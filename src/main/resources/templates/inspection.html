@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tableau de Bord Agents</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #e0e0e0;
+      }
+      .container { max-width: 1300px; margin: 0 auto; }
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 28px;
+      }
+      header h1 { font-size: 2em; margin-bottom: 6px; color: #a78bfa; }
+      header p { font-size: 0.95em; opacity: 0.75; }
+      .nav-links { margin-top: 10px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+      .nav-link {
+        display: inline-block;
+        padding: 7px 16px;
+        background: rgba(167,139,250,0.15);
+        border: 1px solid rgba(167,139,250,0.4);
+        border-radius: 20px;
+        color: #c4b5fd;
+        text-decoration: none;
+        font-size: 0.85em;
+        transition: background 0.2s;
+      }
+      .nav-link:hover { background: rgba(167,139,250,0.28); }
+
+      .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; margin-bottom: 20px; }
+      .dashboard-full { margin-bottom: 20px; }
+
+      .card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(167,139,250,0.25);
+        border-radius: 12px;
+        padding: 22px 24px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      }
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        border-bottom: 2px solid #7c3aed;
+        padding-bottom: 10px;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .card-header h2 { color: #a78bfa; font-size: 1.1em; }
+      .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      select, input[type="number"] {
+        padding: 6px 10px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(167,139,250,0.4);
+        border-radius: 5px;
+        color: #e0e0e0;
+        font-size: 0.85em;
+      }
+      select option { background: #16213e; }
+      button {
+        background: #7c3aed;
+        color: white;
+        border: none;
+        padding: 7px 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: 600;
+        transition: background 0.2s;
+        white-space: nowrap;
+      }
+      button:hover { background: #6d28d9; }
+      .btn-export {
+        background: rgba(124,58,237,0.25);
+        color: #c4b5fd;
+        border: 1px solid rgba(124,58,237,0.5);
+      }
+      .btn-export:hover { background: rgba(124,58,237,0.4); }
+
+      /* At-risk table */
+      table { width: 100%; border-collapse: collapse; font-size: 0.87em; }
+      th { background: rgba(124,58,237,0.3); color: #c4b5fd; padding: 9px 12px; text-align: left; font-weight: 600; }
+      td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+      tr:hover td { background: rgba(255,255,255,0.04); }
+      .grade-c { color: #fb923c; font-weight: 700; }
+      .grade-z { color: #f87171; font-weight: 700; }
+      .name-link { color: #93c5fd; text-decoration: none; font-weight: 500; }
+      .name-link:hover { color: #60a5fa; text-decoration: underline; }
+      .consecutive-badge {
+        display: inline-block;
+        background: rgba(239,68,68,0.2);
+        color: #fca5a5;
+        border: 1px solid rgba(239,68,68,0.4);
+        border-radius: 10px;
+        padding: 2px 7px;
+        font-size: 0.8em;
+        font-weight: 600;
+      }
+
+      .spinner {
+        border: 3px solid rgba(255,255,255,0.1);
+        border-top: 3px solid #7c3aed;
+        border-radius: 50%;
+        width: 28px; height: 28px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      .error { background: rgba(244,67,54,0.12); color: #fca5a5; padding: 12px; border-radius: 6px; border-left: 4px solid #f44336; font-size: 0.9em; }
+      .empty { color: #666; font-size: 0.9em; padding: 12px; text-align: center; }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (max-width: 768px) {
+        .dashboard { grid-template-columns: 1fr; }
+        .controls { flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Tableau de Bord Agents</h1>
+        <p>Outils d'inspection — accès réservé ADMIN</p>
+        <div class="nav-links">
+          <a href="/" class="nav-link">← Dashboard</a>
+          <a href="/inspection-map" class="nav-link">Carte de chaleur</a>
+          <button class="nav-link" id="logoutBtn" style="border:none;cursor:pointer">Déconnexion</button>
+        </div>
+      </header>
+
+      <!-- At-risk section -->
+      <div class="card dashboard-full">
+        <div class="card-header">
+          <h2>Établissements à Risque</h2>
+          <div class="controls">
+            <select id="at-risk-borough">
+              <option value="">Tous les quartiers</option>
+              <option value="Manhattan">Manhattan</option>
+              <option value="Brooklyn">Brooklyn</option>
+              <option value="Queens">Queens</option>
+              <option value="Bronx">Bronx</option>
+              <option value="Staten Island">Staten Island</option>
+            </select>
+            <input type="number" id="at-risk-limit" value="50" min="1" max="500" style="width:80px" />
+            <button onclick="loadAtRisk()">Charger</button>
+            <button class="btn-export" onclick="exportCsv()">Export CSV</button>
+          </div>
+        </div>
+        <div id="at-risk-content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="dashboard">
+        <!-- Cuisines with worst grades -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Cuisines à Risque</h2>
+            <div class="controls">
+              <select id="wc-borough">
+                <option value="Manhattan">Manhattan</option>
+                <option value="Brooklyn">Brooklyn</option>
+                <option value="Queens">Queens</option>
+                <option value="Bronx">Bronx</option>
+                <option value="Staten Island">Staten Island</option>
+              </select>
+              <button onclick="loadWorstCuisines()">Charger</button>
+            </div>
+          </div>
+          <div style="position:relative;height:260px">
+            <canvas id="worst-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Recent inspections stats -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Inspections Récentes</h2>
+            <div class="controls">
+              <input type="number" id="recent-days" value="3650" min="1" style="width:80px" />
+              <span style="font-size:0.82em;color:#aaa">jours</span>
+              <button onclick="loadRecent()">Charger</button>
+            </div>
+          </div>
+          <div id="recent-content"><p class="empty">Cliquez sur Charger</p></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const token = localStorage.getItem("accessToken");
+      if (!token) window.location.href = "/login";
+
+      // Check role
+      function parseJwt(t) {
+        try { return JSON.parse(atob(t.split(".")[1])); } catch { return {}; }
+      }
+      const claims = parseJwt(token);
+      if (claims.role !== "ROLE_ADMIN") {
+        window.location.href = "/";
+      }
+
+      function getAuthHeaders() {
+        return { "Content-Type": "application/json", Authorization: "Bearer " + token };
+      }
+
+      let worstChart = null;
+
+      // ---- At-risk ----
+      function loadAtRisk() {
+        const borough = document.getElementById("at-risk-borough").value;
+        const limit = document.getElementById("at-risk-limit").value || 50;
+        document.getElementById("at-risk-content").innerHTML = '<div class="spinner"></div>';
+        let url = `/api/inspection/at-risk?limit=${limit}`;
+        if (borough) url += `&borough=${encodeURIComponent(borough)}`;
+        return fetch(url, { headers: getAuthHeaders() })
+          .then(r => {
+            if (r.status === 401 || r.status === 403) { window.location.href = "/login"; throw new Error("auth"); }
+            return r.json();
+          })
+          .then(resp => {
+            if (resp.status !== "success") {
+              document.getElementById("at-risk-content").innerHTML = `<div class="error">${resp.message}</div>`;
+              return;
+            }
+            renderAtRisk(resp.data);
+          })
+          .catch(e => {
+            if (e.message !== "auth")
+              document.getElementById("at-risk-content").innerHTML = `<div class="error">${e.message}</div>`;
+          });
+      }
+
+      function renderAtRisk(data) {
+        const el = document.getElementById("at-risk-content");
+        if (!data || data.length === 0) {
+          el.innerHTML = '<p class="empty">Aucun établissement à risque trouvé</p>';
+          return;
+        }
+        let html = `<div style="overflow-x:auto"><table>
+          <thead><tr>
+            <th>Nom</th><th>Quartier</th><th>Cuisine</th>
+            <th>Dernière Note</th><th>Score</th><th>Notes Consec. Mauvaises</th>
+          </tr></thead><tbody>`;
+        data.forEach(r => {
+          const gc = r.lastGrade === "C" ? "grade-c" : "grade-z";
+          const consec = r.consecutiveBadGrades > 1
+            ? `<span class="consecutive-badge">${r.consecutiveBadGrades}x</span>` : "";
+          html += `<tr>
+            <td><a class="name-link" href="/restaurant/${r.restaurantId}">${r.name || r.restaurantId}</a></td>
+            <td>${r.borough || "—"}</td>
+            <td>${r.cuisine || "—"}</td>
+            <td><span class="${gc}">${r.lastGrade || "—"}</span></td>
+            <td>${r.lastScore != null ? r.lastScore : "—"}</td>
+            <td>${consec || "—"}</td>
+          </tr>`;
+        });
+        html += "</tbody></table></div>";
+        el.innerHTML = html;
+      }
+
+      function exportCsv() {
+        const borough = document.getElementById("at-risk-borough").value;
+        let url = "/api/inspection/at-risk/export.csv?limit=500";
+        if (borough) url += `&borough=${encodeURIComponent(borough)}`;
+        fetch(url, { headers: getAuthHeaders() })
+          .then(r => r.blob())
+          .then(blob => {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "at-risk-restaurants.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          })
+          .catch(() => alert("Erreur lors de l'export CSV"));
+      }
+
+      // ---- Worst cuisines chart ----
+      function loadWorstCuisines() {
+        const borough = document.getElementById("wc-borough").value;
+        return fetch(`/api/restaurants/worst-cuisines?borough=${encodeURIComponent(borough)}&limit=8`,
+          { headers: getAuthHeaders() })
+          .then(r => r.json())
+          .then(resp => {
+            if (resp.status !== "success") return;
+            renderWorstCuisines(resp.data);
+          })
+          .catch(() => {});
+      }
+
+      function renderWorstCuisines(data) {
+        if (!data || data.length === 0) return;
+        const sorted = [...data].sort((a, b) => b.avgScore - a.avgScore);
+        if (worstChart) worstChart.destroy();
+        worstChart = new Chart(document.getElementById("worst-chart"), {
+          type: "bar",
+          data: {
+            labels: sorted.map(d => d.cuisine),
+            datasets: [{
+              label: "Score moyen",
+              data: sorted.map(d => parseFloat(d.avgScore.toFixed(2))),
+              backgroundColor: sorted.map((_, i) => `hsl(${i * 20}, 70%, 55%)`),
+              borderRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: "y",
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { beginAtZero: true, grid: { color: "rgba(255,255,255,0.06)" },
+                ticks: { color: "#aaa" }, title: { display: true, text: "Score moyen", color: "#aaa" } },
+              y: { grid: { display: false }, ticks: { color: "#ddd" } }
+            }
+          }
+        });
+      }
+
+      // ---- Recent inspections ----
+      function loadRecent() {
+        const days = document.getElementById("recent-days").value || 3650;
+        document.getElementById("recent-content").innerHTML = '<div class="spinner"></div>';
+        fetch(`/api/restaurants/recent-inspections?days=${days}&limit=10`, { headers: getAuthHeaders() })
+          .then(r => r.json())
+          .then(resp => {
+            if (resp.status !== "success") {
+              document.getElementById("recent-content").innerHTML = `<div class="error">${resp.message}</div>`;
+              return;
+            }
+            const data = resp.data || [];
+            if (data.length === 0) {
+              document.getElementById("recent-content").innerHTML = '<p class="empty">Aucun résultat</p>';
+              return;
+            }
+            let html = '<ul style="list-style:none;padding:0">';
+            data.forEach(r => {
+              html += `<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+                <a class="name-link" href="/restaurant/${r.restaurantId}">${r.name || r.restaurantId}</a>
+                <span style="font-size:0.8em;color:#888;margin-left:8px">${r.borough || ""}</span>
+              </li>`;
+            });
+            html += "</ul>";
+            document.getElementById("recent-content").innerHTML = html;
+          })
+          .catch(e => {
+            document.getElementById("recent-content").innerHTML = `<div class="error">${e.message}</div>`;
+          });
+      }
+
+      // Logout
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
+      });
+
+      // Auto-load on page open — run in parallel
+      Promise.all([loadAtRisk(), loadWorstCuisines()]);
+    </script>
+  </body>
+</html>

@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Restaurant Analytics - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -15,7 +21,10 @@
         padding: 20px;
       }
 
-      .container { max-width: 1400px; margin: 0 auto; }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
 
       header {
         text-align: center;
@@ -24,22 +33,31 @@
         animation: slideDown 0.5s ease-out;
       }
 
-      header h1 { font-size: 2.5em; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-      header p { font-size: 1.1em; opacity: 0.9; }
+      header h1 {
+        font-size: 2.5em;
+        margin-bottom: 8px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
 
       .nav-link {
         display: inline-block;
         margin-top: 10px;
         padding: 8px 18px;
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.4);
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.4);
         border-radius: 20px;
         color: white;
         text-decoration: none;
         font-size: 0.9em;
         transition: background 0.2s ease;
       }
-      .nav-link:hover { background: rgba(255,255,255,0.25); }
+      .nav-link:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
 
       .dashboard {
         display: grid;
@@ -59,14 +77,16 @@
         background: white;
         border-radius: 12px;
         padding: 22px 24px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
         animation: fadeIn 0.6s ease-out;
       }
 
       .card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 14px 40px rgba(0,0,0,0.28);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
       }
 
       .card-header {
@@ -80,7 +100,11 @@
         flex-wrap: wrap;
       }
 
-      .card-header h2 { color: #667eea; font-size: 1.25em; margin: 0; }
+      .card-header h2 {
+        color: #667eea;
+        font-size: 1.25em;
+        margin: 0;
+      }
 
       .controls {
         display: flex;
@@ -89,7 +113,8 @@
         align-items: center;
       }
 
-      input, select {
+      input,
+      select {
         padding: 7px 11px;
         border: 1px solid #ddd;
         border-radius: 6px;
@@ -98,14 +123,17 @@
         background: #fafafa;
       }
 
-      input:focus, select:focus {
+      input:focus,
+      select:focus {
         outline: none;
         border-color: #667eea;
-        box-shadow: 0 0 5px rgba(102,126,234,0.2);
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.2);
         background: white;
       }
 
-      input[type="number"] { width: 90px; }
+      input[type="number"] {
+        width: 90px;
+      }
 
       button {
         background: #667eea;
@@ -115,13 +143,19 @@
         border-radius: 6px;
         cursor: pointer;
         font-weight: 600;
-        transition: background 0.2s ease, transform 0.1s ease;
+        transition:
+          background 0.2s ease,
+          transform 0.1s ease;
         font-size: 0.88em;
         white-space: nowrap;
       }
 
-      button:hover { background: #764ba2; }
-      button:active { transform: scale(0.97); }
+      button:hover {
+        background: #764ba2;
+      }
+      button:active {
+        transform: scale(0.97);
+      }
 
       .chart-wrapper {
         position: relative;
@@ -150,9 +184,17 @@
         padding: 4px 2px;
       }
 
-      .cuisine-list::-webkit-scrollbar { width: 6px; }
-      .cuisine-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-      .cuisine-list::-webkit-scrollbar-thumb { background: #667eea; border-radius: 10px; }
+      .cuisine-list::-webkit-scrollbar {
+        width: 6px;
+      }
+      .cuisine-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      .cuisine-list::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 10px;
+      }
 
       .cuisine-tag {
         padding: 5px 12px;
@@ -180,7 +222,9 @@
         transition: transform 0.2s ease;
       }
 
-      .stat-box:hover { transform: translateY(-2px); }
+      .stat-box:hover {
+        transform: translateY(-2px);
+      }
 
       .stat-box strong {
         color: #667eea;
@@ -189,7 +233,10 @@
         margin-top: 4px;
       }
 
-      .stat-box .stat-label { font-size: 0.85em; color: #666; }
+      .stat-box .stat-label {
+        font-size: 0.85em;
+        color: #666;
+      }
 
       /* Export buttons */
       .export-buttons {
@@ -209,7 +256,9 @@
         font-weight: 600;
       }
 
-      .btn-export:hover { background: #e0e4ff; }
+      .btn-export:hover {
+        background: #e0e4ff;
+      }
 
       .spinner {
         border: 3px solid #f3f3f3;
@@ -221,18 +270,188 @@
         margin: 20px auto;
       }
 
-      .loading { text-align: center; color: #667eea; font-weight: 600; padding: 20px; }
-      .error { background: #fee; color: #c33; padding: 12px; border-radius: 6px; margin: 8px 0; border-left: 4px solid #c33; font-size: 0.9em; }
+      .loading {
+        text-align: center;
+        color: #667eea;
+        font-weight: 600;
+        padding: 20px;
+      }
+      .error {
+        background: #fee;
+        color: #c33;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 8px 0;
+        border-left: 4px solid #c33;
+        font-size: 0.9em;
+      }
 
-      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-      @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Top Restaurants */
+      .top-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding: 2px;
+      }
+
+      .top-list::-webkit-scrollbar { width: 6px; }
+      .top-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+      .top-list::-webkit-scrollbar-thumb { background: #667eea; border-radius: 10px; }
+
+      .top-restaurant-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: #f8f9ff;
+        border-radius: 8px;
+        padding: 10px 12px;
+        border-left: 4px solid #43e97b;
+      }
+
+      .top-restaurant-info { flex: 1; min-width: 0; }
+      .top-restaurant-name { font-weight: 600; font-size: 0.9em; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .top-restaurant-meta { font-size: 0.78em; color: #888; margin-top: 2px; }
+      .top-restaurant-score { font-size: 0.8em; font-weight: 700; color: #43e97b; white-space: nowrap; }
+
+      .btn-bookmark {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.25em;
+        padding: 2px 4px;
+        line-height: 1;
+        color: #ccc;
+        transition: color 0.2s ease, transform 0.15s ease;
+      }
+      .btn-bookmark:hover { color: #f5a623; transform: scale(1.2); }
+      .btn-bookmark.bookmarked { color: #f5a623; }
+      .btn-bookmark:active { transform: scale(0.95); }
+
+      .btn-view {
+        font-size: 0.75em;
+        padding: 3px 8px;
+        background: #f0f2ff;
+        color: #667eea;
+        border: 1px solid #c5caf7;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background 0.15s;
+        cursor: pointer;
+      }
+      .btn-view:hover { background: #e0e4ff; }
+
+      /* Nearby map */
+      #nearby-map { height: 300px; border-radius: 8px; margin-top: 8px; }
+
+      /* Recent inspections list */
+      .recent-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; padding: 2px; }
+      .recent-item {
+        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: #f8f9ff; border-radius: 6px; padding: 8px 12px;
+        border-left: 4px solid #667eea;
+      }
+      .recent-item-info { flex: 1; min-width: 0; }
+      .recent-item-name { font-weight: 600; font-size: 0.88em; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .recent-item-meta { font-size: 0.76em; color: #888; margin-top: 2px; }
+
+      /* API Reference */
+      .api-section { margin-bottom: 30px; }
+      .api-section > h2 { color: white; font-size: 1.2em; margin-bottom: 14px; opacity: 0.95; }
+
+      .api-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 10px;
+      }
+
+      .api-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.88em;
+        transition: background 0.2s ease, transform 0.15s ease;
+        overflow: hidden;
+      }
+
+      .api-link:hover { background: rgba(255,255,255,0.22); transform: translateY(-2px); }
+
+      .api-method {
+        font-size: 0.72em;
+        font-weight: 700;
+        padding: 3px 7px;
+        border-radius: 4px;
+        flex-shrink: 0;
+        letter-spacing: 0.05em;
+      }
+
+      .method-get  { background: rgba(67,233,123,0.25); color: #a8f5c4; border: 1px solid rgba(67,233,123,0.4); }
+      .method-post { background: rgba(250,112,154,0.25); color: #fdb8ce; border: 1px solid rgba(250,112,154,0.4); }
+
+      .api-link-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+      .api-path { font-family: monospace; font-size: 0.92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .api-desc { font-size: 0.78em; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      .swagger-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 9px 18px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.9em;
+        font-weight: 600;
+        transition: background 0.2s ease;
+      }
+      .swagger-link:hover { background: rgba(255,255,255,0.28); }
 
       @media (max-width: 768px) {
         header h1 { font-size: 1.8em; }
         .dashboard, .dashboard-wide { grid-template-columns: 1fr; }
         .controls { flex-direction: column; }
         input, select, button { width: 100%; }
+        .api-grid { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -241,7 +460,20 @@
       <header>
         <h1>Restaurant Analytics</h1>
         <p>Analyse interactive des restaurants de New York</p>
-        <a href="/trash-advisor" class="nav-link">Trash Advisor →</a>
+        <a href="/hygiene-radar" class="nav-link">Hygiene Radar →</a>
+        <a href="/inspection-map" class="nav-link" id="inspectionMapLink" style="display:none">Carte Violations →</a>
+        <a href="/inspection" class="nav-link" id="inspectionLink" style="display:none">Agents →</a>
+        <button
+          class="nav-link"
+          id="logoutBtn"
+          style="
+            border: none;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+          "
+        >
+          Déconnexion
+        </button>
       </header>
 
       <div class="dashboard">
@@ -256,8 +488,12 @@
           </div>
           <div class="card-content" id="borough-content"></div>
           <div class="export-buttons">
-            <button class="btn-export" onclick="exportData('borough','csv')">CSV</button>
-            <button class="btn-export" onclick="exportData('borough','json')">JSON</button>
+            <button class="btn-export" onclick="exportData('borough', 'csv')">
+              CSV
+            </button>
+            <button class="btn-export" onclick="exportData('borough', 'json')">
+              JSON
+            </button>
           </div>
         </div>
 
@@ -266,7 +502,13 @@
           <div class="card-header">
             <h2>Top Cuisines</h2>
             <div class="controls">
-              <input type="number" id="top-cuisine-limit" value="10" min="1" max="30" />
+              <input
+                type="number"
+                id="top-cuisine-limit"
+                value="10"
+                min="1"
+                max="30"
+              />
               <button onclick="loadTopCuisines()">Charger</button>
             </div>
           </div>
@@ -275,8 +517,18 @@
           </div>
           <div class="card-content" id="top-cuisine-content"></div>
           <div class="export-buttons">
-            <button class="btn-export" onclick="exportData('topCuisine','csv')">CSV</button>
-            <button class="btn-export" onclick="exportData('topCuisine','json')">JSON</button>
+            <button
+              class="btn-export"
+              onclick="exportData('topCuisine', 'csv')"
+            >
+              CSV
+            </button>
+            <button
+              class="btn-export"
+              onclick="exportData('topCuisine', 'json')"
+            >
+              JSON
+            </button>
           </div>
         </div>
 
@@ -285,7 +537,13 @@
           <div class="card-header">
             <h2>Score par Quartier / Cuisine</h2>
             <div class="controls">
-              <input type="text" id="cuisine-input" placeholder="ex: Italian" value="Italian" style="width:120px" />
+              <input
+                type="text"
+                id="cuisine-input"
+                placeholder="ex: Italian"
+                value="Italian"
+                style="width: 120px"
+              />
               <button onclick="loadCuisineScores()">Charger</button>
             </div>
           </div>
@@ -294,8 +552,12 @@
           </div>
           <div class="card-content" id="cuisine-content"></div>
           <div class="export-buttons">
-            <button class="btn-export" onclick="exportData('cuisine','csv')">CSV</button>
-            <button class="btn-export" onclick="exportData('cuisine','json')">JSON</button>
+            <button class="btn-export" onclick="exportData('cuisine', 'csv')">
+              CSV
+            </button>
+            <button class="btn-export" onclick="exportData('cuisine', 'json')">
+              JSON
+            </button>
           </div>
         </div>
 
@@ -311,7 +573,13 @@
                 <option value="Bronx">Bronx</option>
                 <option value="Staten Island">Staten Island</option>
               </select>
-              <input type="number" id="worst-limit" value="8" min="1" max="20" />
+              <input
+                type="number"
+                id="worst-limit"
+                value="8"
+                min="1"
+                max="20"
+              />
               <button onclick="loadWorstCuisines()">Charger</button>
             </div>
           </div>
@@ -320,8 +588,76 @@
           </div>
           <div class="card-content" id="worst-content"></div>
           <div class="export-buttons">
-            <button class="btn-export" onclick="exportData('worst','csv')">CSV</button>
-            <button class="btn-export" onclick="exportData('worst','json')">JSON</button>
+            <button class="btn-export" onclick="exportData('worst', 'csv')">
+              CSV
+            </button>
+            <button class="btn-export" onclick="exportData('worst', 'json')">
+              JSON
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Restaurants + Bookmarks -->
+      <div class="dashboard-wide">
+        <!-- Top healthiest restaurants -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Top Restaurants Sains</h2>
+            <div class="controls">
+              <input type="number" id="top-limit" value="10" min="1" max="50" />
+              <button onclick="loadTopRestaurants()">Charger</button>
+              <button id="rebuild-cache-btn" onclick="rebuildCache()" style="display:none;background:#7c3aed;font-size:0.8em">🔄 Reconstruire le cache</button>
+            </div>
+          </div>
+          <div class="card-content" id="top-restaurants-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+          </div>
+        </div>
+
+        <!-- Bookmarks -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Mes Favoris</h2>
+            <button onclick="loadBookmarks()">Actualiser</button>
+          </div>
+          <div class="card-content" id="bookmarks-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Connectez-vous pour voir vos favoris</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inspections récentes + Autour de moi -->
+      <div class="dashboard-wide">
+        <!-- Inspections récentes -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Inspections Récentes</h2>
+            <div class="controls">
+              <label style="font-size:0.85em;color:#666">Derniers</label>
+              <input type="number" id="recent-days" value="3650" min="1" style="width:80px" />
+              <label style="font-size:0.85em;color:#666">jours</label>
+              <button onclick="loadRecentInspections()">Charger</button>
+            </div>
+          </div>
+          <div class="card-content" id="recent-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+          </div>
+        </div>
+
+        <!-- Autour de moi -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Autour de Moi</h2>
+            <div class="controls">
+              <input type="number" id="nearby-radius" value="500" min="100" max="5000" style="width:80px" />
+              <label style="font-size:0.85em;color:#666">m</label>
+              <button onclick="loadNearby()">📍 Localiser</button>
+            </div>
+          </div>
+          <div id="nearby-map" style="display:none"></div>
+          <div class="card-content" id="nearby-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Localiser</p>
           </div>
         </div>
       </div>
@@ -333,16 +669,22 @@
           <div class="card-header">
             <h2>Cuisines Populaires</h2>
             <div class="controls">
-              <label style="font-size:0.85em;color:#666">Min restaurants :</label>
+              <label style="font-size: 0.85em; color: #666"
+                >Min restaurants :</label
+              >
               <input type="number" id="min-count" value="500" min="1" />
               <button onclick="loadPopularCuisines()">Charger</button>
             </div>
           </div>
           <div class="card-content" id="popular-content">
-            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+            <p class="loading" style="color: #aaa; font-size: 0.9em">
+              Cliquez sur Charger
+            </p>
           </div>
           <div class="export-buttons">
-            <button class="btn-export" onclick="exportData('popular','json')">JSON</button>
+            <button class="btn-export" onclick="exportData('popular', 'json')">
+              JSON
+            </button>
           </div>
         </div>
 
@@ -353,34 +695,185 @@
             <button onclick="loadStats()">Charger</button>
           </div>
           <div id="stats-content" class="card-content">
-            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+            <p class="loading" style="color: #aaa; font-size: 0.9em">
+              Cliquez sur Charger
+            </p>
           </div>
         </div>
+      </div>
+
+      <!-- API Reference -->
+      <div class="api-section">
+        <h2>API Reference</h2>
+        <div class="api-grid">
+          <a href="/api/restaurants/by-borough" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/by-borough</span>
+              <span class="api-desc">Nombre de restaurants par quartier</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/cuisine-scores?cuisine=Italian" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/cuisine-scores?cuisine=Italian</span>
+              <span class="api-desc">Score moyen par quartier pour une cuisine</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/worst-cuisines?borough=Manhattan&amp;limit=5" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/worst-cuisines?borough=Manhattan&amp;limit=5</span>
+              <span class="api-desc">Pires cuisines par score dans un quartier</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/popular-cuisines?minCount=500" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/popular-cuisines?minCount=500</span>
+              <span class="api-desc">Cuisines avec au moins N restaurants</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/top?limit=10" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/top?limit=10</span>
+              <span class="api-desc">Top restaurants les plus sains (Redis sorted set)</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/by-cuisine?limit=10" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/by-cuisine?limit=10</span>
+              <span class="api-desc">Top N cuisines par nombre de restaurants</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/cuisines" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/cuisines</span>
+              <span class="api-desc">Tous les types de cuisine distincts</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/stats" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/stats</span>
+              <span class="api-desc">Statistiques globales</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/hygiene-radar?limit=25" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/hygiene-radar?limit=25</span>
+              <span class="api-desc">Restaurants des cuisines les plus risquées</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/sync-status" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/sync-status</span>
+              <span class="api-desc">Statut du dernier sync de données</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/random" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/random</span>
+              <span class="api-desc">Restaurant aléatoire</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/health" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/health</span>
+              <span class="api-desc">Health check</span>
+            </div>
+          </a>
+          <a href="#" onclick="triggerRefresh(event)" class="api-link">
+            <span class="api-method method-post">POST</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/refresh</span>
+              <span class="api-desc">Déclencher un sync manuel (invalide le cache)</span>
+            </div>
+          </a>
+        </div>
+        <a href="/swagger-ui/index.html" target="_blank" class="swagger-link">
+          &#128196; Swagger UI — documentation interactive
+        </a>
       </div>
     </div>
 
     <script>
       const API_BASE = "/api/restaurants";
 
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        window.location.href = "/login";
+      }
+
+      function getAuthHeaders() {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return { "Content-Type": "application/json" };
+        return {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        };
+      }
+
+      function handleFetchErrorResponse(response) {
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
+          throw new Error("Non autorisé");
+        }
+        return response;
+      }
+      function fetchWithAuth(url, options = {}) {
+        options.headers = { ...getAuthHeaders(), ...(options.headers || {}) };
+        return fetch(url, options).then(handleFetchErrorResponse);
+      }
       const PALETTE = [
-        "#667eea","#764ba2","#f093fb","#f5576c","#4facfe","#00f2fe",
-        "#43e97b","#38f9d7","#fa709a","#fee140","#a18cd1","#fbc2eb",
+        "#667eea",
+        "#764ba2",
+        "#f093fb",
+        "#f5576c",
+        "#4facfe",
+        "#00f2fe",
+        "#43e97b",
+        "#38f9d7",
+        "#fa709a",
+        "#fee140",
+        "#a18cd1",
+        "#fbc2eb",
       ];
 
-      let currentData = { borough: null, topCuisine: null, cuisine: null, worst: null, popular: null };
+      let currentData = {
+        borough: null,
+        topCuisine: null,
+        cuisine: null,
+        worst: null,
+        popular: null,
+      };
       let charts = {};
 
-      function getColor(i) { return PALETTE[i % PALETTE.length]; }
+      function getColor(i) {
+        return PALETTE[i % PALETTE.length];
+      }
 
       function destroyChart(key) {
-        if (charts[key]) { charts[key].destroy(); charts[key] = null; }
+        if (charts[key]) {
+          charts[key].destroy();
+          charts[key] = null;
+        }
       }
 
       // ---- LOAD ----
 
       function loadByBorough() {
         setLoading("borough-content");
-        fetch(`${API_BASE}/by-borough`)
+        fetchWithAuth(`${API_BASE}/by-borough`)
           .then((r) => r.json())
           .then((data) => {
             currentData.borough = data.data;
@@ -393,7 +886,7 @@
       function loadTopCuisines() {
         const limit = document.getElementById("top-cuisine-limit").value || 10;
         setLoading("top-cuisine-content");
-        fetch(`${API_BASE}/by-cuisine?limit=${limit}`)
+        fetchWithAuth(`${API_BASE}/by-cuisine?limit=${limit}`)
           .then((r) => r.json())
           .then((data) => {
             currentData.topCuisine = data.data;
@@ -406,11 +899,14 @@
       function loadCuisineScores() {
         const cuisine = document.getElementById("cuisine-input").value;
         setLoading("cuisine-content");
-        fetch(`${API_BASE}/cuisine-scores?cuisine=${encodeURIComponent(cuisine)}`)
+        fetchWithAuth(
+          `${API_BASE}/cuisine-scores?cuisine=${encodeURIComponent(cuisine)}`,
+        )
           .then((r) => r.json())
           .then((data) => {
             currentData.cuisine = data.data;
-            if (data.status === "success") renderCuisineChart(data.data, cuisine);
+            if (data.status === "success")
+              renderCuisineChart(data.data, cuisine);
             else setError("cuisine-content", data.message);
           })
           .catch((e) => setError("cuisine-content", e.message));
@@ -420,7 +916,9 @@
         const borough = document.getElementById("worst-borough-select").value;
         const limit = document.getElementById("worst-limit").value;
         setLoading("worst-content");
-        fetch(`${API_BASE}/worst-cuisines?borough=${encodeURIComponent(borough)}&limit=${limit}`)
+        fetchWithAuth(
+          `${API_BASE}/worst-cuisines?borough=${encodeURIComponent(borough)}&limit=${limit}`,
+        )
           .then((r) => r.json())
           .then((data) => {
             currentData.worst = data.data;
@@ -433,7 +931,7 @@
       function loadPopularCuisines() {
         const minCount = document.getElementById("min-count").value;
         setLoading("popular-content");
-        fetch(`${API_BASE}/popular-cuisines?minCount=${minCount}`)
+        fetchWithAuth(`${API_BASE}/popular-cuisines?minCount=${minCount}`)
           .then((r) => r.json())
           .then((data) => {
             currentData.popular = data.data;
@@ -445,7 +943,7 @@
 
       function loadStats() {
         setLoading("stats-content");
-        fetch(`${API_BASE}/stats`)
+        fetchWithAuth(`${API_BASE}/stats`)
           .then((r) => r.json())
           .then((data) => {
             if (data.status === "success") renderStats(data);
@@ -458,18 +956,23 @@
 
       function renderBoroughChart(data) {
         document.getElementById("borough-content").innerHTML = "";
-        if (!data || data.length === 0) { setError("borough-content", "Aucune donnée"); return; }
+        if (!data || data.length === 0) {
+          setError("borough-content", "Aucune donnée");
+          return;
+        }
         destroyChart("borough");
         charts.borough = new Chart(document.getElementById("borough-chart"), {
           type: "bar",
           data: {
             labels: data.map((d) => d.id),
-            datasets: [{
-              label: "Restaurants",
-              data: data.map((d) => d.count),
-              backgroundColor: data.map((_, i) => getColor(i)),
-              borderRadius: 6,
-            }],
+            datasets: [
+              {
+                label: "Restaurants",
+                data: data.map((d) => d.count),
+                backgroundColor: data.map((_, i) => getColor(i)),
+                borderRadius: 6,
+              },
+            ],
           },
           options: {
             responsive: true,
@@ -477,7 +980,12 @@
             indexAxis: "y",
             plugins: {
               legend: { display: false },
-              tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.x.toLocaleString("fr-FR")} restaurants` } },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) =>
+                    ` ${ctx.parsed.x.toLocaleString("fr-FR")} restaurants`,
+                },
+              },
             },
             scales: {
               x: { grid: { color: "#f0f0f0" } },
@@ -489,59 +997,85 @@
 
       function renderTopCuisineChart(data) {
         document.getElementById("top-cuisine-content").innerHTML = "";
-        if (!data || data.length === 0) { setError("top-cuisine-content", "Aucune donnée"); return; }
+        if (!data || data.length === 0) {
+          setError("top-cuisine-content", "Aucune donnée");
+          return;
+        }
         destroyChart("topCuisine");
-        charts.topCuisine = new Chart(document.getElementById("top-cuisine-chart"), {
-          type: "bar",
-          data: {
-            labels: data.map((d) => d.id),
-            datasets: [{
-              label: "Restaurants",
-              data: data.map((d) => d.count),
-              backgroundColor: data.map((_, i) => getColor(i + 2)),
-              borderRadius: 6,
-            }],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: "y",
-            plugins: {
-              legend: { display: false },
-              tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.x.toLocaleString("fr-FR")} restaurants` } },
+        charts.topCuisine = new Chart(
+          document.getElementById("top-cuisine-chart"),
+          {
+            type: "bar",
+            data: {
+              labels: data.map((d) => d.id),
+              datasets: [
+                {
+                  label: "Restaurants",
+                  data: data.map((d) => d.count),
+                  backgroundColor: data.map((_, i) => getColor(i + 2)),
+                  borderRadius: 6,
+                },
+              ],
             },
-            scales: {
-              x: { grid: { color: "#f0f0f0" } },
-              y: { grid: { display: false } },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              indexAxis: "y",
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) =>
+                      ` ${ctx.parsed.x.toLocaleString("fr-FR")} restaurants`,
+                  },
+                },
+              },
+              scales: {
+                x: { grid: { color: "#f0f0f0" } },
+                y: { grid: { display: false } },
+              },
             },
           },
-        });
+        );
       }
 
       function renderCuisineChart(data, cuisine) {
         document.getElementById("cuisine-content").innerHTML = "";
-        if (!data || data.length === 0) { setError("cuisine-content", `Aucun résultat pour "${cuisine}"`); return; }
+        if (!data || data.length === 0) {
+          setError("cuisine-content", `Aucun résultat pour "${cuisine}"`);
+          return;
+        }
         destroyChart("cuisine");
         charts.cuisine = new Chart(document.getElementById("cuisine-chart"), {
           type: "bar",
           data: {
             labels: data.map((d) => d.borough),
-            datasets: [{
-              label: `Score moyen (${cuisine})`,
-              data: data.map((d) => parseFloat(d.avgScore.toFixed(2))),
-              backgroundColor: data.map((_, i) => getColor(i + 4)),
-              borderRadius: 6,
-            }],
+            datasets: [
+              {
+                label: `Score moyen (${cuisine})`,
+                data: data.map((d) => parseFloat(d.avgScore.toFixed(2))),
+                backgroundColor: data.map((_, i) => getColor(i + 4)),
+                borderRadius: 6,
+              },
+            ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
-              tooltip: { callbacks: { label: (ctx) => ` Score: ${ctx.parsed.y.toFixed(2)}` } },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` Score: ${ctx.parsed.y.toFixed(2)}`,
+                },
+              },
             },
             scales: {
-              y: { beginAtZero: true, grid: { color: "#f0f0f0" }, title: { display: true, text: "Score moyen" } },
+              y: {
+                beginAtZero: true,
+                grid: { color: "#f0f0f0" },
+                title: { display: true, text: "Score moyen" },
+              },
               x: { grid: { display: false } },
             },
           },
@@ -550,19 +1084,26 @@
 
       function renderWorstChart(data, borough) {
         document.getElementById("worst-content").innerHTML = "";
-        if (!data || data.length === 0) { setError("worst-content", `Aucun résultat pour "${borough}"`); return; }
+        if (!data || data.length === 0) {
+          setError("worst-content", `Aucun résultat pour "${borough}"`);
+          return;
+        }
         destroyChart("worst");
         const sorted = [...data].sort((a, b) => b.avgScore - a.avgScore);
         charts.worst = new Chart(document.getElementById("worst-chart"), {
           type: "bar",
           data: {
             labels: sorted.map((d) => d.cuisine),
-            datasets: [{
-              label: "Score moyen",
-              data: sorted.map((d) => parseFloat(d.avgScore.toFixed(2))),
-              backgroundColor: sorted.map((_, i) => `hsl(${0 + i * 15}, 70%, 55%)`),
-              borderRadius: 6,
-            }],
+            datasets: [
+              {
+                label: "Score moyen",
+                data: sorted.map((d) => parseFloat(d.avgScore.toFixed(2))),
+                backgroundColor: sorted.map(
+                  (_, i) => `hsl(${0 + i * 15}, 70%, 55%)`,
+                ),
+                borderRadius: 6,
+              },
+            ],
           },
           options: {
             responsive: true,
@@ -580,7 +1121,11 @@
               },
             },
             scales: {
-              x: { beginAtZero: true, grid: { color: "#f0f0f0" }, title: { display: true, text: "Score moyen" } },
+              x: {
+                beginAtZero: true,
+                grid: { color: "#f0f0f0" },
+                title: { display: true, text: "Score moyen" },
+              },
               y: { grid: { display: false } },
             },
           },
@@ -589,7 +1134,10 @@
 
       function renderPopularList(data) {
         const content = document.getElementById("popular-content");
-        if (!data || data.length === 0) { content.innerHTML = '<p class="error">Aucune donnée</p>'; return; }
+        if (!data || data.length === 0) {
+          content.innerHTML = '<p class="error">Aucune donnée</p>';
+          return;
+        }
         const list = document.createElement("div");
         list.className = "cuisine-list";
         data.forEach((cuisine) => {
@@ -637,7 +1185,8 @@
       }
 
       function setError(id, message) {
-        document.getElementById(id).innerHTML = `<div class="error">${message}</div>`;
+        document.getElementById(id).innerHTML =
+          `<div class="error">${message}</div>`;
       }
 
       // ---- EXPORT ----
@@ -653,7 +1202,9 @@
       }
 
       function downloadJSON(data, type) {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
         triggerDownload(blob, `restaurant-${type}-${Date.now()}.json`);
       }
 
@@ -662,12 +1213,29 @@
         const keys = Object.keys(data[0]);
         let csv = keys.join(",") + "\n";
         data.forEach((row) => {
-          csv += keys.map((k) => {
-            const v = row[k];
-            return typeof v === "string" ? `"${v.replace(/"/g, '""')}"` : v;
-          }).join(",") + "\n";
+          csv +=
+            keys
+              .map((k) => {
+                const v = row[k];
+                return typeof v === "string" ? `"${v.replace(/"/g, '""')}"` : v;
+              })
+              .join(",") + "\n";
         });
-        triggerDownload(new Blob([csv], { type: "text/csv;charset=utf-8;" }), `restaurant-${type}-${Date.now()}.csv`);
+        triggerDownload(
+          new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+          `restaurant-${type}-${Date.now()}.csv`,
+        );
+      }
+
+      function triggerRefresh(e) {
+        e.preventDefault();
+        if (!confirm("Lancer un sync complet depuis NYC Open Data ? L'opération peut prendre plusieurs minutes.")) return;
+        fetch(`${API_BASE}/refresh`, { method: "POST" })
+          .then((r) => r.json())
+          .then((data) => alert(data.status === "success"
+            ? `Sync terminé : ${data.upsertedRestaurants} restaurants upsertés.`
+            : `Erreur : ${data.error}`))
+          .catch((e) => alert(`Erreur réseau : ${e.message}`));
       }
 
       function triggerDownload(blob, filename) {
@@ -680,6 +1248,295 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
+
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
+      });
+
+      // ---- BOOKMARKS ----
+
+      let bookmarkedIds = new Set();
+
+      function loadBookmarkedIds() {
+        if (!localStorage.getItem("accessToken")) return;
+        fetchWithAuth("/api/users/me/bookmarks")
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") {
+              bookmarkedIds = new Set((data.data || []).map((r) => r.restaurantId));
+              refreshBookmarkButtons();
+            }
+          })
+          .catch(() => {});
+      }
+
+      function refreshBookmarkButtons() {
+        document.querySelectorAll(".btn-bookmark").forEach((btn) => {
+          const id = btn.dataset.id;
+          if (bookmarkedIds.has(id)) {
+            btn.classList.add("bookmarked");
+            btn.title = "Retirer des favoris";
+          } else {
+            btn.classList.remove("bookmarked");
+            btn.title = "Ajouter aux favoris";
+          }
+        });
+      }
+
+      function toggleBookmark(restaurantId, btn) {
+        const isBookmarked = bookmarkedIds.has(restaurantId);
+        const method = isBookmarked ? "DELETE" : "POST";
+        fetchWithAuth(`/api/users/me/bookmarks/${restaurantId}`, { method })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") {
+              if (isBookmarked) {
+                bookmarkedIds.delete(restaurantId);
+              } else {
+                bookmarkedIds.add(restaurantId);
+              }
+              refreshBookmarkButtons();
+              if (document.getElementById("bookmarks-content")) loadBookmarks();
+            }
+          })
+          .catch(() => {});
+      }
+
+      function loadTopRestaurants() {
+        const limit = document.getElementById("top-limit").value || 10;
+        setLoading("top-restaurants-content");
+        fetchWithAuth(`${API_BASE}/top?limit=${limit}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") renderTopRestaurants(data.data);
+            else setError("top-restaurants-content", data.message);
+          })
+          .catch((e) => setError("top-restaurants-content", e.message));
+      }
+
+      function renderTopRestaurants(data) {
+        const content = document.getElementById("top-restaurants-content");
+        if (!data || data.length === 0) {
+          content.innerHTML = '<p class="error">Aucune donnée (le cache Redis est peut-être vide, lancez un sync)</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "top-list";
+        data.forEach((r) => {
+          const item = document.createElement("div");
+          item.className = "top-restaurant-item";
+          item.innerHTML = `
+            <div class="top-restaurant-info">
+              <div class="top-restaurant-name">${r.name || "—"}</div>
+              <div class="top-restaurant-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <span class="top-restaurant-score">Score ${r.latestScore}</span>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+            <button class="btn-bookmark" data-id="${r.restaurantId}"
+              onclick="toggleBookmark('${r.restaurantId}', this)" title="Ajouter aux favoris">★</button>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+        refreshBookmarkButtons();
+      }
+
+      function loadBookmarks() {
+        if (!localStorage.getItem("accessToken")) return;
+        setLoading("bookmarks-content");
+        fetchWithAuth("/api/users/me/bookmarks")
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") renderBookmarks(data.data);
+            else setError("bookmarks-content", data.message);
+          })
+          .catch((e) => setError("bookmarks-content", e.message));
+      }
+
+      function renderBookmarks(data) {
+        const content = document.getElementById("bookmarks-content");
+        if (!data || data.length === 0) {
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">Aucun favori enregistré</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "top-list";
+        data.forEach((r) => {
+          const item = document.createElement("div");
+          item.className = "top-restaurant-item";
+          item.style.borderLeftColor = "#667eea";
+          item.innerHTML = `
+            <div class="top-restaurant-info">
+              <div class="top-restaurant-name">${r.name || r.restaurantId}</div>
+              <div class="top-restaurant-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+            <button class="btn-bookmark bookmarked" data-id="${r.restaurantId}"
+              onclick="toggleBookmark('${r.restaurantId}', this)" title="Retirer des favoris">★</button>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+      }
+
+      // ---- RECENT INSPECTIONS ----
+      function loadRecentInspections() {
+        const days = document.getElementById("recent-days").value || 3650;
+        setLoading("recent-content");
+        fetchWithAuth(`${API_BASE}/recent-inspections?days=${days}&limit=15`)
+          .then(r => r.json())
+          .then(data => {
+            if (data.status === "success") renderRecentInspections(data.data);
+            else setError("recent-content", data.message);
+          })
+          .catch(e => setError("recent-content", e.message));
+      }
+
+      function renderRecentInspections(data) {
+        const content = document.getElementById("recent-content");
+        if (!data || data.length === 0) {
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">Aucune inspection trouvée</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "recent-list";
+        data.forEach(r => {
+          const item = document.createElement("div");
+          item.className = "recent-item";
+          item.innerHTML = `
+            <div class="recent-item-info">
+              <div class="recent-item-name">${r.name || r.restaurantId}</div>
+              <div class="recent-item-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+      }
+
+      // ---- NEARBY ----
+      let nearbyMap = null;
+      let nearbyLayer = null;
+
+      function loadNearby() {
+        if (!navigator.geolocation) {
+          setError("nearby-content", "Géolocalisation non supportée par ce navigateur");
+          return;
+        }
+        setLoading("nearby-content");
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const { latitude: lat, longitude: lng } = pos.coords;
+            const radius = document.getElementById("nearby-radius").value || 500;
+            fetchWithAuth(`${API_BASE}/nearby?lat=${lat}&lng=${lng}&radius=${radius}&limit=20`)
+              .then(r => r.json())
+              .then(data => {
+                if (data.status === "success") renderNearby(data.data, lat, lng);
+                else setError("nearby-content", data.message);
+              })
+              .catch(e => setError("nearby-content", e.message));
+          },
+          err => setError("nearby-content", "Impossible d'obtenir la position: " + err.message)
+        );
+      }
+
+      function renderNearby(data, userLat, userLng) {
+        const mapDiv = document.getElementById("nearby-map");
+        const content = document.getElementById("nearby-content");
+        mapDiv.style.display = "block";
+
+        if (!nearbyMap) {
+          nearbyMap = L.map("nearby-map").setView([userLat, userLng], 15);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap contributors", maxZoom: 18
+          }).addTo(nearbyMap);
+        } else {
+          nearbyMap.setView([userLat, userLng], 15);
+          if (nearbyLayer) nearbyMap.removeLayer(nearbyLayer);
+        }
+
+        // User marker
+        L.marker([userLat, userLng], {
+          icon: L.divIcon({
+            className: "",
+            html: '<div style="width:16px;height:16px;background:#667eea;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
+            iconSize: [16, 16], iconAnchor: [8, 8]
+          })
+        }).addTo(nearbyMap).bindPopup("Ma position");
+
+        nearbyLayer = L.featureGroup().addTo(nearbyMap);
+        data.forEach(r => {
+          if (r.latitude && r.longitude) {
+            L.marker([r.latitude, r.longitude])
+              .bindPopup(`<strong>${r.name}</strong><br>${r.cuisine}<br><a href="/restaurant/${r.restaurantId}">Voir la fiche</a>`)
+              .addTo(nearbyLayer);
+          }
+        });
+
+        if (data.length === 0) {
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:8px">Aucun restaurant trouvé à proximité</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "recent-list";
+        list.style.marginTop = "10px";
+        data.forEach(r => {
+          const item = document.createElement("div");
+          item.className = "recent-item";
+          item.innerHTML = `
+            <div class="recent-item-info">
+              <div class="recent-item-name">${r.name || r.restaurantId}</div>
+              <div class="recent-item-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+      }
+
+      // Show admin links if ROLE_ADMIN
+      (function checkAdminLinks() {
+        const t = localStorage.getItem("accessToken");
+        if (!t) return;
+        try {
+          const payload = JSON.parse(atob(t.split(".")[1]));
+          if (payload.role === "ROLE_ADMIN") {
+            document.getElementById("inspectionMapLink").style.display = "inline-block";
+            document.getElementById("inspectionLink").style.display = "inline-block";
+            document.getElementById("rebuild-cache-btn").style.display = "inline-block";
+          }
+        } catch {}
+      })();
+
+      function rebuildCache() {
+        const btn = document.getElementById("rebuild-cache-btn");
+        btn.disabled = true;
+        btn.textContent = "⏳ En cours...";
+        fetchWithAuth(`${API_BASE}/rebuild-cache`, { method: "POST" })
+          .then(r => r.json())
+          .then(data => {
+            if (data.status === "success") {
+              btn.textContent = "✅ Cache reconstruit";
+              setTimeout(() => { btn.textContent = "🔄 Reconstruire le cache"; btn.disabled = false; }, 3000);
+              loadTopRestaurants();
+            } else {
+              btn.textContent = "❌ Erreur";
+              btn.disabled = false;
+            }
+          })
+          .catch(() => { btn.textContent = "❌ Erreur réseau"; btn.disabled = false; });
+      }
+
+      // Load bookmarked IDs on page load
+      loadBookmarkedIds();
     </script>
   </body>
 </html>

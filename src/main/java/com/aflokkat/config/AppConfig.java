@@ -44,6 +44,62 @@ public class AppConfig {
         return getProperty("mongodb.collection", "restaurants");
     }
 
+    public static String getNycApiUrl() {
+        return getProperty("nyc.api.url", "https://data.cityofnewyork.us/resource/43nn-pn8j.json");
+    }
+
+    public static String getNycApiToken() {
+        return getProperty("nyc.api.app_token", "");
+    }
+
+    public static int getNycApiPageSize() {
+        return getIntProperty("nyc.api.page-size", 1000);
+    }
+
+    public static int getNycApiMaxRecords() {
+        return getIntProperty("nyc.api.max_records", 0);
+    }
+
+    public static String getRedisHost() {
+        return getProperty("redis.host", "localhost");
+    }
+
+    public static int getRedisPort() {
+        return getIntProperty("redis.port", 6379);
+    }
+
+    public static long getRedisCacheTtlSeconds() {
+        return getLongProperty("redis.cache.ttl-seconds", 3600L);
+    }
+
+    public static int getRedisTopLimit() {
+        return getIntProperty("redis.top.limit", 10);
+    }
+
+    public static String getJwtSecret() {
+        return getProperty("jwt.secret", "changeit-please-change-it");
+    }
+
+    public static long getJwtAccessTokenExpirationMs() {
+        return getLongProperty("jwt.access.expiration.ms", 900000L);
+    }
+
+    public static long getJwtRefreshTokenExpirationMs() {
+        return getLongProperty("jwt.refresh.expiration.ms", 604800000L);
+    }
+
+    private static int getIntProperty(String key, int defaultValue) {
+        String value = getProperty(key, String.valueOf(defaultValue));
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return defaultValue; }
+    }
+
+    private static long getLongProperty(String key, long defaultValue) {
+        String value = getProperty(key, String.valueOf(defaultValue));
+        try { return Long.parseLong(value); }
+        catch (NumberFormatException e) { return defaultValue; }
+    }
+
     private static String getProperty(String key, String defaultValue) {
         // 1. Variable d'environnement système (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();

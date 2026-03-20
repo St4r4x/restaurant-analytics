@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carte de Chaleur des Violations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #fff; height: 100vh; display: flex; flex-direction: column; }
+      #toolbar {
+        background: rgba(0,0,0,0.85);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        border-bottom: 2px solid #667eea;
+        z-index: 1000;
+      }
+      #toolbar h1 { font-size: 1.1em; color: #a78bfa; white-space: nowrap; }
+      #toolbar a { color: #aaa; text-decoration: none; font-size: 0.85em; white-space: nowrap; }
+      #toolbar a:hover { color: #fff; }
+      select {
+        padding: 6px 10px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid #667eea;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 0.88em;
+        cursor: pointer;
+      }
+      select option { background: #1a1a2e; }
+      #status { font-size: 0.82em; color: #aaa; margin-left: auto; }
+      #map { flex: 1; }
+      .legend {
+        position: absolute;
+        bottom: 30px;
+        right: 10px;
+        background: rgba(0,0,0,0.75);
+        border-radius: 8px;
+        padding: 12px 16px;
+        z-index: 1000;
+        font-size: 0.82em;
+        color: #ddd;
+      }
+      .legend-title { font-weight: 700; margin-bottom: 8px; color: #a78bfa; }
+      .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+      .legend-dot { width: 14px; height: 14px; border-radius: 50%; }
+    </style>
+  </head>
+  <body>
+    <div id="toolbar">
+      <a href="/">← Dashboard</a>
+      <a href="/inspection">Tableau de bord agents</a>
+      <h1>🔥 Carte de Chaleur des Violations</h1>
+      <select id="borough-filter">
+        <option value="">Tous les quartiers</option>
+        <option value="Manhattan">Manhattan</option>
+        <option value="Brooklyn">Brooklyn</option>
+        <option value="Queens">Queens</option>
+        <option value="Bronx">Bronx</option>
+        <option value="Staten Island">Staten Island</option>
+      </select>
+      <span id="status">Chargement...</span>
+    </div>
+    <div id="map"></div>
+    <div class="legend">
+      <div class="legend-title">Score inspection</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#4ade80"></div> Faible (bon)</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#facc15"></div> Moyen</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div> Élevé</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div> Très élevé (mauvais)</div>
+    </div>
+
+    <script>
+      const token = localStorage.getItem("accessToken");
+      if (!token) window.location.href = "/login";
+
+      function getAuthHeaders() {
+        return { "Content-Type": "application/json", Authorization: "Bearer " + token };
+      }
+
+      const map = L.map("map").setView([40.7128, -74.006], 11);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        maxZoom: 18
+      }).addTo(map);
+
+      let heatLayer = null;
+      let allPoints = [];
+
+      function loadHeatmap() {
+        document.getElementById("status").textContent = "Chargement...";
+        fetch("/api/restaurants/heatmap?limit=500", { headers: getAuthHeaders() })
+          .then(r => {
+            if (r.status === 401 || r.status === 403) {
+              window.location.href = "/login";
+              throw new Error("auth");
+            }
+            return r.json();
+          })
+          .then(resp => {
+            if (resp.status !== "success") {
+              document.getElementById("status").textContent = "Erreur: " + resp.message;
+              return;
+            }
+            allPoints = resp.data || [];
+            document.getElementById("status").textContent = `${allPoints.length} points chargés`;
+            applyFilter();
+          })
+          .catch(e => {
+            if (e.message !== "auth")
+              document.getElementById("status").textContent = "Erreur réseau";
+          });
+      }
+
+      function renderHeat(points) {
+        if (heatLayer) map.removeLayer(heatLayer);
+        heatLayer = L.heatLayer(points, {
+          radius: 25,
+          blur: 20,
+          max: 100,
+          minOpacity: 0.35,
+          gradient: { 0.2: "#4ade80", 0.5: "#facc15", 0.75: "#f97316", 1.0: "#ef4444" }
+        }).addTo(map);
+      }
+
+      function applyFilter() {
+        const points = allPoints
+          .filter(p => p.lat && p.lng && p.weight != null)
+          .map(p => [p.lat, p.lng, p.weight]);
+        renderHeat(points);
+        document.getElementById("status").textContent = `${points.length} points affichés`;
+      }
+
+      document.getElementById("borough-filter").addEventListener("change", () => {
+        const borough = document.getElementById("borough-filter").value;
+        document.getElementById("status").textContent = "Chargement...";
+        let url = `/api/restaurants/heatmap?limit=500`;
+        if (borough) url += `&borough=${encodeURIComponent(borough)}`;
+        fetch(url, { headers: getAuthHeaders() })
+          .then(r => r.json())
+          .then(resp => {
+            if (resp.status !== "success") return;
+            allPoints = resp.data || [];
+            applyFilter();
+          })
+          .catch(() => {});
+      });
+
+      loadHeatmap();
+    </script>
+  </body>
+</html>

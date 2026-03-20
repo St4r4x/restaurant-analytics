@@ -7,6 +7,8 @@ import com.aflokkat.aggregation.AggregationCount;
 import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.domain.Restaurant;
+import com.aflokkat.dto.AtRiskEntry;
+import com.aflokkat.dto.HeatmapPoint;
 
 public interface RestaurantDAO {
     /**
@@ -73,7 +75,53 @@ public interface RestaurantDAO {
      * Retourne la liste de tous les types de cuisine distincts, triés alphabétiquement
      */
     List<String> getDistinctCuisines();
-    
+
+    /**
+     * Retourne un restaurant aléatoire via $sample
+     */
+    Restaurant findRandom();
+
+    /**
+     * Upserts a batch of restaurants keyed by restaurantId (camis).
+     * Inserts if not present, replaces if already exists.
+     *
+     * @return number of documents upserted
+     */
+    int upsertRestaurants(List<Restaurant> restaurants);
+
+    /**
+     * Retourne les restaurants correspondant à une liste d'IDs (restaurant_id / camis)
+     */
+    List<Restaurant> findByIds(List<String> restaurantIds);
+
+    /**
+     * Finds a restaurant by its restaurant_id field.
+     */
+    Restaurant findByRestaurantId(String restaurantId);
+
+    /**
+     * Returns restaurants that had at least one inspection in the last N days.
+     */
+    List<Restaurant> findRecentlyInspected(int days, int limit);
+
+    /**
+     * Returns restaurants within radiusMeters of the given lat/lng coordinates.
+     * Requires a 2dsphere index on address.coord.
+     */
+    List<Restaurant> findNearby(double lat, double lng, int radiusMeters, int limit);
+
+    /**
+     * Returns heatmap data points (lat, lng, weight=score) for the map overlay.
+     * @param borough optional borough filter (null = all)
+     */
+    List<HeatmapPoint> getHeatmapData(String borough, int limit);
+
+    /**
+     * Returns restaurants with a bad last grade (C or Z).
+     * @param borough optional borough filter (null = all)
+     */
+    List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit);
+
     /**
      * Ferme la connexion
      */
