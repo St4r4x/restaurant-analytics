@@ -1,0 +1,50 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: restaurant-app
+    ports:
+      - "8080:8080"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017
+      MONGODB_DATABASE: newyork
+      MONGODB_COLLECTION: restaurants
+    restart: unless-stopped
+    networks:
+      - restaurant-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD", "curl", "-f", "http://localhost:8080/api/restaurants/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    networks:
+      - restaurant-network
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: newyork
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  restaurant-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
