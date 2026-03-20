@@ -42,7 +42,6 @@ services:
       MONGO_INITDB_DATABASE: newyork
     volumes:
       - mongodb_data:/data/db
-      - ./init-restaurants.js:/docker-entrypoint-initdb.d/init-restaurants.js:ro
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
