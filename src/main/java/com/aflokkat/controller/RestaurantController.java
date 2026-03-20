@@ -29,6 +29,7 @@ import com.aflokkat.domain.Restaurant;
 import com.aflokkat.service.RestaurantService;
 import com.aflokkat.sync.SyncResult;
 import com.aflokkat.sync.SyncService;
+import com.aflokkat.util.ResponseUtil;
 
 /**
  * REST API Controller pour l'accès aux données MongoDB
@@ -407,10 +408,6 @@ public class RestaurantController {
     }
 
     private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
-        int status = (e instanceof IllegalArgumentException) ? 400 : 500;
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", e.getMessage());
-        return ResponseEntity.status(status).body(response);
+        return ResponseUtil.errorResponse(e);
     }
 }

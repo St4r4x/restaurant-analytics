@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.dto.AtRiskEntry;
+import com.aflokkat.util.ResponseUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -83,10 +84,6 @@ public class InspectionController {
     }
 
     private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
-        int status = (e instanceof IllegalArgumentException) ? 400 : 500;
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", e.getMessage());
-        return ResponseEntity.status(status).body(response);
+        return ResponseUtil.errorResponse(e);
     }
 }

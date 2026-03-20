@@ -23,6 +23,7 @@ import com.aflokkat.entity.BookmarkEntity;
 import com.aflokkat.entity.UserEntity;
 import com.aflokkat.repository.BookmarkRepository;
 import com.aflokkat.repository.UserRepository;
+import com.aflokkat.util.ResponseUtil;
 
 @RestController
 @RequestMapping("/api/users")
@@ -45,60 +46,76 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getProfile() {
-        UserEntity user = getCurrentUser();
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", user.getId());
-        data.put("username", user.getUsername());
-        data.put("email", user.getEmail());
-        data.put("role", user.getRole());
-        data.put("createdAt", user.getCreatedAt());
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("data", data);
-        return ResponseEntity.ok(response);
+        try {
+            UserEntity user = getCurrentUser();
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", user.getId());
+            data.put("username", user.getUsername());
+            data.put("email", user.getEmail());
+            data.put("role", user.getRole());
+            data.put("createdAt", user.getCreatedAt());
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", data);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseUtil.errorResponse(e);
+        }
     }
 
     @GetMapping("/me/bookmarks")
     public ResponseEntity<Map<String, Object>> getBookmarks() {
-        UserEntity user = getCurrentUser();
-        List<BookmarkEntity> bookmarks = bookmarkRepository.findByUserId(user.getId());
-        List<String> restaurantIds = bookmarks.stream()
-                .map(BookmarkEntity::getRestaurantId)
-                .collect(Collectors.toList());
-        List<Restaurant> restaurants = restaurantIds.isEmpty()
-                ? Collections.emptyList()
-                : restaurantDAO.findByIds(restaurantIds);
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("data", restaurants);
-        response.put("count", restaurants.size());
-        return ResponseEntity.ok(response);
+        try {
+            UserEntity user = getCurrentUser();
+            List<BookmarkEntity> bookmarks = bookmarkRepository.findByUserId(user.getId());
+            List<String> restaurantIds = bookmarks.stream()
+                    .map(BookmarkEntity::getRestaurantId)
+                    .collect(Collectors.toList());
+            List<Restaurant> restaurants = restaurantIds.isEmpty()
+                    ? Collections.emptyList()
+                    : restaurantDAO.findByIds(restaurantIds);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", restaurants);
+            response.put("count", restaurants.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseUtil.errorResponse(e);
+        }
     }
 
     @PostMapping("/me/bookmarks/{restaurantId}")
     public ResponseEntity<Map<String, Object>> addBookmark(@PathVariable String restaurantId) {
-        UserEntity user = getCurrentUser();
-        Map<String, Object> response = new HashMap<>();
-        if (bookmarkRepository.existsByUserIdAndRestaurantId(user.getId(), restaurantId)) {
+        try {
+            UserEntity user = getCurrentUser();
+            Map<String, Object> response = new HashMap<>();
+            if (bookmarkRepository.existsByUserIdAndRestaurantId(user.getId(), restaurantId)) {
+                response.put("status", "success");
+                response.put("message", "Already bookmarked");
+                return ResponseEntity.ok(response);
+            }
+            bookmarkRepository.save(new BookmarkEntity(user, restaurantId));
             response.put("status", "success");
-            response.put("message", "Already bookmarked");
+            response.put("message", "Bookmark added");
+            response.put("restaurantId", restaurantId);
             return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseUtil.errorResponse(e);
         }
-        bookmarkRepository.save(new BookmarkEntity(user, restaurantId));
-        response.put("status", "success");
-        response.put("message", "Bookmark added");
-        response.put("restaurantId", restaurantId);
-        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/me/bookmarks/{restaurantId}")
     @Transactional
     public ResponseEntity<Map<String, Object>> removeBookmark(@PathVariable String restaurantId) {
-        UserEntity user = getCurrentUser();
-        bookmarkRepository.deleteByUserIdAndRestaurantId(user.getId(), restaurantId);
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", "Bookmark removed");
-        return ResponseEntity.ok(response);
+        try {
+            UserEntity user = getCurrentUser();
+            bookmarkRepository.deleteByUserIdAndRestaurantId(user.getId(), restaurantId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Bookmark removed");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseUtil.errorResponse(e);
+        }
     }
 }

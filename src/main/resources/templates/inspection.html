@@ -221,7 +221,7 @@
         document.getElementById("at-risk-content").innerHTML = '<div class="spinner"></div>';
         let url = `/api/inspection/at-risk?limit=${limit}`;
         if (borough) url += `&borough=${encodeURIComponent(borough)}`;
-        fetch(url, { headers: getAuthHeaders() })
+        return fetch(url, { headers: getAuthHeaders() })
           .then(r => {
             if (r.status === 401 || r.status === 403) { window.location.href = "/login"; throw new Error("auth"); }
             return r.json();
@@ -287,7 +287,7 @@
       // ---- Worst cuisines chart ----
       function loadWorstCuisines() {
         const borough = document.getElementById("wc-borough").value;
-        fetch(`/api/restaurants/worst-cuisines?borough=${encodeURIComponent(borough)}&limit=8`,
+        return fetch(`/api/restaurants/worst-cuisines?borough=${encodeURIComponent(borough)}&limit=8`,
           { headers: getAuthHeaders() })
           .then(r => r.json())
           .then(resp => {
@@ -364,9 +364,8 @@
         window.location.href = "/login";
       });
 
-      // Auto-load on page open
-      loadAtRisk();
-      loadWorstCuisines();
+      // Auto-load on page open — run in parallel
+      Promise.all([loadAtRisk(), loadWorstCuisines()]);
     </script>
   </body>
 </html>

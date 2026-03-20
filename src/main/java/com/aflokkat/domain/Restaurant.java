@@ -91,22 +91,22 @@ public class Restaurant {
 
     // ---- Computed badge fields (not stored in MongoDB) ----
 
-    public String getLatestGrade() {
+    private Grade getLatestGradeEntry() {
         if (grades == null || grades.isEmpty()) return null;
         return grades.stream()
             .filter(g -> g.getDate() != null)
             .max(Comparator.comparing(Grade::getDate))
-            .map(Grade::getGrade)
             .orElse(null);
     }
 
+    public String getLatestGrade() {
+        Grade g = getLatestGradeEntry();
+        return g != null ? g.getGrade() : null;
+    }
+
     public Integer getLatestScore() {
-        if (grades == null || grades.isEmpty()) return null;
-        return grades.stream()
-            .filter(g -> g.getDate() != null && g.getScore() != null)
-            .max(Comparator.comparing(Grade::getDate))
-            .map(Grade::getScore)
-            .orElse(null);
+        Grade g = getLatestGradeEntry();
+        return (g != null && g.getScore() != null) ? g.getScore() : null;
     }
 
     public String getTrend() {
