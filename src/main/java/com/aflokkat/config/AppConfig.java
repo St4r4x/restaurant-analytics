@@ -49,7 +49,6 @@ public class AppConfig {
     }
 
     public static String getNycApiToken() {
-        // key nyc.api.app_token → env NYC_API_APP_TOKEN
         return getProperty("nyc.api.app_token", "");
     }
 
@@ -57,7 +56,6 @@ public class AppConfig {
         return getIntProperty("nyc.api.page-size", 1000);
     }
 
-    /** Max total records to fetch. 0 means unlimited. */
     public static int getNycApiMaxRecords() {
         return getIntProperty("nyc.api.max_records", 0);
     }
@@ -70,14 +68,24 @@ public class AppConfig {
         return getIntProperty("redis.port", 6379);
     }
 
-    /** TTL for cached aggregation results in seconds. Default: 1 hour. */
     public static long getRedisCacheTtlSeconds() {
         return getLongProperty("redis.cache.ttl-seconds", 3600L);
     }
 
-    /** Default limit for the top-restaurants sorted set query. */
     public static int getRedisTopLimit() {
         return getIntProperty("redis.top.limit", 10);
+    }
+
+    public static String getJwtSecret() {
+        return getProperty("jwt.secret", "changeit-please-change-it");
+    }
+
+    public static long getJwtAccessTokenExpirationMs() {
+        return getLongProperty("jwt.access.expiration.ms", 900000L);
+    }
+
+    public static long getJwtRefreshTokenExpirationMs() {
+        return getLongProperty("jwt.refresh.expiration.ms", 604800000L);
     }
 
     private static int getIntProperty(String key, int defaultValue) {

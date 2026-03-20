@@ -50,11 +50,11 @@ Raw dataset loaded statically from `restaurants.json`.
 
 ### Decision criteria
 
-| Criterion | Redis | Elasticsearch |
-|---|---|---|
-| Primary benefit | Performance | Discoverability |
-| Complexity | Low | Medium |
-| Academic value | Caching patterns | Search & indexing |
+| Criterion       | Redis            | Elasticsearch     |
+| --------------- | ---------------- | ----------------- |
+| Primary benefit | Performance      | Discoverability   |
+| Complexity      | Low              | Medium            |
+| Academic value  | Caching patterns | Search & indexing |
 
 > Recommended for academic scope: **Redis** (Phase 2a) then **Elasticsearch** (Phase 2b optional).
 
@@ -67,24 +67,28 @@ Raw dataset loaded statically from `restaurants.json`.
 ### Tasks
 
 #### 3.1 Authentication
-- [ ] Add Spring Security + JWT (`jjwt` library)
-- [ ] `POST /api/auth/register` — create account (username, email, hashed password via BCrypt)
-- [ ] `POST /api/auth/login` — return signed JWT
-- [ ] `POST /api/auth/refresh` — refresh token endpoint
-- [ ] Store users in a dedicated MongoDB collection `users`
+
+- [x] Add Spring Security + JWT (`jjwt` library)
+- [x] `POST /api/auth/register` — create account (username, email, hashed password via BCrypt)
+- [x] `POST /api/auth/login` — return signed JWT
+- [x] `POST /api/auth/refresh` — refresh token endpoint
+- [x] Store users in a dedicated MongoDB collection `users`
 
 #### 3.2 Authorisation
+
 - [ ] Define roles: `ROLE_USER`, `ROLE_ADMIN`
 - [ ] Protect write/admin endpoints (`/api/restaurants/refresh`, etc.) behind `ROLE_ADMIN`
 - [ ] Public read endpoints remain unauthenticated
 
 #### 3.3 User features
+
 - [ ] `POST /api/users/me/bookmarks/{restaurantId}` — bookmark a restaurant
 - [ ] `GET /api/users/me/bookmarks` — list bookmarked restaurants
 - [ ] `POST /api/users/me/reviews` — submit a score/comment for a restaurant
 - [ ] Aggregate user reviews alongside inspection scores in the dashboard
 
 #### 3.4 UI
+
 - [ ] Login / register form (Thymeleaf or React SPA depending on evolution)
 - [ ] User profile page showing bookmarks and reviews
 - [ ] Admin panel for triggering data refresh and viewing sync logs
@@ -93,10 +97,10 @@ Raw dataset loaded statically from `restaurants.json`.
 
 ## Phase 4 — Stretch goals (post-academic)
 
-| Feature | Description |
-|---|---|
-| GraphQL API | Replace / complement REST with a GraphQL schema |
+| Feature            | Description                                              |
+| ------------------ | -------------------------------------------------------- |
+| GraphQL API        | Replace / complement REST with a GraphQL schema          |
 | Geospatial queries | Add `$geoNear` queries + Leaflet.js map in the dashboard |
-| Data pipeline | Kafka ingestion topic fed by the external API client |
-| Observability | Micrometer + Prometheus + Grafana dashboards |
-| CI/CD | GitHub Actions: build, test, Docker push on every PR |
+| Data pipeline      | Kafka ingestion topic fed by the external API client     |
+| Observability      | Micrometer + Prometheus + Grafana dashboards             |
+| CI/CD              | GitHub Actions: build, test, Docker push on every PR     |
