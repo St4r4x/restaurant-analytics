@@ -112,8 +112,9 @@ public class RestaurantDAOImpl implements RestaurantDAO {
             throw new IllegalArgumentException("filters ne peut pas être null ou vide");
         }
         List<Restaurant> results = new ArrayList<>();
-        Document filterDoc = new Document(filters);
-        
+        // type 3 = BSON embedded document — skip legacy docs where address is a plain string
+        Document filterDoc = new Document(filters).append("address", new Document("$type", 3));
+
         restaurantCollection.find(filterDoc)
             .limit(limit)
             .forEach(results::add);
@@ -199,6 +200,15 @@ public class RestaurantDAOImpl implements RestaurantDAO {
             new Document("$sort", new Document("avgScore", 1)),
             new Document("$limit", limit)
         ), CuisineScore.class);
+    }
+
+    @Override
+    public Restaurant findRandom() {
+        List<Restaurant> result = new ArrayList<>();
+        restaurantCollection.aggregate(Arrays.asList(
+            new Document("$sample", new Document("size", 1))
+        )).forEach(result::add);
+        return result.isEmpty() ? null : result.get(0);
     }
 
     @Override

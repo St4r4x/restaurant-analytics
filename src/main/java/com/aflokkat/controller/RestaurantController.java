@@ -279,6 +279,25 @@ public class RestaurantController {
         }
     }
 
+    @Operation(summary = "Random restaurant", description = "Returns a single restaurant picked at random from the dataset.")
+    @GetMapping("/random")
+    public ResponseEntity<Map<String, Object>> getRandom() {
+        try {
+            Restaurant data = restaurantService.getRandomRestaurant();
+            Map<String, Object> response = new HashMap<>();
+            if (data == null) {
+                response.put("status", "error");
+                response.put("message", "No restaurants in database");
+                return ResponseEntity.status(404).body(response);
+            }
+            response.put("status", "success");
+            response.put("data", data);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
     private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
         int status = (e instanceof IllegalArgumentException) ? 400 : 500;
         Map<String, Object> response = new HashMap<>();

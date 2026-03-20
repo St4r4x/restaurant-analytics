@@ -75,6 +75,11 @@ public interface RestaurantDAO {
     List<String> getDistinctCuisines();
 
     /**
+     * Retourne un restaurant aléatoire via $sample
+     */
+    Restaurant findRandom();
+
+    /**
      * Upserts a batch of restaurants keyed by restaurantId (camis).
      * Inserts if not present, replaces if already exists.
      *

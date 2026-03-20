@@ -140,4 +140,11 @@ public class RestaurantService {
     public List<String> getDistinctCuisines() {
         return restaurantDAO.getDistinctCuisines();
     }
+
+    /**
+     * Retourne un restaurant aléatoire via $sample MongoDB
+     */
+    public Restaurant getRandomRestaurant() {
+        return restaurantDAO.findRandom();
+    }
 }

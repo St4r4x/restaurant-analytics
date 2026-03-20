@@ -228,11 +228,72 @@
       @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+      /* API Reference */
+      .api-section { margin-bottom: 30px; }
+      .api-section > h2 { color: white; font-size: 1.2em; margin-bottom: 14px; opacity: 0.95; }
+
+      .api-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 10px;
+      }
+
+      .api-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.88em;
+        transition: background 0.2s ease, transform 0.15s ease;
+        overflow: hidden;
+      }
+
+      .api-link:hover { background: rgba(255,255,255,0.22); transform: translateY(-2px); }
+
+      .api-method {
+        font-size: 0.72em;
+        font-weight: 700;
+        padding: 3px 7px;
+        border-radius: 4px;
+        flex-shrink: 0;
+        letter-spacing: 0.05em;
+      }
+
+      .method-get  { background: rgba(67,233,123,0.25); color: #a8f5c4; border: 1px solid rgba(67,233,123,0.4); }
+      .method-post { background: rgba(250,112,154,0.25); color: #fdb8ce; border: 1px solid rgba(250,112,154,0.4); }
+
+      .api-link-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+      .api-path { font-family: monospace; font-size: 0.92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .api-desc { font-size: 0.78em; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      .swagger-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 9px 18px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.9em;
+        font-weight: 600;
+        transition: background 0.2s ease;
+      }
+      .swagger-link:hover { background: rgba(255,255,255,0.28); }
+
       @media (max-width: 768px) {
         header h1 { font-size: 1.8em; }
         .dashboard, .dashboard-wide { grid-template-columns: 1fr; }
         .controls { flex-direction: column; }
         input, select, button { width: 100%; }
+        .api-grid { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -356,6 +417,107 @@
             <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
           </div>
         </div>
+      </div>
+
+      <!-- API Reference -->
+      <div class="api-section">
+        <h2>API Reference</h2>
+        <div class="api-grid">
+          <a href="/api/restaurants/by-borough" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/by-borough</span>
+              <span class="api-desc">Nombre de restaurants par quartier</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/cuisine-scores?cuisine=Italian" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/cuisine-scores?cuisine=Italian</span>
+              <span class="api-desc">Score moyen par quartier pour une cuisine</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/worst-cuisines?borough=Manhattan&amp;limit=5" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/worst-cuisines?borough=Manhattan&amp;limit=5</span>
+              <span class="api-desc">Pires cuisines par score dans un quartier</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/popular-cuisines?minCount=500" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/popular-cuisines?minCount=500</span>
+              <span class="api-desc">Cuisines avec au moins N restaurants</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/top?limit=10" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/top?limit=10</span>
+              <span class="api-desc">Top restaurants les plus sains (Redis sorted set)</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/by-cuisine?limit=10" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/by-cuisine?limit=10</span>
+              <span class="api-desc">Top N cuisines par nombre de restaurants</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/cuisines" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/cuisines</span>
+              <span class="api-desc">Tous les types de cuisine distincts</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/stats" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/stats</span>
+              <span class="api-desc">Statistiques globales</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/trash-advisor?limit=25" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/trash-advisor?limit=25</span>
+              <span class="api-desc">Restaurants des cuisines les plus risquées</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/sync-status" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/sync-status</span>
+              <span class="api-desc">Statut du dernier sync de données</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/random" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/random</span>
+              <span class="api-desc">Restaurant aléatoire</span>
+            </div>
+          </a>
+          <a href="/api/restaurants/health" target="_blank" class="api-link">
+            <span class="api-method method-get">GET</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/health</span>
+              <span class="api-desc">Health check</span>
+            </div>
+          </a>
+          <a href="#" onclick="triggerRefresh(event)" class="api-link">
+            <span class="api-method method-post">POST</span>
+            <div class="api-link-body">
+              <span class="api-path">/api/restaurants/refresh</span>
+              <span class="api-desc">Déclencher un sync manuel (invalide le cache)</span>
+            </div>
+          </a>
+        </div>
+        <a href="/swagger-ui/index.html" target="_blank" class="swagger-link">
+          &#128196; Swagger UI — documentation interactive
+        </a>
       </div>
     </div>
 
@@ -668,6 +830,17 @@
           }).join(",") + "\n";
         });
         triggerDownload(new Blob([csv], { type: "text/csv;charset=utf-8;" }), `restaurant-${type}-${Date.now()}.csv`);
+      }
+
+      function triggerRefresh(e) {
+        e.preventDefault();
+        if (!confirm("Lancer un sync complet depuis NYC Open Data ? L'opération peut prendre plusieurs minutes.")) return;
+        fetch(`${API_BASE}/refresh`, { method: "POST" })
+          .then((r) => r.json())
+          .then((data) => alert(data.status === "success"
+            ? `Sync terminé : ${data.upsertedRestaurants} restaurants upsertés.`
+            : `Erreur : ${data.error}`))
+          .catch((e) => alert(`Erreur réseau : ${e.message}`));
       }
 
       function triggerDownload(blob, filename) {
