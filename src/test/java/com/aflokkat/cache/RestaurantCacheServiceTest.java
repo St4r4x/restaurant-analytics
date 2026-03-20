@@ -98,14 +98,14 @@ class RestaurantCacheServiceTest {
         r.setName("No Score Place");
         r.setGrades(Collections.singletonList(new Grade())); // grade with null score
 
-
         cacheService.updateTopRestaurants(Collections.singletonList(r));
 
-        verify(zSetOps, never()).add(any(), any(), anyDouble());
+        // bulk add(key, Set) must never be called when no restaurant has a score
+        verify(zSetOps, never()).add(anyString(), anySet());
     }
 
     @Test
-    void updateTopRestaurants_addsRestaurantWithScore() throws Exception {
+    void updateTopRestaurants_addsRestaurantWithScore() {
         Grade grade = new Grade();
         grade.setScore(10);
 
@@ -120,7 +120,8 @@ class RestaurantCacheServiceTest {
 
         cacheService.updateTopRestaurants(Collections.singletonList(r));
 
-        verify(zSetOps).add(eq(RestaurantCacheService.KEY_TOP), anyString(), eq(10.0));
+        // single bulk ZADD call with a non-empty set of tuples
+        verify(zSetOps).add(eq(RestaurantCacheService.KEY_TOP), argThat(tuples -> !tuples.isEmpty()));
     }
 
     // ── getTopRestaurants ────────────────────────────────────────────────────

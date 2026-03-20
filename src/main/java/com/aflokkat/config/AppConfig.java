@@ -54,41 +54,42 @@ public class AppConfig {
     }
 
     public static int getNycApiPageSize() {
-        String value = getProperty("nyc.api.page-size", "1000");
-        try { return Integer.parseInt(value); }
-        catch (NumberFormatException e) { return 1000; }
+        return getIntProperty("nyc.api.page-size", 1000);
     }
 
     /** Max total records to fetch. 0 means unlimited. */
     public static int getNycApiMaxRecords() {
-        String value = getProperty("nyc.api.max_records", "0");
-        try { return Integer.parseInt(value); }
-        catch (NumberFormatException e) { return 0; }
+        return getIntProperty("nyc.api.max_records", 0);
     }
-
 
     public static String getRedisHost() {
         return getProperty("redis.host", "localhost");
     }
 
     public static int getRedisPort() {
-        String value = getProperty("redis.port", "6379");
-        try { return Integer.parseInt(value); }
-        catch (NumberFormatException e) { return 6379; }
+        return getIntProperty("redis.port", 6379);
     }
 
     /** TTL for cached aggregation results in seconds. Default: 1 hour. */
     public static long getRedisCacheTtlSeconds() {
-        String value = getProperty("redis.cache.ttl-seconds", "3600");
-        try { return Long.parseLong(value); }
-        catch (NumberFormatException e) { return 3600L; }
+        return getLongProperty("redis.cache.ttl-seconds", 3600L);
     }
 
     /** Default limit for the top-restaurants sorted set query. */
     public static int getRedisTopLimit() {
-        String value = getProperty("redis.top.limit", "10");
+        return getIntProperty("redis.top.limit", 10);
+    }
+
+    private static int getIntProperty(String key, int defaultValue) {
+        String value = getProperty(key, String.valueOf(defaultValue));
         try { return Integer.parseInt(value); }
-        catch (NumberFormatException e) { return 10; }
+        catch (NumberFormatException e) { return defaultValue; }
+    }
+
+    private static long getLongProperty(String key, long defaultValue) {
+        String value = getProperty(key, String.valueOf(defaultValue));
+        try { return Long.parseLong(value); }
+        catch (NumberFormatException e) { return defaultValue; }
     }
 
     private static String getProperty(String key, String defaultValue) {

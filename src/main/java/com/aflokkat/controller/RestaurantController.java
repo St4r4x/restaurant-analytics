@@ -34,7 +34,7 @@ import com.aflokkat.sync.SyncService;
 @RequestMapping("/api/restaurants")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class RestaurantController {
-    
+
     @Autowired
     private RestaurantService restaurantService;
 
@@ -43,7 +43,7 @@ public class RestaurantController {
 
     @Autowired
     private RestaurantCacheService cacheService;
-    
+
     /**
      * USE CASE 1: Nombre de restaurants par quartier
      */
@@ -51,10 +51,8 @@ public class RestaurantController {
     @GetMapping("/by-borough")
     public ResponseEntity<Map<String, Object>> getByBorough() {
         try {
-            List<AggregationCount> data = cacheService.getOrLoad(
-                    RestaurantCacheService.KEY_BY_BOROUGH,
-                    restaurantService::getRestaurantCountByBorough,
-                    new com.fasterxml.jackson.core.type.TypeReference<List<AggregationCount>>() {});
+            List<AggregationCount> data = cacheService.getOrLoadByBorough(
+                    restaurantService::getRestaurantCountByBorough);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);
@@ -64,7 +62,7 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * USE CASE 2: Score moyen par quartier pour une cuisine donnée
      */
@@ -73,10 +71,8 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Object>> getCuisineScores(
             @Parameter(description = "Cuisine type (e.g. Italian, Chinese, American)", example = "Italian") @RequestParam(defaultValue = "Italian") String cuisine) {
         try {
-            List<BoroughCuisineScore> data = cacheService.getOrLoad(
-                    RestaurantCacheService.KEY_CUISINE_SCORES_PREFIX + cuisine,
-                    () -> restaurantService.getAverageScoreByCuisineAndBorough(cuisine),
-                    new com.fasterxml.jackson.core.type.TypeReference<List<BoroughCuisineScore>>() {});
+            List<BoroughCuisineScore> data = cacheService.getOrLoadCuisineScores(cuisine,
+                    () -> restaurantService.getAverageScoreByCuisineAndBorough(cuisine));
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("cuisine", cuisine);
@@ -87,7 +83,7 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * USE CASE 3: Pires cuisines dans un quartier
      */
@@ -97,10 +93,8 @@ public class RestaurantController {
             @Parameter(description = "Borough name", example = "Manhattan") @RequestParam(defaultValue = "Manhattan") String borough,
             @Parameter(description = "Maximum number of cuisines to return") @RequestParam(defaultValue = "5") int limit) {
         try {
-            List<CuisineScore> data = cacheService.getOrLoad(
-                    RestaurantCacheService.KEY_WORST_CUISINES_PREFIX + borough + ":" + limit,
-                    () -> restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit),
-                    new com.fasterxml.jackson.core.type.TypeReference<List<CuisineScore>>() {});
+            List<CuisineScore> data = cacheService.getOrLoadWorstCuisines(borough, limit,
+                    () -> restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit));
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("borough", borough);
@@ -111,7 +105,7 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * USE CASE 4: Cuisines avec minimum de restaurants
      */
@@ -131,7 +125,7 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * Statistiques générales
      */
@@ -148,7 +142,7 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * Health check
      */
@@ -160,7 +154,7 @@ public class RestaurantController {
         response.put("message", "API is running");
         return ResponseEntity.ok(response);
     }
-    
+
     /**
      * TRASH ADVISOR: Obtient les pires restaurants avec leurs coordonnées GPS
      */
@@ -221,7 +215,7 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * Triggers a manual data sync from the NYC Open Data API.
      */
@@ -285,7 +279,7 @@ public class RestaurantController {
         }
     }
 
-        private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
+    private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
         int status = (e instanceof IllegalArgumentException) ? 400 : 500;
         Map<String, Object> response = new HashMap<>();
         response.put("status", "error");

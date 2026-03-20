@@ -36,20 +36,15 @@ public class SyncService {
 
     private final NycOpenDataClient apiClient;
     private final RestaurantDAO restaurantDAO;
+    private final RestaurantCacheService cacheService;
 
     private volatile SyncResult lastResult;
 
-    // Optional: null when Redis is not configured
-    private RestaurantCacheService cacheService;
-
     @Autowired
-    public SyncService(NycOpenDataClient apiClient, RestaurantDAO restaurantDAO) {
+    public SyncService(NycOpenDataClient apiClient, RestaurantDAO restaurantDAO,
+                       RestaurantCacheService cacheService) {
         this.apiClient = apiClient;
         this.restaurantDAO = restaurantDAO;
-    }
-
-    @Autowired(required = false)
-    public void setCacheService(RestaurantCacheService cacheService) {
         this.cacheService = cacheService;
     }
 
@@ -74,10 +69,8 @@ public class SyncService {
             List<Restaurant> restaurants = mapToRestaurants(rawRecords);
             restaurantDAO.upsertRestaurants(restaurants);
 
-            if (cacheService != null) {
-                cacheService.invalidateAll();
-                cacheService.updateTopRestaurants(restaurants);
-            }
+            cacheService.invalidateAll();
+            cacheService.updateTopRestaurants(restaurants);
 
             SyncResult result = SyncResult.builder()
                     .startedAt(start)
