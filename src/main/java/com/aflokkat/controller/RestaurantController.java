@@ -13,9 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import com.aflokkat.cache.RestaurantCacheService;
 import com.aflokkat.aggregation.AggregationCount;
 import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
+import com.aflokkat.dto.TopRestaurantEntry;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.service.RestaurantService;
 import com.aflokkat.sync.SyncResult;
@@ -24,24 +29,30 @@ import com.aflokkat.sync.SyncService;
 /**
  * REST API Controller pour l'accès aux données MongoDB
  */
+@Tag(name = "Restaurants", description = "NYC restaurant inspection data — analytics, sync and leaderboard")
 @RestController
 @RequestMapping("/api/restaurants")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class RestaurantController {
-    
+
     @Autowired
     private RestaurantService restaurantService;
 
     @Autowired
     private SyncService syncService;
-    
+
+    @Autowired
+    private RestaurantCacheService cacheService;
+
     /**
      * USE CASE 1: Nombre de restaurants par quartier
      */
+    @Operation(summary = "Restaurant count per borough", description = "Returns the number of restaurants in each NYC borough, sorted by count. Result is cached in Redis for 1 hour.")
     @GetMapping("/by-borough")
     public ResponseEntity<Map<String, Object>> getByBorough() {
         try {
-            List<AggregationCount> data = restaurantService.getRestaurantCountByBorough();
+            List<AggregationCount> data = cacheService.getOrLoadByBorough(
+                    restaurantService::getRestaurantCountByBorough);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);
@@ -51,15 +62,17 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * USE CASE 2: Score moyen par quartier pour une cuisine donnée
      */
+    @Operation(summary = "Average inspection score by borough for a cuisine", description = "For the given cuisine type, returns the average inspection score per borough. Lower score = better health. Cached in Redis.")
     @GetMapping("/cuisine-scores")
     public ResponseEntity<Map<String, Object>> getCuisineScores(
-            @RequestParam(defaultValue = "Italian") String cuisine) {
+            @Parameter(description = "Cuisine type (e.g. Italian, Chinese, American)", example = "Italian") @RequestParam(defaultValue = "Italian") String cuisine) {
         try {
-            List<BoroughCuisineScore> data = restaurantService.getAverageScoreByCuisineAndBorough(cuisine);
+            List<BoroughCuisineScore> data = cacheService.getOrLoadCuisineScores(cuisine,
+                    () -> restaurantService.getAverageScoreByCuisineAndBorough(cuisine));
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("cuisine", cuisine);
@@ -70,16 +83,18 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * USE CASE 3: Pires cuisines dans un quartier
      */
+    @Operation(summary = "Worst cuisines by average inspection score in a borough", description = "Returns the cuisine types with the highest average inspection score (most violations) in a given borough. Cached in Redis.")
     @GetMapping("/worst-cuisines")
     public ResponseEntity<Map<String, Object>> getWorstCuisines(
-            @RequestParam(defaultValue = "Manhattan") String borough,
-            @RequestParam(defaultValue = "5") int limit) {
+            @Parameter(description = "Borough name", example = "Manhattan") @RequestParam(defaultValue = "Manhattan") String borough,
+            @Parameter(description = "Maximum number of cuisines to return") @RequestParam(defaultValue = "5") int limit) {
         try {
-            List<CuisineScore> data = restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit);
+            List<CuisineScore> data = cacheService.getOrLoadWorstCuisines(borough, limit,
+                    () -> restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit));
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("borough", borough);
@@ -90,13 +105,14 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * USE CASE 4: Cuisines avec minimum de restaurants
      */
+    @Operation(summary = "Cuisines with a minimum restaurant count", description = "Returns cuisine types that have at least minCount restaurants in the dataset.")
     @GetMapping("/popular-cuisines")
     public ResponseEntity<Map<String, Object>> getPopularCuisines(
-            @RequestParam(defaultValue = "500") int minCount) {
+            @Parameter(description = "Minimum number of restaurants required") @RequestParam(defaultValue = "500") int minCount) {
         try {
             List<String> data = restaurantService.getCuisinesWithMinimumCount(minCount);
             Map<String, Object> response = new HashMap<>();
@@ -109,10 +125,11 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * Statistiques générales
      */
+    @Operation(summary = "Global statistics", description = "Total restaurant count and breakdown by borough.")
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
         try {
@@ -125,10 +142,11 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * Health check
      */
+    @Operation(summary = "Health check")
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         Map<String, String> response = new HashMap<>();
@@ -136,10 +154,11 @@ public class RestaurantController {
         response.put("message", "API is running");
         return ResponseEntity.ok(response);
     }
-    
+
     /**
      * TRASH ADVISOR: Obtient les pires restaurants avec leurs coordonnées GPS
      */
+    @Operation(summary = "Trash Advisor", description = "Returns restaurants from the worst-scoring cuisines, optionally filtered by borough, cuisine and max score. Useful for finding the most violation-prone establishments.")
     @GetMapping("/trash-advisor")
     public ResponseEntity<Map<String, Object>> getTrashAdvisor(
             @RequestParam(required = false) String borough,
@@ -163,6 +182,7 @@ public class RestaurantController {
     /**
      * Tous les types de cuisine distincts (pour alimenter les filtres)
      */
+    @Operation(summary = "All distinct cuisine types", description = "Returns a sorted list of all cuisine types present in the dataset. Useful for populating filter dropdowns.")
     @GetMapping("/cuisines")
     public ResponseEntity<Map<String, Object>> getCuisines() {
         try {
@@ -180,9 +200,10 @@ public class RestaurantController {
     /**
      * Top N cuisines par nombre de restaurants
      */
+    @Operation(summary = "Top N cuisines by restaurant count")
     @GetMapping("/by-cuisine")
     public ResponseEntity<Map<String, Object>> getByCuisine(
-            @RequestParam(defaultValue = "10") int limit) {
+            @Parameter(description = "Number of cuisines to return") @RequestParam(defaultValue = "10") int limit) {
         try {
             List<AggregationCount> data = restaurantService.getTopCuisinesByCount(limit);
             Map<String, Object> response = new HashMap<>();
@@ -194,10 +215,11 @@ public class RestaurantController {
             return errorResponse(e);
         }
     }
-    
+
     /**
      * Triggers a manual data sync from the NYC Open Data API.
      */
+    @Operation(summary = "Trigger manual data sync", description = "Fetches fresh data from the NYC Open Data API, upserts into MongoDB, and invalidates the Redis cache. Returns the sync result with record counts.")
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, Object>> refresh() {
         try {
@@ -219,6 +241,7 @@ public class RestaurantController {
     /**
      * Returns the status of the last data sync.
      */
+    @Operation(summary = "Last sync status", description = "Returns the result of the most recent data sync, or a never_run status if no sync has been executed.")
     @GetMapping("/sync-status")
     public ResponseEntity<Map<String, Object>> syncStatus() {
         SyncResult last = syncService.getLastResult();
@@ -235,6 +258,25 @@ public class RestaurantController {
             if (!last.isSuccess()) response.put("error", last.getErrorMessage());
         }
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Top N healthiest restaurants from the Redis sorted set (lowest inspection score).
+     */
+    @Operation(summary = "Top healthiest restaurants", description = "Returns the restaurants with the lowest inspection scores (best health) from the Redis sorted set. Updated on every sync.")
+    @GetMapping("/top")
+    public ResponseEntity<Map<String, Object>> getTop(
+            @Parameter(description = "Number of restaurants to return") @RequestParam(defaultValue = "10") int limit) {
+        try {
+            List<TopRestaurantEntry> data = cacheService.getTopRestaurants(limit);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", data);
+            response.put("count", data.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
     }
 
     private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {

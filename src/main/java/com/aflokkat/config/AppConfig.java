@@ -54,16 +54,42 @@ public class AppConfig {
     }
 
     public static int getNycApiPageSize() {
-        String value = getProperty("nyc.api.page-size", "1000");
-        try { return Integer.parseInt(value); }
-        catch (NumberFormatException e) { return 1000; }
+        return getIntProperty("nyc.api.page-size", 1000);
     }
 
     /** Max total records to fetch. 0 means unlimited. */
     public static int getNycApiMaxRecords() {
-        String value = getProperty("nyc.api.max_records", "0");
+        return getIntProperty("nyc.api.max_records", 0);
+    }
+
+    public static String getRedisHost() {
+        return getProperty("redis.host", "localhost");
+    }
+
+    public static int getRedisPort() {
+        return getIntProperty("redis.port", 6379);
+    }
+
+    /** TTL for cached aggregation results in seconds. Default: 1 hour. */
+    public static long getRedisCacheTtlSeconds() {
+        return getLongProperty("redis.cache.ttl-seconds", 3600L);
+    }
+
+    /** Default limit for the top-restaurants sorted set query. */
+    public static int getRedisTopLimit() {
+        return getIntProperty("redis.top.limit", 10);
+    }
+
+    private static int getIntProperty(String key, int defaultValue) {
+        String value = getProperty(key, String.valueOf(defaultValue));
         try { return Integer.parseInt(value); }
-        catch (NumberFormatException e) { return 0; }
+        catch (NumberFormatException e) { return defaultValue; }
+    }
+
+    private static long getLongProperty(String key, long defaultValue) {
+        String value = getProperty(key, String.valueOf(defaultValue));
+        try { return Long.parseLong(value); }
+        catch (NumberFormatException e) { return defaultValue; }
     }
 
     private static String getProperty(String key, String defaultValue) {

@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.aflokkat.cache.RestaurantCacheService;
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.domain.Restaurant;
 
@@ -25,6 +26,9 @@ class SyncServiceTest {
 
     @Mock
     private RestaurantDAO restaurantDAO;
+
+    @Mock
+    private RestaurantCacheService cacheService;
 
     @InjectMocks
     private SyncService syncService;
