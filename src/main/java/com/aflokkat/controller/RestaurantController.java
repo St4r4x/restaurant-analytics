@@ -244,8 +244,14 @@ public class RestaurantController {
     @Operation(summary = "Last sync status", description = "Returns the result of the most recent data sync, or a never_run status if no sync has been executed.")
     @GetMapping("/sync-status")
     public ResponseEntity<Map<String, Object>> syncStatus() {
-        SyncResult last = syncService.getLastResult();
         Map<String, Object> response = new HashMap<>();
+        if (syncService.isRunning()) {
+            response.put("status", "running");
+            response.put("startedAt", syncService.getRunningStartedAt());
+            response.put("message", "Sync in progress");
+            return ResponseEntity.ok(response);
+        }
+        SyncResult last = syncService.getLastResult();
         if (last == null) {
             response.put("status", "never_run");
             response.put("message", "No sync has been executed yet");

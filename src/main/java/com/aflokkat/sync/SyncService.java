@@ -39,6 +39,8 @@ public class SyncService {
     private final RestaurantCacheService cacheService;
 
     private volatile SyncResult lastResult;
+    private volatile boolean running = false;
+    private volatile Instant runningStartedAt;
 
     @Autowired
     public SyncService(NycOpenDataClient apiClient, RestaurantDAO restaurantDAO,
@@ -64,6 +66,8 @@ public class SyncService {
      */
     public SyncResult runSync() {
         Instant start = Instant.now();
+        running = true;
+        runningStartedAt = start;
         try {
             List<NycApiRestaurantDto> rawRecords = apiClient.fetchAll();
             List<Restaurant> restaurants = mapToRestaurants(rawRecords);
@@ -81,6 +85,7 @@ public class SyncService {
                     .build();
 
             lastResult = result;
+            running = false;
             logger.info("Sync complete: {}", result);
             return result;
 
@@ -95,10 +100,14 @@ public class SyncService {
                     .build();
 
             lastResult = result;
+            running = false;
             logger.error("Sync failed: {}", e.getMessage(), e);
             return result;
         }
     }
+
+    public boolean isRunning() { return running; }
+    public Instant getRunningStartedAt() { return runningStartedAt; }
 
     /**
      * Returns the result of the last sync, or null if no sync has run yet.
