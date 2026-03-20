@@ -33,9 +33,10 @@ class SyncServiceTest {
 
     @Test
     void mapToRestaurants_groupsRowsByCamis() {
-        NycApiRestaurantDto r1a = row("111", "Pizza Place", "MANHATTAN", "A", "10");
-        NycApiRestaurantDto r1b = row("111", "Pizza Place", "MANHATTAN", "B", "25");
-        NycApiRestaurantDto r2  = row("222", "Sushi Bar",   "BROOKLYN",  "A", "8");
+        // Two rows for same restaurant but different inspection dates → 2 grades
+        NycApiRestaurantDto r1a = row("111", "Pizza Place", "MANHATTAN", "A", "10", "2024-01-01T00:00:00.000");
+        NycApiRestaurantDto r1b = row("111", "Pizza Place", "MANHATTAN", "B", "25", "2023-06-15T00:00:00.000");
+        NycApiRestaurantDto r2  = row("222", "Sushi Bar",   "BROOKLYN",  "A", "8",  "2024-01-01T00:00:00.000");
 
         List<Restaurant> result = syncService.mapToRestaurants(Arrays.asList(r1a, r1b, r2));
 
@@ -43,6 +44,18 @@ class SyncServiceTest {
         Restaurant pizza = result.stream().filter(r -> "111".equals(r.getRestaurantId())).findFirst().orElse(null);
         assertNotNull(pizza);
         assertEquals(2, pizza.getGrades().size());
+    }
+
+    @Test
+    void mapToRestaurants_deduplicatesGradesByDate() {
+        // Two rows for same restaurant and same date → only 1 grade (same inspection, multiple violations)
+        NycApiRestaurantDto r1a = row("333", "Dup Restaurant", "MANHATTAN", "B", "20", "2024-01-01T00:00:00.000");
+        NycApiRestaurantDto r1b = row("333", "Dup Restaurant", "MANHATTAN", "B", "20", "2024-01-01T00:00:00.000");
+
+        List<Restaurant> result = syncService.mapToRestaurants(Arrays.asList(r1a, r1b));
+
+        assertEquals(1, result.size());
+        assertEquals(1, result.get(0).getGrades().size());
     }
 
     @Test
@@ -129,13 +142,17 @@ class SyncServiceTest {
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private NycApiRestaurantDto row(String camis, String name, String boro, String grade, String score) {
+        return row(camis, name, boro, grade, score, "2024-01-01T00:00:00.000");
+    }
+
+    private NycApiRestaurantDto row(String camis, String name, String boro, String grade, String score, String date) {
         NycApiRestaurantDto dto = new NycApiRestaurantDto();
         dto.setCamis(camis);
         dto.setDba(name);
         dto.setBoro(boro);
         dto.setGrade(grade);
         dto.setScore(score);
-        dto.setInspectionDate("2024-01-01T00:00:00.000");
+        dto.setInspectionDate(date);
         dto.setCuisineDescription("American");
         return dto;
     }

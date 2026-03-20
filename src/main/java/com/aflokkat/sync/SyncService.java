@@ -3,9 +3,11 @@ package com.aflokkat.sync;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,12 +114,19 @@ public class SyncService {
 
         List<Restaurant> result = new ArrayList<>(byId.size());
         for (Map.Entry<String, List<NycApiRestaurantDto>> entry : byId.entrySet()) {
+            NycApiRestaurantDto first = entry.getValue().get(0);
+            // Skip incomplete records (no name or no cuisine — placeholder inspections)
+            if (first.getDba() == null || first.getDba().isEmpty()
+                    || first.getCuisineDescription() == null || first.getCuisineDescription().isEmpty()) {
+                continue;
+            }
             result.add(buildRestaurant(entry.getKey(), entry.getValue()));
         }
         return result;
     }
 
     private Restaurant buildRestaurant(String camis, List<NycApiRestaurantDto> rows) {
+        if (rows.isEmpty()) throw new IllegalArgumentException("rows must not be empty for camis=" + camis);
         NycApiRestaurantDto first = rows.get(0);
 
         Restaurant r = new Restaurant();
@@ -137,16 +146,24 @@ public class SyncService {
             addr.setCoord(Arrays.asList(lon, lat)); // GeoJSON: [lng, lat]
         }
 
+        r.setPhone(first.getPhone());
         r.setAddress(addr);
 
+        // One Grade per inspection date — rows share the same date for multiple violations
         List<Grade> grades = new ArrayList<>();
+        Set<String> seenDates = new HashSet<>();
         for (NycApiRestaurantDto row : rows) {
             if (row.getInspectionDate() == null) continue;
-            Grade grade = new Grade(
-                    row.getInspectionDate(),
-                    row.getGrade(),
-                    parseInteger(row.getScore())
-            );
+            if (!seenDates.add(row.getInspectionDate())) continue;
+            Grade grade = new Grade();
+            grade.setDate(row.getInspectionDate());
+            grade.setGrade(row.getGrade());
+            grade.setScore(parseInteger(row.getScore()));
+            grade.setInspectionType(row.getInspectionType());
+            grade.setAction(row.getAction());
+            grade.setViolationCode(row.getViolationCode());
+            grade.setViolationDescription(row.getViolationDescription());
+            grade.setCriticalFlag(row.getCriticalFlag());
             grades.add(grade);
         }
         r.setGrades(grades);

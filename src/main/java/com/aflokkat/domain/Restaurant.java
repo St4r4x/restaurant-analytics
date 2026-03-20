@@ -24,6 +24,9 @@ public class Restaurant {
     @BsonProperty("address")
     private Address address;
 
+    @BsonProperty("phone")
+    private String phone;
+
     @BsonProperty("grades")
     private List<Grade> grades;
 
@@ -77,6 +80,9 @@ public class Restaurant {
 
     public String getRestaurantId() { return restaurantId; }
     public void setRestaurantId(String restaurantId) { this.restaurantId = restaurantId; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
     public List<Grade> getGrades() { return grades; }
     public void setGrades(List<Grade> grades) { this.grades = grades; }
