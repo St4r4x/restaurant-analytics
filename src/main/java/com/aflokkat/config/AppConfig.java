@@ -66,6 +66,31 @@ public class AppConfig {
         catch (NumberFormatException e) { return 0; }
     }
 
+
+    public static String getRedisHost() {
+        return getProperty("redis.host", "localhost");
+    }
+
+    public static int getRedisPort() {
+        String value = getProperty("redis.port", "6379");
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 6379; }
+    }
+
+    /** TTL for cached aggregation results in seconds. Default: 1 hour. */
+    public static long getRedisCacheTtlSeconds() {
+        String value = getProperty("redis.cache.ttl-seconds", "3600");
+        try { return Long.parseLong(value); }
+        catch (NumberFormatException e) { return 3600L; }
+    }
+
+    /** Default limit for the top-restaurants sorted set query. */
+    public static int getRedisTopLimit() {
+        String value = getProperty("redis.top.limit", "10");
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 10; }
+    }
+
     private static String getProperty(String key, String defaultValue) {
         // 1. Variable d'environnement système (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();

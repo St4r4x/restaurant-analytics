@@ -10,11 +10,15 @@ services:
       MONGODB_URI: mongodb://mongodb:27017
       MONGODB_DATABASE: newyork
       MONGODB_COLLECTION: restaurants
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     restart: unless-stopped
     networks:
       - restaurant-network
     depends_on:
       mongodb:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test:
@@ -39,6 +43,20 @@ services:
       - ./init-restaurants.js:/docker-entrypoint-initdb.d/init-restaurants.js:ro
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - restaurant-network
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

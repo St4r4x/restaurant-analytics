@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.aflokkat.cache.RestaurantCacheService;
 import com.aflokkat.aggregation.AggregationCount;
 import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
+import com.aflokkat.dto.TopRestaurantEntry;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.service.RestaurantService;
 import com.aflokkat.sync.SyncResult;
@@ -34,6 +36,9 @@ public class RestaurantController {
 
     @Autowired
     private SyncService syncService;
+
+    @Autowired
+    private RestaurantCacheService cacheService;
     
     /**
      * USE CASE 1: Nombre de restaurants par quartier
@@ -41,7 +46,10 @@ public class RestaurantController {
     @GetMapping("/by-borough")
     public ResponseEntity<Map<String, Object>> getByBorough() {
         try {
-            List<AggregationCount> data = restaurantService.getRestaurantCountByBorough();
+            List<AggregationCount> data = cacheService.getOrLoad(
+                    RestaurantCacheService.KEY_BY_BOROUGH,
+                    restaurantService::getRestaurantCountByBorough,
+                    new com.fasterxml.jackson.core.type.TypeReference<List<AggregationCount>>() {});
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);
@@ -59,7 +67,10 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Object>> getCuisineScores(
             @RequestParam(defaultValue = "Italian") String cuisine) {
         try {
-            List<BoroughCuisineScore> data = restaurantService.getAverageScoreByCuisineAndBorough(cuisine);
+            List<BoroughCuisineScore> data = cacheService.getOrLoad(
+                    RestaurantCacheService.KEY_CUISINE_SCORES_PREFIX + cuisine,
+                    () -> restaurantService.getAverageScoreByCuisineAndBorough(cuisine),
+                    new com.fasterxml.jackson.core.type.TypeReference<List<BoroughCuisineScore>>() {});
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("cuisine", cuisine);
@@ -79,7 +90,10 @@ public class RestaurantController {
             @RequestParam(defaultValue = "Manhattan") String borough,
             @RequestParam(defaultValue = "5") int limit) {
         try {
-            List<CuisineScore> data = restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit);
+            List<CuisineScore> data = cacheService.getOrLoad(
+                    RestaurantCacheService.KEY_WORST_CUISINES_PREFIX + borough + ":" + limit,
+                    () -> restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit),
+                    new com.fasterxml.jackson.core.type.TypeReference<List<CuisineScore>>() {});
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("borough", borough);
@@ -237,7 +251,25 @@ public class RestaurantController {
         return ResponseEntity.ok(response);
     }
 
-    private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
+    /**
+     * Top N healthiest restaurants from the Redis sorted set (lowest inspection score).
+     */
+    @GetMapping("/top")
+    public ResponseEntity<Map<String, Object>> getTop(
+            @RequestParam(defaultValue = "10") int limit) {
+        try {
+            List<TopRestaurantEntry> data = cacheService.getTopRestaurants(limit);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", data);
+            response.put("count", data.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+        private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
         int status = (e instanceof IllegalArgumentException) ? 400 : 500;
         Map<String, Object> response = new HashMap<>();
         response.put("status", "error");

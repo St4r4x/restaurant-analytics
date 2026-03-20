@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.aflokkat.cache.RestaurantCacheService;
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.domain.Address;
 import com.aflokkat.domain.Grade;
@@ -38,10 +39,18 @@ public class SyncService {
 
     private volatile SyncResult lastResult;
 
+    // Optional: null when Redis is not configured
+    private RestaurantCacheService cacheService;
+
     @Autowired
     public SyncService(NycOpenDataClient apiClient, RestaurantDAO restaurantDAO) {
         this.apiClient = apiClient;
         this.restaurantDAO = restaurantDAO;
+    }
+
+    @Autowired(required = false)
+    public void setCacheService(RestaurantCacheService cacheService) {
+        this.cacheService = cacheService;
     }
 
     /**
@@ -64,6 +73,11 @@ public class SyncService {
             List<NycApiRestaurantDto> rawRecords = apiClient.fetchAll();
             List<Restaurant> restaurants = mapToRestaurants(rawRecords);
             restaurantDAO.upsertRestaurants(restaurants);
+
+            if (cacheService != null) {
+                cacheService.invalidateAll();
+                cacheService.updateTopRestaurants(restaurants);
+            }
 
             SyncResult result = SyncResult.builder()
                     .startedAt(start)
