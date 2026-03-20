@@ -27,8 +27,10 @@ public class AuthController {
         try {
             JwtResponse response = authService.register(request);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(errorResponse(e));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(errorResponse(e));
         }
     }
 
@@ -37,8 +39,10 @@ public class AuthController {
         try {
             JwtResponse response = authService.login(request);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(errorResponse(e));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(errorResponse(e));
         }
     }
 
@@ -47,8 +51,10 @@ public class AuthController {
         try {
             JwtResponse response = authService.refresh(request.getRefreshToken());
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(errorResponse(e));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(errorResponse(e));
         }
     }
 

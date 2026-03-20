@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Restaurant Analytics - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
       * {
         margin: 0;
@@ -311,6 +313,79 @@
         }
       }
 
+      /* Top Restaurants */
+      .top-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding: 2px;
+      }
+
+      .top-list::-webkit-scrollbar { width: 6px; }
+      .top-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+      .top-list::-webkit-scrollbar-thumb { background: #667eea; border-radius: 10px; }
+
+      .top-restaurant-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: #f8f9ff;
+        border-radius: 8px;
+        padding: 10px 12px;
+        border-left: 4px solid #43e97b;
+      }
+
+      .top-restaurant-info { flex: 1; min-width: 0; }
+      .top-restaurant-name { font-weight: 600; font-size: 0.9em; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .top-restaurant-meta { font-size: 0.78em; color: #888; margin-top: 2px; }
+      .top-restaurant-score { font-size: 0.8em; font-weight: 700; color: #43e97b; white-space: nowrap; }
+
+      .btn-bookmark {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.25em;
+        padding: 2px 4px;
+        line-height: 1;
+        color: #ccc;
+        transition: color 0.2s ease, transform 0.15s ease;
+      }
+      .btn-bookmark:hover { color: #f5a623; transform: scale(1.2); }
+      .btn-bookmark.bookmarked { color: #f5a623; }
+      .btn-bookmark:active { transform: scale(0.95); }
+
+      .btn-view {
+        font-size: 0.75em;
+        padding: 3px 8px;
+        background: #f0f2ff;
+        color: #667eea;
+        border: 1px solid #c5caf7;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background 0.15s;
+        cursor: pointer;
+      }
+      .btn-view:hover { background: #e0e4ff; }
+
+      /* Nearby map */
+      #nearby-map { height: 300px; border-radius: 8px; margin-top: 8px; }
+
+      /* Recent inspections list */
+      .recent-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; padding: 2px; }
+      .recent-item {
+        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: #f8f9ff; border-radius: 6px; padding: 8px 12px;
+        border-left: 4px solid #667eea;
+      }
+      .recent-item-info { flex: 1; min-width: 0; }
+      .recent-item-name { font-weight: 600; font-size: 0.88em; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .recent-item-meta { font-size: 0.76em; color: #888; margin-top: 2px; }
+
       /* API Reference */
       .api-section { margin-bottom: 30px; }
       .api-section > h2 { color: white; font-size: 1.2em; margin-bottom: 14px; opacity: 0.95; }
@@ -385,7 +460,9 @@
       <header>
         <h1>Restaurant Analytics</h1>
         <p>Analyse interactive des restaurants de New York</p>
-        <a href="/trash-advisor" class="nav-link">Trash Advisor →</a>
+        <a href="/hygiene-radar" class="nav-link">Hygiene Radar →</a>
+        <a href="/inspection-map" class="nav-link" id="inspectionMapLink" style="display:none">Carte Violations →</a>
+        <a href="/inspection" class="nav-link" id="inspectionLink" style="display:none">Agents →</a>
         <button
           class="nav-link"
           id="logoutBtn"
@@ -521,6 +598,70 @@
         </div>
       </div>
 
+      <!-- Top Restaurants + Bookmarks -->
+      <div class="dashboard-wide">
+        <!-- Top healthiest restaurants -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Top Restaurants Sains</h2>
+            <div class="controls">
+              <input type="number" id="top-limit" value="10" min="1" max="50" />
+              <button onclick="loadTopRestaurants()">Charger</button>
+              <button id="rebuild-cache-btn" onclick="rebuildCache()" style="display:none;background:#7c3aed;font-size:0.8em">🔄 Reconstruire le cache</button>
+            </div>
+          </div>
+          <div class="card-content" id="top-restaurants-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+          </div>
+        </div>
+
+        <!-- Bookmarks -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Mes Favoris</h2>
+            <button onclick="loadBookmarks()">Actualiser</button>
+          </div>
+          <div class="card-content" id="bookmarks-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Connectez-vous pour voir vos favoris</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inspections récentes + Autour de moi -->
+      <div class="dashboard-wide">
+        <!-- Inspections récentes -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Inspections Récentes</h2>
+            <div class="controls">
+              <label style="font-size:0.85em;color:#666">Derniers</label>
+              <input type="number" id="recent-days" value="3650" min="1" style="width:80px" />
+              <label style="font-size:0.85em;color:#666">jours</label>
+              <button onclick="loadRecentInspections()">Charger</button>
+            </div>
+          </div>
+          <div class="card-content" id="recent-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+          </div>
+        </div>
+
+        <!-- Autour de moi -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Autour de Moi</h2>
+            <div class="controls">
+              <input type="number" id="nearby-radius" value="500" min="100" max="5000" style="width:80px" />
+              <label style="font-size:0.85em;color:#666">m</label>
+              <button onclick="loadNearby()">📍 Localiser</button>
+            </div>
+          </div>
+          <div id="nearby-map" style="display:none"></div>
+          <div class="card-content" id="nearby-content">
+            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Localiser</p>
+          </div>
+        </div>
+      </div>
+
       <!-- UC4 + Stats (full width row) -->
       <div class="dashboard-wide">
         <!-- UC4: Cuisines populaires -->
@@ -621,10 +762,10 @@
               <span class="api-desc">Statistiques globales</span>
             </div>
           </a>
-          <a href="/api/restaurants/trash-advisor?limit=25" target="_blank" class="api-link">
+          <a href="/api/restaurants/hygiene-radar?limit=25" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
-              <span class="api-path">/api/restaurants/trash-advisor?limit=25</span>
+              <span class="api-path">/api/restaurants/hygiene-radar?limit=25</span>
               <span class="api-desc">Restaurants des cuisines les plus risquées</span>
             </div>
           </a>
@@ -1113,6 +1254,289 @@
         localStorage.removeItem("refreshToken");
         window.location.href = "/login";
       });
+
+      // ---- BOOKMARKS ----
+
+      let bookmarkedIds = new Set();
+
+      function loadBookmarkedIds() {
+        if (!localStorage.getItem("accessToken")) return;
+        fetchWithAuth("/api/users/me/bookmarks")
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") {
+              bookmarkedIds = new Set((data.data || []).map((r) => r.restaurantId));
+              refreshBookmarkButtons();
+            }
+          })
+          .catch(() => {});
+      }
+
+      function refreshBookmarkButtons() {
+        document.querySelectorAll(".btn-bookmark").forEach((btn) => {
+          const id = btn.dataset.id;
+          if (bookmarkedIds.has(id)) {
+            btn.classList.add("bookmarked");
+            btn.title = "Retirer des favoris";
+          } else {
+            btn.classList.remove("bookmarked");
+            btn.title = "Ajouter aux favoris";
+          }
+        });
+      }
+
+      function toggleBookmark(restaurantId, btn) {
+        const isBookmarked = bookmarkedIds.has(restaurantId);
+        const method = isBookmarked ? "DELETE" : "POST";
+        fetchWithAuth(`/api/users/me/bookmarks/${restaurantId}`, { method })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") {
+              if (isBookmarked) {
+                bookmarkedIds.delete(restaurantId);
+              } else {
+                bookmarkedIds.add(restaurantId);
+              }
+              refreshBookmarkButtons();
+              if (document.getElementById("bookmarks-content")) loadBookmarks();
+            }
+          })
+          .catch(() => {});
+      }
+
+      function loadTopRestaurants() {
+        const limit = document.getElementById("top-limit").value || 10;
+        setLoading("top-restaurants-content");
+        fetchWithAuth(`${API_BASE}/top?limit=${limit}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") renderTopRestaurants(data.data);
+            else setError("top-restaurants-content", data.message);
+          })
+          .catch((e) => setError("top-restaurants-content", e.message));
+      }
+
+      function renderTopRestaurants(data) {
+        const content = document.getElementById("top-restaurants-content");
+        if (!data || data.length === 0) {
+          content.innerHTML = '<p class="error">Aucune donnée (le cache Redis est peut-être vide, lancez un sync)</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "top-list";
+        data.forEach((r) => {
+          const item = document.createElement("div");
+          item.className = "top-restaurant-item";
+          item.innerHTML = `
+            <div class="top-restaurant-info">
+              <div class="top-restaurant-name">${r.name || "—"}</div>
+              <div class="top-restaurant-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <span class="top-restaurant-score">Score ${r.latestScore}</span>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+            <button class="btn-bookmark" data-id="${r.restaurantId}"
+              onclick="toggleBookmark('${r.restaurantId}', this)" title="Ajouter aux favoris">★</button>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+        refreshBookmarkButtons();
+      }
+
+      function loadBookmarks() {
+        if (!localStorage.getItem("accessToken")) return;
+        setLoading("bookmarks-content");
+        fetchWithAuth("/api/users/me/bookmarks")
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") renderBookmarks(data.data);
+            else setError("bookmarks-content", data.message);
+          })
+          .catch((e) => setError("bookmarks-content", e.message));
+      }
+
+      function renderBookmarks(data) {
+        const content = document.getElementById("bookmarks-content");
+        if (!data || data.length === 0) {
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">Aucun favori enregistré</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "top-list";
+        data.forEach((r) => {
+          const item = document.createElement("div");
+          item.className = "top-restaurant-item";
+          item.style.borderLeftColor = "#667eea";
+          item.innerHTML = `
+            <div class="top-restaurant-info">
+              <div class="top-restaurant-name">${r.name || r.restaurantId}</div>
+              <div class="top-restaurant-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+            <button class="btn-bookmark bookmarked" data-id="${r.restaurantId}"
+              onclick="toggleBookmark('${r.restaurantId}', this)" title="Retirer des favoris">★</button>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+      }
+
+      // ---- RECENT INSPECTIONS ----
+      function loadRecentInspections() {
+        const days = document.getElementById("recent-days").value || 3650;
+        setLoading("recent-content");
+        fetchWithAuth(`${API_BASE}/recent-inspections?days=${days}&limit=15`)
+          .then(r => r.json())
+          .then(data => {
+            if (data.status === "success") renderRecentInspections(data.data);
+            else setError("recent-content", data.message);
+          })
+          .catch(e => setError("recent-content", e.message));
+      }
+
+      function renderRecentInspections(data) {
+        const content = document.getElementById("recent-content");
+        if (!data || data.length === 0) {
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">Aucune inspection trouvée</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "recent-list";
+        data.forEach(r => {
+          const item = document.createElement("div");
+          item.className = "recent-item";
+          item.innerHTML = `
+            <div class="recent-item-info">
+              <div class="recent-item-name">${r.name || r.restaurantId}</div>
+              <div class="recent-item-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+      }
+
+      // ---- NEARBY ----
+      let nearbyMap = null;
+      let nearbyLayer = null;
+
+      function loadNearby() {
+        if (!navigator.geolocation) {
+          setError("nearby-content", "Géolocalisation non supportée par ce navigateur");
+          return;
+        }
+        setLoading("nearby-content");
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const { latitude: lat, longitude: lng } = pos.coords;
+            const radius = document.getElementById("nearby-radius").value || 500;
+            fetchWithAuth(`${API_BASE}/nearby?lat=${lat}&lng=${lng}&radius=${radius}&limit=20`)
+              .then(r => r.json())
+              .then(data => {
+                if (data.status === "success") renderNearby(data.data, lat, lng);
+                else setError("nearby-content", data.message);
+              })
+              .catch(e => setError("nearby-content", e.message));
+          },
+          err => setError("nearby-content", "Impossible d'obtenir la position: " + err.message)
+        );
+      }
+
+      function renderNearby(data, userLat, userLng) {
+        const mapDiv = document.getElementById("nearby-map");
+        const content = document.getElementById("nearby-content");
+        mapDiv.style.display = "block";
+
+        if (!nearbyMap) {
+          nearbyMap = L.map("nearby-map").setView([userLat, userLng], 15);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap contributors", maxZoom: 18
+          }).addTo(nearbyMap);
+        } else {
+          nearbyMap.setView([userLat, userLng], 15);
+          if (nearbyLayer) nearbyMap.removeLayer(nearbyLayer);
+        }
+
+        // User marker
+        L.marker([userLat, userLng], {
+          icon: L.divIcon({
+            className: "",
+            html: '<div style="width:16px;height:16px;background:#667eea;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
+            iconSize: [16, 16], iconAnchor: [8, 8]
+          })
+        }).addTo(nearbyMap).bindPopup("Ma position");
+
+        nearbyLayer = L.featureGroup().addTo(nearbyMap);
+        data.forEach(r => {
+          if (r.latitude && r.longitude) {
+            L.marker([r.latitude, r.longitude])
+              .bindPopup(`<strong>${r.name}</strong><br>${r.cuisine}<br><a href="/restaurant/${r.restaurantId}">Voir la fiche</a>`)
+              .addTo(nearbyLayer);
+          }
+        });
+
+        if (data.length === 0) {
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:8px">Aucun restaurant trouvé à proximité</p>';
+          return;
+        }
+        const list = document.createElement("div");
+        list.className = "recent-list";
+        list.style.marginTop = "10px";
+        data.forEach(r => {
+          const item = document.createElement("div");
+          item.className = "recent-item";
+          item.innerHTML = `
+            <div class="recent-item-info">
+              <div class="recent-item-name">${r.name || r.restaurantId}</div>
+              <div class="recent-item-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
+            </div>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+          `;
+          list.appendChild(item);
+        });
+        content.innerHTML = "";
+        content.appendChild(list);
+      }
+
+      // Show admin links if ROLE_ADMIN
+      (function checkAdminLinks() {
+        const t = localStorage.getItem("accessToken");
+        if (!t) return;
+        try {
+          const payload = JSON.parse(atob(t.split(".")[1]));
+          if (payload.role === "ROLE_ADMIN") {
+            document.getElementById("inspectionMapLink").style.display = "inline-block";
+            document.getElementById("inspectionLink").style.display = "inline-block";
+            document.getElementById("rebuild-cache-btn").style.display = "inline-block";
+          }
+        } catch {}
+      })();
+
+      function rebuildCache() {
+        const btn = document.getElementById("rebuild-cache-btn");
+        btn.disabled = true;
+        btn.textContent = "⏳ En cours...";
+        fetchWithAuth(`${API_BASE}/rebuild-cache`, { method: "POST" })
+          .then(r => r.json())
+          .then(data => {
+            if (data.status === "success") {
+              btn.textContent = "✅ Cache reconstruit";
+              setTimeout(() => { btn.textContent = "🔄 Reconstruire le cache"; btn.disabled = false; }, 3000);
+              loadTopRestaurants();
+            } else {
+              btn.textContent = "❌ Erreur";
+              btn.disabled = false;
+            }
+          })
+          .catch(() => { btn.textContent = "❌ Erreur réseau"; btn.disabled = false; });
+      }
+
+      // Load bookmarked IDs on page load
+      loadBookmarkedIds();
     </script>
   </body>
 </html>

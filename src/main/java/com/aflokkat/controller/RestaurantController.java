@@ -6,8 +6,10 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +22,8 @@ import com.aflokkat.cache.RestaurantCacheService;
 import com.aflokkat.aggregation.AggregationCount;
 import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
+import com.aflokkat.dao.RestaurantDAO;
+import com.aflokkat.dto.HeatmapPoint;
 import com.aflokkat.dto.TopRestaurantEntry;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.service.RestaurantService;
@@ -37,6 +41,9 @@ public class RestaurantController {
 
     @Autowired
     private RestaurantService restaurantService;
+
+    @Autowired
+    private RestaurantDAO restaurantDAO;
 
     @Autowired
     private SyncService syncService;
@@ -156,18 +163,18 @@ public class RestaurantController {
     }
 
     /**
-     * TRASH ADVISOR: Obtient les pires restaurants avec leurs coordonnées GPS
+     * HYGIENE RADAR: Obtient les pires restaurants avec leurs coordonnées GPS
      */
-    @Operation(summary = "Trash Advisor", description = "Returns restaurants from the worst-scoring cuisines, optionally filtered by borough, cuisine and max score. Useful for finding the most violation-prone establishments.")
-    @GetMapping("/trash-advisor")
-    public ResponseEntity<Map<String, Object>> getTrashAdvisor(
+    @Operation(summary = "Hygiene Radar", description = "Returns restaurants from the worst-scoring cuisines, optionally filtered by borough, cuisine and max score. Useful for finding the most violation-prone establishments.")
+    @GetMapping("/hygiene-radar")
+    public ResponseEntity<Map<String, Object>> getHygieneRadar(
             @RequestParam(required = false) String borough,
             @RequestParam(defaultValue = "100") int limit,
             @RequestParam(required = false) Double maxScore,
             @RequestParam(defaultValue = "25") int restaurantLimit,
             @RequestParam(required = false) String cuisine) {
         try {
-            List<Restaurant> restaurants = restaurantService.getTrashAdvisorRestaurants(borough, limit, maxScore, restaurantLimit, cuisine);
+            List<Restaurant> restaurants = restaurantService.getHygieneRadarRestaurants(borough, limit, maxScore, restaurantLimit, cuisine);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("borough", borough);
@@ -220,6 +227,7 @@ public class RestaurantController {
      * Triggers a manual data sync from the NYC Open Data API.
      */
     @Operation(summary = "Trigger manual data sync", description = "Fetches fresh data from the NYC Open Data API, upserts into MongoDB, and invalidates the Redis cache. Returns the sync result with record counts.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, Object>> refresh() {
         try {
@@ -242,6 +250,7 @@ public class RestaurantController {
      * Returns the status of the last data sync.
      */
     @Operation(summary = "Last sync status", description = "Returns the result of the most recent data sync, or a never_run status if no sync has been executed.")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/sync-status")
     public ResponseEntity<Map<String, Object>> syncStatus() {
         Map<String, Object> response = new HashMap<>();
@@ -298,6 +307,99 @@ public class RestaurantController {
             }
             response.put("status", "success");
             response.put("data", data);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Restaurant detail", description = "Returns the full document for a single restaurant, including all grades and computed badge fields.")
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<Map<String, Object>> getById(@PathVariable String restaurantId) {
+        try {
+            Restaurant data = restaurantDAO.findByRestaurantId(restaurantId);
+            Map<String, Object> response = new HashMap<>();
+            if (data == null) {
+                response.put("status", "error");
+                response.put("message", "Restaurant not found: " + restaurantId);
+                return ResponseEntity.status(404).body(response);
+            }
+            response.put("status", "success");
+            response.put("data", data);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Recently inspected restaurants", description = "Returns restaurants that had at least one inspection in the last N days.")
+    @GetMapping("/recent-inspections")
+    public ResponseEntity<Map<String, Object>> getRecentInspections(
+            @RequestParam(defaultValue = "3650") int days,
+            @RequestParam(defaultValue = "20") int limit) {
+        try {
+            List<Restaurant> data = restaurantDAO.findRecentlyInspected(days, limit);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("days", days);
+            response.put("data", data);
+            response.put("count", data.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Nearby restaurants", description = "Returns restaurants within the given radius (meters) around the provided coordinates. Requires a 2dsphere index.")
+    @GetMapping("/nearby")
+    public ResponseEntity<Map<String, Object>> getNearby(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "500") int radius,
+            @RequestParam(defaultValue = "20") int limit) {
+        try {
+            List<Restaurant> data = restaurantDAO.findNearby(lat, lng, radius, limit);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", data);
+            response.put("count", data.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Heatmap data", description = "Returns lat/lng/weight points for the violation heatmap overlay. Admin only.")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/heatmap")
+    public ResponseEntity<Map<String, Object>> getHeatmap(
+            @RequestParam(required = false) String borough,
+            @RequestParam(defaultValue = "500") int limit) {
+        try {
+            List<HeatmapPoint> data = restaurantDAO.getHeatmapData(borough, limit);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", data);
+            response.put("count", data.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Rebuild Redis cache from MongoDB", description = "Reads all restaurants from MongoDB and repopulates the Redis leaderboard sorted set. Use when Redis is empty after a restart. Admin only.")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/rebuild-cache")
+    public ResponseEntity<Map<String, Object>> rebuildCache(
+            @RequestParam(defaultValue = "25000") int limit) {
+        try {
+            List<Restaurant> restaurants = restaurantDAO.findAll(limit);
+            cacheService.invalidateAll();
+            cacheService.updateTopRestaurants(restaurants);
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("restaurantsProcessed", restaurants.size());
+            response.put("message", "Cache rebuilt successfully");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return errorResponse(e);

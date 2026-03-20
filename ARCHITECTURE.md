@@ -15,11 +15,13 @@ and served through a Redis cache layer.
 | Language | Java | 11 |
 | Framework | Spring Boot | 2.6.15 |
 | Primary DB | MongoDB (driver-sync) | 4.x |
+| Relational DB | PostgreSQL + Spring Data JPA | 15 |
 | Cache / Leaderboard | Redis (Lettuce) | 7-alpine |
+| Security | Spring Security + JJWT | 0.11.5 |
 | API documentation | Springdoc OpenAPI | 1.8.0 |
 | Build | Maven | 3.x |
 | Config | dotenv-java | 3.0.0 |
-| Testing | JUnit 5 + Mockito | 4.x (BOM) |
+| Testing | JUnit 4 + Mockito | 4.x (BOM) |
 | Deployment | Docker / Docker Compose | — |
 
 ---
@@ -38,22 +40,37 @@ com.aflokkat/
 │
 ├── controller/
 │   ├── RestaurantController.java # REST endpoints (/api/restaurants/*)
+│   ├── AuthController.java       # Auth endpoints (/api/auth/*)
 │   └── ViewController.java       # Thymeleaf page routes
 │
 ├── service/
-│   └── RestaurantService.java    # Business logic, delegates to DAO
+│   ├── RestaurantService.java    # Business logic, delegates to DAO
+│   └── AuthService.java          # Register / login / refresh logic
+│
+├── security/
+│   ├── JwtUtil.java              # Token generation, validation, claims extraction
+│   └── JwtAuthenticationFilter.java  # OncePerRequestFilter — sets SecurityContext
 │
 ├── cache/
 │   └── RestaurantCacheService.java  # Redis cache-aside + sorted set
 │
 ├── dao/
 │   ├── RestaurantDAO.java        # Interface
-│   └── RestaurantDAOImpl.java    # MongoDB impl (raw driver, aggregation pipelines)
+│   ├── RestaurantDAOImpl.java    # MongoDB impl (raw driver, aggregation pipelines)
+│   ├── UserDAO.java              # Interface (legacy Mongo user DAO)
+│   └── UserDAOImpl.java          # MongoDB impl
+│
+├── entity/
+│   └── UserEntity.java           # JPA entity — mapped to PostgreSQL `users` table
+│
+├── repository/
+│   └── UserRepository.java       # Spring Data JPA repository
 │
 ├── domain/
 │   ├── Restaurant.java           # Main POJO (BSON-mapped)
 │   ├── Address.java              # Embedded address + GeoJSON coords
-│   └── Grade.java                # Inspection record (date, score, grade letter, violation)
+│   ├── Grade.java                # Inspection record (date, score, grade letter, violation)
+│   └── User.java                 # MongoDB user domain object
 │
 ├── aggregation/
 │   ├── AggregationCount.java     # { id, count } — result of $group by field
@@ -61,7 +78,11 @@ com.aflokkat/
 │   └── CuisineScore.java         # { cuisine, avgScore, count }
 │
 ├── dto/
-│   └── TopRestaurantEntry.java   # Lightweight Redis sorted-set snapshot
+│   ├── TopRestaurantEntry.java   # Lightweight Redis sorted-set snapshot
+│   ├── AuthRequest.java          # { username, password }
+│   ├── RegisterRequest.java      # { username, email, password }
+│   ├── RefreshRequest.java       # { refreshToken }
+│   └── JwtResponse.java          # { accessToken, refreshToken }
 │
 ├── sync/
 │   ├── NycOpenDataClient.java    # Paginated HTTP client (RestTemplate, exp. backoff)
@@ -115,6 +136,52 @@ RestaurantController
                └──► RestaurantCacheService.getTopRestaurants(limit)
                          └──► Redis ZRANGE restaurants:top 0 N-1
 ```
+
+---
+
+## Authentication Flow
+
+```
+POST /api/auth/register  or  POST /api/auth/login
+           │
+      AuthController
+           │
+      AuthService
+       ├── validate inputs (ValidationUtil)
+       ├── BCrypt hash / match password
+       ├── load / save UserEntity via UserRepository (PostgreSQL)
+       └── JwtUtil.generateAccessToken()  +  generateRefreshToken()
+                │
+         JwtResponse { accessToken (15min), refreshToken (7d) }
+
+──────────────────────────────────────────────────────────────────
+Every subsequent request:
+
+  Authorization: Bearer <accessToken>
+           │
+  JwtAuthenticationFilter (OncePerRequestFilter)
+           │
+  JwtUtil.getClaimsIfValid(token)
+           ├── valid  → set SecurityContext (username)
+           └── invalid → continue unauthenticated (app currently open)
+```
+
+---
+
+## PostgreSQL Data Model
+
+### Table: `users`
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | BIGSERIAL | PRIMARY KEY |
+| `username` | VARCHAR | UNIQUE NOT NULL |
+| `email` | VARCHAR | UNIQUE NOT NULL |
+| `password_hash` | VARCHAR | NOT NULL (BCrypt) |
+| `role` | VARCHAR | NOT NULL (default `ROLE_USER`) |
+| `created_at` | TIMESTAMP | NOT NULL |
+
+Managed by Spring Data JPA / Hibernate auto-DDL.
 
 ---
 
@@ -200,9 +267,18 @@ All `restaurants:*` keys are deleted on every successful sync.
 | GET | `/api/restaurants/cuisines` | All distinct cuisine types | ❌ |
 | GET | `/api/restaurants/stats` | Total count + borough breakdown | ❌ |
 | GET | `/api/restaurants/trash-advisor` | Restaurants from worst-scoring cuisines | ❌ |
+| GET | `/api/restaurants/random` | Random restaurant ($sample) | ❌ |
 | GET | `/api/restaurants/health` | Health check | ❌ |
 | POST | `/api/restaurants/refresh` | Trigger manual sync (invalidates cache) | — |
-| GET | `/api/restaurants/sync-status` | Last sync result | — |
+| GET | `/api/restaurants/sync-status` | Last sync result + running state | — |
+
+### Auth endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Create account, returns JWT pair |
+| POST | `/api/auth/login` | Authenticate, returns JWT pair |
+| POST | `/api/auth/refresh` | Exchange refresh token for new access token |
 
 Full interactive docs: `http://localhost:8080/swagger-ui/index.html`
 
@@ -225,6 +301,9 @@ All values can be overridden via environment variable (key = `PROPERTY_KEY` in u
 | `nyc.api.app_token` | `NYC_API_APP_TOKEN` | *(empty)* | Socrata app token |
 | `nyc.api.page-size` | `NYC_API_PAGE_SIZE` | `1000` | Records per API page |
 | `nyc.api.max_records` | `NYC_API_MAX_RECORDS` | `0` (unlimited) | Cap on total records |
+| `jwt.secret` | `JWT_SECRET` | *(changeit)* | HMAC-SHA256 signing key |
+| `jwt.access.expiration.ms` | `JWT_ACCESS_EXPIRATION_MS` | `900000` (15min) | Access token TTL |
+| `jwt.refresh.expiration.ms` | `JWT_REFRESH_EXPIRATION_MS` | `604800000` (7d) | Refresh token TTL |
 
 ---
 
@@ -234,18 +313,18 @@ All values can be overridden via environment variable (key = `PROPERTY_KEY` in u
 ┌──────────────────────────────────────────────────────┐
 │  Docker Compose                                       │
 │                                                       │
-│  ┌─────────────┐   ┌─────────────┐  ┌─────────────┐ │
-│  │  restaurant │   │   mongodb   │  │    redis    │ │
-│  │     -app    │──►│  port 27017 │  │  port 6379  │ │
-│  │  port 8080  │──►│             │  │  7-alpine   │ │
-│  └─────────────┘   └─────────────┘  └─────────────┘ │
-│                                                       │
-│  Network: restaurant-network (bridge)                 │
-│  Volumes: mongodb_data                                │
-└──────────────────────────────────────────────────────┘
+│  ┌─────────────┐   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
+│  │  restaurant │   │   mongodb   │  │    redis    │  │  postgres   │ │
+│  │     -app    │──►│  port 27017 │  │  port 6379  │  │  port 5432  │ │
+│  │  port 8080  │──►│             │  │  7-alpine   │  │  pg 15      │ │
+│  └─────────────┘   └─────────────┘  └─────────────┘  └─────────────┘ │
+│                                                                        │
+│  Network: restaurant-network (bridge)                                  │
+│  Volumes: mongodb_data, postgres_data                                  │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-Startup order: `mongodb` (healthy) → `redis` (healthy) → `app`
+Startup order: `mongodb` (healthy) → `redis` (healthy) → `postgres` (healthy) → `app`
 
 ---
 
@@ -255,5 +334,5 @@ Startup order: `mongodb` (healthy) → `redis` (healthy) → `app`
 |---|---|---|
 | 1 | NYC Open Data API sync (paginated, nightly scheduled) | ✅ Done |
 | 2 | Redis cache layer + top-restaurants sorted set | ✅ Done |
-| 3 | User management (JWT auth, roles, bookmarks) | 🔄 In progress (colleague branch) |
-| 4 | Stretch: GraphQL, geospatial, Kafka, Prometheus, CI/CD | ⏳ Planned |
+| 3 | User management (JWT auth, PostgreSQL, BCrypt, refresh tokens) | ✅ Done |
+| 4 | Stretch: geospatial queries, Kafka ingest, Prometheus metrics, CI/CD | ⏳ Planned |

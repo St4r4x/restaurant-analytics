@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trash Advisor - Trouvez les Pires Restaurants de NYC</title>
+    <title>Hygiene Radar - Inspection des Restaurants NYC</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -354,8 +354,8 @@
         <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
 
         <div class="header">
-          <h1><i class="fas fa-skull-crossbones"></i> Trash Advisor</h1>
-          <p>Trouvez les pires restaurants de NYC</p>
+          <h1><i class="fas fa-shield-virus"></i> Hygiene Radar</h1>
+          <p>Inspection des établissements à risque de NYC</p>
         </div>
 
         <div class="error" id="error-message"></div>
@@ -433,14 +433,14 @@
       let allRestaurants = [];
       let currentRestaurants = [];
 
-      function searchTrashAdvisor() {
+      function searchHygieneRadar() {
         const borough = document.getElementById("borough-select").value;
         const cuisine = document.getElementById("cuisine-filter").value;
         const restaurantLimit = parseInt(document.getElementById("restaurant-limit").value) || 25;
         const scoreVal = parseInt(document.getElementById("score-max").value);
         const hasScoreLimit = scoreVal < 100;
 
-        let url = `/api/restaurants/trash-advisor?limit=100&restaurantLimit=${restaurantLimit}`;
+        let url = `/api/restaurants/hygiene-radar?limit=100&restaurantLimit=${restaurantLimit}`;
         if (borough !== "") url += `&borough=${encodeURIComponent(borough)}`;
         if (cuisine !== "") url += `&cuisine=${encodeURIComponent(cuisine)}`;
         if (hasScoreLimit) url += `&maxScore=${scoreVal}`;
@@ -517,12 +517,19 @@
             : "";
           const hasGps = restaurant.latitude && restaurant.longitude;
           div.innerHTML = `
-            <div class="restaurant-name">
-              ${hasGps ? '<i class="fas fa-map-pin" style="font-size:0.85em;margin-right:4px;"></i>' : ''}${restaurant.name}
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+              <div style="flex:1;min-width:0">
+                <div class="restaurant-name">
+                  ${hasGps ? '<i class="fas fa-map-pin" style="font-size:0.85em;margin-right:4px;"></i>' : ''}${restaurant.name}
+                </div>
+                <div class="restaurant-meta">${restaurant.borough}</div>
+                <span class="cuisine-badge">${restaurant.cuisine}</span>
+                ${addr ? `<div class="restaurant-address">${addr}</div>` : ""}
+              </div>
+              <a href="/restaurant/${restaurant.restaurantId}"
+                 style="flex-shrink:0;font-size:0.78em;padding:3px 8px;background:rgba(255,23,68,0.15);color:#ff8a80;border:1px solid rgba(255,23,68,0.4);border-radius:4px;text-decoration:none;font-weight:600;white-space:nowrap"
+                 title="Voir la fiche">Fiche</a>
             </div>
-            <div class="restaurant-meta">${restaurant.borough}</div>
-            <span class="cuisine-badge">${restaurant.cuisine}</span>
-            ${addr ? `<div class="restaurant-address">${addr}</div>` : ""}
           `;
           div.addEventListener("click", () => {
             highlightRestaurant(index);
@@ -650,18 +657,18 @@
         return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
       }
 
-      const debouncedSearch = debounce(searchTrashAdvisor, 400);
+      const debouncedSearch = debounce(searchHygieneRadar, 400);
 
       window.addEventListener("load", () => {
         updateScoreDisplay(100);
         loadAllCuisines();
-        searchTrashAdvisor();
+        searchHygieneRadar();
 
         // Filtres backend → nouvelle recherche
-        document.getElementById("borough-select").addEventListener("change", searchTrashAdvisor);
-        document.getElementById("cuisine-filter").addEventListener("change", searchTrashAdvisor);
+        document.getElementById("borough-select").addEventListener("change", searchHygieneRadar);
+        document.getElementById("cuisine-filter").addEventListener("change", searchHygieneRadar);
         document.getElementById("restaurant-limit").addEventListener("input", debouncedSearch);
-        document.getElementById("score-max").addEventListener("change", searchTrashAdvisor);
+        document.getElementById("score-max").addEventListener("change", searchHygieneRadar);
 
         // GPS uniquement → filtre client-side uniquement
         document.getElementById("gps-only").addEventListener("change", applyGpsFilter);

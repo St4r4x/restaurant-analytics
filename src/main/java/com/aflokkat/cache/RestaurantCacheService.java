@@ -1,5 +1,6 @@
 package com.aflokkat.cache;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +11,10 @@ import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -162,13 +166,23 @@ public class RestaurantCacheService {
 
     /**
      * Deletes all {@code restaurants:*} keys. Called after a successful data sync.
+     * Uses SCAN instead of KEYS to avoid blocking Redis on large keyspaces.
      */
     public void invalidateAll() {
         try {
-            Set<String> keys = redis.keys(KEY_PATTERN);
-            if (keys != null && !keys.isEmpty()) {
-                redis.delete(keys);
-                logger.info("Cache invalidated: {} keys deleted", keys.size());
+            ScanOptions options = ScanOptions.scanOptions().match(KEY_PATTERN).count(100).build();
+            List<String> toDelete = redis.execute((RedisCallback<List<String>>) conn -> {
+                List<String> keys = new ArrayList<>();
+                Cursor<byte[]> cursor = conn.scan(options);
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+                cursor.close();
+                return keys;
+            });
+            if (toDelete != null && !toDelete.isEmpty()) {
+                redis.delete(toDelete);
+                logger.info("Cache invalidated: {} keys deleted", toDelete.size());
             }
         } catch (Exception e) {
             logger.warn("Cache invalidation failed: {}", e.getMessage());

@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.redis.core.RedisCallback;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -139,9 +141,10 @@ class RestaurantCacheServiceTest {
     // ── invalidateAll ────────────────────────────────────────────────────────
 
     @Test
+    @SuppressWarnings("unchecked")
     void invalidateAll_deletesAllMatchingKeys() {
-        Set<String> keys = new HashSet<>(Arrays.asList("restaurants:by_borough", "restaurants:top"));
-        when(redis.keys("restaurants:*")).thenReturn(keys);
+        List<String> keys = Arrays.asList("restaurants:by_borough", "restaurants:top");
+        when(redis.execute(any(RedisCallback.class))).thenReturn(keys);
 
         cacheService.invalidateAll();
 
@@ -149,8 +152,9 @@ class RestaurantCacheServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void invalidateAll_doesNothing_whenNoKeysExist() {
-        when(redis.keys("restaurants:*")).thenReturn(Collections.emptySet());
+        when(redis.execute(any(RedisCallback.class))).thenReturn(Collections.emptyList());
 
         cacheService.invalidateAll();
 

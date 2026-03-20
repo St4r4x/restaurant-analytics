@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.WriteModel;
@@ -27,6 +28,8 @@ import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.config.AppConfig;
 import com.aflokkat.config.MongoClientFactory;
 import com.aflokkat.domain.Restaurant;
+import com.aflokkat.dto.AtRiskEntry;
+import com.aflokkat.dto.HeatmapPoint;
 import com.aflokkat.util.ValidationUtil;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -55,8 +58,14 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         
         this.restaurantCollection = database.withCodecRegistry(pojoCodecRegistry)
                 .getCollection(AppConfig.getMongoCollection(), Restaurant.class);
-        
-        logger.info("RestaurantDAOImpl initialisé - DB: {}, Collection: {}", 
+
+        // 2dsphere index for geospatial queries (idempotent)
+        restaurantCollection.createIndex(
+            new Document("address.coord", "2dsphere"),
+            new IndexOptions().background(true)
+        );
+
+        logger.info("RestaurantDAOImpl initialisé - DB: {}, Collection: {}",
                 AppConfig.getMongoDatabase(), AppConfig.getMongoCollection());
     }
     
@@ -75,9 +84,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
      */
     private <T> List<T> aggregate(List<Document> pipeline, Class<T> resultClass) {
         List<T> results = new ArrayList<>();
-        MongoCollection<T> collection = database.withCodecRegistry(pojoCodecRegistry)
-                .getCollection(AppConfig.getMongoCollection(), resultClass);
-        collection.aggregate(pipeline).forEach(results::add);
+        restaurantCollection.aggregate(pipeline, resultClass).forEach(results::add);
         return results;
     }
     
@@ -85,7 +92,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     public List<Restaurant> findAll(int limit) {
         ValidationUtil.requirePositive(limit, "limit");
         List<Restaurant> results = new ArrayList<>();
-        restaurantCollection.find()
+        // type 3 = BSON embedded document — skip legacy docs where address is a plain string
+        restaurantCollection.find(new Document("address", new Document("$type", 3)))
             .limit(limit)
             .forEach(results::add);
         return results;
@@ -252,6 +260,105 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
         logger.info("Upserted {} restaurants into MongoDB", operations.size());
         return operations.size();
+    }
+
+    @Override
+    public List<Restaurant> findByIds(List<String> restaurantIds) {
+        List<Restaurant> results = new ArrayList<>();
+        restaurantCollection.find(new Document("restaurant_id",
+            new Document("$in", restaurantIds))).forEach(results::add);
+        return results;
+    }
+
+    @Override
+    public Restaurant findByRestaurantId(String restaurantId) {
+        ValidationUtil.requireNonEmpty(restaurantId, "restaurantId");
+        return restaurantCollection.find(new Document("restaurant_id", restaurantId)).first();
+    }
+
+    @Override
+    public List<Restaurant> findRecentlyInspected(int days, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        long cutoffMs = System.currentTimeMillis() - (long) days * 24 * 60 * 60 * 1000;
+        java.util.Date cutoff = new java.util.Date(cutoffMs);
+        // Use $toDate to handle both BSON Date and ISO string formats
+        List<Document> idPipeline = Arrays.asList(
+            new Document("$unwind", "$grades"),
+            new Document("$match", new Document("$expr", new Document("$gte", Arrays.asList(
+                new Document("$toDate", "$grades.date"),
+                new Document("$toDate", cutoff)
+            )))),
+            new Document("$sort", new Document("grades.date", -1)),
+            new Document("$group", new Document("_id", "$restaurant_id")),
+            new Document("$limit", limit)
+        );
+        List<String> ids = new ArrayList<>();
+        restaurantCollection.aggregate(idPipeline, Document.class)
+            .forEach(doc -> ids.add(doc.getString("_id")));
+        if (ids.isEmpty()) return new ArrayList<>();
+        return findByIds(ids);
+    }
+
+    @Override
+    public List<Restaurant> findNearby(double lat, double lng, int radiusMeters, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        List<Document> pipeline = Arrays.asList(
+            new Document("$geoNear", new Document()
+                .append("near", new Document("type", "Point")
+                    .append("coordinates", Arrays.asList(lng, lat)))
+                .append("distanceField", "distance")
+                .append("maxDistance", radiusMeters)
+                .append("spherical", true)),
+            new Document("$limit", limit)
+        );
+        return aggregate(pipeline, Restaurant.class);
+    }
+
+    @Override
+    public List<HeatmapPoint> getHeatmapData(String borough, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        List<Document> pipeline = new ArrayList<>();
+        if (borough != null && !borough.isEmpty()) {
+            pipeline.add(new Document("$match", new Document("borough", borough)));
+        }
+        pipeline.add(new Document("$match", new Document("address.coord", new Document("$exists", true))));
+        pipeline.add(new Document("$addFields", new Document("latestScore",
+            new Document("$arrayElemAt", Arrays.asList("$grades.score", 0)))));
+        pipeline.add(new Document("$match", new Document("latestScore", new Document("$ne", null))));
+        pipeline.add(new Document("$project", new Document("_id", 0)
+            .append("lat", new Document("$arrayElemAt", Arrays.asList("$address.coord", 1)))
+            .append("lng", new Document("$arrayElemAt", Arrays.asList("$address.coord", 0)))
+            .append("weight", "$latestScore")));
+        pipeline.add(new Document("$limit", limit));
+        return aggregate(pipeline, HeatmapPoint.class);
+    }
+
+    @Override
+    public List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        List<Document> pipeline = new ArrayList<>();
+        if (borough != null && !borough.isEmpty()) {
+            pipeline.add(new Document("$match", new Document("borough", borough)));
+        }
+        pipeline.add(new Document("$project", new Document("_id", 0)
+            .append("name", 1)
+            .append("borough", 1)
+            .append("cuisine", 1)
+            .append("restaurant_id", 1)
+            .append("lastGrades", new Document("$slice", Arrays.asList("$grades", 3)))));
+        pipeline.add(new Document("$addFields", new Document()
+            .append("lastGrade", new Document("$arrayElemAt", Arrays.asList("$lastGrades.grade", 0)))
+            .append("lastScore", new Document("$arrayElemAt", Arrays.asList("$lastGrades.score", 0)))
+            .append("consecutiveBadGrades", new Document("$size", new Document("$filter", new Document()
+                .append("input", new Document("$ifNull", Arrays.asList("$lastGrades", Arrays.asList())))
+                .append("as", "g")
+                .append("cond", new Document("$in", Arrays.asList("$$g.grade",
+                    Arrays.asList("C", "Z", "N", "P")))))))));
+        pipeline.add(new Document("$match", new Document("lastGrade",
+            new Document("$in", Arrays.asList("C", "Z")))));
+        pipeline.add(new Document("$sort", new Document("lastScore", -1)));
+        pipeline.add(new Document("$limit", limit));
+        return aggregate(pipeline, AtRiskEntry.class);
     }
 
     /**

@@ -10,6 +10,7 @@ import com.aflokkat.dto.RegisterRequest;
 import com.aflokkat.entity.UserEntity;
 import com.aflokkat.repository.UserRepository;
 import com.aflokkat.security.JwtUtil;
+import com.aflokkat.util.ValidationUtil;
 
 @Service
 public class AuthService {
@@ -24,15 +25,9 @@ public class AuthService {
     private JwtUtil jwtUtil;
 
     public JwtResponse register(RegisterRequest request) {
-        if (request.getUsername() == null || request.getUsername().isBlank()) {
-            throw new IllegalArgumentException("Username required");
-        }
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Email required");
-        }
-        if (request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password required");
-        }
+        ValidationUtil.requireNonEmpty(request.getUsername(), "username");
+        ValidationUtil.requireNonEmpty(request.getEmail(), "email");
+        ValidationUtil.requireNonEmpty(request.getPassword(), "password");
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
@@ -52,12 +47,8 @@ public class AuthService {
     }
 
     public JwtResponse login(AuthRequest request) {
-        if (request.getUsername() == null || request.getUsername().isBlank()) {
-            throw new IllegalArgumentException("Username required");
-        }
-        if (request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password required");
-        }
+        ValidationUtil.requireNonEmpty(request.getUsername(), "username");
+        ValidationUtil.requireNonEmpty(request.getPassword(), "password");
 
         java.util.Optional<UserEntity> userOpt = userRepository.findByUsername(request.getUsername());
         if (userOpt.isEmpty()) {
@@ -75,15 +66,14 @@ public class AuthService {
     }
 
     public JwtResponse refresh(String refreshToken) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new IllegalArgumentException("Refresh token required");
-        }
+        ValidationUtil.requireNonEmpty(refreshToken, "refreshToken");
 
-        if (!jwtUtil.validateToken(refreshToken)) {
+        io.jsonwebtoken.Claims claims = jwtUtil.getClaimsIfValid(refreshToken);
+        if (claims == null) {
             throw new IllegalArgumentException("Invalid refresh token");
         }
 
-        String username = jwtUtil.getUsernameFromToken(refreshToken);
+        String username = claims.getSubject();
         java.util.Optional<UserEntity> userOpt = userRepository.findByUsername(username);
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found");

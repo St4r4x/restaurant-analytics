@@ -68,6 +68,7 @@ public class SyncService {
         Instant start = Instant.now();
         running = true;
         runningStartedAt = start;
+        SyncResult result;
         try {
             List<NycApiRestaurantDto> rawRecords = apiClient.fetchAll();
             List<Restaurant> restaurants = mapToRestaurants(rawRecords);
@@ -76,7 +77,7 @@ public class SyncService {
             cacheService.invalidateAll();
             cacheService.updateTopRestaurants(restaurants);
 
-            SyncResult result = SyncResult.builder()
+            result = SyncResult.builder()
                     .startedAt(start)
                     .completedAt(Instant.now())
                     .rawRecords(rawRecords.size())
@@ -85,12 +86,10 @@ public class SyncService {
                     .build();
 
             lastResult = result;
-            running = false;
             logger.info("Sync complete: {}", result);
-            return result;
 
         } catch (Exception e) {
-            SyncResult result = SyncResult.builder()
+            result = SyncResult.builder()
                     .startedAt(start)
                     .completedAt(Instant.now())
                     .rawRecords(0)
@@ -100,10 +99,12 @@ public class SyncService {
                     .build();
 
             lastResult = result;
-            running = false;
             logger.error("Sync failed: {}", e.getMessage(), e);
-            return result;
+
+        } finally {
+            running = false;
         }
+        return result;
     }
 
     public boolean isRunning() { return running; }

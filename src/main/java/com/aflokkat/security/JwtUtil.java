@@ -1,5 +1,6 @@
 package com.aflokkat.security;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -16,7 +17,7 @@ public class JwtUtil {
     private final long refreshTokenValidityMs;
 
     public JwtUtil() {
-        this.key = Keys.hmacShaKeyFor(AppConfig.getJwtSecret().getBytes());
+        this.key = Keys.hmacShaKeyFor(AppConfig.getJwtSecret().getBytes(StandardCharsets.UTF_8));
         this.accessTokenValidityMs = AppConfig.getJwtAccessTokenExpirationMs();
         this.refreshTokenValidityMs = AppConfig.getJwtRefreshTokenExpirationMs();
     }
@@ -49,22 +50,33 @@ public class JwtUtil {
             .compact();
     }
 
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            parseClaims(token);
             return true;
         } catch (Exception ex) {
             return false;
         }
     }
 
+    /** Returns the Claims if the token is valid, or null if invalid/expired. */
+    public Claims getClaimsIfValid(String token) {
+        try {
+            return parseClaims(token);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        return claims.getSubject();
+        return parseClaims(token).getSubject();
     }
 
     public String getRoleFromToken(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        return claims.get("role", String.class);
+        return parseClaims(token).get("role", String.class);
     }
 }

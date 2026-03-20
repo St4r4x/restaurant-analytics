@@ -79,14 +79,14 @@ public class RestaurantService {
         return restaurantDAO.getStatisticsByBorough();
     }
     
-    // =============== TRASH ADVISOR ===============
+    // =============== HYGIENE RADAR ===============
 
     /**
      * Retourne les restaurants des pires cuisines avec leurs coordonnées GPS.
      * @param maxScore  score moyen maximum des cuisines à inclure (null = pas de filtre)
      * @param restaurantLimit  nombre maximum de restaurants retournés
      */
-    public List<Restaurant> getTrashAdvisorRestaurants(String borough, int limit, Double maxScore, int restaurantLimit, String cuisineFilter) {
+    public List<Restaurant> getHygieneRadarRestaurants(String borough, int limit, Double maxScore, int restaurantLimit, String cuisineFilter) {
         boolean allBoroughs = (borough == null || borough.isEmpty());
         boolean hasCuisineFilter = (cuisineFilter != null && !cuisineFilter.isEmpty());
 

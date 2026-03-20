@@ -19,8 +19,23 @@ public class ViewController {
         return "login";
     }
     
-    @GetMapping("/trash-advisor")
-    public String trashAdvisor() {
-        return "trash-advisor";
+    @GetMapping("/hygiene-radar")
+    public String hygieneRadar() {
+        return "hygiene-radar";
+    }
+
+    @GetMapping("/restaurant/{id}")
+    public String restaurantDetail() {
+        return "restaurant";
+    }
+
+    @GetMapping("/inspection-map")
+    public String inspectionMap() {
+        return "inspection-map";
+    }
+
+    @GetMapping("/inspection")
+    public String inspectionDashboard() {
+        return "inspection";
     }
 }

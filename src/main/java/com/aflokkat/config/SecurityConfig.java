@@ -1,7 +1,10 @@
 package com.aflokkat.config;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +18,7 @@ import com.aflokkat.security.JwtAuthenticationFilter;
 import com.aflokkat.security.JwtUtil;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -34,14 +38,20 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-                .antMatchers(
-                        "/", "/index.html", "/login", "/api/auth/**", "/api/restaurants/health",
-                        "/css/**", "/js/**", "/webjars/**", "/favicon.ico"
-                ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             .and()
             .exceptionHandling()
-                .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/login"))
+                .authenticationEntryPoint((request, response, authException) -> {
+                    // API calls get 401 JSON; browser navigation gets redirected to /login
+                    String path = request.getRequestURI();
+                    if (path.startsWith("/api/")) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"status\":\"error\",\"message\":\"Unauthorized\"}");
+                    } else {
+                        response.sendRedirect("/login");
+                    }
+                })
             .and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
