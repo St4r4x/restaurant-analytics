@@ -20,9 +20,10 @@ WORKDIR /app
 # Copy JAR from builder
 COPY --from=builder /build/target/*.jar app.jar
 
-# MongoDB connection (can be overridden with env vars)
-ENV MONGO_URI=mongodb://host.docker.internal:27017
-ENV MONGO_DB=newyork
+# MongoDB connection defaults (overridden by docker-compose environment section)
+ENV MONGODB_URI=mongodb://mongodb:27017
+ENV MONGODB_DATABASE=newyork
+ENV MONGODB_COLLECTION=restaurants
 
 # Expose port
 EXPOSE 8080
