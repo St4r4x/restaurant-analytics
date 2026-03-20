@@ -73,7 +73,15 @@ public interface RestaurantDAO {
      * Retourne la liste de tous les types de cuisine distincts, triés alphabétiquement
      */
     List<String> getDistinctCuisines();
-    
+
+    /**
+     * Upserts a batch of restaurants keyed by restaurantId (camis).
+     * Inserts if not present, replaces if already exists.
+     *
+     * @return number of documents upserted
+     */
+    int upsertRestaurants(List<Restaurant> restaurants);
+
     /**
      * Ferme la connexion
      */

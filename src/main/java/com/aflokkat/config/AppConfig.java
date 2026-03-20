@@ -44,6 +44,28 @@ public class AppConfig {
         return getProperty("mongodb.collection", "restaurants");
     }
 
+    public static String getNycApiUrl() {
+        return getProperty("nyc.api.url", "https://data.cityofnewyork.us/resource/43nn-pn8j.json");
+    }
+
+    public static String getNycApiToken() {
+        // key nyc.api.app_token → env NYC_API_APP_TOKEN
+        return getProperty("nyc.api.app_token", "");
+    }
+
+    public static int getNycApiPageSize() {
+        String value = getProperty("nyc.api.page-size", "1000");
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 1000; }
+    }
+
+    /** Max total records to fetch. 0 means unlimited. */
+    public static int getNycApiMaxRecords() {
+        String value = getProperty("nyc.api.max_records", "0");
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 0; }
+    }
+
     private static String getProperty(String key, String defaultValue) {
         // 1. Variable d'environnement système (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();

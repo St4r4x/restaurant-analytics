@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mongodb.client.model.ReplaceOneModel;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.WriteModel;
+
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -214,12 +218,32 @@ public class RestaurantDAOImpl implements RestaurantDAO {
             new Document("$group", new Document()
                 .append("_id", "$cuisine")
                 .append("count", new Document("$sum", 1))),
-            new Document("$match", new Document("count", new Document("$gt", minCount))),
+            new Document("$match", new Document("count", new Document("$gte", minCount))),
             new Document("$sort", new Document("_id", 1))
         ), AggregationCount.class).forEach(doc -> results.add(doc.getId()));
         return results;
     }
     
+    @Override
+    public int upsertRestaurants(List<Restaurant> restaurants) {
+        if (restaurants == null || restaurants.isEmpty()) return 0;
+
+        ReplaceOptions upsertOption = new ReplaceOptions().upsert(true);
+        List<WriteModel<Restaurant>> operations = new ArrayList<>(restaurants.size());
+
+        for (Restaurant r : restaurants) {
+            if (r.getRestaurantId() == null || r.getRestaurantId().isEmpty()) continue;
+            Bson filter = new Document("restaurant_id", r.getRestaurantId());
+            operations.add(new ReplaceOneModel<>(filter, r, upsertOption));
+        }
+
+        if (operations.isEmpty()) return 0;
+        restaurantCollection.bulkWrite(operations);
+
+        logger.info("Upserted {} restaurants into MongoDB", operations.size());
+        return operations.size();
+    }
+
     /**
      * Ferme la connexion MongoDB via le Singleton Factory
      */

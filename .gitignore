@@ -24,3 +24,6 @@ Thumbs.db
 
 # gstack internal
 .gstack/
+
+# Large data files (import manually)
+restaurants.json

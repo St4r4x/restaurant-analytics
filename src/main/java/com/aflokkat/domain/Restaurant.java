@@ -1,26 +1,37 @@
 package com.aflokkat.domain;
 
+import java.util.List;
+
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 
 public class Restaurant {
     @BsonProperty("_id")
     private ObjectId id;
-    
+
+    @BsonProperty("restaurant_id")
+    private String restaurantId;
+
     @BsonProperty("name")
     private String name;
-    
+
     @BsonProperty("cuisine")
     private String cuisine;
-    
+
     @BsonProperty("borough")
     private String borough;
-    
+
     @BsonProperty("address")
     private Address address;
-    
+
+    @BsonProperty("phone")
+    private String phone;
+
+    @BsonProperty("grades")
+    private List<Grade> grades;
+
     public Restaurant() {}
-    
+
     public Restaurant(String name, String cuisine, String borough) {
         this.name = name;
         this.cuisine = cuisine;
@@ -66,6 +77,15 @@ public class Restaurant {
     public void setAddress(Address address) {
         this.address = address;
     }
+
+    public String getRestaurantId() { return restaurantId; }
+    public void setRestaurantId(String restaurantId) { this.restaurantId = restaurantId; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public List<Grade> getGrades() { return grades; }
+    public void setGrades(List<Grade> grades) { this.grades = grades; }
 
     public Double getLatitude() {
         if (address != null && address.getCoord() != null && address.getCoord().size() >= 2) {
