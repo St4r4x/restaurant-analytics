@@ -45,14 +45,17 @@ public class NycOpenDataClient {
     public List<NycApiRestaurantDto> fetchAll() {
         List<NycApiRestaurantDto> all = new ArrayList<>();
         int pageSize = AppConfig.getNycApiPageSize();
+        int maxRecords = AppConfig.getNycApiMaxRecords();
         int offset = 0;
 
         while (true) {
-            List<NycApiRestaurantDto> page = fetchPage(offset, pageSize);
+            int limit = (maxRecords > 0) ? Math.min(pageSize, maxRecords - all.size()) : pageSize;
+            List<NycApiRestaurantDto> page = fetchPage(offset, limit);
             if (page.isEmpty()) break;
             all.addAll(page);
             logger.info("Fetched {} records (total so far: {})", page.size(), all.size());
-            if (page.size() < pageSize) break;
+            if (page.size() < limit) break;
+            if (maxRecords > 0 && all.size() >= maxRecords) break;
             offset += pageSize;
         }
 

@@ -49,13 +49,21 @@ public class AppConfig {
     }
 
     public static String getNycApiToken() {
-        return getProperty("nyc.api.token", "");
+        // key nyc.api.app_token → env NYC_API_APP_TOKEN
+        return getProperty("nyc.api.app_token", "");
     }
 
     public static int getNycApiPageSize() {
         String value = getProperty("nyc.api.page-size", "1000");
         try { return Integer.parseInt(value); }
         catch (NumberFormatException e) { return 1000; }
+    }
+
+    /** Max total records to fetch. 0 means unlimited. */
+    public static int getNycApiMaxRecords() {
+        String value = getProperty("nyc.api.max_records", "0");
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 0; }
     }
 
     private static String getProperty(String key, String defaultValue) {
