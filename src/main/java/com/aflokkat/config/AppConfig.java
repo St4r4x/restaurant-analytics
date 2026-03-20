@@ -44,6 +44,20 @@ public class AppConfig {
         return getProperty("mongodb.collection", "restaurants");
     }
 
+    public static String getNycApiUrl() {
+        return getProperty("nyc.api.url", "https://data.cityofnewyork.us/resource/43nn-pn8j.json");
+    }
+
+    public static String getNycApiToken() {
+        return getProperty("nyc.api.token", "");
+    }
+
+    public static int getNycApiPageSize() {
+        String value = getProperty("nyc.api.page-size", "1000");
+        try { return Integer.parseInt(value); }
+        catch (NumberFormatException e) { return 1000; }
+    }
+
     private static String getProperty(String key, String defaultValue) {
         // 1. Variable d'environnement système (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();

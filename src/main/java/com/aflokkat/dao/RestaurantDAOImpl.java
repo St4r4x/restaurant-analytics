@@ -220,6 +220,25 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         return results;
     }
     
+    @Override
+    public int upsertRestaurants(List<Restaurant> restaurants) {
+        if (restaurants == null || restaurants.isEmpty()) return 0;
+
+        int count = 0;
+        com.mongodb.client.model.ReplaceOptions upsertOption =
+                new com.mongodb.client.model.ReplaceOptions().upsert(true);
+
+        for (Restaurant r : restaurants) {
+            if (r.getRestaurantId() == null || r.getRestaurantId().isEmpty()) continue;
+            Bson filter = new Document("restaurant_id", r.getRestaurantId());
+            restaurantCollection.replaceOne(filter, r, upsertOption);
+            count++;
+        }
+
+        logger.info("Upserted {} restaurants into MongoDB", count);
+        return count;
+    }
+
     /**
      * Ferme la connexion MongoDB via le Singleton Factory
      */

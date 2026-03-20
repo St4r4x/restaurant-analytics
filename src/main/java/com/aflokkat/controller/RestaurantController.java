@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,8 @@ import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.service.RestaurantService;
+import com.aflokkat.sync.SyncResult;
+import com.aflokkat.sync.SyncService;
 
 /**
  * REST API Controller pour l'accès aux données MongoDB
@@ -28,6 +31,9 @@ public class RestaurantController {
     
     @Autowired
     private RestaurantService restaurantService;
+
+    @Autowired
+    private SyncService syncService;
     
     /**
      * USE CASE 1: Nombre de restaurants par quartier
@@ -189,6 +195,48 @@ public class RestaurantController {
         }
     }
     
+    /**
+     * Triggers a manual data sync from the NYC Open Data API.
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, Object>> refresh() {
+        try {
+            SyncResult result = syncService.runSync();
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", result.isSuccess() ? "success" : "error");
+            response.put("rawRecords", result.getRawRecords());
+            response.put("upsertedRestaurants", result.getUpsertedRestaurants());
+            response.put("startedAt", result.getStartedAt());
+            response.put("completedAt", result.getCompletedAt());
+            if (!result.isSuccess()) response.put("error", result.getErrorMessage());
+            int httpStatus = result.isSuccess() ? 200 : 502;
+            return ResponseEntity.status(httpStatus).body(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    /**
+     * Returns the status of the last data sync.
+     */
+    @GetMapping("/sync-status")
+    public ResponseEntity<Map<String, Object>> syncStatus() {
+        SyncResult last = syncService.getLastResult();
+        Map<String, Object> response = new HashMap<>();
+        if (last == null) {
+            response.put("status", "never_run");
+            response.put("message", "No sync has been executed yet");
+        } else {
+            response.put("status", last.isSuccess() ? "success" : "error");
+            response.put("rawRecords", last.getRawRecords());
+            response.put("upsertedRestaurants", last.getUpsertedRestaurants());
+            response.put("startedAt", last.getStartedAt());
+            response.put("completedAt", last.getCompletedAt());
+            if (!last.isSuccess()) response.put("error", last.getErrorMessage());
+        }
+        return ResponseEntity.ok(response);
+    }
+
     private ResponseEntity<Map<String, Object>> errorResponse(Exception e) {
         int status = (e instanceof IllegalArgumentException) ? 400 : 500;
         Map<String, Object> response = new HashMap<>();
