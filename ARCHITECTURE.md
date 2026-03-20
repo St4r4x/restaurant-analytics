@@ -40,6 +40,8 @@ com.aflokkat/
 │
 ├── controller/
 │   ├── RestaurantController.java # REST endpoints (/api/restaurants/*)
+│   ├── InspectionController.java # Admin-only endpoints (/api/inspection/*)
+│   ├── UserController.java       # User profile & bookmarks (/api/users/*)
 │   ├── AuthController.java       # Auth endpoints (/api/auth/*)
 │   └── ViewController.java       # Thymeleaf page routes
 │
@@ -61,15 +63,18 @@ com.aflokkat/
 │   └── UserDAOImpl.java          # MongoDB impl
 │
 ├── entity/
-│   └── UserEntity.java           # JPA entity — mapped to PostgreSQL `users` table
+│   ├── UserEntity.java           # JPA entity — mapped to PostgreSQL `users` table
+│   └── BookmarkEntity.java       # JPA entity — mapped to PostgreSQL `bookmarks` table
 │
 ├── repository/
-│   └── UserRepository.java       # Spring Data JPA repository
+│   ├── UserRepository.java       # Spring Data JPA repository
+│   └── BookmarkRepository.java   # Spring Data JPA repository (findByUserId, existsByUserIdAndRestaurantId)
 │
 ├── domain/
-│   ├── Restaurant.java           # Main POJO (BSON-mapped)
+│   ├── Restaurant.java           # Main POJO (BSON-mapped) + computed badge getters
+│   │                             #   getLatestGrade(), getLatestScore(), getTrend(), getBadgeColor()
 │   ├── Address.java              # Embedded address + GeoJSON coords
-│   ├── Grade.java                # Inspection record (date, score, grade letter, violation)
+│   ├── Grade.java                # Inspection record (date, score, grade, violation, criticalFlag)
 │   └── User.java                 # MongoDB user domain object
 │
 ├── aggregation/
@@ -79,6 +84,8 @@ com.aflokkat/
 │
 ├── dto/
 │   ├── TopRestaurantEntry.java   # Lightweight Redis sorted-set snapshot
+│   ├── HeatmapPoint.java         # { lat, lng, weight } — heatmap aggregation result
+│   ├── AtRiskEntry.java          # { restaurantId, name, borough, cuisine, lastGrade, lastScore, consecutiveBadGrades }
 │   ├── AuthRequest.java          # { username, password }
 │   ├── RegisterRequest.java      # { username, email, password }
 │   ├── RefreshRequest.java       # { refreshToken }
@@ -91,7 +98,8 @@ com.aflokkat/
 │   └── SyncResult.java           # Immutable sync result (builder pattern)
 │
 └── util/
-    └── ValidationUtil.java       # requirePositive, requireNonEmpty, validateFieldName
+    ├── ValidationUtil.java       # requirePositive, requireNonEmpty, validateFieldName
+    └── ResponseUtil.java         # Shared errorResponse() — 400 for IllegalArgument, 500 otherwise
 ```
 
 ---
@@ -162,8 +170,8 @@ Every subsequent request:
   JwtAuthenticationFilter (OncePerRequestFilter)
            │
   JwtUtil.getClaimsIfValid(token)
-           ├── valid  → set SecurityContext (username)
-           └── invalid → continue unauthenticated (app currently open)
+           ├── valid  → set SecurityContext (username + role as GrantedAuthority)
+           └── invalid → continue unauthenticated (public endpoints only)
 ```
 
 ---
@@ -180,6 +188,16 @@ Every subsequent request:
 | `password_hash` | VARCHAR | NOT NULL (BCrypt) |
 | `role` | VARCHAR | NOT NULL (default `ROLE_USER`) |
 | `created_at` | TIMESTAMP | NOT NULL |
+
+### Table: `bookmarks`
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | BIGSERIAL | PRIMARY KEY |
+| `user_id` | BIGINT | FK → `users.id` NOT NULL |
+| `restaurant_id` | VARCHAR | NOT NULL (MongoDB restaurant_id / camis) |
+| `created_at` | TIMESTAMP | NOT NULL |
+| — | UNIQUE | (`user_id`, `restaurant_id`) |
 
 Managed by Spring Data JPA / Hibernate auto-DDL.
 
@@ -256,23 +274,44 @@ All `restaurants:*` keys are deleted on every successful sync.
 
 ## API Endpoints
 
-| Method | Path | Description | Cached |
-|---|---|---|---|
-| GET | `/api/restaurants/by-borough` | Restaurant count per borough | ✅ Redis |
-| GET | `/api/restaurants/cuisine-scores?cuisine=` | Avg inspection score by borough for a cuisine | ✅ Redis |
-| GET | `/api/restaurants/worst-cuisines?borough=&limit=` | Worst cuisines by avg score in a borough | ✅ Redis |
-| GET | `/api/restaurants/popular-cuisines?minCount=` | Cuisines with ≥ N restaurants | ❌ |
-| GET | `/api/restaurants/top?limit=` | Healthiest restaurants (Redis sorted set) | ✅ Redis |
-| GET | `/api/restaurants/by-cuisine?limit=` | Top N cuisines by count | ❌ |
-| GET | `/api/restaurants/cuisines` | All distinct cuisine types | ❌ |
-| GET | `/api/restaurants/stats` | Total count + borough breakdown | ❌ |
-| GET | `/api/restaurants/trash-advisor` | Restaurants from worst-scoring cuisines | ❌ |
-| GET | `/api/restaurants/random` | Random restaurant ($sample) | ❌ |
-| GET | `/api/restaurants/health` | Health check | ❌ |
-| POST | `/api/restaurants/refresh` | Trigger manual sync (invalidates cache) | — |
-| GET | `/api/restaurants/sync-status` | Last sync result + running state | — |
+### Restaurants (authenticated)
 
-### Auth endpoints
+| Method | Path | Auth | Description | Cached |
+|---|---|---|---|---|
+| GET | `/api/restaurants/by-borough` | User | Restaurant count per borough | ✅ Redis |
+| GET | `/api/restaurants/cuisine-scores?cuisine=` | User | Avg inspection score by borough for a cuisine | ✅ Redis |
+| GET | `/api/restaurants/worst-cuisines?borough=&limit=` | User | Worst cuisines by avg score in a borough | ✅ Redis |
+| GET | `/api/restaurants/popular-cuisines?minCount=` | User | Cuisines with ≥ N restaurants | ❌ |
+| GET | `/api/restaurants/top?limit=` | User | Healthiest restaurants (Redis sorted set) | ✅ Redis |
+| GET | `/api/restaurants/stats` | User | Total count + borough breakdown | ❌ |
+| GET | `/api/restaurants/hygiene-radar` | User | Restaurants from best-scoring cuisines | ❌ |
+| GET | `/api/restaurants/random` | User | Random restaurant (`$sample`) | ❌ |
+| GET | `/api/restaurants/health` | — | Health check | ❌ |
+| GET | `/api/restaurants/{id}` | User | Full restaurant detail + computed badge | ❌ |
+| GET | `/api/restaurants/recent-inspections?days=&limit=` | User | Restaurants inspected in last N days | ❌ |
+| GET | `/api/restaurants/nearby?lat=&lng=&radius=&limit=` | User | Geospatial search (`$geoNear`, 2dsphere) | ❌ |
+| GET | `/api/restaurants/heatmap?borough=&limit=` | **Admin** | Lat/lng/weight points for heatmap | ❌ |
+| POST | `/api/restaurants/refresh` | **Admin** | Trigger manual sync (invalidates cache) | — |
+| GET | `/api/restaurants/sync-status` | **Admin** | Last sync result + running state | — |
+| POST | `/api/restaurants/rebuild-cache?limit=` | **Admin** | Repopulate Redis leaderboard from MongoDB | — |
+
+### Inspection (admin only)
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/inspection/at-risk?borough=&limit=` | At-risk restaurants (last grade C or Z) |
+| GET | `/api/inspection/at-risk/export.csv` | CSV export of at-risk restaurants |
+
+### Users
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/users/me` | Current user profile |
+| GET | `/api/users/me/bookmarks` | Bookmarked restaurants (enriched from MongoDB) |
+| POST | `/api/users/me/bookmarks/{restaurantId}` | Add bookmark (idempotent) |
+| DELETE | `/api/users/me/bookmarks/{restaurantId}` | Remove bookmark |
+
+### Auth
 
 | Method | Path | Description |
 |---|---|---|
@@ -328,11 +367,25 @@ Startup order: `mongodb` (healthy) → `redis` (healthy) → `postgres` (healthy
 
 ---
 
+## Frontend Pages
+
+| Route | Template | Auth | Description |
+|---|---|---|---|
+| `/login` | `login.html` | — | Login / register form |
+| `/` | `index.html` | User | Main dashboard |
+| `/restaurant/{id}` | `restaurant.html` | User | Restaurant detail + badge + score chart |
+| `/hygiene-radar` | `hygiene-radar.html` | User | Healthiest restaurants search |
+| `/inspection-map` | `inspection-map.html` | Admin | Leaflet + Leaflet.heat violation heatmap |
+| `/inspection` | `inspection.html` | Admin | Agent dashboard: at-risk table, worst cuisines, CSV export |
+
+---
+
 ## Roadmap Status
 
 | Phase | Description | Status |
 |---|---|---|
 | 1 | NYC Open Data API sync (paginated, nightly scheduled) | ✅ Done |
 | 2 | Redis cache layer + top-restaurants sorted set | ✅ Done |
-| 3 | User management (JWT auth, PostgreSQL, BCrypt, refresh tokens) | ✅ Done |
-| 4 | Stretch: geospatial queries, Kafka ingest, Prometheus metrics, CI/CD | ⏳ Planned |
+| 3 | User management (JWT auth, PostgreSQL, BCrypt, refresh tokens, bookmarks) | ✅ Done |
+| 4 | Citizen & inspection agent features (heatmap, at-risk, detail page, geospatial) | ✅ Done |
+| 5 | Stretch goals (Elasticsearch, Kafka, Prometheus, CI/CD, GraphQL) | ⏳ Post-académique |
