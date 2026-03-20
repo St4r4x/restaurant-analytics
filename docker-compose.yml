@@ -42,9 +42,30 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: unless-stopped
+    networks:
+      - restaurant-network
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: restaurant
+      POSTGRES_PASSWORD: restaurant
+      POSTGRES_DB: restaurantdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restaurant -d restaurantdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   restaurant-network:
     driver: bridge
 
 volumes:
   mongodb_data:
+  postgres_data:

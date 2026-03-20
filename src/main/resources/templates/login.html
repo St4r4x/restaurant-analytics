@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restaurant Analytics - Login</title>
+    <style>
+      body {
+        background: #161b22;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+      }
+      .auth-card {
+        width: 360px;
+        background: rgba(28, 35, 45, 0.95);
+        border-radius: 12px;
+        border: 1px solid #2e333d;
+        box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
+        padding: 24px;
+      }
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 18px;
+      }
+      label {
+        display: block;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #cbd5e1;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid #475569;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      button {
+        width: 100%;
+        margin-top: 16px;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #4f46e5;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #4338ca;
+      }
+      .error {
+        margin-top: 12px;
+        color: #f87171;
+        font-size: 0.85rem;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 14px;
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+      .footer a {
+        color: #7c3aed;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-card">
+      <h1>Connexion</h1>
+      <label for="username">Username</label>
+      <input id="username" placeholder="nom d'utilisateur" />
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="mot de passe" />
+      <button id="loginBtn">Se connecter</button>
+      <p id="loginError" class="error" style="display: none"></p>
+      <p class="footer">
+        Pas de compte ? <a href="#" id="registerLink">Créer un compte</a>
+      </p>
+    </div>
+
+    <script>
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        window.location.href = "/";
+      }
+
+      document.getElementById("loginBtn").addEventListener("click", () => {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const loginError = document.getElementById("loginError");
+
+        if (!username || !password) {
+          loginError.style.display = "block";
+          loginError.textContent =
+            "Veuillez renseigner username et mot de passe.";
+          return;
+        }
+
+        fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        })
+          .then((res) =>
+            res.json().then((data) => ({ status: res.status, body: data })),
+          )
+          .then((result) => {
+            if (result.status !== 200 || !result.body.accessToken) {
+              loginError.style.display = "block";
+              loginError.textContent =
+                result.body.message || "Identifiants invalides";
+            } else {
+              localStorage.setItem("accessToken", result.body.accessToken);
+              localStorage.setItem("refreshToken", result.body.refreshToken);
+              window.location.href = "/";
+            }
+          })
+          .catch((err) => {
+            loginError.style.display = "block";
+            loginError.textContent = "Erreur réseau, réessayez.";
+            console.error(err);
+          });
+      });
+
+      document.getElementById("registerLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        const username = prompt("Username :");
+        const email = prompt("Email :");
+        const password = prompt("Mot de passe :");
+        if (!username || !email || !password) return;
+
+        fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        })
+          .then((res) =>
+            res.json().then((data) => ({ status: res.status, body: data })),
+          )
+          .then((result) => {
+            if (result.status === 200 && result.body.accessToken) {
+              localStorage.setItem("accessToken", result.body.accessToken);
+              localStorage.setItem("refreshToken", result.body.refreshToken);
+              window.location.href = "/";
+            } else {
+              loginError.style.display = "block";
+              loginError.textContent =
+                result.body.message || "Impossible de créer le compte";
+            }
+          })
+          .catch((err) => {
+            loginError.style.display = "block";
+            loginError.textContent = "Erreur réseau, réessayez.";
+            console.error(err);
+          });
+      });
+    </script>
+  </body>
+</html>

@@ -44,6 +44,18 @@ public class AppConfig {
         return getProperty("mongodb.collection", "restaurants");
     }
 
+    public static String getJwtSecret() {
+        return getProperty("jwt.secret", "changeit-please-change-it");
+    }
+
+    public static long getJwtAccessTokenExpirationMs() {
+        return Long.parseLong(getProperty("jwt.access.expiration.ms", "900000"));
+    }
+
+    public static long getJwtRefreshTokenExpirationMs() {
+        return Long.parseLong(getProperty("jwt.refresh.expiration.ms", "604800000"));
+    }
+
     private static String getProperty(String key, String defaultValue) {
         // 1. Variable d'environnement système (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();
