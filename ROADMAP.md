@@ -1,6 +1,6 @@
 # Roadmap — Restaurant Analytics
 
-## État actuel (v1.2)
+## État actuel (v2.0)
 
 Spring Boot REST API + Thymeleaf dashboard analysant les données d'inspection sanitaire des restaurants de New York City. Données synchronisées depuis l'API NYC Open Data, stockées dans MongoDB, accélérées par Redis, avec gestion des utilisateurs sur PostgreSQL et authentification JWT.
 
@@ -78,55 +78,61 @@ Spring Boot REST API + Thymeleaf dashboard analysant les données d'inspection s
 
 ---
 
-## Phase 4 — Application métier : agents d'inspection & citoyens
+## Phase 4 — Application métier : agents d'inspection & citoyens ✅
 
 L'objectif est de transformer le dashboard analytique en une vraie application à double audience :
 - **Agents d'inspection** : outils d'aide à la planification et au suivi terrain
 - **Citoyens** : transparence et information sur l'hygiène des restaurants qu'ils fréquentent
 
-### 4.1 Page détail restaurant
+### 4.1 Page détail restaurant ✅
 
-- [ ] Endpoint `GET /api/restaurants/{restaurantId}` — données complètes + historique des grades
-- [ ] Vue Thymeleaf `/restaurant/{id}` : fiche complète (nom, adresse, carte, historique des inspections avec dates et scores, tendance)
-- [ ] Lien vers la fiche depuis les cartes du dashboard et le Trash Advisor
+- [x] Endpoint `GET /api/restaurants/{restaurantId}` — données complètes + historique des grades
+- [x] Vue `/restaurant/{id}` : fiche complète (nom, adresse, carte Leaflet, historique des inspections avec dates/scores/violations, graphique Chart.js)
+- [x] Liens "Voir" depuis les cartes du dashboard et Hygiene Radar
 
-### 4.2 Badge de confiance (citoyens)
+### 4.2 Badge de confiance (citoyens) ✅
 
-- [ ] Calcul côté serveur : dernière note (A/B/C/Z), score, tendance (amélioration / dégradation / stable)
-- [ ] Badge coloré (vert / orange / rouge) exposé dans les réponses API existantes
-- [ ] Affichage du badge dans les cartes restaurant du dashboard et du Trash Advisor
+- [x] Calcul côté serveur (getters calculés, zéro stockage MongoDB) : dernière note, score, tendance (improving / stable / worsening)
+- [x] Badge coloré (vert A / jaune B / orange C / rouge Z-N-P) dans toutes les réponses API
+- [x] Affichage du badge dans la fiche restaurant
 
-### 4.3 Recherche géospatiale (citoyens)
+### 4.3 Recherche géospatiale (citoyens) ✅
 
-- [ ] Index `2dsphere` sur `address.coord` dans MongoDB
-- [ ] Endpoint `GET /api/restaurants/nearby?lat=&lng=&radius=&sort=score` — restaurants autour d'un point
-- [ ] Widget carte "autour de moi" dans le dashboard (géolocalisation navigateur)
+- [x] Index `2dsphere` sur `address.coord` (idempotent au démarrage)
+- [x] Endpoint `GET /api/restaurants/nearby?lat=&lng=&radius=&limit=` — `$geoNear` pipeline
+- [x] Widget carte "autour de moi" dans le dashboard (géolocalisation navigateur + markers Leaflet)
 
-### 4.4 Carte de chaleur des violations (agents)
+### 4.4 Carte de chaleur des violations (agents) ✅
 
-- [ ] Endpoint `GET /api/restaurants/heatmap?borough=` — liste des points GPS + score moyen pondéré
-- [ ] Vue dédiée `/inspection-map` avec Leaflet + plugin heatmap (Leaflet.heat)
-- [ ] Filtre par période d'inspection (date range)
+- [x] Endpoint `GET /api/restaurants/heatmap?borough=&limit=` — points GPS + score (admin)
+- [x] Vue `/inspection-map` avec Leaflet + Leaflet.heat (CDN)
+- [x] Filtre par quartier (re-fetch API côté client)
 
-### 4.5 Tableau de bord agents d'inspection
+### 4.5 Tableau de bord agents d'inspection ✅
 
-- [ ] Vue `/inspection` (protégée `ROLE_ADMIN`) avec :
-  - Restaurants en **rechute** (grade N pire que grade N-1)
-  - Restaurants **récidivistes** (≥ 3 notes C/Z consécutives)
-  - Classement des cuisines par taux de mauvaises notes
-- [ ] Endpoint `GET /api/restaurants/at-risk` — liste des établissements prioritaires
-- [ ] Export CSV des établissements à risque
+- [x] Vue `/inspection` (protégée `ROLE_ADMIN`)
+  - Établissements à risque (dernière note C ou Z) avec comptage notes consécutives
+  - Classement des pires cuisines (Chart.js barre)
+  - Inspections récentes
+- [x] Endpoint `GET /api/inspection/at-risk?borough=&limit=`
+- [x] Export CSV `GET /api/inspection/at-risk/export.csv`
 
-### 4.6 Historique & tendances (agents + citoyens)
+### 4.6 Historique & tendances (agents + citoyens) ✅
 
-- [ ] Endpoint `GET /api/restaurants/{id}/history` — série temporelle des scores
-- [ ] Graphique d'évolution des scores pour un restaurant (Chart.js, ligne)
-- [ ] Détection automatique de tendance (régression linéaire simple sur les N derniers grades)
+- [x] Graphique d'évolution des scores dans la fiche restaurant (Chart.js ligne)
+- [x] Tendance automatique calculée depuis les grades (±5 points seuil)
 
-### 4.7 Fil d'actualité des inspections récentes (citoyens)
+### 4.7 Fil d'actualité des inspections récentes (citoyens) ✅
 
-- [ ] Endpoint `GET /api/restaurants/recent-inspections?days=7` — inspections des N derniers jours
-- [ ] Section "Nouvelles inspections" dans le dashboard (mise à jour à chaque sync)
+- [x] Endpoint `GET /api/restaurants/recent-inspections?days=&limit=`
+- [x] Section "Inspections Récentes" dans le dashboard
+
+### Extras Phase 4
+
+- [x] Renommage Trash Advisor → **Hygiene Radar** (image plus professionnelle)
+- [x] `POST /api/restaurants/rebuild-cache` — reconstruire le leaderboard Redis depuis MongoDB sans sync externe
+- [x] Suppression des 10 documents legacy (address en string, fausses données de test)
+- [x] Refactoring : `ResponseUtil.errorResponse()` partagé, `getLatestGradeEntry()` helper, `Promise.all` sur la page inspection
 
 ---
 

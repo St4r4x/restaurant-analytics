@@ -1,365 +1,154 @@
-# 🍽️ Restaurant Analytics - Application Complète
+# Restaurant Analytics
 
-Une application complète pour analyser les données MongoDB des restaurants de New York avec une **API REST** et un **dashboard web moderne**.
+Spring Boot REST API + dashboard web pour analyser les données d'inspection sanitaire des restaurants de New York City.
 
----
-
-## 📋 Caractéristiques
-
-✅ **API REST** - 4 use cases + statistiques  
-✅ **Dashboard interactif** - Interface élégante et réactive  
-✅ **Export données** - CSV et JSON  
-✅ **Docker & Docker Compose** - Déploiement facile  
-✅ **Architecture propre** - Couches bien organisées
+**Stack** : Java 11 · Spring Boot 2.6 · MongoDB · Redis · PostgreSQL · Docker Compose · JWT
 
 ---
 
-## 🚀 Démarrage rapide
-
-### Option 1 : Docker Compose (Recommandé) 🐳
+## Démarrage rapide
 
 ```bash
-# 1. Assurer que MongoDB est en place
-# (Si MongoDB n'existe pas déjà) :
-docker-compose down  # nettoyer les conteneurs précédents
+# Copier les variables d'environnement
+cp .env.example .env   # ou utiliser le .env fourni
 
-# 2. Démarrer l'application
-docker-compose up -d
+# Démarrer tous les services (MongoDB + Redis + PostgreSQL + app)
+docker compose up -d --build
 
-# 3. Attendre que les services démarrent (~30s)
-sleep 10
-
-# 4. Ouvrir dans le navigateur
-http://localhost:8080
+# Attendre ~15s que les healthchecks passent
+# Ouvrir le navigateur
+open http://localhost:8080
 ```
 
-**Status**:
+### Comptes par défaut
 
-- MongoDB: http://localhost:27017
-- Application: http://localhost:8080
+| Rôle | Username | Password |
+|---|---|---|
+| Admin | `admin` | `adminpass` |
+| User | `testuser` | `pass123` |
 
-### Option 2 : Lancer le JAR directement
+> **Première utilisation** : connectez-vous en tant qu'admin, puis cliquez sur **🔄 Reconstruire le cache** dans la carte "Top Restaurants Sains" pour peupler le leaderboard Redis.
+
+---
+
+## Fonctionnalités
+
+### Citoyens (tous les utilisateurs)
+
+- **Dashboard** — statistiques par quartier, scores de cuisine, top restaurants sains, favoris, inspections récentes, carte "autour de moi"
+- **Fiche restaurant** (`/restaurant/{id}`) — historique complet des inspections, graphique d'évolution des scores, carte Leaflet, badge de confiance (A/B/C/Z + tendance)
+- **Hygiene Radar** (`/hygiene-radar`) — recherche des restaurants les plus sains par quartier/cuisine
+- **Favoris** — bookmark/unbookmark, liste persistée par compte
+
+### Agents d'inspection (ROLE_ADMIN)
+
+- **Carte de chaleur** (`/inspection-map`) — heatmap Leaflet des scores d'inspection, filtre par quartier
+- **Tableau de bord agents** (`/inspection`) — établissements à risque (dernière note C/Z), pires cuisines (Chart.js), export CSV, inspections récentes
+- **Sync NYC Open Data** — `POST /api/restaurants/refresh` déclenche une ingestion depuis l'API officielle; sync automatique à 02:00 chaque nuit
+
+---
+
+## API REST
+
+Tous les endpoints nécessitent un token JWT (`Authorization: Bearer <token>`).
 
 ```bash
-# Préalable: MongoDB en local sur localhost:27017
+# Obtenir un token
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"pass123"}' | jq -r .accessToken)
+```
 
-# 1. Compiler et packager
+| Endpoint | Auth | Description |
+|---|---|---|
+| `POST /api/auth/login` | — | Connexion, retourne access + refresh token |
+| `POST /api/auth/register` | — | Création de compte |
+| `POST /api/auth/refresh` | — | Renouvellement du token |
+| `GET /api/restaurants/by-borough` | User | Comptage par quartier (Redis TTL 1h) |
+| `GET /api/restaurants/cuisine-scores` | User | Score moyen par quartier pour une cuisine |
+| `GET /api/restaurants/worst-cuisines` | User | Pires cuisines d'un quartier |
+| `GET /api/restaurants/popular-cuisines` | User | Cuisines avec ≥ N restaurants |
+| `GET /api/restaurants/stats` | User | Statistiques globales |
+| `GET /api/restaurants/top` | User | Top restaurants sains (Redis leaderboard) |
+| `GET /api/restaurants/{id}` | User | Fiche complète d'un restaurant |
+| `GET /api/restaurants/recent-inspections` | User | Inspections des N derniers jours |
+| `GET /api/restaurants/nearby` | User | Restaurants à moins de R mètres (2dsphere) |
+| `GET /api/restaurants/hygiene-radar` | User | Restaurants sains par quartier/cuisine |
+| `GET /api/restaurants/heatmap` | **Admin** | Points GPS + score pour heatmap |
+| `POST /api/restaurants/refresh` | **Admin** | Sync NYC Open Data |
+| `POST /api/restaurants/rebuild-cache` | **Admin** | Reconstruire le leaderboard Redis |
+| `GET /api/inspection/at-risk` | **Admin** | Établissements à risque (grade C/Z) |
+| `GET /api/inspection/at-risk/export.csv` | **Admin** | Export CSV |
+| `GET /api/users/me` | User | Profil utilisateur |
+| `GET /api/users/me/bookmarks` | User | Favoris |
+| `POST /api/users/me/bookmarks/{id}` | User | Ajouter un favori |
+| `DELETE /api/users/me/bookmarks/{id}` | User | Retirer un favori |
+
+Documentation Swagger : `http://localhost:8080/swagger-ui.html`
+
+---
+
+## Structure du projet
+
+```
+src/main/java/com/aflokkat/
+├── controller/        # REST endpoints + routes Thymeleaf
+├── service/           # Logique métier
+├── dao/               # Accès MongoDB (interface + impl, pipelines manuels)
+├── domain/            # POJOs (Restaurant, Grade, Address)
+├── dto/               # DTOs de réponse (HeatmapPoint, AtRiskEntry, …)
+├── aggregation/       # DTOs d'agrégation MongoDB
+├── cache/             # RestaurantCacheService (Redis)
+├── sync/              # Client NYC Open Data + SyncService
+├── security/          # JwtUtil + JwtAuthenticationFilter
+├── entity/            # Entités JPA (UserEntity, BookmarkEntity)
+├── repository/        # Spring Data JPA repositories
+├── config/            # SecurityConfig, MongoClientFactory, RedisConfig
+└── util/              # ValidationUtil, ResponseUtil
+
+src/main/resources/templates/
+├── login.html          # Page de connexion
+├── index.html          # Dashboard principal
+├── restaurant.html     # Fiche détail restaurant
+├── hygiene-radar.html  # Recherche restaurants sains
+├── inspection-map.html # Carte de chaleur (admin)
+└── inspection.html     # Tableau de bord agents (admin)
+```
+
+---
+
+## Configuration
+
+Variables d'environnement (`.env`) :
+
+```env
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DATABASE=newyork
+MONGODB_COLLECTION=restaurants
+REDIS_HOST=localhost
+REDIS_PORT=6379
+API_SECRET=<jwt_secret>
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=adminpass
+USER_USERNAME=testuser
+USER_PASSWORD=pass123
+```
+
+---
+
+## Commandes utiles
+
+```bash
+# Build
 mvn clean package -DskipTests
 
-# 2. Lancer l'application
-java -jar target/quickstart-app-1.0-SNAPSHOT.jar
-
-# 3. Accéder via navigateur
-http://localhost:8080
-```
-
-### Option 3 : Maven direct
-
-```bash
-# Compiler et lancer directement
-mvn clean spring-boot:run
-```
-
----
-
-## 📡 Endpoints API
-
-### 1. Restaurants par Quartier (USE CASE 1)
-
-```bash
-curl http://localhost:8080/api/restaurants/by-borough
-```
-
-**Réponse** :
-
-```json
-{
-  "status": "success",
-  "data": [
-    { "id": "Manhattan", "count": 10259 },
-    { "id": "Queens", "count": 6330 }
-  ],
-  "count": 5
-}
-```
-
-### 2. Scores Cuisines/Quartiers (USE CASE 2)
-
-```bash
-curl "http://localhost:8080/api/restaurants/cuisine-scores?cuisine=Italian"
-```
-
-**Réponse** :
-
-```json
-{
-  "status": "success",
-  "cuisine": "Italian",
-  "data": [
-    { "borough": "Manhattan", "avgScore": 12.5 },
-    { "borough": "Queens", "avgScore": 11.8 }
-  ]
-}
-```
-
-### 3. Pires Cuisines (USE CASE 3)
-
-```bash
-curl "http://localhost:8080/api/restaurants/worst-cuisines?borough=Manhattan&limit=5"
-```
-
-### 4. Cuisines Populaires (USE CASE 4)
-
-```bash
-curl "http://localhost:8080/api/restaurants/popular-cuisines?minCount=500"
-```
-
-### 5. Statistiques Globales
-
-```bash
-curl http://localhost:8080/api/restaurants/stats
-```
-
-### 6. Health Check
-
-```bash
-curl http://localhost:8080/api/restaurants/health
-```
-
----
-
-## 🎨 Interface Web
-
-### Fonctionnalités du Dashboard
-
-1. **Restaurants par Quartier**
-   - Tableau avec comptage par quartier
-   - Tri décroissant automatique
-   - Export CSV/JSON
-
-2. **Scores de Cuisine**
-   - Entrée de cuisine personnalisée
-   - Affichage des scores moyens
-   - Comparaison par quartier
-
-3. **Pires Cuisines**
-   - Filtrage par quartier
-   - Limite configurable
-   - Classement du pire au meilleur
-
-4. **Cuisines Populaires**
-   - Seuil de minimum configurable
-   - Tri alphabétique
-   - Export simple
-
-5. **Statistiques Globales**
-   - Vue d'ensemble rapide
-   - Cartes statistiques
-   - Résumé des quartiers
-
----
-
-## 📦 Structure Projet
-
-```
-src/
-├── main/
-│   ├── java/com/aflokkat/
-│   │   ├── Application.java          # Point d'entrée Spring Boot
-│   │   ├── aggregation/              # DTOs d'agrégation
-│   │   ├── controller/                # REST API + Views
-│   │   ├── dao/                      # Couche données
-│   │   ├── domain/                   # Modèles (POJO)
-│   │   ├── service/                  # Logique métier
-│   │   ├── config/                   # Configuration
-│   │   └── util/                     # Utilitaires
-│   └── resources/
-│       ├── templates/
-│       │   └── index.html            # Dashboard UI
-│       └── application.properties
-└── test/                              # Tests unitaires
-```
-
----
-
-## 🔧 Configuration
-
-### Via environment variables
-
-```bash
-export MONGO_URI=mongodb://localhost:27017
-export MONGO_DB=newyork
-export MONGO_COLLECTION=restaurants
-```
-
-### Via application.properties
-
-```properties
-mongodb.uri=mongodb://localhost:27017
-mongodb.database=newyork
-mongodb.collection=restaurants
-```
-
-### Docker Compose (.env)
-
-Créé automatiquement dans docker-compose.yml
-
----
-
-## 🐛 Troubleshooting
-
-### Erreur : "Connection refused"
-
-```bash
-# Vérifier que MongoDB est lancé
-docker ps | grep mongo
-
-# Si absent, tous les services :
-docker-compose up -d
-```
-
-### Erreur : "Database not found"
-
-```bash
-# Vérifier les données
-mongosh localhost:27017/newyork
-> db.restaurants.count()
-```
-
-### Port 8080 déjà utilisé
-
-```bash
-# Modifier docker-compose.yml ou application.properties
-server.port=8081
-```
-
-### Lenteur au chargement
-
-```bash
-# Les indices aident les performances
-# Vérifiez qu'ils sont créés :
-mongosh localhost:27017/newyork
-> db.restaurants.getIndexes()
-```
-
----
-
-## 📊 Exemples de Requêtes
-
-### Avec cURL
-
-```bash
-# Tous les restaurants par quartier
-curl -X GET "http://localhost:8080/api/restaurants/by-borough"
-
-# Scores italiens
-curl -X GET "http://localhost:8080/api/restaurants/cuisine-scores?cuisine=Chinese"
-
-# Pires cuisines à Queens (top 3)
-curl -X GET "http://localhost:8080/api/restaurants/worst-cuisines?borough=Queens&limit=3"
-
-# Cuisines avec >1000 restaurants
-curl -X GET "http://localhost:8080/api/restaurants/popular-cuisines?minCount=1000"
-```
-
-### Avec JavaScript (depuis le navigateur)
-
-```javascript
-// Charger les données
-fetch("http://localhost:8080/api/restaurants/by-borough")
-  .then((res) => res.json())
-  .then((data) => console.log(data))
-  .catch((err) => console.error(err));
-```
-
----
-
-## 🧪 Tests
-
-```bash
-# Lancer tous les tests
+# Tests unitaires (21 tests, pas de MongoDB requis)
 mvn test
 
-# Tests spécifiques
-mvn test -Dtest=RestaurantDAOIntegrationTest
+# Logs Docker
+docker compose logs -f app
 
-# Tests avec couverture
-mvn clean test jacoco:report
+# Reconstruire le cache Redis depuis MongoDB (admin)
+curl -X POST http://localhost:8080/api/restaurants/rebuild-cache \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
-
----
-
-## 🐳 Docker
-
-### Construire l'image
-
-```bash
-docker build -t restaurant-app:latest .
-```
-
-### Lancer le conteneur
-
-```bash
-docker run -p 8080:8080 \
-  -e MONGO_URI=mongodb://mongo:27017 \
-  restaurant-app:latest
-```
-
-### Avec Docker Compose (tout compris)
-
-```bash
-docker-compose up -d          # Démarrer
-docker-compose logs -f app    # Voir les logs
-docker-compose down           # Arrêter
-```
-
----
-
-## 📈 Performance
-
-- **Requêtes optimisées** : Indices MongoDB automatiques
-- **Caching** : En développement
-- **Export rapide** : JSON/CSV natif
-- **API responsive** : ~200ms par requête
-
----
-
-## 🤝 Contribution
-
-Pour améliorer l'application :
-
-1. Créer une branche (`git checkout -b feature/amélioration`)
-2. Commit les changements (`git commit -m "Amélioration X"`)
-3. Push et Pull Request
-
----
-
-## 📝 License
-
-MIT - Libre d'utilisation
-
----
-
-## ❓ FAQ
-
-**Q: Comment charger les données?**  
-A: Les données doivent être importées dans MongoDB en amont.
-
-**Q: Peut-on modifier les requêtes?**  
-A: Oui via RestaurantService.java et RestaurantDAO.java
-
-**Q: Support de la pagination?**  
-A: Oui, modifier le DAO pour ajouter skip/limit aux endpoints
-
-**Q: Comment déplacer en prod?**  
-A: Utiliser docker-compose avec variables d'env MongoDB prod
-
----
-
-**Besoin d'aide?** Vérifier les logs :
-
-```bash
-docker-compose logs app -f
-```
-
-Bon analyses ! 🚀
