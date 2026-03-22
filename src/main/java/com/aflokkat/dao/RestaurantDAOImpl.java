@@ -134,7 +134,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public Map<String, Long> getStatisticsByBorough() {
+    public Map<String, Long> findStatisticsByBorough() {
         Map<String, Long> stats = new HashMap<>();
         countByField("borough").forEach(count -> stats.put(count.getId(), (long) count.getCount()));
         return stats;
@@ -152,13 +152,13 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public List<AggregationCount> getRestaurantCountByBorough() {
+    public List<AggregationCount> findCountByBorough() {
         logger.debug("Requête: Comptage des restaurants par quartier");
         return countByField("borough");
     }
     
     @Override
-    public List<BoroughCuisineScore> getAverageScoreByCuisineAndBorough(String cuisine) {
+    public List<BoroughCuisineScore> findAverageScoreByCuisineAndBorough(String cuisine) {
         logger.debug("Requête: Score moyen par quartier pour cuisine '{}'", cuisine);
         return aggregate(Arrays.asList(
             new Document("$match", new Document("cuisine", cuisine)),
@@ -171,7 +171,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public List<CuisineScore> getWorstCuisinesByAverageScoreInBorough(String borough, int limit) {
+    public List<CuisineScore> findWorstCuisinesByAverageScoreInBorough(String borough, int limit) {
         return aggregate(Arrays.asList(
             new Document("$match", new Document("borough", borough)),
             new Document("$unwind", "$grades"),
@@ -185,7 +185,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
+    public List<CuisineScore> findWorstCuisinesByAverageScore(int limit) {
         return aggregate(Arrays.asList(
             new Document("$unwind", "$grades"),
             new Document("$group", new Document()
@@ -207,7 +207,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<String> getDistinctCuisines() {
+    public List<String> findDistinctCuisines() {
         List<String> results = new ArrayList<>();
         restaurantCollection.distinct("cuisine", String.class)
             .forEach(results::add);
@@ -216,7 +216,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<String> getCuisinesWithMinimumCount(int minCount) {
+    public List<String> findCuisinesWithMinimumCount(int minCount) {
         List<String> results = new ArrayList<>();
         aggregate(Arrays.asList(
             new Document("$group", new Document()
@@ -298,7 +298,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<HeatmapPoint> getHeatmapData(String borough, int limit) {
+    public List<HeatmapPoint> findHeatmapData(String borough, int limit) {
         List<Document> pipeline = new ArrayList<>();
         if (borough != null && !borough.isEmpty()) {
             pipeline.add(new Document("$match", new Document("borough", borough)));
@@ -316,7 +316,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit) {
+    public List<AtRiskEntry> findAtRiskRestaurants(String borough, int limit) {
         List<Document> pipeline = new ArrayList<>();
         if (borough != null && !borough.isEmpty()) {
             pipeline.add(new Document("$match", new Document("borough", borough)));

@@ -40,7 +40,7 @@ public class RestaurantService {
      * USE CASE 1: Nombre de restaurants par quartier
      */
     public List<AggregationCount> getRestaurantCountByBorough() {
-        return restaurantDAO.getRestaurantCountByBorough();
+        return restaurantDAO.findCountByBorough();
     }
     
     // =============== USE CASE 2 ===============
@@ -50,7 +50,7 @@ public class RestaurantService {
      */
     public List<BoroughCuisineScore> getAverageScoreByCuisineAndBorough(String cuisine) {
         ValidationUtil.requireNonEmpty(cuisine, "cuisine");
-        return restaurantDAO.getAverageScoreByCuisineAndBorough(cuisine);
+        return restaurantDAO.findAverageScoreByCuisineAndBorough(cuisine);
     }
     
     // =============== USE CASE 3 ===============
@@ -61,7 +61,7 @@ public class RestaurantService {
     public List<CuisineScore> getWorstCuisinesByAverageScoreInBorough(String borough, int limit) {
         ValidationUtil.requireNonEmpty(borough, "borough");
         ValidationUtil.requirePositive(limit, "limit");
-        return restaurantDAO.getWorstCuisinesByAverageScoreInBorough(borough, limit);
+        return restaurantDAO.findWorstCuisinesByAverageScoreInBorough(borough, limit);
     }
     
     // =============== USE CASE 4 ===============
@@ -71,7 +71,7 @@ public class RestaurantService {
      */
     public List<String> getCuisinesWithMinimumCount(int minCount) {
         ValidationUtil.requirePositive(minCount, "minCount");
-        return restaurantDAO.getCuisinesWithMinimumCount(minCount);
+        return restaurantDAO.findCuisinesWithMinimumCount(minCount);
     }
     
     // =============== GENERIC QUERIES ===============
@@ -87,7 +87,7 @@ public class RestaurantService {
      * Retourne les statistiques par quartier
      */
     public Map<String, Long> getStatisticsByBorough() {
-        return restaurantDAO.getStatisticsByBorough();
+        return restaurantDAO.findStatisticsByBorough();
     }
     
     // =============== HYGIENE RADAR ===============
@@ -113,8 +113,8 @@ public class RestaurantService {
 
         // Sinon : logique "pires cuisines"
         List<CuisineScore> worstCuisines = allBoroughs
-                ? restaurantDAO.getWorstCuisinesByAverageScore(limit)
-                : restaurantDAO.getWorstCuisinesByAverageScoreInBorough(borough, limit);
+                ? restaurantDAO.findWorstCuisinesByAverageScore(limit)
+                : restaurantDAO.findWorstCuisinesByAverageScoreInBorough(borough, limit);
 
         if (maxScore != null) {
             worstCuisines = worstCuisines.stream()
@@ -151,7 +151,7 @@ public class RestaurantService {
      * Retourne tous les types de cuisine distincts, triés alphabétiquement
      */
     public List<String> getDistinctCuisines() {
-        return restaurantDAO.getDistinctCuisines();
+        return restaurantDAO.findDistinctCuisines();
     }
 
     /**
@@ -166,7 +166,7 @@ public class RestaurantService {
         return restaurantDAO.findAll(limit);
     }
 
-    public Restaurant findByRestaurantId(String restaurantId) {
+    public Restaurant getByRestaurantId(String restaurantId) {
         ValidationUtil.requireNonEmpty(restaurantId, "restaurantId");
         return restaurantDAO.findByRestaurantId(restaurantId);
     }
@@ -176,7 +176,7 @@ public class RestaurantService {
         return restaurantDAO.findRecentlyInspected(days, limit);
     }
 
-    public List<Restaurant> findNearby(double lat, double lng, int radiusMeters, int limit) {
+    public List<Restaurant> getNearbyRestaurants(double lat, double lng, int radiusMeters, int limit) {
         ValidationUtil.requirePositive(radiusMeters, "radiusMeters");
         ValidationUtil.requirePositive(limit, "limit");
         return restaurantDAO.findNearby(lat, lng, radiusMeters, limit);
@@ -184,12 +184,12 @@ public class RestaurantService {
 
     public List<HeatmapPoint> getHeatmapData(String borough, int limit) {
         ValidationUtil.requirePositive(limit, "limit");
-        return restaurantDAO.getHeatmapData(borough, limit);
+        return restaurantDAO.findHeatmapData(borough, limit);
     }
 
     public List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit) {
         ValidationUtil.requirePositive(limit, "limit");
-        return restaurantDAO.getAtRiskRestaurants(borough, limit);
+        return restaurantDAO.findAtRiskRestaurants(borough, limit);
     }
 
     // ── Restaurant computed fields (business logic extracted from POJO) ───────

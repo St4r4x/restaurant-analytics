@@ -44,37 +44,37 @@ public interface RestaurantDAO {
     /**
      * Retourne les statistiques par quartier
      */
-    Map<String, Long> getStatisticsByBorough();
+    Map<String, Long> findStatisticsByBorough();
     
     /**
      * USE CASE 1: Compte les restaurants par quartier
      */
-    List<AggregationCount> getRestaurantCountByBorough();
+    List<AggregationCount> findCountByBorough();
     
     /**
      * USE CASE 2: Calcule le score moyen par quartier pour une cuisine donnée
      */
-    List<BoroughCuisineScore> getAverageScoreByCuisineAndBorough(String cuisine);
+    List<BoroughCuisineScore> findAverageScoreByCuisineAndBorough(String cuisine);
     
     /**
      * USE CASE 3: Retourne les pires cuisines (score moyen le plus bas) dans un quartier
      */
-    List<CuisineScore> getWorstCuisinesByAverageScoreInBorough(String borough, int limit);
+    List<CuisineScore> findWorstCuisinesByAverageScoreInBorough(String borough, int limit);
 
     /**
      * USE CASE 3 (global): Pires cuisines tous quartiers confondus
      */
-    List<CuisineScore> getWorstCuisinesByAverageScore(int limit);
+    List<CuisineScore> findWorstCuisinesByAverageScore(int limit);
 
     /**
      * USE CASE 4: Retourne les cuisines avec un minimum de restaurants
      */
-    List<String> getCuisinesWithMinimumCount(int minCount);
+    List<String> findCuisinesWithMinimumCount(int minCount);
 
     /**
      * Retourne la liste de tous les types de cuisine distincts, triés alphabétiquement
      */
-    List<String> getDistinctCuisines();
+    List<String> findDistinctCuisines();
 
     /**
      * Retourne un restaurant aléatoire via $sample
@@ -114,13 +114,13 @@ public interface RestaurantDAO {
      * Returns heatmap data points (lat, lng, weight=score) for the map overlay.
      * @param borough optional borough filter (null = all)
      */
-    List<HeatmapPoint> getHeatmapData(String borough, int limit);
+    List<HeatmapPoint> findHeatmapData(String borough, int limit);
 
     /**
      * Returns restaurants with a bad last grade (C or Z).
      * @param borough optional borough filter (null = all)
      */
-    List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit);
+    List<AtRiskEntry> findAtRiskRestaurants(String borough, int limit);
 
     /**
      * Ferme la connexion

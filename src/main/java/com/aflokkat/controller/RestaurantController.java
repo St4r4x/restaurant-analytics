@@ -316,7 +316,7 @@ public class RestaurantController {
     @GetMapping("/{restaurantId}")
     public ResponseEntity<Map<String, Object>> getById(@PathVariable String restaurantId) {
         try {
-            Restaurant data = restaurantService.findByRestaurantId(restaurantId);
+            Restaurant data = restaurantService.getByRestaurantId(restaurantId);
             Map<String, Object> response = new HashMap<>();
             if (data == null) {
                 response.put("status", "error");
@@ -358,7 +358,7 @@ public class RestaurantController {
             @RequestParam(defaultValue = "500") int radius,
             @RequestParam(defaultValue = "20") int limit) {
         try {
-            List<Map<String, Object>> data = restaurantService.findNearby(lat, lng, radius, limit)
+            List<Map<String, Object>> data = restaurantService.getNearbyRestaurants(lat, lng, radius, limit)
                     .stream().map(RestaurantService::toView).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
