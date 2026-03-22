@@ -2,43 +2,76 @@
 
 ## Project Overview
 
-Spring Boot REST API + web dashboard for analyzing New York restaurant data stored in MongoDB.
+Spring Boot REST API + web dashboard for analyzing New York restaurant inspection data.
+Data is synced live from the **NYC Open Data API** (`data.cityofnewyork.us`) into MongoDB.
 Academic project (Aflokkat / big data module).
 
 ## Stack
 
 - **Language**: Java 11
 - **Framework**: Spring Boot 2.6.15
-- **Database**: MongoDB (driver: `mongodb-driver-sync`)
+- **Primary DB**: MongoDB (driver: `mongodb-driver-sync`, raw aggregation pipelines — no Spring Data MongoDB)
+- **RDBMS**: PostgreSQL 15 — users, bookmarks (Spring JPA / Hibernate)
+- **Cache**: Redis 7 (TTL-based, via `RestaurantCacheService`)
+- **Security**: JWT (access 15 min / refresh 7 days), Spring Security
 - **Build**: Maven (`mvn`)
-- **Config**: dotenv-java (`.env` file at project root)
+- **Config**: `src/main/resources/application.properties` (main config, no dotenv in production)
 - **Testing**: JUnit 4 + Mockito
-- **Deployment**: Docker / Docker Compose
+- **Deployment**: Docker / Docker Compose (plugin — use `docker compose`, not `docker-compose`)
 
 ## Architecture
 
 ```
 com.aflokkat/
-├── Application.java          # Spring Boot entry point
-├── controller/               # REST endpoints + Thymeleaf view routes
-├── service/                  # Business logic
-├── dao/                      # MongoDB data access (interface + impl)
-├── domain/                   # POJOs (Restaurant)
-├── aggregation/              # Aggregation result DTOs
-├── config/                   # MongoClientFactory, AppConfig
-└── util/                     # ValidationUtil
+├── Application.java
+├── config/           # AppConfig, MongoClientFactory, RedisConfig, SecurityConfig, OpenApiConfig
+├── controller/       # RestaurantController, InspectionController, AuthController, UserController, ViewController
+├── service/          # RestaurantService, AuthService
+├── dao/              # RestaurantDAO + Impl, UserDAO + Impl (MongoDB)
+├── repository/       # UserRepository, BookmarkRepository (Spring JPA / PostgreSQL)
+├── cache/            # RestaurantCacheService (Redis)
+├── sync/             # NycOpenDataClient, SyncService, NycApiRestaurantDto, SyncResult
+├── domain/           # Restaurant, Address, Grade, User (MongoDB POJOs)
+├── entity/           # UserEntity, BookmarkEntity (JPA entities)
+├── dto/              # AuthRequest, JwtResponse, RegisterRequest, RefreshRequest, HeatmapPoint, AtRiskEntry, TopRestaurantEntry
+├── aggregation/      # AggregationCount, BoroughCuisineScore, CuisineScore
+├── security/         # JwtUtil, JwtAuthenticationFilter
+└── util/             # ValidationUtil, ResponseUtil
 ```
 
-## Configuration
+## Data Flow
 
-Environment variables (via `.env` or Docker):
-```
-MONGODB_URI=mongodb://localhost:27017
-MONGODB_DATABASE=newyork
-MONGODB_COLLECTION=restaurants
+NYC Open Data API → `NycOpenDataClient` → `SyncService` → MongoDB (`newyork.restaurants`)
+MongoDB → `RestaurantDAO` → `RestaurantService` → REST controllers → JSON responses
+Hot data → `RestaurantCacheService` (Redis, TTL 3600s)
+Users/bookmarks → PostgreSQL via Spring JPA
+
+## Configuration (`application.properties`)
+
+```properties
+mongodb.uri=mongodb://mongodb:27017
+mongodb.database=newyork
+mongodb.collection=restaurants
+
+spring.datasource.url=jdbc:postgresql://postgres:5432/restaurantdb
+spring.datasource.username=restaurant
+spring.datasource.password=restaurant
+
+redis.host=localhost
+redis.port=6379
+redis.cache.ttl-seconds=3600
+
+nyc.api.url=https://data.cityofnewyork.us/resource/43nn-pn8j.json
+nyc.api.app_token=          # optional — avoids rate limiting
+nyc.api.page-size=1000
+nyc.api.max_records=0       # 0 = unlimited
+
+jwt.secret=<min 32 chars>
+jwt.access.expiration.ms=900000
+jwt.refresh.expiration.ms=604800000
 ```
 
-Docker Compose uses `MONGO_URI` and `MONGO_DB` (different keys — see `docker-compose.yml`).
+Docker Compose sets `MONGODB_URI`, `MONGODB_DATABASE`, `MONGODB_COLLECTION`, `REDIS_HOST`, `REDIS_PORT` as env vars on the app container.
 
 ## Common Commands
 
@@ -55,27 +88,34 @@ mvn test
 mvn test -Dtest=RestaurantDAOIntegrationTest
 
 # Docker
-docker-compose up -d
-docker-compose logs -f app
-docker-compose down
+docker compose up -d
+docker compose logs -f app
+docker compose down
 ```
 
 ## API Endpoints
 
 | Endpoint | Description |
 |---|---|
+| `POST /api/auth/register` | Register user |
+| `POST /api/auth/login` | Login → JWT |
+| `POST /api/auth/refresh` | Refresh token |
 | `GET /api/restaurants/by-borough` | Count per borough |
 | `GET /api/restaurants/cuisine-scores?cuisine=X` | Avg score by borough for a cuisine |
 | `GET /api/restaurants/worst-cuisines?borough=X&limit=N` | Worst cuisines in a borough |
 | `GET /api/restaurants/popular-cuisines?minCount=N` | Cuisines with >= N restaurants |
 | `GET /api/restaurants/stats` | Global stats |
 | `GET /api/restaurants/health` | Health check |
+| `GET /api/inspections/*` | Inspection endpoints |
+| `GET /api/users/*` | User/bookmark endpoints |
+| `GET /swagger-ui.html` | Swagger UI |
 
 App runs on `http://localhost:8080`.
 
 ## Key Notes
 
-- Integration tests require a live MongoDB instance on `localhost:27017` with the `newyork` DB loaded
-- Data import: use `init-restaurants.js` or import `restaurants.json` manually
-- No Spring Data MongoDB — uses raw `mongodb-driver-sync` with manual aggregation pipelines
-- The `GeocodingService` caches coordinates internally
+- Data comes from NYC Open Data API (no `restaurants.json` import needed in normal use)
+- `init-restaurants.js` at project root is a broken empty directory owned by root — do NOT mount it in Docker; the volume mount was removed from `docker-compose.yml`
+- Integration tests require live MongoDB on `localhost:27017` with `newyork` DB populated
+- `nyc.api.max_records=0` means unlimited — set a small value (e.g. 5000) for local testing to avoid long sync
+- Swagger available at `http://localhost:8080/swagger-ui.html`
