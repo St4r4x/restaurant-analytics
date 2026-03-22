@@ -23,7 +23,6 @@ import com.aflokkat.cache.RestaurantCacheService;
 import com.aflokkat.aggregation.AggregationCount;
 import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
-import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.dto.HeatmapPoint;
 import com.aflokkat.dto.TopRestaurantEntry;
 import com.aflokkat.domain.Restaurant;
@@ -43,9 +42,6 @@ public class RestaurantController {
 
     @Autowired
     private RestaurantService restaurantService;
-
-    @Autowired
-    private RestaurantDAO restaurantDAO;
 
     @Autowired
     private SyncService syncService;
@@ -320,7 +316,7 @@ public class RestaurantController {
     @GetMapping("/{restaurantId}")
     public ResponseEntity<Map<String, Object>> getById(@PathVariable String restaurantId) {
         try {
-            Restaurant data = restaurantDAO.findByRestaurantId(restaurantId);
+            Restaurant data = restaurantService.findByRestaurantId(restaurantId);
             Map<String, Object> response = new HashMap<>();
             if (data == null) {
                 response.put("status", "error");
@@ -341,7 +337,7 @@ public class RestaurantController {
             @RequestParam(defaultValue = "3650") int days,
             @RequestParam(defaultValue = "20") int limit) {
         try {
-            List<Map<String, Object>> data = restaurantDAO.findRecentlyInspected(days, limit)
+            List<Map<String, Object>> data = restaurantService.getRecentlyInspected(days, limit)
                     .stream().map(RestaurantService::toView).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -362,7 +358,7 @@ public class RestaurantController {
             @RequestParam(defaultValue = "500") int radius,
             @RequestParam(defaultValue = "20") int limit) {
         try {
-            List<Map<String, Object>> data = restaurantDAO.findNearby(lat, lng, radius, limit)
+            List<Map<String, Object>> data = restaurantService.findNearby(lat, lng, radius, limit)
                     .stream().map(RestaurantService::toView).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -381,7 +377,7 @@ public class RestaurantController {
             @RequestParam(required = false) String borough,
             @RequestParam(defaultValue = "500") int limit) {
         try {
-            List<HeatmapPoint> data = restaurantDAO.getHeatmapData(borough, limit);
+            List<HeatmapPoint> data = restaurantService.getHeatmapData(borough, limit);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);
@@ -398,7 +394,7 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Object>> rebuildCache(
             @RequestParam(defaultValue = "25000") int limit) {
         try {
-            List<Restaurant> restaurants = restaurantDAO.findAll(limit);
+            List<Restaurant> restaurants = restaurantService.getAllRestaurants(limit);
             cacheService.invalidateAll();
             cacheService.updateTopRestaurants(restaurants);
             Map<String, Object> response = new HashMap<>();

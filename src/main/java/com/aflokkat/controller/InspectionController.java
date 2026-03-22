@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.dto.AtRiskEntry;
+import com.aflokkat.service.RestaurantService;
 import com.aflokkat.util.ResponseUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class InspectionController {
 
     @Autowired
-    private RestaurantDAO restaurantDAO;
+    private RestaurantService restaurantService;
 
     @Operation(summary = "At-risk restaurants", description = "Returns restaurants whose last grade is C or Z. Admin only.")
     @GetMapping("/at-risk")
@@ -39,7 +39,7 @@ public class InspectionController {
             @RequestParam(required = false) String borough,
             @RequestParam(defaultValue = "50") int limit) {
         try {
-            List<AtRiskEntry> data = restaurantDAO.getAtRiskRestaurants(borough, limit);
+            List<AtRiskEntry> data = restaurantService.getAtRiskRestaurants(borough, limit);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);
@@ -56,7 +56,7 @@ public class InspectionController {
             @RequestParam(required = false) String borough,
             @RequestParam(defaultValue = "500") int limit) {
         try {
-            List<AtRiskEntry> data = restaurantDAO.getAtRiskRestaurants(borough, limit);
+            List<AtRiskEntry> data = restaurantService.getAtRiskRestaurants(borough, limit);
             StringBuilder sb = new StringBuilder();
             sb.append("restaurant_id,name,borough,cuisine,lastGrade,lastScore,consecutiveBadGrades\n");
             for (AtRiskEntry e : data) {
