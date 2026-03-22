@@ -17,6 +17,9 @@ import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.domain.Address;
 import com.aflokkat.domain.Grade;
 import com.aflokkat.domain.Restaurant;
+import com.aflokkat.dto.AtRiskEntry;
+import com.aflokkat.dto.HeatmapPoint;
+import com.aflokkat.util.ValidationUtil;
 
 /**
  * Service layer pour gérer la logique métier
@@ -46,6 +49,7 @@ public class RestaurantService {
      * USE CASE 2: Score moyen par quartier pour une cuisine donnée
      */
     public List<BoroughCuisineScore> getAverageScoreByCuisineAndBorough(String cuisine) {
+        ValidationUtil.requireNonEmpty(cuisine, "cuisine");
         return restaurantDAO.getAverageScoreByCuisineAndBorough(cuisine);
     }
     
@@ -55,6 +59,8 @@ public class RestaurantService {
      * USE CASE 3: Pires cuisines (score moyen le plus bas) dans un quartier
      */
     public List<CuisineScore> getWorstCuisinesByAverageScoreInBorough(String borough, int limit) {
+        ValidationUtil.requireNonEmpty(borough, "borough");
+        ValidationUtil.requirePositive(limit, "limit");
         return restaurantDAO.getWorstCuisinesByAverageScoreInBorough(borough, limit);
     }
     
@@ -64,6 +70,7 @@ public class RestaurantService {
      * USE CASE 4: Cuisines avec minimum de restaurants
      */
     public List<String> getCuisinesWithMinimumCount(int minCount) {
+        ValidationUtil.requirePositive(minCount, "minCount");
         return restaurantDAO.getCuisinesWithMinimumCount(minCount);
     }
     
@@ -91,6 +98,8 @@ public class RestaurantService {
      * @param restaurantLimit  nombre maximum de restaurants retournés
      */
     public List<Restaurant> getHygieneRadarRestaurants(String borough, int limit, Double maxScore, int restaurantLimit, String cuisineFilter) {
+        ValidationUtil.requirePositive(limit, "limit");
+        ValidationUtil.requirePositive(restaurantLimit, "restaurantLimit");
         boolean allBoroughs = (borough == null || borough.isEmpty());
         boolean hasCuisineFilter = (cuisineFilter != null && !cuisineFilter.isEmpty());
 
@@ -150,6 +159,37 @@ public class RestaurantService {
      */
     public Restaurant getRandomRestaurant() {
         return restaurantDAO.findRandom();
+    }
+
+    public List<Restaurant> getAllRestaurants(int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        return restaurantDAO.findAll(limit);
+    }
+
+    public Restaurant findByRestaurantId(String restaurantId) {
+        ValidationUtil.requireNonEmpty(restaurantId, "restaurantId");
+        return restaurantDAO.findByRestaurantId(restaurantId);
+    }
+
+    public List<Restaurant> getRecentlyInspected(int days, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        return restaurantDAO.findRecentlyInspected(days, limit);
+    }
+
+    public List<Restaurant> findNearby(double lat, double lng, int radiusMeters, int limit) {
+        ValidationUtil.requirePositive(radiusMeters, "radiusMeters");
+        ValidationUtil.requirePositive(limit, "limit");
+        return restaurantDAO.findNearby(lat, lng, radiusMeters, limit);
+    }
+
+    public List<HeatmapPoint> getHeatmapData(String borough, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        return restaurantDAO.getHeatmapData(borough, limit);
+    }
+
+    public List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        return restaurantDAO.getAtRiskRestaurants(borough, limit);
     }
 
     // ── Restaurant computed fields (business logic extracted from POJO) ───────

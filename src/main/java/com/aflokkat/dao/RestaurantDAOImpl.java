@@ -30,7 +30,7 @@ import com.aflokkat.config.MongoClientFactory;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.dto.AtRiskEntry;
 import com.aflokkat.dto.HeatmapPoint;
-import com.aflokkat.util.ValidationUtil;
+
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -90,7 +90,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<Restaurant> findAll(int limit) {
-        ValidationUtil.requirePositive(limit, "limit");
         List<Restaurant> results = new ArrayList<>();
         // type 3 = BSON embedded document — skip legacy docs where address is a plain string
         restaurantCollection.find(new Document("address", new Document("$type", 3)))
@@ -101,8 +100,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<Restaurant> findByCuisine(String cuisine, int limit) {
-        ValidationUtil.requireNonEmpty(cuisine, "cuisine");
-        ValidationUtil.requirePositive(limit, "limit");
         List<Restaurant> results = new ArrayList<>();
         Document filter = new Document("cuisine", cuisine);
         
@@ -115,10 +112,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<Restaurant> findWithFilters(Map<String, Object> filters, int limit) {
-        ValidationUtil.requirePositive(limit, "limit");
-        if (filters == null || filters.isEmpty()) {
-            throw new IllegalArgumentException("filters ne peut pas être null ou vide");
-        }
         List<Restaurant> results = new ArrayList<>();
         // type 3 = BSON embedded document — skip legacy docs where address is a plain string
         Document filterDoc = new Document(filters).append("address", new Document("$type", 3));
@@ -136,7 +129,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public long countByCuisine(String cuisine) {
-        ValidationUtil.requireNonEmpty(cuisine, "cuisine");
         Document filter = new Document("cuisine", cuisine);
         return restaurantCollection.countDocuments(filter);
     }
@@ -150,7 +142,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<AggregationCount> countByField(String fieldName) {
-        ValidationUtil.validateFieldName(fieldName);
         logger.debug("Agrégation: comptage par champ '{}'", fieldName);
         return aggregate(Arrays.asList(
             new Document("$group", new Document()
@@ -168,7 +159,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<BoroughCuisineScore> getAverageScoreByCuisineAndBorough(String cuisine) {
-        ValidationUtil.requireNonEmpty(cuisine, "cuisine");
         logger.debug("Requête: Score moyen par quartier pour cuisine '{}'", cuisine);
         return aggregate(Arrays.asList(
             new Document("$match", new Document("cuisine", cuisine)),
@@ -182,8 +172,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<CuisineScore> getWorstCuisinesByAverageScoreInBorough(String borough, int limit) {
-        ValidationUtil.requireNonEmpty(borough, "borough");
-        ValidationUtil.requirePositive(limit, "limit");
         return aggregate(Arrays.asList(
             new Document("$match", new Document("borough", borough)),
             new Document("$unwind", "$grades"),
@@ -198,7 +186,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
-        ValidationUtil.requirePositive(limit, "limit");
         return aggregate(Arrays.asList(
             new Document("$unwind", "$grades"),
             new Document("$group", new Document()
@@ -230,7 +217,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
     @Override
     public List<String> getCuisinesWithMinimumCount(int minCount) {
-        ValidationUtil.requirePositive(minCount, "minCount");
         List<String> results = new ArrayList<>();
         aggregate(Arrays.asList(
             new Document("$group", new Document()
@@ -272,13 +258,11 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
     @Override
     public Restaurant findByRestaurantId(String restaurantId) {
-        ValidationUtil.requireNonEmpty(restaurantId, "restaurantId");
         return restaurantCollection.find(new Document("restaurant_id", restaurantId)).first();
     }
 
     @Override
     public List<Restaurant> findRecentlyInspected(int days, int limit) {
-        ValidationUtil.requirePositive(limit, "limit");
         long cutoffMs = System.currentTimeMillis() - (long) days * 24 * 60 * 60 * 1000;
         java.util.Date cutoff = new java.util.Date(cutoffMs);
         // Use $toDate to handle both BSON Date and ISO string formats
@@ -301,7 +285,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
     @Override
     public List<Restaurant> findNearby(double lat, double lng, int radiusMeters, int limit) {
-        ValidationUtil.requirePositive(limit, "limit");
         List<Document> pipeline = Arrays.asList(
             new Document("$geoNear", new Document()
                 .append("near", new Document("type", "Point")
@@ -316,7 +299,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
     @Override
     public List<HeatmapPoint> getHeatmapData(String borough, int limit) {
-        ValidationUtil.requirePositive(limit, "limit");
         List<Document> pipeline = new ArrayList<>();
         if (borough != null && !borough.isEmpty()) {
             pipeline.add(new Document("$match", new Document("borough", borough)));
@@ -335,7 +317,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
     @Override
     public List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit) {
-        ValidationUtil.requirePositive(limit, "limit");
         List<Document> pipeline = new ArrayList<>();
         if (borough != null && !borough.isEmpty()) {
             pipeline.add(new Document("$match", new Document("borough", borough)));
