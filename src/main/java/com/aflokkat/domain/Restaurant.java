@@ -1,8 +1,6 @@
 package com.aflokkat.domain;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
@@ -89,66 +87,6 @@ public class Restaurant {
     public List<Grade> getGrades() { return grades; }
     public void setGrades(List<Grade> grades) { this.grades = grades; }
 
-    // ---- Computed badge fields (not stored in MongoDB) ----
-
-    private Grade getLatestGradeEntry() {
-        if (grades == null || grades.isEmpty()) return null;
-        return grades.stream()
-            .filter(g -> g.getDate() != null)
-            .max(Comparator.comparing(Grade::getDate))
-            .orElse(null);
-    }
-
-    public String getLatestGrade() {
-        Grade g = getLatestGradeEntry();
-        return g != null ? g.getGrade() : null;
-    }
-
-    public Integer getLatestScore() {
-        Grade g = getLatestGradeEntry();
-        return (g != null && g.getScore() != null) ? g.getScore() : null;
-    }
-
-    public String getTrend() {
-        if (grades == null || grades.size() < 2) return "stable";
-        List<Grade> sorted = grades.stream()
-            .filter(g -> g.getDate() != null && g.getScore() != null)
-            .sorted(Comparator.comparing(Grade::getDate).reversed())
-            .collect(Collectors.toList());
-        if (sorted.size() < 2) return "stable";
-        int recent = sorted.get(0).getScore();
-        int prev = sorted.get(1).getScore();
-        // Lower score = better (fewer violations)
-        if (recent < prev - 5) return "improving";
-        if (recent > prev + 5) return "worsening";
-        return "stable";
-    }
-
-    public String getBadgeColor() {
-        String g = getLatestGrade();
-        if (g == null || g.isEmpty()) return "red";
-        switch (g) {
-            case "A": return "green";
-            case "B": return "yellow";
-            case "C": return "orange";
-            default:  return "red"; // Z, N, P, etc.
-        }
-    }
-
-    public Double getLatitude() {
-        if (address != null && address.getCoord() != null && address.getCoord().size() >= 2) {
-            return address.getCoord().get(1); // GeoJSON: [longitude, latitude]
-        }
-        return null;
-    }
-
-    public Double getLongitude() {
-        if (address != null && address.getCoord() != null && address.getCoord().size() >= 2) {
-            return address.getCoord().get(0); // GeoJSON: [longitude, latitude]
-        }
-        return null;
-    }
-    
     @Override
     public String toString() {
         return "Restaurant{" +
@@ -157,8 +95,6 @@ public class Restaurant {
                 ", cuisine='" + cuisine + '\'' +
                 ", borough='" + borough + '\'' +
                 ", address=" + address +
-                ", latitude=" + getLatitude() +
-                ", longitude=" + getLongitude() +
                 '}';
     }
 }

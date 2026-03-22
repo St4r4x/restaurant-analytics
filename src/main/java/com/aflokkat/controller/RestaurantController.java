@@ -3,6 +3,7 @@ package com.aflokkat.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -176,11 +177,12 @@ public class RestaurantController {
             @RequestParam(required = false) String cuisine) {
         try {
             List<Restaurant> restaurants = restaurantService.getHygieneRadarRestaurants(borough, limit, maxScore, restaurantLimit, cuisine);
+            List<Map<String, Object>> views = restaurants.stream().map(RestaurantService::toView).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("borough", borough);
-            response.put("data", restaurants);
-            response.put("count", restaurants.size());
+            response.put("data", views);
+            response.put("count", views.size());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return errorResponse(e);
@@ -307,7 +309,7 @@ public class RestaurantController {
                 return ResponseEntity.status(404).body(response);
             }
             response.put("status", "success");
-            response.put("data", data);
+            response.put("data", RestaurantService.toView(data));
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return errorResponse(e);
@@ -326,7 +328,7 @@ public class RestaurantController {
                 return ResponseEntity.status(404).body(response);
             }
             response.put("status", "success");
-            response.put("data", data);
+            response.put("data", RestaurantService.toView(data));
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return errorResponse(e);
@@ -339,7 +341,8 @@ public class RestaurantController {
             @RequestParam(defaultValue = "3650") int days,
             @RequestParam(defaultValue = "20") int limit) {
         try {
-            List<Restaurant> data = restaurantDAO.findRecentlyInspected(days, limit);
+            List<Map<String, Object>> data = restaurantDAO.findRecentlyInspected(days, limit)
+                    .stream().map(RestaurantService::toView).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("days", days);
@@ -359,7 +362,8 @@ public class RestaurantController {
             @RequestParam(defaultValue = "500") int radius,
             @RequestParam(defaultValue = "20") int limit) {
         try {
-            List<Restaurant> data = restaurantDAO.findNearby(lat, lng, radius, limit);
+            List<Map<String, Object>> data = restaurantDAO.findNearby(lat, lng, radius, limit)
+                    .stream().map(RestaurantService::toView).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);

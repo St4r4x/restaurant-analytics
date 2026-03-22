@@ -1,6 +1,8 @@
 package com.aflokkat.service;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,6 +14,8 @@ import com.aflokkat.aggregation.AggregationCount;
 import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.dao.RestaurantDAO;
+import com.aflokkat.domain.Address;
+import com.aflokkat.domain.Grade;
 import com.aflokkat.domain.Restaurant;
 
 /**
@@ -146,5 +150,92 @@ public class RestaurantService {
      */
     public Restaurant getRandomRestaurant() {
         return restaurantDAO.findRandom();
+    }
+
+    // ── Restaurant computed fields (business logic extracted from POJO) ───────
+
+    private static Grade getLatestGradeEntry(Restaurant r) {
+        List<Grade> grades = r.getGrades();
+        if (grades == null || grades.isEmpty()) return null;
+        return grades.stream()
+                .filter(g -> g.getDate() != null)
+                .max(Comparator.comparing(Grade::getDate))
+                .orElse(null);
+    }
+
+    public static String getLatestGrade(Restaurant r) {
+        Grade g = getLatestGradeEntry(r);
+        return g != null ? g.getGrade() : null;
+    }
+
+    public static Integer getLatestScore(Restaurant r) {
+        Grade g = getLatestGradeEntry(r);
+        return (g != null && g.getScore() != null) ? g.getScore() : null;
+    }
+
+    public static String getTrend(Restaurant r) {
+        List<Grade> grades = r.getGrades();
+        if (grades == null || grades.size() < 2) return "stable";
+        List<Grade> sorted = grades.stream()
+                .filter(g -> g.getDate() != null && g.getScore() != null)
+                .sorted(Comparator.comparing(Grade::getDate).reversed())
+                .collect(Collectors.toList());
+        if (sorted.size() < 2) return "stable";
+        int recent = sorted.get(0).getScore();
+        int prev = sorted.get(1).getScore();
+        // Lower score = better (fewer violations)
+        if (recent < prev - 5) return "improving";
+        if (recent > prev + 5) return "worsening";
+        return "stable";
+    }
+
+    public static String getBadgeColor(Restaurant r) {
+        String g = getLatestGrade(r);
+        if (g == null || g.isEmpty()) return "red";
+        switch (g) {
+            case "A": return "green";
+            case "B": return "yellow";
+            case "C": return "orange";
+            default:  return "red";
+        }
+    }
+
+    public static Double getLatitude(Restaurant r) {
+        Address a = r.getAddress();
+        if (a != null && a.getCoord() != null && a.getCoord().size() >= 2) {
+            return a.getCoord().get(1); // GeoJSON: [longitude, latitude]
+        }
+        return null;
+    }
+
+    public static Double getLongitude(Restaurant r) {
+        Address a = r.getAddress();
+        if (a != null && a.getCoord() != null && a.getCoord().size() >= 2) {
+            return a.getCoord().get(0); // GeoJSON: [longitude, latitude]
+        }
+        return null;
+    }
+
+    /**
+     * Builds a view map for a restaurant, including all stored fields and computed ones.
+     * Use this in controllers instead of serializing the Restaurant POJO directly.
+     */
+    public static Map<String, Object> toView(Restaurant r) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", r.getId() != null ? r.getId().toHexString() : null);
+        map.put("restaurantId", r.getRestaurantId());
+        map.put("name", r.getName());
+        map.put("cuisine", r.getCuisine());
+        map.put("borough", r.getBorough());
+        map.put("address", r.getAddress());
+        map.put("phone", r.getPhone());
+        map.put("grades", r.getGrades());
+        map.put("latestGrade", getLatestGrade(r));
+        map.put("latestScore", getLatestScore(r));
+        map.put("trend", getTrend(r));
+        map.put("badgeColor", getBadgeColor(r));
+        map.put("latitude", getLatitude(r));
+        map.put("longitude", getLongitude(r));
+        return map;
     }
 }

@@ -20,13 +20,6 @@ docker compose up -d --build
 open http://localhost:8080
 ```
 
-### Comptes par défaut
-
-| Rôle | Username | Password |
-|---|---|---|
-| Admin | `admin` | `adminpass` |
-| User | `testuser` | `pass123` |
-
 > **Première utilisation** : connectez-vous en tant qu'admin, puis cliquez sur **🔄 Reconstruire le cache** dans la carte "Top Restaurants Sains" pour peupler le leaderboard Redis.
 
 ---
@@ -56,7 +49,7 @@ Tous les endpoints nécessitent un token JWT (`Authorization: Bearer <token>`).
 # Obtenir un token
 TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","password":"pass123"}' | jq -r .accessToken)
+  -d '{"username":"<your_username>","password":"<your_password>"}' | jq -r .accessToken)
 ```
 
 | Endpoint | Auth | Description |
@@ -128,10 +121,6 @@ MONGODB_COLLECTION=restaurants
 REDIS_HOST=localhost
 REDIS_PORT=6379
 API_SECRET=<jwt_secret>
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=adminpass
-USER_USERNAME=testuser
-USER_PASSWORD=pass123
 ```
 
 ---
