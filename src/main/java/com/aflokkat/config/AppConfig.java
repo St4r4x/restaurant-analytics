@@ -88,6 +88,14 @@ public class AppConfig {
         return getLongProperty("jwt.refresh.expiration.ms", 604800000L);
     }
 
+    public static int getAuthRateLimitRequests() {
+        return getIntProperty("auth.rate-limit.requests", 10);
+    }
+
+    public static int getAuthRateLimitWindowMinutes() {
+        return getIntProperty("auth.rate-limit.window-minutes", 1);
+    }
+
     private static int getIntProperty(String key, int defaultValue) {
         String value = getProperty(key, String.valueOf(defaultValue));
         try { return Integer.parseInt(value); }
