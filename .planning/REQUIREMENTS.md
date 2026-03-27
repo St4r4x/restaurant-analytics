@@ -74,11 +74,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CTRL-01 | Phase 2 | Pending |
 | CTRL-02 | Phase 2 | Pending |
 | CTRL-03 | Phase 2 | Pending |
-| CTRL-04 | Phase 3 | Pending |
-| CUST-01 | Phase 4 | Pending |
-| CUST-02 | Phase 4 | Pending |
-| CUST-03 | Phase 4 | Pending |
-| CUST-04 | Phase 4 | Pending |
+| CTRL-04 | Phase 2 | Pending |
+| CUST-01 | Phase 3 | Pending |
+| CUST-02 | Phase 3 | Pending |
+| CUST-03 | Phase 3 | Pending |
+| CUST-04 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 13 total
@@ -87,4 +87,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-27*
-*Last updated: 2026-03-27 after initial definition*
+*Last updated: 2026-03-27 after roadmap creation*
