@@ -28,7 +28,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. A CUSTOMER JWT sent to any `/api/reports/**` endpoint returns HTTP 403; an unauthenticated request to the same endpoint returns HTTP 401
   3. The application starts up with one seeded CUSTOMER account and one seeded CONTROLLER account that can each log in immediately
   4. Auth endpoints (login, register) return HTTP 429 after exceeding the configured request threshold
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Role assignment in RegisterRequest + AuthService (AUTH-01, AUTH-02)
+- [ ] 01-02-PLAN.md — SecurityConfig antMatchers + 403 accessDeniedHandler (AUTH-03)
+- [ ] 01-03-PLAN.md — Bucket4j RateLimitFilter for /api/auth/** (AUTH-04)
+- [ ] 01-04-PLAN.md — DataSeeder: seed customer_test and controller_test on startup (AUTH-05)
 
 ### Phase 2: Controller Reports
 **Goal**: An authenticated controller can create, view, edit, and attach photos to internal inspection reports scoped to a specific restaurant
@@ -69,7 +75,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Role Infrastructure | 0/TBD | Not started | - |
+| 1. Role Infrastructure | 0/4 | Planning done | - |
 | 2. Controller Reports | 0/TBD | Not started | - |
 | 3. Customer Discovery | 0/TBD | Not started | - |
 | 4. Integration Polish | 0/TBD | Not started | - |
