@@ -6,32 +6,38 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.aflokkat.config.AppConfig;
 import com.aflokkat.dto.AuthRequest;
 import com.aflokkat.dto.JwtResponse;
 import com.aflokkat.dto.RegisterRequest;
 import com.aflokkat.entity.UserEntity;
 import com.aflokkat.repository.UserRepository;
-import com.aflokkat.security.JwtUtil;
+import com.aflokkat.security.JwtService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtUtil jwtUtil;
+    @Mock private JwtService jwtUtil;
 
-    @InjectMocks
+    /** Default AuthService: CONTROLLER_SIGNUP_CODE not set (null = disabled). */
     private AuthService authService;
+
+    @BeforeEach
+    void setUp() {
+        authService = new AuthService(userRepository, passwordEncoder, jwtUtil, null);
+    }
 
     // ── register ──────────────────────────────────────────────────────────────
 
@@ -50,12 +56,9 @@ class AuthServiceTest {
         req.setEmail("alice@example.com");
         req.setPassword("password123");
 
-        try (MockedStatic<AppConfig> appConfig = mockStatic(AppConfig.class)) {
-            appConfig.when(AppConfig::getControllerSignupCode).thenReturn(null);
-            JwtResponse response = authService.register(req);
-            assertEquals("access-token", response.getAccessToken());
-            assertEquals("refresh-token", response.getRefreshToken());
-        }
+        JwtResponse response = authService.register(req);
+        assertEquals("access-token", response.getAccessToken());
+        assertEquals("refresh-token", response.getRefreshToken());
     }
 
     @Test
@@ -141,8 +144,8 @@ class AuthServiceTest {
 
     @Test
     void refresh_returnsNewTokens_forValidRefreshToken() {
-        io.jsonwebtoken.Claims claims = mock(io.jsonwebtoken.Claims.class);
-        when(claims.getSubject()).thenReturn("carol");
+        // Build a real Claims object instead of mocking (avoids Byte Buddy on Java 25)
+        Claims claims = Jwts.claims().setSubject("carol");
         when(jwtUtil.getClaimsIfValid("valid-refresh")).thenReturn(claims);
 
         UserEntity user = new UserEntity("carol", "carol@example.com", "hashed", "ROLE_ADMIN");
@@ -183,12 +186,9 @@ class AuthServiceTest {
         req.setUsername("alice");
         req.setEmail("alice@example.com");
         req.setPassword("pass");
-        // signupCode NOT set (null)
+        // signupCode NOT set (null) → ROLE_CUSTOMER
 
-        try (MockedStatic<AppConfig> appConfig = mockStatic(AppConfig.class)) {
-            appConfig.when(AppConfig::getControllerSignupCode).thenReturn(null);
-            authService.register(req);
-        }
+        authService.register(req);
 
         ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
         verify(userRepository).save(captor.capture());
@@ -197,6 +197,9 @@ class AuthServiceTest {
 
     @Test
     void register_assignsControllerRole_whenCorrectSignupCode() {
+        // AuthService with signup code "secret123" configured
+        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123");
+
         when(userRepository.findByUsername("ctrl")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("ctrl@test.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode(any())).thenReturn("hashed");
@@ -210,10 +213,7 @@ class AuthServiceTest {
         req.setPassword("pass");
         req.setSignupCode("secret123");
 
-        try (MockedStatic<AppConfig> appConfig = mockStatic(AppConfig.class)) {
-            appConfig.when(AppConfig::getControllerSignupCode).thenReturn("secret123");
-            authService.register(req);
-        }
+        serviceWithCode.register(req);
 
         ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
         verify(userRepository).save(captor.capture());
@@ -222,33 +222,31 @@ class AuthServiceTest {
 
     @Test
     void register_throws_whenWrongSignupCode() {
+        // AuthService with signup code "secret123" configured
+        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123");
+
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
         req.setPassword("pass");
         req.setSignupCode("wrongcode");
 
-        try (MockedStatic<AppConfig> appConfig = mockStatic(AppConfig.class)) {
-            appConfig.when(AppConfig::getControllerSignupCode).thenReturn("secret123");
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                    () -> authService.register(req));
-            assertEquals("Invalid registration request", ex.getMessage());
-        }
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> serviceWithCode.register(req));
+        assertEquals("Invalid registration request", ex.getMessage());
     }
 
     @Test
     void register_throws_whenSignupCodeEnvVarAbsent() {
+        // authService has null signup code (the default setUp)
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
         req.setPassword("pass");
         req.setSignupCode("anything");
 
-        try (MockedStatic<AppConfig> appConfig = mockStatic(AppConfig.class)) {
-            appConfig.when(AppConfig::getControllerSignupCode).thenReturn(null);
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                    () -> authService.register(req));
-            assertEquals("Invalid registration request", ex.getMessage());
-        }
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.register(req));
+        assertEquals("Invalid registration request", ex.getMessage());
     }
 }

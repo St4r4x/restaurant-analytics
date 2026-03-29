@@ -11,7 +11,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
-public class JwtUtil {
+public class JwtUtil implements JwtService {
     private final Key key;
     private final long accessTokenValidityMs;
     private final long refreshTokenValidityMs;
