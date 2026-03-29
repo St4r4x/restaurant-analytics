@@ -9,8 +9,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication & Roles
 
-- [ ] **AUTH-01**: User account has a CUSTOMER or CONTROLLER role stored in PostgreSQL
-- [ ] **AUTH-02**: Controller can register via a dedicated endpoint using a shared signup code
+- [x] **AUTH-01**: User account has a CUSTOMER or CONTROLLER role stored in PostgreSQL
+- [x] **AUTH-02**: Controller can register via a dedicated endpoint using a shared signup code
 - [ ] **AUTH-03**: URL-level security guards block CONTROLLER endpoints from unauthenticated or CUSTOMER access
 - [ ] **AUTH-04**: Auth endpoints (login/register) have rate limiting to prevent brute-force attacks
 - [x] **AUTH-05**: One CUSTOMER and one CONTROLLER test account are seeded automatically on application startup
@@ -66,8 +66,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Pending |
 | AUTH-04 | Phase 1 | Pending |
 | AUTH-05 | Phase 1 | Complete |
