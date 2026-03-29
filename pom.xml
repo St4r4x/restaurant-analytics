@@ -17,8 +17,8 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Override Byte Buddy from Spring Boot BOM — 1.11.x does not support Java 21+; 1.14.x does -->
-    <byte-buddy.version>1.14.18</byte-buddy.version>
+    <!-- Override Byte Buddy from Spring Boot BOM — 1.16.x adds Java 25 support -->
+    <byte-buddy.version>1.16.0</byte-buddy.version>
   </properties>
   <dependencies>
     <!-- Spring Boot Web Starter -->
@@ -114,6 +114,12 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Spring Security Test: SecurityMockMvcRequestPostProcessors.authentication() etc. -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -135,6 +141,14 @@
     </dependency>
     <!-- mockito-inline removed: Mockito 5.x merged inline mocking into mockito-core.
          Having both on the classpath causes MockMaker conflicts on Java 21+. -->
+
+    <!-- JUnit Vintage Engine: allows JUnit 4 @Test annotations to run on the JUnit 5 platform.
+         Required because existing tests (AppConfigTest, AuthServiceTest, etc.) use JUnit 4. -->
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -153,6 +167,17 @@
           <source>11</source>
           <target>11</target>
           <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+
+      <!-- Surefire Plugin: allow Mockito's byte-buddy-agent to attach dynamically on Java 21+.
+           Without -XX:+EnableDynamicAgentLoading, Mockito self-attachment on Java 25 causes
+           a StackOverflowError in @WebMvcTest slice tests. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-XX:+EnableDynamicAgentLoading</argLine>
         </configuration>
       </plugin>
     </plugins>
