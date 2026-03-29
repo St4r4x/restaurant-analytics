@@ -50,6 +50,22 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
+                // Public: auth endpoints, read-only NYC data, Swagger
+                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/api/restaurants/**").permitAll()
+                .antMatchers("/api/inspections/**").permitAll()
+                .antMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/api-docs/**",
+                    "/v3/api-docs/**",
+                    "/webjars/**"
+                ).permitAll()
+                // Controller-only endpoints
+                .antMatchers("/api/reports/**").hasRole("CONTROLLER")
+                // Any authenticated user (any role)
+                .antMatchers("/api/users/**").authenticated()
+                // Non-API view routes: open for now (Phase 3 scope)
                 .anyRequest().permitAll()
             .and()
             .exceptionHandling()
@@ -63,6 +79,11 @@ public class SecurityConfig {
                     } else {
                         response.sendRedirect("/login");
                     }
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"status\":\"error\",\"message\":\"Forbidden\"}");
                 })
             .and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

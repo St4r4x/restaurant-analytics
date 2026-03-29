@@ -55,9 +55,12 @@ public class SecurityConfigTest {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         // SecurityAutoConfiguration registers HttpSecurity and the SpringSecurityFilterChain infrastructure.
         // SecurityConfig provides our custom SecurityFilterChain (antMatchers, accessDeniedHandler, etc.).
+        // SecurityConfig must be registered BEFORE SecurityAutoConfiguration so that
+        // SpringBootWebSecurityConfiguration's @ConditionalOnDefaultWebSecurity sees our
+        // SecurityFilterChain bean and skips creating its own default chain.
         context.register(
-                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-                SecurityConfig.class
+                SecurityConfig.class,
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
         );
         context.refresh();
 
