@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-29T16:44:45.716Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-03-29T17:57:39.701Z"
 last_activity: 2026-03-27 — Roadmap created, Phase 1 ready for planning
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-role-infrastructure P04 | 2 | 1 tasks | 2 files |
 | Phase 01-role-infrastructure P01-01 | 15 | 1 tasks | 5 files |
+| Phase 01-role-infrastructure P02 | 90 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - [Phase 01-role-infrastructure]: ROLE_CUSTOMER / ROLE_CONTROLLER locked in as registration roles; ROLE_USER removed entirely
 - [Phase 01-role-infrastructure]: Controller signup is fail-safe: CONTROLLER_SIGNUP_CODE env var absent means any signupCode returns HTTP 400
 - [Phase 01-role-infrastructure]: Mockito upgraded to 5.x, Byte Buddy to 1.14.18 to support static mocking on Java 21+ runtime
+- [Phase 01-02]: Abandoned @WebMvcTest for SecurityConfigTest on Java 25: Mockito agent attachment crashes JVM. Used JUnit 4 + AnnotationConfigWebApplicationContext + standaloneSetup instead.
+- [Phase 01-02]: SecurityConfig registered before SecurityAutoConfiguration in test context to prevent duplicate FilterChain from @ConditionalOnDefaultWebSecurity.
+- [Phase 01-02]: FilterRegistrationBean.setEnabled(false) prevents JwtAuthenticationFilter double-registration as servlet filter.
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T16:44:33.503Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-03-29T17:57:39.697Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

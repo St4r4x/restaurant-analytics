@@ -12,7 +12,7 @@ This milestone transforms the existing Spring Boot NYC restaurant analytics API 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Role Infrastructure** - Extend JWT auth and Spring Security for CUSTOMER/CONTROLLER roles with secure registration and URL-level access guards
+- [x] **Phase 1: Role Infrastructure** - Extend JWT auth and Spring Security for CUSTOMER/CONTROLLER roles with secure registration and URL-level access guards (completed 2026-03-29)
 - [ ] **Phase 2: Controller Reports** - CRUD API for internal inspection reports stored in PostgreSQL, including photo attachment
 - [ ] **Phase 3: Customer Discovery** - Restaurant search, detail page, and interactive map UI for customer-facing reads
 - [ ] **Phase 4: Integration Polish** - Cross-role security tests, ownership invariant tests, and rate limiting hardening
@@ -75,7 +75,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Role Infrastructure | 3/4 | In Progress|  |
+| 1. Role Infrastructure | 4/4 | Complete   | 2026-03-29 |
 | 2. Controller Reports | 0/TBD | Not started | - |
 | 3. Customer Discovery | 0/TBD | Not started | - |
 | 4. Integration Polish | 0/TBD | Not started | - |
