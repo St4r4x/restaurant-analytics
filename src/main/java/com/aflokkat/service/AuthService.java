@@ -28,6 +28,7 @@ public class AuthService {
     /** Injected from ${controller.signup.code} / CONTROLLER_SIGNUP_CODE env var. Null = disabled. */
     private final String controllerSignupCode;
 
+    @Autowired
     public AuthService(@Value("${controller.signup.code:#{null}}") String controllerSignupCode) {
         this.controllerSignupCode = controllerSignupCode;
     }
