@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.aflokkat.config.AppConfig;
 import com.aflokkat.dto.AuthRequest;
 import com.aflokkat.dto.JwtResponse;
 import com.aflokkat.dto.RegisterRequest;
@@ -38,7 +39,24 @@ public class AuthService {
         }
 
         String hash = passwordEncoder.encode(request.getPassword());
-        UserEntity userEntity = new UserEntity(request.getUsername(), request.getEmail(), hash, "ROLE_USER");
+
+        String signupCode = AppConfig.getControllerSignupCode();
+        String providedCode = request.getSignupCode();
+
+        String role;
+        if (providedCode == null || providedCode.isEmpty()) {
+            role = "ROLE_CUSTOMER";
+        } else {
+            // Controller signup is disabled when env var is not set — fail-safe
+            if (signupCode == null || signupCode.isEmpty()) {
+                throw new IllegalArgumentException("Invalid registration request");
+            }
+            if (!signupCode.equals(providedCode)) {
+                throw new IllegalArgumentException("Invalid registration request");
+            }
+            role = "ROLE_CONTROLLER";
+        }
+        UserEntity userEntity = new UserEntity(request.getUsername(), request.getEmail(), hash, role);
         userEntity = userRepository.save(userEntity);
 
         String accessToken = jwtUtil.generateAccessToken(userEntity.getUsername(), userEntity.getRole());

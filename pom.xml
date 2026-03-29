@@ -17,6 +17,8 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Override Byte Buddy from Spring Boot BOM — 1.11.x does not support Java 21+; 1.14.x does -->
+    <byte-buddy.version>1.14.18</byte-buddy.version>
   </properties>
   <dependencies>
     <!-- Spring Boot Web Starter -->
@@ -121,14 +123,18 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <!-- version managed by Spring Boot 2.6 BOM (4.x, compatible with Byte Buddy 1.11.x) -->
+      <!-- 5.x required for Java 21+ Byte Buddy instrumentation support -->
+      <version>5.17.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
+      <version>5.17.0</version>
       <scope>test</scope>
     </dependency>
+    <!-- mockito-inline removed: Mockito 5.x merged inline mocking into mockito-core.
+         Having both on the classpath causes MockMaker conflicts on Java 21+. -->
   </dependencies>
   <build>
     <plugins>

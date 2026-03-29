@@ -88,6 +88,10 @@ public class AppConfig {
         return getLongProperty("jwt.refresh.expiration.ms", 604800000L);
     }
 
+    public static String getControllerSignupCode() {
+        return getProperty("controller.signup.code", null);
+    }
+
     public static int getAuthRateLimitRequests() {
         return getIntProperty("auth.rate-limit.requests", 10);
     }
