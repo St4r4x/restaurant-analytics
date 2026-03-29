@@ -13,7 +13,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AUTH-02**: Controller can register via a dedicated endpoint using a shared signup code
 - [ ] **AUTH-03**: URL-level security guards block CONTROLLER endpoints from unauthenticated or CUSTOMER access
 - [ ] **AUTH-04**: Auth endpoints (login/register) have rate limiting to prevent brute-force attacks
-- [ ] **AUTH-05**: One CUSTOMER and one CONTROLLER test account are seeded automatically on application startup
+- [x] **AUTH-05**: One CUSTOMER and one CONTROLLER test account are seeded automatically on application startup
 
 ### Controller Reports
 
@@ -70,7 +70,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Phase 1 | Pending |
 | AUTH-03 | Phase 1 | Pending |
 | AUTH-04 | Phase 1 | Pending |
-| AUTH-05 | Phase 1 | Pending |
+| AUTH-05 | Phase 1 | Complete |
 | CTRL-01 | Phase 2 | Pending |
 | CTRL-02 | Phase 2 | Pending |
 | CTRL-03 | Phase 2 | Pending |

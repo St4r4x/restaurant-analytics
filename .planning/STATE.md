@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-27T13:35:16.111Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-03-29T16:41:49.217Z"
 last_activity: 2026-03-27 — Roadmap created, Phase 1 ready for planning
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 2
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01-role-infrastructure P04 | 2 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Recent decisions affecting current work:
 - Roadmap: Controller signup gated by env-var registration code (Docker Compose injection)
 - Roadmap: Customer UI extends existing `ViewController` + Thymeleaf templates
 - Roadmap: Photos stored on Docker named volume (`uploads_data:/app/uploads`) — no S3
+- [Phase 01-04]: Constructor injection chosen over @Autowired field injection for DataSeeder (testability, immutability)
+- [Phase 01-04]: Idempotent seed pattern: findByUsername().isPresent() guard before every save() in ApplicationRunner
 
 ### Pending Todos
 
@@ -77,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T13:35:16.109Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-role-infrastructure/01-CONTEXT.md
+Last session: 2026-03-29T16:41:49.212Z
+Stopped at: Completed 01-04-PLAN.md
+Resume file: None

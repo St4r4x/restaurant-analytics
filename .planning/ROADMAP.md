@@ -75,7 +75,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Role Infrastructure | 0/4 | Planning done | - |
+| 1. Role Infrastructure | 2/4 | In Progress|  |
 | 2. Controller Reports | 0/TBD | Not started | - |
 | 3. Customer Discovery | 0/TBD | Not started | - |
 | 4. Integration Polish | 0/TBD | Not started | - |
