@@ -109,4 +109,40 @@ public class ReportController {
             return ResponseUtil.errorResponse(e);
         }
     }
+
+    // ── PATCH /api/reports/{id} ────────────────────────────────────────────
+    @PatchMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> patchReport(
+            @PathVariable Long id,
+            @RequestBody ReportRequest req) {
+        try {
+            UserEntity currentUser = getCurrentUser();
+            InspectionReportEntity report = reportRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Report not found"));
+
+            // Ownership check — build 403 response manually (do NOT throw)
+            if (!report.getUser().getId().equals(currentUser.getId())) {
+                Map<String, Object> body = new HashMap<>();
+                body.put("status", "error");
+                body.put("message", "Forbidden");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+            }
+
+            // Partial update — only apply non-null fields; restaurantId is ignored
+            if (req.getGrade()          != null) { report.setGrade(req.getGrade()); }
+            if (req.getStatus()         != null) { report.setStatus(req.getStatus()); }
+            if (req.getViolationCodes() != null) { report.setViolationCodes(req.getViolationCodes()); }
+            if (req.getNotes()          != null) { report.setNotes(req.getNotes()); }
+            report.setUpdatedAt(new Date());
+            reportRepository.save(report);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", toResponseMap(report));
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseUtil.errorResponse(e);
+        }
+    }
 }

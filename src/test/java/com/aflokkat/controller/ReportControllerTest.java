@@ -200,9 +200,93 @@ class ReportControllerTest {
     }
 
     // ── CTRL-03: patch report ──────────────────────────────────────────────
-    @Test void patchReport_updatesOwnedReport_andReturns200() { assumeTrue(false, "not implemented"); }
-    @Test void patchReport_returns403_whenNotOwner() { assumeTrue(false, "not implemented"); }
-    @Test void patchReport_appliesOnlyNonNullFields_leavingOthersUnchanged() { assumeTrue(false, "not implemented"); }
+
+    @Test
+    void patchReport_updatesOwnedReport_andReturns200() throws Exception {
+        // Entity owned by user 42L (same as ctx user)
+        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        UserEntity user = new UserEntity("ctrl_user", "ctrl@test.com", "hash", "ROLE_CONTROLLER");
+        user.setId(42L);
+        when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(reportRepository.save(any(InspectionReportEntity.class))).thenReturn(entity);
+        when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
+
+        ReportRequest req = new ReportRequest();
+        req.setGrade(Grade.B);
+        req.setStatus(Status.IN_PROGRESS);
+
+        mockMvc.perform(patch("/api/reports/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.id").value(1));
+
+        verify(reportRepository).save(any(InspectionReportEntity.class));
+    }
+
+    @Test
+    void patchReport_returns403_whenNotOwner() throws Exception {
+        // Entity owned by user 99L — caller is 42L
+        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        UserEntity owner = new UserEntity("other_user", "other@test.com", "hash", "ROLE_CONTROLLER");
+        owner.setId(99L);
+        entity.setUser(owner);
+
+        UserEntity caller = new UserEntity("ctrl_user", "ctrl@test.com", "hash", "ROLE_CONTROLLER");
+        caller.setId(42L);
+        when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(caller));
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
+
+        ReportRequest req = new ReportRequest();
+        req.setGrade(Grade.C);
+
+        mockMvc.perform(patch("/api/reports/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("Forbidden"));
+
+        verify(reportRepository, never()).save(any());
+    }
+
+    @Test
+    void patchReport_appliesOnlyNonNullFields_leavingOthersUnchanged() throws Exception {
+        // Entity starts with grade=A, status=OPEN, notes=null, violationCodes=null
+        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+
+        UserEntity user = new UserEntity("ctrl_user", "ctrl@test.com", "hash", "ROLE_CONTROLLER");
+        user.setId(42L);
+        when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(reportRepository.save(any(InspectionReportEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
+
+        // Only grade and violationCodes are non-null; status and notes are intentionally null
+        ReportRequest req = new ReportRequest();
+        req.setGrade(Grade.C);
+        req.setViolationCodes("10F");
+        // status and notes stay null in the request
+
+        mockMvc.perform(patch("/api/reports/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk());
+
+        // Capture the entity passed to save() and verify only non-null fields were applied
+        org.mockito.ArgumentCaptor<InspectionReportEntity> captor =
+                org.mockito.ArgumentCaptor.forClass(InspectionReportEntity.class);
+        verify(reportRepository).save(captor.capture());
+        InspectionReportEntity saved = captor.getValue();
+        // grade and violationCodes must be updated
+        org.junit.jupiter.api.Assertions.assertEquals(Grade.C, saved.getGrade());
+        org.junit.jupiter.api.Assertions.assertEquals("10F", saved.getViolationCodes());
+        // status must remain OPEN (not overwritten), notes must remain null
+        org.junit.jupiter.api.Assertions.assertEquals(Status.OPEN, saved.getStatus());
+        org.junit.jupiter.api.Assertions.assertNull(saved.getNotes());
+    }
 
     // ── CTRL-04: photo upload ──────────────────────────────────────────────
     @Test void photoUpload_savesFileAndUpdatesPhotoPath() { assumeTrue(false, "not implemented"); }
