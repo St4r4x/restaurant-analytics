@@ -45,7 +45,12 @@ Plans:
   2. A controller can list their own reports and filter by status; they cannot see reports filed by other controllers
   3. A controller can edit the grade, status, violation codes, and notes on a report they own; another controller's attempt to edit the same report returns HTTP 403
   4. A controller can upload a photo to a report and retrieve the photo URL in subsequent GET responses; photos survive a `docker compose down && docker compose up`
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — InspectionReportEntity + ReportRepository + DTO + POST /api/reports + GET /api/reports (CTRL-01, CTRL-02)
+- [ ] 02-02-PLAN.md — PATCH /api/reports/{id} with ownership check (CTRL-03)
+- [ ] 02-03-PLAN.md — Photo upload/streaming endpoints + AppConfig.getUploadsDir() + Docker volume (CTRL-04)
 
 ### Phase 3: Customer Discovery
 **Goal**: A customer can search for any NYC restaurant by name or address, view its hygiene detail, and browse all restaurants on a grade-colored interactive map
@@ -76,6 +81,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Role Infrastructure | 4/4 | Complete   | 2026-03-29 |
-| 2. Controller Reports | 0/TBD | Not started | - |
+| 2. Controller Reports | 0/3 | Not started | - |
 | 3. Customer Discovery | 0/TBD | Not started | - |
 | 4. Integration Polish | 0/TBD | Not started | - |
