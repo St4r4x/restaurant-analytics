@@ -1,5 +1,6 @@
 package com.aflokkat.controller;
 
+import com.aflokkat.config.AppConfig;
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.dto.ReportRequest;
@@ -13,23 +14,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Properties;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -289,7 +295,79 @@ class ReportControllerTest {
     }
 
     // ── CTRL-04: photo upload ──────────────────────────────────────────────
-    @Test void photoUpload_savesFileAndUpdatesPhotoPath() { assumeTrue(false, "not implemented"); }
-    @Test void photoUpload_returns404_whenReportNotFound() { assumeTrue(false, "not implemented"); }
-    @Test void getPhoto_streamsFileWithCorrectContentType() { assumeTrue(false, "not implemented"); }
+
+    /**
+     * Override the AppConfig static "properties" field to inject a test uploads dir.
+     * Avoids mockStatic (which causes java.lang.VerifyError on Java 25 with Byte Buddy).
+     * AppConfig.getUploadsDir() reads: System.getenv(APP_UPLOADS_DIR) > .env > properties field.
+     * In tests there is no APP_UPLOADS_DIR env var, so patching the properties field works.
+     */
+    private static void setUploadsDir(String path) throws Exception {
+        Field f = AppConfig.class.getDeclaredField("properties");
+        f.setAccessible(true);
+        Properties props = (Properties) f.get(null);
+        props.setProperty("app.uploads.dir", path);
+    }
+
+    @Test
+    void photoUpload_savesFileAndUpdatesPhotoPath(@TempDir Path tempDir) throws Exception {
+        setUploadsDir(tempDir.toString());
+
+        UserEntity user = new UserEntity("ctrl_user", "ctrl@test.com", "hash", "ROLE_CONTROLLER");
+        user.setId(42L);
+        when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
+
+        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(reportRepository.save(any(InspectionReportEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
+
+        byte[] imageBytes = "fake-image-content".getBytes();
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                "file", "test.jpg", "image/jpeg", imageBytes);
+
+        mockMvc.perform(multipart("/api/reports/1/photo").file(multipartFile))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"));
+
+        // Capture entity passed to save() and verify photoPath contains reportId and filename
+        org.mockito.ArgumentCaptor<InspectionReportEntity> captor =
+                org.mockito.ArgumentCaptor.forClass(InspectionReportEntity.class);
+        verify(reportRepository).save(captor.capture());
+        InspectionReportEntity saved = captor.getValue();
+        org.junit.jupiter.api.Assertions.assertNotNull(saved.getPhotoPath());
+        org.junit.jupiter.api.Assertions.assertTrue(saved.getPhotoPath().contains("1"),
+                "photoPath should contain reportId directory");
+        org.junit.jupiter.api.Assertions.assertTrue(saved.getPhotoPath().contains("test.jpg"),
+                "photoPath should contain original filename");
+    }
+
+    @Test
+    void photoUpload_returns404_whenReportNotFound(@TempDir Path tempDir) throws Exception {
+        setUploadsDir(tempDir.toString());
+        when(reportRepository.findById(99L)).thenReturn(Optional.empty());
+
+        byte[] imageBytes = "fake-image-content".getBytes();
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                "file", "test.jpg", "image/jpeg", imageBytes);
+
+        mockMvc.perform(multipart("/api/reports/99/photo").file(multipartFile))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getPhoto_streamsFileWithCorrectContentType(@TempDir Path tempDir) throws Exception {
+        // Write a real file to temp dir so UrlResource.exists() returns true
+        Path photoDir = tempDir.resolve("1");
+        Files.createDirectories(photoDir);
+        Path photoFile = photoDir.resolve("123456789_test.jpg");
+        Files.write(photoFile, "fake-jpeg-bytes".getBytes());
+
+        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        entity.setPhotoPath(photoFile.toString());
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
+
+        mockMvc.perform(get("/api/reports/1/photo"))
+                .andExpect(status().isOk());
+    }
 }
