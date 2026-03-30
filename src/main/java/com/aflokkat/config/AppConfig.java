@@ -92,6 +92,10 @@ public class AppConfig {
         return getProperty("controller.signup.code", null);
     }
 
+    public static String getUploadsDir() {
+        return getProperty("app.uploads.dir", "/app/uploads");
+    }
+
     public static int getAuthRateLimitRequests() {
         return getIntProperty("auth.rate-limit.requests", 10);
     }

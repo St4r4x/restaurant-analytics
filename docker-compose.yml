@@ -12,6 +12,9 @@ services:
       MONGODB_COLLECTION: restaurants
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      APP_UPLOADS_DIR: /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
     restart: unless-stopped
     networks:
       - restaurant-network
@@ -89,3 +92,4 @@ networks:
 volumes:
   mongodb_data:
   postgres_data:
+  uploads_data:
