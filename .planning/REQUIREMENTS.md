@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CTRL-01**: Controller can create an inspection report for a restaurant (violations found, grade A/B/C/F, status open/in-progress/resolved)
 - [x] **CTRL-02**: Controller can view a list of their own submitted inspection reports
 - [x] **CTRL-03**: Controller can edit their own inspection reports
-- [ ] **CTRL-04**: Controller can attach a photo to an inspection report
+- [x] **CTRL-04**: Controller can attach a photo to an inspection report
 
 ### Customer Discovery
 
@@ -74,7 +74,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CTRL-01 | Phase 2 | Complete |
 | CTRL-02 | Phase 2 | Complete |
 | CTRL-03 | Phase 2 | Complete |
-| CTRL-04 | Phase 2 | Pending |
+| CTRL-04 | Phase 2 | Complete |
 | CUST-01 | Phase 3 | Pending |
 | CUST-02 | Phase 3 | Pending |
 | CUST-03 | Phase 3 | Pending |
