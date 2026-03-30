@@ -344,7 +344,11 @@ class ReportControllerTest {
 
     @Test
     void photoUpload_returns404_whenReportNotFound(@TempDir Path tempDir) throws Exception {
-        setUploadsDir(tempDir.toString());
+        // Stub user lookup so controller reaches findById() check
+        UserEntity user = new UserEntity("ctrl_user", "ctrl@test.com", "hash", "ROLE_CONTROLLER");
+        user.setId(42L);
+        when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
+        // Report 99 does not exist
         when(reportRepository.findById(99L)).thenReturn(Optional.empty());
 
         byte[] imageBytes = "fake-image-content".getBytes();
