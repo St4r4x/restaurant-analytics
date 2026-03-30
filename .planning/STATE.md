@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-30T07:34:44.507Z"
+stopped_at: Completed 02-controller-reports/02-01-PLAN.md
+last_updated: "2026-03-30T13:24:50.695Z"
 last_activity: 2026-03-27 — Roadmap created, Phase 1 ready for planning
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 7
+  completed_plans: 5
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-role-infrastructure P04 | 2 | 1 tasks | 2 files |
 | Phase 01-role-infrastructure P01-01 | 15 | 1 tasks | 5 files |
 | Phase 01-role-infrastructure P02 | 90 | 2 tasks | 4 files |
+| Phase 02-controller-reports P01 | 18 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 01-02]: Abandoned @WebMvcTest for SecurityConfigTest on Java 25: Mockito agent attachment crashes JVM. Used JUnit 4 + AnnotationConfigWebApplicationContext + standaloneSetup instead.
 - [Phase 01-02]: SecurityConfig registered before SecurityAutoConfiguration in test context to prevent duplicate FilterChain from @ConditionalOnDefaultWebSecurity.
 - [Phase 01-02]: FilterRegistrationBean.setEnabled(false) prevents JwtAuthenticationFilter double-registration as servlet filter.
+- [Phase 02-01]: assumeTrue(false) used instead of Assumptions.abort(String) — abort(String) added in JUnit 5.9.0, project uses 5.8.2 via Spring Boot 2.6.15 BOM
+- [Phase 02-01]: Grade enum placed in com.aflokkat.entity (not com.aflokkat.domain) to avoid collision with existing com.aflokkat.domain.Grade MongoDB POJO
 
 ### Pending Todos
 
@@ -88,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T07:34:44.505Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-controller-reports/02-CONTEXT.md
+Last session: 2026-03-30T13:24:50.692Z
+Stopped at: Completed 02-controller-reports/02-01-PLAN.md
+Resume file: None
