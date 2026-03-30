@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-controller-reports/02-01-PLAN.md
-last_updated: "2026-03-30T13:24:50.695Z"
+stopped_at: Completed 02-controller-reports/02-02-PLAN.md
+last_updated: "2026-03-30T13:35:58.010Z"
 last_activity: 2026-03-27 — Roadmap created, Phase 1 ready for planning
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-role-infrastructure P01-01 | 15 | 1 tasks | 5 files |
 | Phase 01-role-infrastructure P02 | 90 | 2 tasks | 4 files |
 | Phase 02-controller-reports P01 | 18 | 2 tasks | 7 files |
+| Phase 02-controller-reports P02 | 8 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 01-02]: FilterRegistrationBean.setEnabled(false) prevents JwtAuthenticationFilter double-registration as servlet filter.
 - [Phase 02-01]: assumeTrue(false) used instead of Assumptions.abort(String) — abort(String) added in JUnit 5.9.0, project uses 5.8.2 via Spring Boot 2.6.15 BOM
 - [Phase 02-01]: Grade enum placed in com.aflokkat.entity (not com.aflokkat.domain) to avoid collision with existing com.aflokkat.domain.Grade MongoDB POJO
+- [Phase 02-02]: spy() on JPA entity fails on Java 25 — use ArgumentCaptor on reportRepository.save() to verify partial-update behavior
+- [Phase 02-02]: Manual 403 body map returned directly — do NOT use ResponseUtil.errorResponse() which cannot produce 403
 
 ### Pending Todos
 
@@ -91,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T13:24:50.692Z
-Stopped at: Completed 02-controller-reports/02-01-PLAN.md
+Last session: 2026-03-30T13:35:58.007Z
+Stopped at: Completed 02-controller-reports/02-02-PLAN.md
 Resume file: None
