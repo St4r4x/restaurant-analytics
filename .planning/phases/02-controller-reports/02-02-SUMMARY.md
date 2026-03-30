@@ -112,3 +112,11 @@ None - no external service configuration required.
 ---
 *Phase: 02-controller-reports*
 *Completed: 2026-03-30*
+
+## Self-Check: PASSED
+
+- FOUND: `src/main/java/com/aflokkat/controller/ReportController.java`
+- FOUND: `src/test/java/com/aflokkat/controller/ReportControllerTest.java`
+- FOUND: `.planning/phases/02-controller-reports/02-02-SUMMARY.md`
+- FOUND: commit `39c923b` (feat: PATCH endpoint + tests)
+- FOUND: commit `4dc907d` (docs: plan metadata)
