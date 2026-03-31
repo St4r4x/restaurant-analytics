@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Customer Discovery
 
 - [x] **CUST-01**: Customer can search restaurants by name or address and see a list of results with hygiene grade
-- [ ] **CUST-02**: Customer can view a restaurant detail page showing hygiene grade, cleanliness score, and NYC inspection history
+- [x] **CUST-02**: Customer can view a restaurant detail page showing hygiene grade, cleanliness score, and NYC inspection history
 - [x] **CUST-03**: Customer can browse restaurants on an interactive map with grade-colored markers (green=A, yellow=B, red=C/F)
 - [x] **CUST-04**: Customer can bookmark/favorite restaurants and view their saved list
 
@@ -76,7 +76,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CTRL-03 | Phase 2 | Complete |
 | CTRL-04 | Phase 2 | Complete |
 | CUST-01 | Phase 3 | Complete |
-| CUST-02 | Phase 3 | Pending |
+| CUST-02 | Phase 3 | Complete |
 | CUST-03 | Phase 3 | Complete |
 | CUST-04 | Phase 3 | Complete |
 

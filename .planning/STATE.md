@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-customer-discovery-03-PLAN.md (checkpoint approved)
-last_updated: "2026-03-31T11:00:00.000Z"
+stopped_at: Phase 3 execution complete, all 4 plans done
+last_updated: "2026-03-31T12:00:00.000Z"
 last_activity: 2026-03-27 — Roadmap created, Phase 1 ready for planning
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-customer-discovery P01 | 35 | 1 tasks | 3 files |
 | Phase 03-customer-discovery P02 | 30 | 2 tasks | 5 files |
 | Phase 03-customer-discovery P03 | 15 | 2 tasks | 2 files |
+| Phase 03-customer-discovery P04 | 25 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 03-customer-discovery]: Remove @Mock RestaurantService from search test — Mockito VerifyError on Java 25 for inline mocking; toView is static so no instance mock needed
 - [Phase 03-customer-discovery]: Search card inserted between header and first .dashboard grid — append-only JS pattern, no rewrites
 - [Phase 03-customer-discovery]: my-bookmarks.html is standalone HTML with no Thymeleaf th: attributes — client-side fetch-only rendering
+- [Phase 03-customer-discovery]: restaurant.html and inspection-map.html are now public pages — auth guard removed from page load; authentication only triggers on bookmark button click
+- [Phase 03-customer-discovery]: Leaflet.markerCluster CDN loaded after leaflet.min.js — load order is mandatory (CSS before JS, markerCluster after Leaflet)
+- [Phase 03-customer-discovery]: Last cluster spiderfies on click when restaurants share same GPS coordinates — standard markerCluster behavior, not a bug
 
 ### Pending Todos
 
@@ -110,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T11:00:00.000Z
-Stopped at: Completed 03-customer-discovery-03-PLAN.md (checkpoint approved — all 7 browser checks passed)
+Last session: 2026-03-31T12:00:00.000Z
+Stopped at: Phase 3 execution complete, all 4 plans done (03-04 checkpoint approved — all 13 browser checks passed)
 Resume file: None

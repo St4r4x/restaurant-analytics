@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Role Infrastructure** - Extend JWT auth and Spring Security for CUSTOMER/CONTROLLER roles with secure registration and URL-level access guards (completed 2026-03-29)
 - [x] **Phase 2: Controller Reports** - CRUD API for internal inspection reports stored in PostgreSQL, including photo attachment (completed 2026-03-30)
-- [ ] **Phase 3: Customer Discovery** - Restaurant search, detail page, and interactive map UI for customer-facing reads
+- [x] **Phase 3: Customer Discovery** - Restaurant search, detail page, and interactive map UI for customer-facing reads (completed 2026-03-31)
 - [ ] **Phase 4: Integration Polish** - Cross-role security tests, ownership invariant tests, and rate limiting hardening
 
 ## Phase Details
@@ -67,7 +67,7 @@ Plans:
 - [ ] 03-01-PLAN.md — Wave 0 test scaffold: RestaurantControllerSearchTest with @Disabled stubs (CUST-01, CUST-03)
 - [ ] 03-02-PLAN.md — DAO methods + REST endpoints /search + /map-points + ViewController /my-bookmarks route (CUST-01, CUST-03, CUST-04)
 - [x] 03-03-PLAN.md — index.html search bar + my-bookmarks.html template (CUST-01, CUST-04)
-- [ ] 03-04-PLAN.md — restaurant.html grade badge + history table + bookmark toggle; inspection-map.html clustering migration (CUST-02, CUST-03, CUST-04)
+- [x] 03-04-PLAN.md — restaurant.html grade badge + history table + bookmark toggle; inspection-map.html clustering migration (CUST-02, CUST-03, CUST-04)
 
 ### Phase 4: Integration Polish
 **Goal**: Security boundaries, ownership rules, and photo persistence are verified end-to-end with targeted tests; the application behaves correctly at all role/permission boundaries
@@ -88,5 +88,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Role Infrastructure | 4/4 | Complete   | 2026-03-29 |
 | 2. Controller Reports | 3/3 | Complete   | 2026-03-31 |
-| 3. Customer Discovery | 3/4 | In Progress|  |
+| 3. Customer Discovery | 4/4 | Complete   | 2026-03-31 |
 | 4. Integration Polish | 0/TBD | Not started | - |
