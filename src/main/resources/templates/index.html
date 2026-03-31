@@ -476,6 +476,15 @@
         </button>
       </header>
 
+      <div class="card" style="margin-bottom:20px">
+        <h2 style="margin:0 0 12px 0;color:#667eea;font-size:1.1em;font-weight:600">Search Restaurants</h2>
+        <input id="search-input" type="text" placeholder="Search by restaurant name or address…"
+               style="width:100%;box-sizing:border-box;padding:7px 11px;border:1px solid #ddd;border-radius:6px;font-size:0.88em;background:#fafafa;outline:none"
+               onfocus="this.style.borderColor='#667eea';this.style.boxShadow='0 0 5px rgba(102,126,234,0.2)'"
+               onblur="this.style.borderColor='#ddd';this.style.boxShadow='none'" />
+        <div id="search-results" style="display:none;margin-top:12px"></div>
+      </div>
+
       <div class="dashboard">
         <!-- UC1: Restaurants par quartier -->
         <div class="card">
@@ -1537,6 +1546,85 @@
 
       // Load bookmarked IDs on page load
       loadBookmarkedIds();
+
+      // ── Search bar ──────────────────────────────────────────────────
+      (function() {
+          const searchInput  = document.getElementById('search-input');
+          const searchResults = document.getElementById('search-results');
+          if (!searchInput) return;
+
+          let searchTimer = null;
+
+          function gradeBadgeHtml(grade) {
+              const g = grade || '—';
+              let bg = '#ffebee', color = '#b71c1c';
+              if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
+              else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
+              return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${bg};color:${color}">${g}</span>`;
+          }
+
+          function borderColor(grade) {
+              if (grade === 'A') return '#22c55e';
+              if (grade === 'B') return '#eab308';
+              return '#ef4444';
+          }
+
+          function renderResults(restaurants) {
+              if (!restaurants.length) {
+                  searchResults.innerHTML = '<p class="error" style="background:#fee;color:#c33;border-left:4px solid #c33;padding:8px 12px;border-radius:4px">No restaurants found. Try a different name or address.</p>';
+                  searchResults.style.display = 'block';
+                  return;
+              }
+              const html = restaurants.map(r => {
+                  const grade = r.latestGrade || '—';
+                  const isBookmarked = (typeof bookmarkedIds !== 'undefined') && bookmarkedIds.has(r.restaurantId);
+                  const bookmarkLabel = isBookmarked ? '★' : '☆';
+                  const bookmarkClass = isBookmarked ? 'btn-bookmark bookmarked' : 'btn-bookmark';
+                  return `<div class="top-restaurant-item" style="border-left:4px solid ${borderColor(grade)};display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f9ff;border-radius:6px;margin-bottom:6px">
+                      <div style="flex:1;min-width:0">
+                          <div class="top-restaurant-name" style="font-weight:600;font-size:0.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name || '—'}</div>
+                          <div class="top-restaurant-meta" style="font-size:0.82em;color:#666">${r.borough || '—'}</div>
+                      </div>
+                      ${gradeBadgeHtml(grade)}
+                      <button class="${bookmarkClass}" data-id="${r.restaurantId}"
+                              onclick="toggleBookmark('${r.restaurantId}', this)"
+                              style="min-width:44px;min-height:44px;background:none;border:none;cursor:pointer;font-size:1.1em;color:${isBookmarked ? '#f5a623' : '#ccc'}">${bookmarkLabel}</button>
+                      <a class="btn-view" href="/restaurant/${r.restaurantId}"
+                         style="text-decoration:none;color:#667eea;font-weight:600;font-size:0.82em;white-space:nowrap">View →</a>
+                  </div>`;
+              }).join('');
+              searchResults.innerHTML = html;
+              searchResults.style.display = 'block';
+          }
+
+          function doSearch(q) {
+              searchResults.innerHTML = '<div class="spinner" style="width:24px;height:24px;border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;animation:spin 0.8s linear infinite;margin:10px auto"></div>';
+              searchResults.style.display = 'block';
+              fetch('/api/restaurants/search?q=' + encodeURIComponent(q) + '&limit=20')
+                  .then(r => r.json())
+                  .then(data => {
+                      if (data.status === 'success') renderResults(data.data || []);
+                      else searchResults.innerHTML = '<p class="error" style="background:#fee;color:#c33;padding:8px 12px">Search failed. Try again.</p>';
+                  })
+                  .catch(() => {
+                      searchResults.innerHTML = '<p class="error" style="background:#fee;color:#c33;padding:8px 12px">Search failed. Try again.</p>';
+                  });
+          }
+
+          function hideResults() {
+              clearTimeout(searchTimer);
+              searchResults.style.display = 'none';
+              searchResults.innerHTML = '';
+          }
+
+          searchInput.addEventListener('input', function() {
+              clearTimeout(searchTimer);
+              const q = this.value.trim();
+              if (q.length < 2) { hideResults(); return; }
+              searchTimer = setTimeout(() => doSearch(q), 300);
+          });
+      })();
+      // ── End Search bar ───────────────────────────────────────────────
     </script>
   </body>
 </html>
