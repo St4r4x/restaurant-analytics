@@ -45,8 +45,8 @@ patterns-established:
 requirements-completed: [CTRL-04]
 
 # Metrics
-duration: 20min
-completed: 2026-03-30
+duration: 20min + human checkpoint
+completed: 2026-03-31
 ---
 
 # Phase 02 Plan 03: Photo Upload and Streaming Summary
@@ -58,7 +58,7 @@ completed: 2026-03-30
 - **Duration:** ~20 min
 - **Started:** 2026-03-30T15:30:00Z
 - **Completed:** 2026-03-30T15:43:30Z
-- **Tasks:** 2 of 3 complete (Task 3 is a human checkpoint — awaiting manual verification)
+- **Tasks:** 3 of 3 complete (Task 3 human checkpoint approved 2026-03-31)
 - **Files modified:** 5
 
 ## Accomplishments
@@ -75,7 +75,9 @@ Each task was committed atomically:
 2. **Task 2 RED: failing tests for photo upload endpoints** - `748d16e` (test)
 3. **Task 2 GREEN: POST /{id}/photo and GET /{id}/photo endpoints** - `cc509a1` (feat)
 
-_Note: Task 3 is a human-verify checkpoint — not yet committed._
+4. **Task 3: Human checkpoint — photo persistence across docker compose restart** - Approved 2026-03-31 (no code commit required; manual verification confirmed)
+
+_Note: Task 3 was a human-verify checkpoint. No code was committed for it — verification was performed manually._
 
 ## Files Created/Modified
 - `src/main/java/com/aflokkat/config/AppConfig.java` - Added `getUploadsDir()` static method
@@ -116,23 +118,26 @@ _Note: Task 3 is a human-verify checkpoint — not yet committed._
 ## Issues Encountered
 - Java 25 + Byte Buddy 1.16 limitation on `mockStatic` for classes with static initializers — resolved via reflection pattern (same family of issue as Phase 01-02 documented in STATE.md)
 
-## User Setup Required
-Task 3 (human checkpoint) requires manual verification:
+## Human Checkpoint Result (Task 3)
 
-1. `docker compose up -d`
-2. Login as `controller_test`, create a report, upload a photo via `POST /api/reports/{id}/photo`
-3. Verify photo accessible via `GET /api/reports/{id}/photo` (HTTP 200)
-4. `docker compose down && docker compose up -d` — re-login, verify photo still accessible
-5. If confirmed: type "approved" to resume
+**CTRL-04 manual verification — approved 2026-03-31:**
+- Photo uploaded via `POST /api/reports/1/photo` with a real PNG (148 390 bytes)
+- `GET /api/reports/1/photo` before restart: HTTP 200, Content-Type: image/png, 148 390 bytes
+- `docker compose down && docker compose up -d`
+- `GET /api/reports/1/photo` after restart: HTTP 200, Content-Type: image/png, 148 390 bytes
+- Volume `uploads_data:/app/uploads` confirmed working — file byte-for-byte identical across restart
+
+## User Setup Required
+None - checkpoint complete. No further manual steps required.
 
 ## Next Phase Readiness
-- All four Phase 2 endpoints implemented: CTRL-01 (create), CTRL-02 (list), CTRL-03 (patch), CTRL-04 (photo)
-- Pending: manual Docker volume persistence verification (Task 3 checkpoint)
-- Phase 3 (Customer UI) can begin after Task 3 approval
+- All four Phase 2 requirements satisfied: CTRL-01 (create), CTRL-02 (list), CTRL-03 (patch), CTRL-04 (photo)
+- Phase 2 fully complete; ready for Phase 3: Customer Discovery (restaurant search, detail page, map UI)
+- `uploads_data` named volume is permanent infrastructure — Phase 4 integration test for photo persistence can reference it directly
 
 ---
 *Phase: 02-controller-reports*
-*Completed: 2026-03-30*
+*Completed: 2026-03-31*
 
 ## Self-Check: PASSED
 - AppConfig.java: FOUND
@@ -143,3 +148,4 @@ Task 3 (human checkpoint) requires manual verification:
 - b188ad2 (Task 1 commit): FOUND
 - 748d16e (Task 2 RED commit): FOUND
 - cc509a1 (Task 2 GREEN commit): FOUND
+- Task 3 (human checkpoint): APPROVED 2026-03-31

@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-controller-reports/02-03-PLAN.md (Tasks 1-2; Task 3 is human-verify checkpoint)
-last_updated: "2026-03-30T14:02:41.590Z"
+stopped_at: Completed 02-controller-reports/02-03-PLAN.md — Phase 2 execution complete (CTRL-04 approved)
+last_updated: "2026-03-31T07:34:35.144Z"
 last_activity: 2026-03-27 — Roadmap created, Phase 1 ready for planning
 progress:
   total_phases: 4
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-controller-reports P01 | 18 | 2 tasks | 7 files |
 | Phase 02-controller-reports P02 | 8 | 1 tasks | 2 files |
 | Phase 02-controller-reports P03 | 20 | 2 tasks | 5 files |
+| Phase 02-controller-reports P03 | 20 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase 02-02]: Manual 403 body map returned directly — do NOT use ResponseUtil.errorResponse() which cannot produce 403
 - [Phase 02-controller-reports]: mockStatic(AppConfig.class) causes java.lang.VerifyError on Java 25; use reflection to patch AppConfig.properties static field in tests instead
 - [Phase 02-controller-reports]: photoUpload test must stub userRepository.findByUsername() — controller calls getCurrentUser() before findById()
+- [Phase 02-controller-reports]: mockStatic(AppConfig.class) causes VerifyError on Java 25 — use reflection to patch AppConfig.properties static field in tests instead
+- [Phase 02-controller-reports]: photoUpload test must stub userRepository.findByUsername() — controller calls getCurrentUser() before findById()
+- [Phase 02-controller-reports]: getPhoto() return type is ResponseEntity<Resource> not ResponseEntity<Map> — Spring MVC allows different return types per handler
 
 ### Pending Todos
 
@@ -97,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T14:02:41.588Z
-Stopped at: Completed 02-controller-reports/02-03-PLAN.md (Tasks 1-2; Task 3 is human-verify checkpoint)
+Last session: 2026-03-31T07:34:35.142Z
+Stopped at: Completed 02-controller-reports/02-03-PLAN.md — Phase 2 execution complete (CTRL-04 approved)
 Resume file: None
