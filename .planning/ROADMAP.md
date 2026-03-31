@@ -77,7 +77,13 @@ Plans:
   1. Running the test suite produces passing tests that explicitly assert: CUSTOMER JWT against CONTROLLER endpoints returns 403, anonymous request against authenticated endpoints returns 401
   2. Running the test suite produces a passing test that asserts controller B cannot read or edit controller A's reports
   3. A photo uploaded in one container run is accessible after `docker compose down && docker compose up --build` with no manual intervention
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Translate entire project to English (HTML templates + Java comments)
+- [ ] 04-02-PLAN.md — Remove orphaned routes (/hygiene-radar, /inspection), dead endpoints (/worst-cuisines, /cuisine-scores, /popular-cuisines), and delete orphaned templates
+- [ ] 04-03-PLAN.md — Refresh documentation (README.md, ARCHITECTURE.md, CHANGELOG.md)
+- [ ] 04-04-PLAN.md — Add SC-2 read path + SC-3 file-I/O tests to ReportControllerTest
 
 ## Progress
 
@@ -89,4 +95,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Role Infrastructure | 4/4 | Complete   | 2026-03-29 |
 | 2. Controller Reports | 3/3 | Complete   | 2026-03-31 |
 | 3. Customer Discovery | 4/4 | Complete   | 2026-03-31 |
-| 4. Integration Polish | 0/TBD | Not started | - |
+| 4. Integration Polish | 0/4 | Not started | - |
