@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-customer-discovery-02-PLAN.md
-last_updated: "2026-03-31T10:20:02.569Z"
+stopped_at: Completed 03-customer-discovery-03-PLAN.md
+last_updated: "2026-03-31T10:35:17.098Z"
 last_activity: 2026-03-27 — Roadmap created, Phase 1 ready for planning
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-controller-reports P03 | 20 | 3 tasks | 5 files |
 | Phase 03-customer-discovery P01 | 35 | 1 tasks | 3 files |
 | Phase 03-customer-discovery P02 | 30 | 2 tasks | 5 files |
+| Phase 03-customer-discovery P03 | 15 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,8 @@ Recent decisions affecting current work:
 - [Phase 03-customer-discovery]: RestaurantDAO injected directly into RestaurantController for search/map-points — no service wrapper needed since there is no business logic
 - [Phase 03-customer-discovery]: findMapPoints uses raw database.getCollection().aggregate() not typed aggregate() helper — return type is List<Document> not a POJO
 - [Phase 03-customer-discovery]: Remove @Mock RestaurantService from search test — Mockito VerifyError on Java 25 for inline mocking; toView is static so no instance mock needed
+- [Phase 03-customer-discovery]: Search card inserted between header and first .dashboard grid — append-only JS pattern, no rewrites
+- [Phase 03-customer-discovery]: my-bookmarks.html is standalone HTML with no Thymeleaf th: attributes — client-side fetch-only rendering
 
 ### Pending Todos
 
@@ -107,6 +110,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T10:20:02.566Z
-Stopped at: Completed 03-customer-discovery-02-PLAN.md
+Last session: 2026-03-31T10:35:12.680Z
+Stopped at: Completed 03-customer-discovery-03-PLAN.md
 Resume file: None
