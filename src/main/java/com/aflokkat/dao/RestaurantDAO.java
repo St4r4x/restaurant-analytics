@@ -123,6 +123,18 @@ public interface RestaurantDAO {
     List<AtRiskEntry> findAtRiskRestaurants(String borough, int limit);
 
     /**
+     * Searches restaurants by name or address using a case-insensitive regex.
+     * Added in Plan 03-01 interface stub; implemented in Plan 03-02.
+     */
+    List<Restaurant> searchByNameOrAddress(String q, int limit);
+
+    /**
+     * Returns lightweight map projection documents (restaurantId, name, lat, lng, grade).
+     * Added in Plan 03-01 interface stub; implemented in Plan 03-02.
+     */
+    List<org.bson.Document> findMapPoints();
+
+    /**
      * Ferme la connexion
      */
     void close();

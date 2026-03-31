@@ -343,6 +343,22 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     /**
+     * Stub — full implementation added in Plan 03-02.
+     */
+    @Override
+    public List<Restaurant> searchByNameOrAddress(String q, int limit) {
+        throw new UnsupportedOperationException("searchByNameOrAddress not yet implemented — Plan 03-02");
+    }
+
+    /**
+     * Stub — full implementation added in Plan 03-02.
+     */
+    @Override
+    public List<Document> findMapPoints() {
+        throw new UnsupportedOperationException("findMapPoints not yet implemented — Plan 03-02");
+    }
+
+    /**
      * Ferme la connexion MongoDB via le Singleton Factory
      */
     @Override
