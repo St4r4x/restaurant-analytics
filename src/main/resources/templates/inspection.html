@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tableau de Bord Agents</title>
+    <title>Agent Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -128,22 +128,22 @@
   <body>
     <div class="container">
       <header>
-        <h1>Tableau de Bord Agents</h1>
-        <p>Outils d'inspection — accès réservé ADMIN</p>
+        <h1>Agent Dashboard</h1>
+        <p>Inspection tools — ADMIN access only</p>
         <div class="nav-links">
           <a href="/" class="nav-link">← Dashboard</a>
-          <a href="/inspection-map" class="nav-link">Carte de chaleur</a>
-          <button class="nav-link" id="logoutBtn" style="border:none;cursor:pointer">Déconnexion</button>
+          <a href="/inspection-map" class="nav-link">Heat map</a>
+          <button class="nav-link" id="logoutBtn" style="border:none;cursor:pointer">Sign Out</button>
         </div>
       </header>
 
       <!-- At-risk section -->
       <div class="card dashboard-full">
         <div class="card-header">
-          <h2>Établissements à Risque</h2>
+          <h2>At-Risk Establishments</h2>
           <div class="controls">
             <select id="at-risk-borough">
-              <option value="">Tous les quartiers</option>
+              <option value="">All boroughs</option>
               <option value="Manhattan">Manhattan</option>
               <option value="Brooklyn">Brooklyn</option>
               <option value="Queens">Queens</option>
@@ -151,7 +151,7 @@
               <option value="Staten Island">Staten Island</option>
             </select>
             <input type="number" id="at-risk-limit" value="50" min="1" max="500" style="width:80px" />
-            <button onclick="loadAtRisk()">Charger</button>
+            <button onclick="loadAtRisk()">Load</button>
             <button class="btn-export" onclick="exportCsv()">Export CSV</button>
           </div>
         </div>
@@ -163,7 +163,7 @@
         <!-- Cuisines with worst grades -->
         <div class="card">
           <div class="card-header">
-            <h2>Cuisines à Risque</h2>
+            <h2>At-Risk Cuisines</h2>
             <div class="controls">
               <select id="wc-borough">
                 <option value="Manhattan">Manhattan</option>
@@ -172,7 +172,7 @@
                 <option value="Bronx">Bronx</option>
                 <option value="Staten Island">Staten Island</option>
               </select>
-              <button onclick="loadWorstCuisines()">Charger</button>
+              <button onclick="loadWorstCuisines()">Load</button>
             </div>
           </div>
           <div style="position:relative;height:260px">
@@ -183,14 +183,14 @@
         <!-- Recent inspections stats -->
         <div class="card">
           <div class="card-header">
-            <h2>Inspections Récentes</h2>
+            <h2>Recent Inspections</h2>
             <div class="controls">
               <input type="number" id="recent-days" value="3650" min="1" style="width:80px" />
-              <span style="font-size:0.82em;color:#aaa">jours</span>
-              <button onclick="loadRecent()">Charger</button>
+              <span style="font-size:0.82em;color:#aaa">days</span>
+              <button onclick="loadRecent()">Load</button>
             </div>
           </div>
-          <div id="recent-content"><p class="empty">Cliquez sur Charger</p></div>
+          <div id="recent-content"><p class="empty">Click Load to display</p></div>
         </div>
       </div>
     </div>
@@ -242,13 +242,13 @@
       function renderAtRisk(data) {
         const el = document.getElementById("at-risk-content");
         if (!data || data.length === 0) {
-          el.innerHTML = '<p class="empty">Aucun établissement à risque trouvé</p>';
+          el.innerHTML = '<p class="empty">No at-risk establishments found</p>';
           return;
         }
         let html = `<div style="overflow-x:auto"><table>
           <thead><tr>
-            <th>Nom</th><th>Quartier</th><th>Cuisine</th>
-            <th>Dernière Note</th><th>Score</th><th>Notes Consec. Mauvaises</th>
+            <th>Name</th><th>Borough</th><th>Cuisine</th>
+            <th>Last Grade</th><th>Score</th><th>Consec. Bad Grades</th>
           </tr></thead><tbody>`;
         data.forEach(r => {
           const gc = r.lastGrade === "C" ? "grade-c" : "grade-z";
@@ -281,7 +281,7 @@
             a.click();
             document.body.removeChild(a);
           })
-          .catch(() => alert("Erreur lors de l'export CSV"));
+          .catch(() => alert("Error during CSV export"));
       }
 
       // ---- Worst cuisines chart ----
@@ -306,7 +306,7 @@
           data: {
             labels: sorted.map(d => d.cuisine),
             datasets: [{
-              label: "Score moyen",
+              label: "Average score",
               data: sorted.map(d => parseFloat(d.avgScore.toFixed(2))),
               backgroundColor: sorted.map((_, i) => `hsl(${i * 20}, 70%, 55%)`),
               borderRadius: 5
@@ -319,7 +319,7 @@
             plugins: { legend: { display: false } },
             scales: {
               x: { beginAtZero: true, grid: { color: "rgba(255,255,255,0.06)" },
-                ticks: { color: "#aaa" }, title: { display: true, text: "Score moyen", color: "#aaa" } },
+                ticks: { color: "#aaa" }, title: { display: true, text: "Average score", color: "#aaa" } },
               y: { grid: { display: false }, ticks: { color: "#ddd" } }
             }
           }
@@ -339,7 +339,7 @@
             }
             const data = resp.data || [];
             if (data.length === 0) {
-              document.getElementById("recent-content").innerHTML = '<p class="empty">Aucun résultat</p>';
+              document.getElementById("recent-content").innerHTML = '<p class="empty">No results</p>';
               return;
             }
             let html = '<ul style="list-style:none;padding:0">';

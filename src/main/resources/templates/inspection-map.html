@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -64,17 +64,17 @@
   <body>
     <div id="toolbar">
       <a href="/">← Dashboard</a>
-      <a href="/inspection">Tableau de bord agents</a>
-      <h1>Carte des Restaurants</h1>
+      <a href="/inspection">Agent dashboard</a>
+      <h1>Restaurant Map</h1>
       <select id="borough-filter">
-        <option value="">Tous les quartiers</option>
+        <option value="">All boroughs</option>
         <option value="Manhattan">Manhattan</option>
         <option value="Brooklyn">Brooklyn</option>
         <option value="Queens">Queens</option>
         <option value="Bronx">Bronx</option>
         <option value="Staten Island">Staten Island</option>
       </select>
-      <span id="status">Chargement...</span>
+      <span id="status">Loading...</span>
     </div>
     <div id="map-wrapper">
       <div id="map"></div>
@@ -82,9 +82,9 @@
     </div>
     <div class="legend">
       <div class="legend-title">Note inspection</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#22c55e"></div> Grade A (bon)</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#22c55e"></div> Grade A (good)</div>
       <div class="legend-row"><div class="legend-dot" style="background:#eab308"></div> Grade B</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div> Grade C/F (mauvais)</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div> Grade C/F (bad)</div>
     </div>
 
     <script>
@@ -105,13 +105,13 @@
 
       function loadMapPoints() {
         if (statusEl) statusEl.textContent = 'Loading restaurants…';
-        document.getElementById('status').textContent = 'Chargement...';
+        document.getElementById('status').textContent = 'Loading...';
         fetch('/api/restaurants/map-points')
           .then(r => r.json())
           .then(data => {
             if (!data || data.status !== 'success') {
               if (statusEl) statusEl.textContent = 'Failed to load restaurants. Refresh the page to try again.';
-              document.getElementById('status').textContent = 'Erreur de chargement';
+              document.getElementById('status').textContent = 'Loading error';
               return;
             }
             const points = data.data || [];
@@ -141,11 +141,11 @@
 
             map.addLayer(markers);
             if (statusEl) statusEl.textContent = `${points.length} restaurants loaded`;
-            document.getElementById('status').textContent = `${points.length} restaurants chargés`;
+            document.getElementById('status').textContent = `${points.length} restaurants loaded`;
           })
           .catch(() => {
             if (statusEl) statusEl.textContent = 'Failed to load restaurants. Refresh the page to try again.';
-            document.getElementById('status').textContent = 'Erreur réseau';
+            document.getElementById('status').textContent = 'Network error';
           });
       }
 

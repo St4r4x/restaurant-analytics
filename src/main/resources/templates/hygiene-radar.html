@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hygiene Radar - Inspection des Restaurants NYC</title>
+    <title>Hygiene Radar - NYC Restaurant Inspections</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -355,17 +355,17 @@
 
         <div class="header">
           <h1><i class="fas fa-shield-virus"></i> Hygiene Radar</h1>
-          <p>Inspection des établissements à risque de NYC</p>
+          <p>Inspection of at-risk establishments in NYC</p>
         </div>
 
         <div class="error" id="error-message"></div>
 
         <div class="controls">
-          <!-- Quartier -->
+          <!-- Borough -->
           <div class="control-group">
-            <label for="borough-select">Quartier</label>
+            <label for="borough-select">Borough</label>
             <select id="borough-select">
-              <option value="">Tous les quartiers</option>
+              <option value="">All boroughs</option>
               <option value="Manhattan">Manhattan</option>
               <option value="Brooklyn">Brooklyn</option>
               <option value="Queens">Queens</option>
@@ -374,23 +374,23 @@
             </select>
           </div>
 
-          <!-- Type de cuisine -->
+          <!-- Cuisine type -->
           <div class="control-group">
-            <label for="cuisine-filter">Type de cuisine</label>
+            <label for="cuisine-filter">Cuisine type</label>
             <select id="cuisine-filter">
-              <option value="">Toutes les cuisines</option>
+              <option value="">All cuisines</option>
             </select>
           </div>
 
-          <!-- Nombre de restaurants -->
+          <!-- Number of restaurants -->
           <div class="control-group">
-            <label for="restaurant-limit">Nombre de restaurants</label>
+            <label for="restaurant-limit">Number of restaurants</label>
             <input type="number" id="restaurant-limit" value="25" min="1" max="200" />
           </div>
 
-          <!-- Score max -->
+          <!-- Max score -->
           <div class="control-group">
-            <label for="score-max">Score max : <span id="score-max-display">Pas de limite</span></label>
+            <label for="score-max">Max score: <span id="score-max-display">No limit</span></label>
             <div class="range-wrapper">
               <input type="range" id="score-max" min="0" max="100" step="1" value="100"
                 oninput="updateScoreDisplay(this.value)" />
@@ -399,16 +399,16 @@
             <div class="range-bounds"><span>0</span><span>100</span></div>
           </div>
 
-          <!-- GPS uniquement -->
+          <!-- GPS only -->
           <label class="checkbox-group" for="gps-only">
             <input type="checkbox" id="gps-only" />
-            <span><i class="fas fa-map-marker-alt"></i> GPS uniquement</span>
+            <span><i class="fas fa-map-marker-alt"></i> GPS only</span>
           </label>
         </div>
 
         <div class="loading" id="loading">
           <i class="fas fa-spinner"></i>
-          <p>Recherche en cours...</p>
+          <p>Searching...</p>
         </div>
 
         <div class="restaurants-list" id="restaurants-list"></div>
@@ -452,7 +452,7 @@
 
         fetch(url)
           .then((r) => {
-            if (!r.ok) throw new Error("Erreur serveur");
+            if (!r.ok) throw new Error("Server error");
             return r.json();
           })
           .then((data) => {
@@ -460,12 +460,12 @@
               allRestaurants = data.data;
               applyGpsFilter();
             } else {
-              showError(data.message || "Erreur lors de la recherche");
+              showError(data.message || "Search error");
             }
           })
           .catch((err) => {
             console.error(err);
-            showError("Impossible de se connecter au serveur");
+            showError("Unable to connect to the server");
           })
           .finally(hideLoading);
       }
@@ -477,7 +477,7 @@
             if (data.status !== "success") return;
             const select = document.getElementById("cuisine-filter");
             const current = select.value;
-            select.innerHTML = '<option value="">Toutes les cuisines</option>';
+            select.innerHTML = '<option value="">All cuisines</option>';
             data.data.forEach((c) => {
               const opt = document.createElement("option");
               opt.value = c;
@@ -505,7 +505,7 @@
       function displayRestaurants(restaurants) {
         const container = document.getElementById("restaurants-list");
         if (restaurants.length === 0) {
-          container.innerHTML = '<div class="no-results"><i class="fas fa-search"></i><br>Aucun restaurant trouvé</div>';
+          container.innerHTML = '<div class="no-results"><i class="fas fa-search"></i><br>No restaurants found</div>';
           return;
         }
         container.innerHTML = "";
@@ -528,7 +528,7 @@
               </div>
               <a href="/restaurant/${restaurant.restaurantId}"
                  style="flex-shrink:0;font-size:0.78em;padding:3px 8px;background:rgba(255,23,68,0.15);color:#ff8a80;border:1px solid rgba(255,23,68,0.4);border-radius:4px;text-decoration:none;font-weight:600;white-space:nowrap"
-                 title="Voir la fiche">Fiche</a>
+                 title="View details">Details</a>
             </div>
           `;
           div.addEventListener("click", () => {
@@ -560,7 +560,7 @@
               <div style="max-width:200px">
                 <h4 style="margin:0 0 8px 0;color:#ff1744">${restaurant.name}</h4>
                 <p style="margin:4px 0"><strong>Cuisine:</strong> ${restaurant.cuisine}</p>
-                <p style="margin:4px 0"><strong>Quartier:</strong> ${restaurant.borough}</p>
+                <p style="margin:4px 0"><strong>Borough:</strong> ${restaurant.borough}</p>
                 ${addr ? `<p style="margin:4px 0;font-size:0.9em;color:#666">${addr}</p>` : ""}
               </div>
             `);
@@ -602,7 +602,7 @@
         statsDiv.innerHTML = `
           <div class="stat-item">
             <span class="stat-value">${filtered}</span>
-            <span class="stat-label">affichés</span>
+            <span class="stat-label">displayed</span>
           </div>
           <div class="stat-item">
             <span class="stat-value">${total}</span>
@@ -610,7 +610,7 @@
           </div>
           <div class="stat-item">
             <span class="stat-value">${gpsCount}</span>
-            <span class="stat-label">sur carte</span>
+            <span class="stat-label">on map</span>
           </div>
         `;
       }
@@ -641,7 +641,7 @@
         const slider = document.getElementById("score-max");
         slider.style.setProperty("--pct", v + "%");
         if (v >= 100) {
-          labelEl.textContent = "Pas de limite";
+          labelEl.textContent = "No limit";
           labelEl.style.color = "#888";
           valEl.textContent = "—";
         } else {
@@ -651,7 +651,7 @@
         }
       }
 
-      // Debounce pour les inputs à frappe continue
+      // Debounce for continuous-input fields
       function debounce(fn, delay) {
         let timer;
         return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
@@ -664,13 +664,13 @@
         loadAllCuisines();
         searchHygieneRadar();
 
-        // Filtres backend → nouvelle recherche
+        // Backend filters → new search
         document.getElementById("borough-select").addEventListener("change", searchHygieneRadar);
         document.getElementById("cuisine-filter").addEventListener("change", searchHygieneRadar);
         document.getElementById("restaurant-limit").addEventListener("input", debouncedSearch);
         document.getElementById("score-max").addEventListener("change", searchHygieneRadar);
 
-        // GPS uniquement → filtre client-side uniquement
+        // GPS only → client-side filter only
         document.getElementById("gps-only").addEventListener("change", applyGpsFilter);
       });
     </script>

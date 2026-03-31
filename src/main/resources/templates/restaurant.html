@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -148,11 +148,11 @@
 
       <div class="grid-2">
         <div class="card">
-          <h2>Localisation</h2>
+          <h2>Location</h2>
           <div id="map-container"><div class="spinner"></div></div>
         </div>
         <div class="card">
-          <h2>Evolution du score</h2>
+          <h2>Score evolution</h2>
           <div class="chart-wrapper">
             <canvas id="score-chart"></canvas>
           </div>
@@ -160,7 +160,7 @@
       </div>
 
       <div class="card full-width">
-        <h2>Historique des inspections</h2>
+        <h2>Inspection history</h2>
         <div id="inspections-table"><div class="spinner"></div></div>
       </div>
 
@@ -190,7 +190,7 @@
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           window.location.href = "/login";
-          throw new Error("Non autorisé");
+          throw new Error("Unauthorized");
         }
         return response;
       }
@@ -254,7 +254,7 @@
         const latestGrade = r.latestGrade || "N/A";
         const latestScore = r.latestScore != null ? r.latestScore : "—";
 
-        const trendLabel = { improving: "↑ En amélioration", stable: "→ Stable", worsening: "↓ En dégradation" };
+        const trendLabel = { improving: "↑ Improving", stable: "→ Stable", worsening: "↓ Worsening" };
         const trendClass = { improving: "trend-improving", stable: "trend-stable", worsening: "trend-worsening" };
 
         document.getElementById("header-card").innerHTML = `
@@ -275,7 +275,7 @@
                     style="background:#f0f2ff;color:#667eea;border:1px solid #c5caf7;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:0.88em;font-weight:600;white-space:nowrap">+ Bookmark</button>
           </div>
         `;
-        document.title = `${r.name} — Fiche Restaurant`;
+        document.title = `${r.name} — Restaurant Details`;
 
         // Grade circle
         const gradeCircle = document.getElementById('grade-circle');
@@ -303,7 +303,7 @@
       function renderMap(r) {
         const container = document.getElementById("map-container");
         if (!r.latitude || !r.longitude) {
-          container.innerHTML = '<div class="no-location">Coordonnées GPS non disponibles</div>';
+          container.innerHTML = '<div class="no-location">GPS coordinates not available</div>';
           return;
         }
         container.innerHTML = '<div id="map"></div>';
@@ -327,7 +327,7 @@
 
         if (sorted.length === 0) {
           document.getElementById("score-chart").parentElement.innerHTML =
-            '<p style="color:#aaa;font-size:0.9em;padding:20px 0">Aucune donnée de score disponible</p>';
+            '<p style="color:#aaa;font-size:0.9em;padding:20px 0">No score data available</p>';
           return;
         }
 
@@ -336,7 +336,7 @@
           data: {
             labels: sorted.map(g => g.date.substring(0, 10)),
             datasets: [{
-              label: "Score inspection",
+              label: "Inspection score",
               data: sorted.map(g => g.score),
               borderColor: "#667eea",
               backgroundColor: "rgba(102,126,234,0.1)",
@@ -353,7 +353,7 @@
             scales: {
               y: {
                 beginAtZero: true,
-                title: { display: true, text: "Score (bas = mieux)" },
+                title: { display: true, text: "Score (lower = better)" },
                 grid: { color: "#f0f0f0" }
               },
               x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }
@@ -365,14 +365,14 @@
       function renderInspections(grades) {
         const container = document.getElementById("inspections-table");
         if (!grades || grades.length === 0) {
-          container.innerHTML = '<p style="color:#aaa;padding:10px">Aucune inspection enregistrée</p>';
+          container.innerHTML = '<p style="color:#aaa;padding:10px">No inspections recorded</p>';
           return;
         }
         const sorted = [...grades].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
         let html = `<div style="overflow-x:auto"><table>
           <thead><tr>
-            <th>Date</th><th>Note</th><th>Score</th><th>Type inspection</th>
-            <th>Critique</th><th>Code violation</th><th>Description</th>
+            <th>Date</th><th>Grade</th><th>Score</th><th>Inspection type</th>
+            <th>Critical</th><th>Violation code</th><th>Description</th>
           </tr></thead><tbody>`;
         sorted.forEach(g => {
           const gc = gradeClass(g.grade);
@@ -382,7 +382,7 @@
             <td><span class="${gc}">${g.grade || "—"}</span></td>
             <td>${g.score != null ? g.score : "—"}</td>
             <td style="font-size:0.85em;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.inspectionType || "—"}</td>
-            <td><span class="${crit ? "critical-yes" : "critical-no"}">${crit ? "⚠ Oui" : "Non"}</span></td>
+            <td><span class="${crit ? "critical-yes" : "critical-no"}">${crit ? "⚠ Yes" : "No"}</span></td>
             <td style="font-family:monospace;font-size:0.85em">${g.violationCode || "—"}</td>
             <td style="font-size:0.82em;max-width:260px">${g.violationDescription || "—"}</td>
           </tr>`;
@@ -455,7 +455,7 @@
           }
         })
         .catch(e => {
-          document.getElementById("header-card").innerHTML = `<div class="error">Erreur: ${e.message}</div>`;
+          document.getElementById("header-card").innerHTML = `<div class="error">Error: ${e.message}</div>`;
         });
     </script>
   </body>

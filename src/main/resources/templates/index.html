@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -459,9 +459,9 @@
     <div class="container">
       <header>
         <h1>Restaurant Analytics</h1>
-        <p>Analyse interactive des restaurants de New York</p>
+        <p>Interactive analytics for New York restaurants</p>
         <a href="/hygiene-radar" class="nav-link">Hygiene Radar →</a>
-        <a href="/inspection-map" class="nav-link" id="inspectionMapLink" style="display:none">Carte Violations →</a>
+        <a href="/inspection-map" class="nav-link" id="inspectionMapLink" style="display:none">Violations Map →</a>
         <a href="/inspection" class="nav-link" id="inspectionLink" style="display:none">Agents →</a>
         <button
           class="nav-link"
@@ -472,7 +472,7 @@
             background: rgba(255, 255, 255, 0.2);
           "
         >
-          Déconnexion
+          Sign Out
         </button>
       </header>
 
@@ -486,11 +486,11 @@
       </div>
 
       <div class="dashboard">
-        <!-- UC1: Restaurants par quartier -->
+        <!-- UC1: Restaurants per borough -->
         <div class="card">
           <div class="card-header">
-            <h2>Restaurants par Quartier</h2>
-            <button onclick="loadByBorough()">Charger</button>
+            <h2>Restaurants per Borough</h2>
+            <button onclick="loadByBorough()">Load</button>
           </div>
           <div class="chart-wrapper">
             <canvas id="borough-chart"></canvas>
@@ -506,7 +506,7 @@
           </div>
         </div>
 
-        <!-- UC5: Top 10 cuisines par nombre -->
+        <!-- UC5: Top 10 cuisines by count -->
         <div class="card">
           <div class="card-header">
             <h2>Top Cuisines</h2>
@@ -518,7 +518,7 @@
                 min="1"
                 max="30"
               />
-              <button onclick="loadTopCuisines()">Charger</button>
+              <button onclick="loadTopCuisines()">Load</button>
             </div>
           </div>
           <div class="chart-wrapper">
@@ -541,10 +541,10 @@
           </div>
         </div>
 
-        <!-- UC2: Score moyen par quartier pour une cuisine -->
+        <!-- UC2: Average score per borough for a cuisine -->
         <div class="card">
           <div class="card-header">
-            <h2>Score par Quartier / Cuisine</h2>
+            <h2>Score per Borough / Cuisine</h2>
             <div class="controls">
               <input
                 type="text"
@@ -553,7 +553,7 @@
                 value="Italian"
                 style="width: 120px"
               />
-              <button onclick="loadCuisineScores()">Charger</button>
+              <button onclick="loadCuisineScores()">Load</button>
             </div>
           </div>
           <div class="chart-wrapper">
@@ -570,10 +570,10 @@
           </div>
         </div>
 
-        <!-- UC3: Pires cuisines -->
+        <!-- UC3: Worst cuisines -->
         <div class="card">
           <div class="card-header">
-            <h2>Pires Cuisines</h2>
+            <h2>Worst Cuisines</h2>
             <div class="controls">
               <select id="worst-borough-select">
                 <option value="Manhattan">Manhattan</option>
@@ -589,7 +589,7 @@
                 min="1"
                 max="20"
               />
-              <button onclick="loadWorstCuisines()">Charger</button>
+              <button onclick="loadWorstCuisines()">Load</button>
             </div>
           </div>
           <div class="chart-wrapper">
@@ -612,82 +612,82 @@
         <!-- Top healthiest restaurants -->
         <div class="card">
           <div class="card-header">
-            <h2>Top Restaurants Sains</h2>
+            <h2>Top Healthy Restaurants</h2>
             <div class="controls">
               <input type="number" id="top-limit" value="10" min="1" max="50" />
-              <button onclick="loadTopRestaurants()">Charger</button>
-              <button id="rebuild-cache-btn" onclick="rebuildCache()" style="display:none;background:#7c3aed;font-size:0.8em">🔄 Reconstruire le cache</button>
+              <button onclick="loadTopRestaurants()">Load</button>
+              <button id="rebuild-cache-btn" onclick="rebuildCache()" style="display:none;background:#7c3aed;font-size:0.8em">🔄 Rebuild cache</button>
             </div>
           </div>
           <div class="card-content" id="top-restaurants-content">
-            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+            <p class="loading" style="color:#aaa;font-size:0.9em">Click Load to display</p>
           </div>
         </div>
 
         <!-- Bookmarks -->
         <div class="card">
           <div class="card-header">
-            <h2>Mes Favoris</h2>
-            <button onclick="loadBookmarks()">Actualiser</button>
+            <h2>My Bookmarks</h2>
+            <button onclick="loadBookmarks()">Refresh</button>
           </div>
           <div class="card-content" id="bookmarks-content">
-            <p class="loading" style="color:#aaa;font-size:0.9em">Connectez-vous pour voir vos favoris</p>
+            <p class="loading" style="color:#aaa;font-size:0.9em">Sign in to see your bookmarks</p>
           </div>
         </div>
       </div>
 
-      <!-- Inspections récentes + Autour de moi -->
+      <!-- Recent inspections + Nearby -->
       <div class="dashboard-wide">
-        <!-- Inspections récentes -->
+        <!-- Recent inspections -->
         <div class="card">
           <div class="card-header">
-            <h2>Inspections Récentes</h2>
+            <h2>Recent Inspections</h2>
             <div class="controls">
-              <label style="font-size:0.85em;color:#666">Derniers</label>
+              <label style="font-size:0.85em;color:#666">Last</label>
               <input type="number" id="recent-days" value="3650" min="1" style="width:80px" />
-              <label style="font-size:0.85em;color:#666">jours</label>
-              <button onclick="loadRecentInspections()">Charger</button>
+              <label style="font-size:0.85em;color:#666">days</label>
+              <button onclick="loadRecentInspections()">Load</button>
             </div>
           </div>
           <div class="card-content" id="recent-content">
-            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Charger</p>
+            <p class="loading" style="color:#aaa;font-size:0.9em">Click Load to display</p>
           </div>
         </div>
 
-        <!-- Autour de moi -->
+        <!-- Nearby -->
         <div class="card">
           <div class="card-header">
-            <h2>Autour de Moi</h2>
+            <h2>Nearby</h2>
             <div class="controls">
               <input type="number" id="nearby-radius" value="500" min="100" max="5000" style="width:80px" />
               <label style="font-size:0.85em;color:#666">m</label>
-              <button onclick="loadNearby()">📍 Localiser</button>
+              <button onclick="loadNearby()">📍 Locate me</button>
             </div>
           </div>
           <div id="nearby-map" style="display:none"></div>
           <div class="card-content" id="nearby-content">
-            <p class="loading" style="color:#aaa;font-size:0.9em">Cliquez sur Localiser</p>
+            <p class="loading" style="color:#aaa;font-size:0.9em">Click Locate me to display</p>
           </div>
         </div>
       </div>
 
       <!-- UC4 + Stats (full width row) -->
       <div class="dashboard-wide">
-        <!-- UC4: Cuisines populaires -->
+        <!-- UC4: Popular cuisines -->
         <div class="card">
           <div class="card-header">
-            <h2>Cuisines Populaires</h2>
+            <h2>Popular Cuisines</h2>
             <div class="controls">
               <label style="font-size: 0.85em; color: #666"
-                >Min restaurants :</label
+                >Min restaurants:</label
               >
               <input type="number" id="min-count" value="500" min="1" />
-              <button onclick="loadPopularCuisines()">Charger</button>
+              <button onclick="loadPopularCuisines()">Load</button>
             </div>
           </div>
           <div class="card-content" id="popular-content">
             <p class="loading" style="color: #aaa; font-size: 0.9em">
-              Cliquez sur Charger
+              Click Load to display
             </p>
           </div>
           <div class="export-buttons">
@@ -700,12 +700,12 @@
         <!-- Stats globales -->
         <div class="card">
           <div class="card-header">
-            <h2>Statistiques Globales</h2>
-            <button onclick="loadStats()">Charger</button>
+            <h2>Global Statistics</h2>
+            <button onclick="loadStats()">Load</button>
           </div>
           <div id="stats-content" class="card-content">
             <p class="loading" style="color: #aaa; font-size: 0.9em">
-              Cliquez sur Charger
+              Click Load to display
             </p>
           </div>
         </div>
@@ -719,77 +719,77 @@
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/by-borough</span>
-              <span class="api-desc">Nombre de restaurants par quartier</span>
+              <span class="api-desc">Restaurant count per borough</span>
             </div>
           </a>
           <a href="/api/restaurants/cuisine-scores?cuisine=Italian" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/cuisine-scores?cuisine=Italian</span>
-              <span class="api-desc">Score moyen par quartier pour une cuisine</span>
+              <span class="api-desc">Average score per borough for a cuisine</span>
             </div>
           </a>
           <a href="/api/restaurants/worst-cuisines?borough=Manhattan&amp;limit=5" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/worst-cuisines?borough=Manhattan&amp;limit=5</span>
-              <span class="api-desc">Pires cuisines par score dans un quartier</span>
+              <span class="api-desc">Worst cuisines by score in a borough</span>
             </div>
           </a>
           <a href="/api/restaurants/popular-cuisines?minCount=500" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/popular-cuisines?minCount=500</span>
-              <span class="api-desc">Cuisines avec au moins N restaurants</span>
+              <span class="api-desc">Cuisines with a minimum restaurant count</span>
             </div>
           </a>
           <a href="/api/restaurants/top?limit=10" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/top?limit=10</span>
-              <span class="api-desc">Top restaurants les plus sains (Redis sorted set)</span>
+              <span class="api-desc">Healthiest restaurants (Redis sorted set)</span>
             </div>
           </a>
           <a href="/api/restaurants/by-cuisine?limit=10" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/by-cuisine?limit=10</span>
-              <span class="api-desc">Top N cuisines par nombre de restaurants</span>
+              <span class="api-desc">Top N cuisines by restaurant count</span>
             </div>
           </a>
           <a href="/api/restaurants/cuisines" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/cuisines</span>
-              <span class="api-desc">Tous les types de cuisine distincts</span>
+              <span class="api-desc">All distinct cuisine types</span>
             </div>
           </a>
           <a href="/api/restaurants/stats" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/stats</span>
-              <span class="api-desc">Statistiques globales</span>
+              <span class="api-desc">Global statistics</span>
             </div>
           </a>
           <a href="/api/restaurants/hygiene-radar?limit=25" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/hygiene-radar?limit=25</span>
-              <span class="api-desc">Restaurants des cuisines les plus risquées</span>
+              <span class="api-desc">Restaurants from the riskiest cuisines</span>
             </div>
           </a>
           <a href="/api/restaurants/sync-status" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/sync-status</span>
-              <span class="api-desc">Statut du dernier sync de données</span>
+              <span class="api-desc">Last data sync status</span>
             </div>
           </a>
           <a href="/api/restaurants/random" target="_blank" class="api-link">
             <span class="api-method method-get">GET</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/random</span>
-              <span class="api-desc">Restaurant aléatoire</span>
+              <span class="api-desc">Random restaurant</span>
             </div>
           </a>
           <a href="/api/restaurants/health" target="_blank" class="api-link">
@@ -803,7 +803,7 @@
             <span class="api-method method-post">POST</span>
             <div class="api-link-body">
               <span class="api-path">/api/restaurants/refresh</span>
-              <span class="api-desc">Déclencher un sync manuel (invalide le cache)</span>
+              <span class="api-desc">Trigger a manual sync (invalidates cache)</span>
             </div>
           </a>
         </div>
@@ -835,7 +835,7 @@
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           window.location.href = "/login";
-          throw new Error("Non autorisé");
+          throw new Error("Unauthorized");
         }
         return response;
       }
@@ -966,7 +966,7 @@
       function renderBoroughChart(data) {
         document.getElementById("borough-content").innerHTML = "";
         if (!data || data.length === 0) {
-          setError("borough-content", "Aucune donnée");
+          setError("borough-content", "No data");
           return;
         }
         destroyChart("borough");
@@ -992,7 +992,7 @@
               tooltip: {
                 callbacks: {
                   label: (ctx) =>
-                    ` ${ctx.parsed.x.toLocaleString("fr-FR")} restaurants`,
+                    ` ${ctx.parsed.x.toLocaleString("en-US")} restaurants`,
                 },
               },
             },
@@ -1007,7 +1007,7 @@
       function renderTopCuisineChart(data) {
         document.getElementById("top-cuisine-content").innerHTML = "";
         if (!data || data.length === 0) {
-          setError("top-cuisine-content", "Aucune donnée");
+          setError("top-cuisine-content", "No data");
           return;
         }
         destroyChart("topCuisine");
@@ -1035,7 +1035,7 @@
                 tooltip: {
                   callbacks: {
                     label: (ctx) =>
-                      ` ${ctx.parsed.x.toLocaleString("fr-FR")} restaurants`,
+                      ` ${ctx.parsed.x.toLocaleString("en-US")} restaurants`,
                   },
                 },
               },
@@ -1051,7 +1051,7 @@
       function renderCuisineChart(data, cuisine) {
         document.getElementById("cuisine-content").innerHTML = "";
         if (!data || data.length === 0) {
-          setError("cuisine-content", `Aucun résultat pour "${cuisine}"`);
+          setError("cuisine-content", `No results for "${cuisine}"`);
           return;
         }
         destroyChart("cuisine");
@@ -1061,7 +1061,7 @@
             labels: data.map((d) => d.borough),
             datasets: [
               {
-                label: `Score moyen (${cuisine})`,
+                label: `Average score (${cuisine})`,
                 data: data.map((d) => parseFloat(d.avgScore.toFixed(2))),
                 backgroundColor: data.map((_, i) => getColor(i + 4)),
                 borderRadius: 6,
@@ -1083,7 +1083,7 @@
               y: {
                 beginAtZero: true,
                 grid: { color: "#f0f0f0" },
-                title: { display: true, text: "Score moyen" },
+                title: { display: true, text: "Average score" },
               },
               x: { grid: { display: false } },
             },
@@ -1094,7 +1094,7 @@
       function renderWorstChart(data, borough) {
         document.getElementById("worst-content").innerHTML = "";
         if (!data || data.length === 0) {
-          setError("worst-content", `Aucun résultat pour "${borough}"`);
+          setError("worst-content", `No results for "${borough}"`);
           return;
         }
         destroyChart("worst");
@@ -1105,7 +1105,7 @@
             labels: sorted.map((d) => d.cuisine),
             datasets: [
               {
-                label: "Score moyen",
+                label: "Average score",
                 data: sorted.map((d) => parseFloat(d.avgScore.toFixed(2))),
                 backgroundColor: sorted.map(
                   (_, i) => `hsl(${0 + i * 15}, 70%, 55%)`,
@@ -1133,7 +1133,7 @@
               x: {
                 beginAtZero: true,
                 grid: { color: "#f0f0f0" },
-                title: { display: true, text: "Score moyen" },
+                title: { display: true, text: "Average score" },
               },
               y: { grid: { display: false } },
             },
@@ -1144,7 +1144,7 @@
       function renderPopularList(data) {
         const content = document.getElementById("popular-content");
         if (!data || data.length === 0) {
-          content.innerHTML = '<p class="error">Aucune donnée</p>';
+          content.innerHTML = '<p class="error">No data</p>';
           return;
         }
         const list = document.createElement("div");
@@ -1160,7 +1160,7 @@
 
         const note = document.createElement("p");
         note.style.cssText = "font-size:0.82em;color:#999;margin-top:10px";
-        note.textContent = `${data.length} type${data.length > 1 ? "s" : ""} de cuisine`;
+        note.textContent = `${data.length} cuisine type${data.length > 1 ? "s" : ""}`;
         content.appendChild(note);
       }
 
@@ -1171,16 +1171,16 @@
         let html = `<div class="stats-grid">
           <div class="stat-box">
             <span class="stat-label">Total restaurants</span>
-            <strong>${data.totalRestaurants.toLocaleString("fr-FR")}</strong>
+            <strong>${data.totalRestaurants.toLocaleString("en-US")}</strong>
           </div>
           <div class="stat-box">
-            <span class="stat-label">Quartiers</span>
+            <span class="stat-label">Boroughs</span>
             <strong>${boroughs.length}</strong>
           </div>`;
         boroughs.forEach(([borough, count]) => {
           html += `<div class="stat-box">
             <span class="stat-label">${borough}</span>
-            <strong>${count.toLocaleString("fr-FR")}</strong>
+            <strong>${count.toLocaleString("en-US")}</strong>
           </div>`;
         });
         html += "</div>";
@@ -1203,7 +1203,7 @@
       function exportData(type, format) {
         const data = currentData[type];
         if (!data || (Array.isArray(data) && data.length === 0)) {
-          alert("Aucune donnée à exporter. Chargez des données d'abord.");
+          alert("No data to export. Load data first.");
           return;
         }
         if (format === "json") downloadJSON(data, type);
@@ -1238,13 +1238,13 @@
 
       function triggerRefresh(e) {
         e.preventDefault();
-        if (!confirm("Lancer un sync complet depuis NYC Open Data ? L'opération peut prendre plusieurs minutes.")) return;
+        if (!confirm("Launch a full sync from NYC Open Data? This operation may take several minutes.")) return;
         fetch(`${API_BASE}/refresh`, { method: "POST" })
           .then((r) => r.json())
           .then((data) => alert(data.status === "success"
-            ? `Sync terminé : ${data.upsertedRestaurants} restaurants upsertés.`
-            : `Erreur : ${data.error}`))
-          .catch((e) => alert(`Erreur réseau : ${e.message}`));
+            ? `Sync complete: ${data.upsertedRestaurants} restaurants upserted.`
+            : `Error: ${data.error}`))
+          .catch((e) => alert(`Network error: ${e.message}`));
       }
 
       function triggerDownload(blob, filename) {
@@ -1286,10 +1286,10 @@
           const id = btn.dataset.id;
           if (bookmarkedIds.has(id)) {
             btn.classList.add("bookmarked");
-            btn.title = "Retirer des favoris";
+            btn.title = "Remove from bookmarks";
           } else {
             btn.classList.remove("bookmarked");
-            btn.title = "Ajouter aux favoris";
+            btn.title = "Add to bookmarks";
           }
         });
       }
@@ -1328,7 +1328,7 @@
       function renderTopRestaurants(data) {
         const content = document.getElementById("top-restaurants-content");
         if (!data || data.length === 0) {
-          content.innerHTML = '<p class="error">Aucune donnée (le cache Redis est peut-être vide, lancez un sync)</p>';
+          content.innerHTML = '<p class="error">No data (Redis cache may be empty, run a sync)</p>';
           return;
         }
         const list = document.createElement("div");
@@ -1342,9 +1342,9 @@
               <div class="top-restaurant-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
             </div>
             <span class="top-restaurant-score">Score ${r.latestScore}</span>
-            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">View</a>
             <button class="btn-bookmark" data-id="${r.restaurantId}"
-              onclick="toggleBookmark('${r.restaurantId}', this)" title="Ajouter aux favoris">★</button>
+              onclick="toggleBookmark('${r.restaurantId}', this)" title="Add to bookmarks">★</button>
           `;
           list.appendChild(item);
         });
@@ -1368,7 +1368,7 @@
       function renderBookmarks(data) {
         const content = document.getElementById("bookmarks-content");
         if (!data || data.length === 0) {
-          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">Aucun favori enregistré</p>';
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">No bookmarks saved yet</p>';
           return;
         }
         const list = document.createElement("div");
@@ -1382,9 +1382,9 @@
               <div class="top-restaurant-name">${r.name || r.restaurantId}</div>
               <div class="top-restaurant-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
             </div>
-            <a class="btn-view" href="/restaurant/${r.restaurantId}">Voir</a>
+            <a class="btn-view" href="/restaurant/${r.restaurantId}">View</a>
             <button class="btn-bookmark bookmarked" data-id="${r.restaurantId}"
-              onclick="toggleBookmark('${r.restaurantId}', this)" title="Retirer des favoris">★</button>
+              onclick="toggleBookmark('${r.restaurantId}', this)" title="Remove from bookmarks">★</button>
           `;
           list.appendChild(item);
         });
@@ -1408,7 +1408,7 @@
       function renderRecentInspections(data) {
         const content = document.getElementById("recent-content");
         if (!data || data.length === 0) {
-          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">Aucune inspection trouvée</p>';
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px">No inspections found</p>';
           return;
         }
         const list = document.createElement("div");
@@ -1435,7 +1435,7 @@
 
       function loadNearby() {
         if (!navigator.geolocation) {
-          setError("nearby-content", "Géolocalisation non supportée par ce navigateur");
+          setError("nearby-content", "Geolocation is not supported by this browser");
           return;
         }
         setLoading("nearby-content");
@@ -1451,7 +1451,7 @@
               })
               .catch(e => setError("nearby-content", e.message));
           },
-          err => setError("nearby-content", "Impossible d'obtenir la position: " + err.message)
+          err => setError("nearby-content", "Unable to get location: " + err.message)
         );
       }
 
@@ -1477,19 +1477,19 @@
             html: '<div style="width:16px;height:16px;background:#667eea;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
             iconSize: [16, 16], iconAnchor: [8, 8]
           })
-        }).addTo(nearbyMap).bindPopup("Ma position");
+        }).addTo(nearbyMap).bindPopup("My location");
 
         nearbyLayer = L.featureGroup().addTo(nearbyMap);
         data.forEach(r => {
           if (r.latitude && r.longitude) {
             L.marker([r.latitude, r.longitude])
-              .bindPopup(`<strong>${r.name}</strong><br>${r.cuisine}<br><a href="/restaurant/${r.restaurantId}">Voir la fiche</a>`)
+              .bindPopup(`<strong>${r.name}</strong><br>${r.cuisine}<br><a href="/restaurant/${r.restaurantId}">View details</a>`)
               .addTo(nearbyLayer);
           }
         });
 
         if (data.length === 0) {
-          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:8px">Aucun restaurant trouvé à proximité</p>';
+          content.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:8px">No restaurants found nearby</p>';
           return;
         }
         const list = document.createElement("div");
@@ -1528,20 +1528,20 @@
       function rebuildCache() {
         const btn = document.getElementById("rebuild-cache-btn");
         btn.disabled = true;
-        btn.textContent = "⏳ En cours...";
+        btn.textContent = "⏳ In progress...";
         fetchWithAuth(`${API_BASE}/rebuild-cache`, { method: "POST" })
           .then(r => r.json())
           .then(data => {
             if (data.status === "success") {
-              btn.textContent = "✅ Cache reconstruit";
-              setTimeout(() => { btn.textContent = "🔄 Reconstruire le cache"; btn.disabled = false; }, 3000);
+              btn.textContent = "✅ Cache rebuilt";
+              setTimeout(() => { btn.textContent = "🔄 Rebuild cache"; btn.disabled = false; }, 3000);
               loadTopRestaurants();
             } else {
-              btn.textContent = "❌ Erreur";
+              btn.textContent = "❌ Error";
               btn.disabled = false;
             }
           })
-          .catch(() => { btn.textContent = "❌ Erreur réseau"; btn.disabled = false; });
+          .catch(() => { btn.textContent = "❌ Network error"; btn.disabled = false; });
       }
 
       // Load bookmarked IDs on page load
