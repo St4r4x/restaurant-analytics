@@ -61,7 +61,13 @@ Plans:
   2. A customer can open a restaurant detail page and see the current grade badge, cleanliness score, and the full NYC inspection history timeline with violation descriptions
   3. A customer can open a map page and see grade-colored markers (green A, yellow B, red C/F) across NYC; the map does not freeze or crash with the full ~27K restaurant dataset loaded
   4. A customer can bookmark a restaurant from the detail page or search results and view their saved bookmarks in a dedicated list
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Wave 0 test scaffold: RestaurantControllerSearchTest with @Disabled stubs (CUST-01, CUST-03)
+- [ ] 03-02-PLAN.md — DAO methods + REST endpoints /search + /map-points + ViewController /my-bookmarks route (CUST-01, CUST-03, CUST-04)
+- [ ] 03-03-PLAN.md — index.html search bar + my-bookmarks.html template (CUST-01, CUST-04)
+- [ ] 03-04-PLAN.md — restaurant.html grade badge + history table + bookmark toggle; inspection-map.html clustering migration (CUST-02, CUST-03, CUST-04)
 
 ### Phase 4: Integration Polish
 **Goal**: Security boundaries, ownership rules, and photo persistence are verified end-to-end with targeted tests; the application behaves correctly at all role/permission boundaries
@@ -82,5 +88,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Role Infrastructure | 4/4 | Complete   | 2026-03-29 |
 | 2. Controller Reports | 3/3 | Complete   | 2026-03-31 |
-| 3. Customer Discovery | 0/TBD | Not started | - |
+| 3. Customer Discovery | 0/4 | Not started | - |
 | 4. Integration Polish | 0/TBD | Not started | - |
