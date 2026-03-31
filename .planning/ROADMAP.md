@@ -66,7 +66,7 @@ Plans:
 Plans:
 - [ ] 03-01-PLAN.md — Wave 0 test scaffold: RestaurantControllerSearchTest with @Disabled stubs (CUST-01, CUST-03)
 - [ ] 03-02-PLAN.md — DAO methods + REST endpoints /search + /map-points + ViewController /my-bookmarks route (CUST-01, CUST-03, CUST-04)
-- [ ] 03-03-PLAN.md — index.html search bar + my-bookmarks.html template (CUST-01, CUST-04)
+- [x] 03-03-PLAN.md — index.html search bar + my-bookmarks.html template (CUST-01, CUST-04)
 - [ ] 03-04-PLAN.md — restaurant.html grade badge + history table + bookmark toggle; inspection-map.html clustering migration (CUST-02, CUST-03, CUST-04)
 
 ### Phase 4: Integration Polish

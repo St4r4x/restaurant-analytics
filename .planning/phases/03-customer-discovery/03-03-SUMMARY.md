@@ -95,9 +95,9 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- Search bar and bookmark pages are complete
-- Checkpoint: human browser verification required (8-step checklist in PLAN.md)
-- After checkpoint approval, Phase 3 customer-discovery UI is done
+- Search bar and bookmark pages are complete and human-verified (all 7 browser checks passed)
+- Checkpoint approved 2026-03-31: search bar, grade badges, bookmark toggle on results, /my-bookmarks list, optimistic remove, empty state all confirmed working
+- Ready for 03-04-PLAN.md: restaurant detail page and inspection-map clustering
 
 ---
 *Phase: 03-customer-discovery*
