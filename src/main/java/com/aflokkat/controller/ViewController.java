@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Vue Controller - Sert les pages HTML principales
+ * View Controller — serves the main HTML pages
  */
 @Controller
 public class ViewController {

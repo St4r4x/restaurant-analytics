@@ -37,7 +37,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 /**
- * Implémentation du DAO pour MongoDB avec pattern Singleton pour la connexion
+ * DAO implementation for MongoDB using a Singleton connection pattern
  */
 @Repository
 public class RestaurantDAOImpl implements RestaurantDAO {
@@ -49,11 +49,11 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     private CodecRegistry pojoCodecRegistry;
     
     public RestaurantDAOImpl() {
-        // Utiliser le MongoClient Singleton
+        // Use the Singleton MongoClient
         this.mongoClient = MongoClientFactory.getInstance();
         this.database = mongoClient.getDatabase(AppConfig.getMongoDatabase());
         
-        // Initialiser le CodecRegistry une seule fois
+        // Initialize the CodecRegistry once
         this.pojoCodecRegistry = getPojoCodecRegistry();
         
         this.restaurantCollection = database.withCodecRegistry(pojoCodecRegistry)
@@ -65,12 +65,12 @@ public class RestaurantDAOImpl implements RestaurantDAO {
             new IndexOptions().background(true)
         );
 
-        logger.info("RestaurantDAOImpl initialisé - DB: {}, Collection: {}",
+        logger.info("RestaurantDAOImpl initialized - DB: {}, Collection: {}",
                 AppConfig.getMongoDatabase(), AppConfig.getMongoCollection());
     }
     
     /**
-     * Crée et retourne le CodecRegistry pour les POJOs (extraction de la redondance)
+     * Creates and returns the CodecRegistry for POJOs (deduplication helper)
      */
     private CodecRegistry getPojoCodecRegistry() {
         return fromRegistries(
@@ -80,7 +80,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     /**
-     * Agrégation générique réutilisable
+     * Generic reusable aggregation helper
      */
     private <T> List<T> aggregate(List<Document> pipeline, Class<T> resultClass) {
         List<T> results = new ArrayList<>();
@@ -142,7 +142,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<AggregationCount> countByField(String fieldName) {
-        logger.debug("Agrégation: comptage par champ '{}'", fieldName);
+        logger.debug("Aggregation: counting by field '{}'", fieldName);
         return aggregate(Arrays.asList(
             new Document("$group", new Document()
                 .append("_id", "$" + fieldName)
@@ -153,13 +153,13 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<AggregationCount> findCountByBorough() {
-        logger.debug("Requête: Comptage des restaurants par quartier");
+        logger.debug("Query: counting restaurants per borough");
         return countByField("borough");
     }
     
     @Override
     public List<BoroughCuisineScore> findAverageScoreByCuisineAndBorough(String cuisine) {
-        logger.debug("Requête: Score moyen par quartier pour cuisine '{}'", cuisine);
+        logger.debug("Query: average score per borough for cuisine '{}'", cuisine);
         return aggregate(Arrays.asList(
             new Document("$match", new Document("cuisine", cuisine)),
             new Document("$unwind", "$grades"),
@@ -374,11 +374,11 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     /**
-     * Ferme la connexion MongoDB via le Singleton Factory
+     * Closes the MongoDB connection via the Singleton Factory
      */
     @Override
     public void close() {
-        logger.info("Fermeture du DAO");
+        logger.info("Closing the DAO");
         MongoClientFactory.closeInstance();
     }
 }

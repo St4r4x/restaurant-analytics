@@ -12,72 +12,72 @@ import com.aflokkat.dto.HeatmapPoint;
 
 public interface RestaurantDAO {
     /**
-     * Récupère tous les restaurants avec limite
+     * Returns all restaurants up to the given limit
      */
     List<Restaurant> findAll(int limit);
     
     /**
-     * Récupère les restaurants de type de cuisine spécifiée
+     * Returns restaurants of the specified cuisine type
      */
     List<Restaurant> findByCuisine(String cuisine, int limit);
     
     /**
-     * Recherche avec filtres multiples
+     * Search with multiple filters
      */
     List<Restaurant> findWithFilters(Map<String, Object> filters, int limit);
     
     /**
-     * Agrège les restaurants par un champ spécifié et les trie par nombre décroissant
+     * Aggregates restaurants by a given field and sorts by count descending
      */
     List<AggregationCount> countByField(String fieldName);
     
     /**
-     * Compte le nombre total de restaurants
+     * Returns the total restaurant count
      */
     long countAll();
     
     /**
-     * Compte le nombre de restaurants pour une cuisine spécifique
+     * Returns the restaurant count for a specific cuisine
      */
     long countByCuisine(String cuisine);
     
     /**
-     * Retourne les statistiques par quartier
+     * Returns statistics per borough
      */
     Map<String, Long> findStatisticsByBorough();
     
     /**
-     * USE CASE 1: Compte les restaurants par quartier
+     * USE CASE 1: Count restaurants per borough
      */
     List<AggregationCount> findCountByBorough();
     
     /**
-     * USE CASE 2: Calcule le score moyen par quartier pour une cuisine donnée
+     * USE CASE 2: Compute average inspection score per borough for a given cuisine
      */
     List<BoroughCuisineScore> findAverageScoreByCuisineAndBorough(String cuisine);
     
     /**
-     * USE CASE 3: Retourne les pires cuisines (score moyen le plus bas) dans un quartier
+     * USE CASE 3: Return the worst cuisines (highest average score) in a borough
      */
     List<CuisineScore> findWorstCuisinesByAverageScoreInBorough(String borough, int limit);
 
     /**
-     * USE CASE 3 (global): Pires cuisines tous quartiers confondus
+     * USE CASE 3 (global): Worst cuisines across all boroughs
      */
     List<CuisineScore> findWorstCuisinesByAverageScore(int limit);
 
     /**
-     * USE CASE 4: Retourne les cuisines avec un minimum de restaurants
+     * USE CASE 4: Return cuisine types with at least minCount restaurants
      */
     List<String> findCuisinesWithMinimumCount(int minCount);
 
     /**
-     * Retourne la liste de tous les types de cuisine distincts, triés alphabétiquement
+     * Returns all distinct cuisine types, sorted alphabetically
      */
     List<String> findDistinctCuisines();
 
     /**
-     * Retourne un restaurant aléatoire via $sample
+     * Returns a random restaurant via $sample
      */
     Restaurant findRandom();
 
@@ -90,7 +90,7 @@ public interface RestaurantDAO {
     int upsertRestaurants(List<Restaurant> restaurants);
 
     /**
-     * Retourne les restaurants correspondant à une liste d'IDs (restaurant_id / camis)
+     * Returns restaurants matching a list of IDs (restaurant_id / camis)
      */
     List<Restaurant> findByIds(List<String> restaurantIds);
 
@@ -135,7 +135,7 @@ public interface RestaurantDAO {
     List<org.bson.Document> findMapPoints();
 
     /**
-     * Ferme la connexion
+     * Closes the connection
      */
     void close();
 }

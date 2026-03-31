@@ -34,7 +34,7 @@ import com.aflokkat.util.ResponseUtil;
 import org.bson.Document;
 
 /**
- * REST API Controller pour l'accès aux données MongoDB
+ * REST API controller for MongoDB restaurant data
  */
 @Tag(name = "Restaurants", description = "NYC restaurant inspection data — analytics, sync and leaderboard")
 @RestController
@@ -55,7 +55,7 @@ public class RestaurantController {
     private RestaurantCacheService cacheService;
 
     /**
-     * USE CASE 1: Nombre de restaurants par quartier
+     * USE CASE 1: Restaurant count per borough
      */
     @Operation(summary = "Restaurant count per borough", description = "Returns the number of restaurants in each NYC borough, sorted by count. Result is cached in Redis for 1 hour.")
     @GetMapping("/by-borough")
@@ -74,7 +74,7 @@ public class RestaurantController {
     }
 
     /**
-     * USE CASE 2: Score moyen par quartier pour une cuisine donnée
+     * USE CASE 2: Average inspection score per borough for a given cuisine
      */
     @Operation(summary = "Average inspection score by borough for a cuisine", description = "For the given cuisine type, returns the average inspection score per borough. Lower score = better health. Cached in Redis.")
     @GetMapping("/cuisine-scores")
@@ -95,7 +95,7 @@ public class RestaurantController {
     }
 
     /**
-     * USE CASE 3: Pires cuisines dans un quartier
+     * USE CASE 3: Worst cuisines by average score in a borough
      */
     @Operation(summary = "Worst cuisines by average inspection score in a borough", description = "Returns the cuisine types with the highest average inspection score (most violations) in a given borough. Cached in Redis.")
     @GetMapping("/worst-cuisines")
@@ -117,7 +117,7 @@ public class RestaurantController {
     }
 
     /**
-     * USE CASE 4: Cuisines avec minimum de restaurants
+     * USE CASE 4: Cuisines with a minimum restaurant count
      */
     @Operation(summary = "Cuisines with a minimum restaurant count", description = "Returns cuisine types that have at least minCount restaurants in the dataset.")
     @GetMapping("/popular-cuisines")
@@ -137,7 +137,7 @@ public class RestaurantController {
     }
 
     /**
-     * Statistiques générales
+     * Global statistics
      */
     @Operation(summary = "Global statistics", description = "Total restaurant count and breakdown by borough.")
     @GetMapping("/stats")
@@ -166,7 +166,7 @@ public class RestaurantController {
     }
 
     /**
-     * HYGIENE RADAR: Obtient les pires restaurants avec leurs coordonnées GPS
+     * HYGIENE RADAR: Returns the worst restaurants with their GPS coordinates
      */
     @Operation(summary = "Hygiene Radar", description = "Returns restaurants from the worst-scoring cuisines, optionally filtered by borough, cuisine and max score. Useful for finding the most violation-prone establishments.")
     @GetMapping("/hygiene-radar")
@@ -191,7 +191,7 @@ public class RestaurantController {
     }
 
     /**
-     * Tous les types de cuisine distincts (pour alimenter les filtres)
+     * All distinct cuisine types (for populating filter dropdowns)
      */
     @Operation(summary = "All distinct cuisine types", description = "Returns a sorted list of all cuisine types present in the dataset. Useful for populating filter dropdowns.")
     @GetMapping("/cuisines")
@@ -209,7 +209,7 @@ public class RestaurantController {
     }
 
     /**
-     * Top N cuisines par nombre de restaurants
+     * Top N cuisines by restaurant count
      */
     @Operation(summary = "Top N cuisines by restaurant count")
     @GetMapping("/by-cuisine")

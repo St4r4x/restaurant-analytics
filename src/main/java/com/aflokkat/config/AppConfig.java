@@ -7,28 +7,28 @@ import java.util.Properties;
 import io.github.cdimascio.dotenv.Dotenv;
 
 /**
- * Configuration manager pour charger les properties et .env
+ * Configuration manager for loading properties and .env
  */
 public class AppConfig {
     private static final Properties properties = new Properties();
     private static Dotenv dotenv;
 
     static {
-        // Charger .env s'il existe
+        // Load .env if it exists
         try {
             dotenv = Dotenv.configure().ignoreIfMissing().load();
         } catch (Exception e) {
-            System.err.println("Avertissement: .env n'a pas pu être chargé");
+            System.err.println("Warning: .env could not be loaded");
         }
 
-        // Charger application.properties
+        // Load application.properties
         try (InputStream input = AppConfig.class.getClassLoader()
                 .getResourceAsStream("application.properties")) {
             if (input != null) {
                 properties.load(input);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Erreur lors du chargement de application.properties", e);
+            throw new RuntimeException("Error loading application.properties", e);
         }
     }
 
@@ -117,7 +117,7 @@ public class AppConfig {
     }
 
     private static String getProperty(String key, String defaultValue) {
-        // 1. Variable d'environnement système (Docker, CI...)
+        // 1. System environment variable (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();
         String envValue = System.getenv(envKey);
         if (envValue != null) return envValue;
