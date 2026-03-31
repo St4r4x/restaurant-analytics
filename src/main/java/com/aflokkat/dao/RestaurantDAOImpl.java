@@ -342,20 +342,35 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         return aggregate(pipeline, AtRiskEntry.class);
     }
 
-    /**
-     * Stub — full implementation added in Plan 03-02.
-     */
     @Override
     public List<Restaurant> searchByNameOrAddress(String q, int limit) {
-        throw new UnsupportedOperationException("searchByNameOrAddress not yet implemented — Plan 03-02");
+        Document regex = new Document("$regex", q).append("$options", "i");
+        Document filter = new Document("$or", Arrays.asList(
+            new Document("name", regex),
+            new Document("address.street", regex)
+        ));
+        List<Restaurant> results = new ArrayList<>();
+        restaurantCollection.find(filter).limit(limit).forEach(results::add);
+        return results;
     }
 
-    /**
-     * Stub — full implementation added in Plan 03-02.
-     */
     @Override
     public List<Document> findMapPoints() {
-        throw new UnsupportedOperationException("findMapPoints not yet implemented — Plan 03-02");
+        List<Document> pipeline = Arrays.asList(
+            new Document("$match", new Document("address.coord", new Document("$exists", true))),
+            new Document("$project", new Document("_id", 0)
+                .append("restaurantId", "$restaurant_id")
+                .append("name", 1)
+                .append("grade", new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))
+                .append("lat",  new Document("$arrayElemAt", Arrays.asList("$address.coord", 1)))
+                .append("lng",  new Document("$arrayElemAt", Arrays.asList("$address.coord", 0)))
+            )
+        );
+        List<Document> results = new ArrayList<>();
+        database.getCollection(AppConfig.getMongoCollection())
+                .aggregate(pipeline)
+                .forEach(results::add);
+        return results;
     }
 
     /**
