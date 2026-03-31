@@ -19,11 +19,6 @@ public class ViewController {
         return "login";
     }
     
-    @GetMapping("/hygiene-radar")
-    public String hygieneRadar() {
-        return "hygiene-radar";
-    }
-
     @GetMapping("/restaurant/{id}")
     public String restaurantDetail() {
         return "restaurant";
@@ -32,11 +27,6 @@ public class ViewController {
     @GetMapping("/inspection-map")
     public String inspectionMap() {
         return "inspection-map";
-    }
-
-    @GetMapping("/inspection")
-    public String inspectionDashboard() {
-        return "inspection";
     }
 
     @GetMapping("/my-bookmarks")
