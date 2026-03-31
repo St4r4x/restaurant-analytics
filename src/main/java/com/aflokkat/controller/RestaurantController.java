@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.aflokkat.cache.RestaurantCacheService;
+import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.aggregation.AggregationCount;
 import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
@@ -30,6 +31,7 @@ import com.aflokkat.service.RestaurantService;
 import com.aflokkat.sync.SyncResult;
 import com.aflokkat.sync.SyncService;
 import com.aflokkat.util.ResponseUtil;
+import org.bson.Document;
 
 /**
  * REST API Controller pour l'accès aux données MongoDB
@@ -39,6 +41,9 @@ import com.aflokkat.util.ResponseUtil;
 @RequestMapping("/api/restaurants")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class RestaurantController {
+
+    @Autowired
+    private RestaurantDAO restaurantDAO;
 
     @Autowired
     private RestaurantService restaurantService;
@@ -401,6 +406,41 @@ public class RestaurantController {
             response.put("status", "success");
             response.put("restaurantsProcessed", restaurants.size());
             response.put("message", "Cache rebuilt successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Search restaurants by name or address", description = "Case-insensitive regex search on restaurant name and street address. Returns at most limit results (default 20).")
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchRestaurants(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") int limit) {
+        try {
+            List<Restaurant> data = restaurantDAO.searchByNameOrAddress(q, limit);
+            List<Map<String, Object>> views = data.stream()
+                .map(RestaurantService::toView)
+                .collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", views);
+            response.put("count", views.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Map points for all restaurants", description = "Returns lightweight projection documents (restaurantId, name, lat, lng, grade) for all restaurants that have coordinates.")
+    @GetMapping("/map-points")
+    public ResponseEntity<Map<String, Object>> getMapPoints() {
+        try {
+            List<Document> data = restaurantDAO.findMapPoints();
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", data);
+            response.put("count", data.size());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return errorResponse(e);

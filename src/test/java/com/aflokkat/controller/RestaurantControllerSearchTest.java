@@ -2,10 +2,8 @@ package com.aflokkat.controller;
 
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.domain.Restaurant;
-import com.aflokkat.service.RestaurantService;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RestaurantControllerSearchTest {
 
     @Mock private RestaurantDAO restaurantDAO;
-    @Mock private RestaurantService restaurantService;
 
     @InjectMocks
     private RestaurantController restaurantController;
@@ -50,7 +47,6 @@ class RestaurantControllerSearchTest {
      * CUST-01: search with a valid query returns 200 + data array with one element.
      */
     @Test
-    @Disabled("Wave 0 stub — endpoint added in Plan 03-02")
     void testSearch_returnsResults() throws Exception {
         Restaurant r = new Restaurant("Pizza Palace", "Italian", "MANHATTAN");
         r.setRestaurantId("12345");
@@ -68,7 +64,6 @@ class RestaurantControllerSearchTest {
      * CUST-01: search with an empty query returns 200 (endpoint does not throw).
      */
     @Test
-    @Disabled("Wave 0 stub — endpoint added in Plan 03-02")
     void testSearch_emptyQuery() throws Exception {
         when(restaurantDAO.searchByNameOrAddress("", 20))
                 .thenReturn(Collections.emptyList());
@@ -81,7 +76,6 @@ class RestaurantControllerSearchTest {
      * CUST-01: search with a single-character query returns 200 with empty data.
      */
     @Test
-    @Disabled("Wave 0 stub — endpoint added in Plan 03-02")
     void testSearch_shortQuery() throws Exception {
         when(restaurantDAO.searchByNameOrAddress("a", 20))
                 .thenReturn(Collections.emptyList());
@@ -94,7 +88,6 @@ class RestaurantControllerSearchTest {
      * CUST-03: map-points returns 200 + data array with restaurantId field.
      */
     @Test
-    @Disabled("Wave 0 stub — endpoint added in Plan 03-02")
     void testMapPoints_returnsProjection() throws Exception {
         Document doc = new Document()
                 .append("restaurantId", "99999")

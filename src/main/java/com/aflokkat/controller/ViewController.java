@@ -38,4 +38,9 @@ public class ViewController {
     public String inspectionDashboard() {
         return "inspection";
     }
+
+    @GetMapping("/my-bookmarks")
+    public String myBookmarks() {
+        return "my-bookmarks";
+    }
 }
