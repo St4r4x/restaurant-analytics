@@ -460,7 +460,7 @@
       <header>
         <h1>Restaurant Analytics</h1>
         <p>Interactive analytics for New York restaurants</p>
-        <a href="/inspection-map" class="nav-link" id="inspectionMapLink" style="display:none">Violations Map →</a>
+        <a href="/inspection-map" class="nav-link" id="inspectionMapLink">Violations Map →</a>
         <button
           class="nav-link"
           id="logoutBtn"
@@ -1502,14 +1502,13 @@
         content.appendChild(list);
       }
 
-      // Show admin links if ROLE_ADMIN
-      (function checkAdminLinks() {
+      // Show controller-only links if ROLE_CONTROLLER
+      (function checkRoleLinks() {
         const t = localStorage.getItem("accessToken");
         if (!t) return;
         try {
           const payload = JSON.parse(atob(t.split(".")[1]));
-          if (payload.role === "ROLE_ADMIN") {
-            document.getElementById("inspectionMapLink").style.display = "inline-block";
+          if (payload.role === "ROLE_CONTROLLER") {
             document.getElementById("rebuild-cache-btn").style.display = "inline-block";
           }
         } catch {}
