@@ -1,143 +1,140 @@
-# Restaurant Analytics
+# Restaurant Analytics — NYC Inspection Data
 
-Spring Boot REST API + dashboard web pour analyser les données d'inspection sanitaire des restaurants de New York City.
+Spring Boot REST API and web dashboard for exploring NYC restaurant hygiene data.
+Data is synced from the NYC Open Data API into MongoDB. The application supports two
+user roles: **CUSTOMER** (read-only discovery) and **CONTROLLER** (inspection report filing).
 
-**Stack** : Java 11 · Spring Boot 2.6 · MongoDB · Redis · PostgreSQL · Docker Compose · JWT
+Academic project — Aflokkat / big data module.
 
----
+## Stack
 
-## Démarrage rapide
+| Layer | Technology |
+|-------|-----------|
+| Language | Java 11 |
+| Framework | Spring Boot 2.6.15 |
+| Primary DB | MongoDB (raw driver, no Spring Data) |
+| RDBMS | PostgreSQL 15 (users, bookmarks, reports) |
+| Cache | Redis 7 (TTL 3600 s) |
+| Security | JWT (access 15 min / refresh 7 days) |
+| Build | Maven |
+| Deployment | Docker Compose |
 
-```bash
-# Copier les variables d'environnement
-cp .env.example .env   # ou utiliser le .env fourni
-
-# Démarrer tous les services (MongoDB + Redis + PostgreSQL + app)
-docker compose up -d --build
-
-# Attendre ~15s que les healthchecks passent
-# Ouvrir le navigateur
-open http://localhost:8080
-```
-
-> **Première utilisation** : connectez-vous en tant qu'admin, puis cliquez sur **🔄 Reconstruire le cache** dans la carte "Top Restaurants Sains" pour peupler le leaderboard Redis.
-
----
-
-## Fonctionnalités
-
-### Citoyens (tous les utilisateurs)
-
-- **Dashboard** — statistiques par quartier, scores de cuisine, top restaurants sains, favoris, inspections récentes, carte "autour de moi"
-- **Fiche restaurant** (`/restaurant/{id}`) — historique complet des inspections, graphique d'évolution des scores, carte Leaflet, badge de confiance (A/B/C/Z + tendance)
-- **Hygiene Radar** (`/hygiene-radar`) — recherche des restaurants les plus sains par quartier/cuisine
-- **Favoris** — bookmark/unbookmark, liste persistée par compte
-
-### Agents d'inspection (ROLE_ADMIN)
-
-- **Carte de chaleur** (`/inspection-map`) — heatmap Leaflet des scores d'inspection, filtre par quartier
-- **Tableau de bord agents** (`/inspection`) — établissements à risque (dernière note C/Z), pires cuisines (Chart.js), export CSV, inspections récentes
-- **Sync NYC Open Data** — `POST /api/restaurants/refresh` déclenche une ingestion depuis l'API officielle; sync automatique à 02:00 chaque nuit
-
----
-
-## API REST
-
-Tous les endpoints nécessitent un token JWT (`Authorization: Bearer <token>`).
-
-```bash
-# Obtenir un token
-TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"<your_username>","password":"<your_password>"}' | jq -r .accessToken)
-```
-
-| Endpoint | Auth | Description |
-|---|---|---|
-| `POST /api/auth/login` | — | Connexion, retourne access + refresh token |
-| `POST /api/auth/register` | — | Création de compte |
-| `POST /api/auth/refresh` | — | Renouvellement du token |
-| `GET /api/restaurants/by-borough` | User | Comptage par quartier (Redis TTL 1h) |
-| `GET /api/restaurants/cuisine-scores` | User | Score moyen par quartier pour une cuisine |
-| `GET /api/restaurants/worst-cuisines` | User | Pires cuisines d'un quartier |
-| `GET /api/restaurants/popular-cuisines` | User | Cuisines avec ≥ N restaurants |
-| `GET /api/restaurants/stats` | User | Statistiques globales |
-| `GET /api/restaurants/top` | User | Top restaurants sains (Redis leaderboard) |
-| `GET /api/restaurants/{id}` | User | Fiche complète d'un restaurant |
-| `GET /api/restaurants/recent-inspections` | User | Inspections des N derniers jours |
-| `GET /api/restaurants/nearby` | User | Restaurants à moins de R mètres (2dsphere) |
-| `GET /api/restaurants/hygiene-radar` | User | Restaurants sains par quartier/cuisine |
-| `GET /api/restaurants/heatmap` | **Admin** | Points GPS + score pour heatmap |
-| `POST /api/restaurants/refresh` | **Admin** | Sync NYC Open Data |
-| `POST /api/restaurants/rebuild-cache` | **Admin** | Reconstruire le leaderboard Redis |
-| `GET /api/inspection/at-risk` | **Admin** | Établissements à risque (grade C/Z) |
-| `GET /api/inspection/at-risk/export.csv` | **Admin** | Export CSV |
-| `GET /api/users/me` | User | Profil utilisateur |
-| `GET /api/users/me/bookmarks` | User | Favoris |
-| `POST /api/users/me/bookmarks/{id}` | User | Ajouter un favori |
-| `DELETE /api/users/me/bookmarks/{id}` | User | Retirer un favori |
-
-Documentation Swagger : `http://localhost:8080/swagger-ui.html`
-
----
-
-## Structure du projet
-
-```
-src/main/java/com/aflokkat/
-├── controller/        # REST endpoints + routes Thymeleaf
-├── service/           # Logique métier
-├── dao/               # Accès MongoDB (interface + impl, pipelines manuels)
-├── domain/            # POJOs (Restaurant, Grade, Address)
-├── dto/               # DTOs de réponse (HeatmapPoint, AtRiskEntry, …)
-├── aggregation/       # DTOs d'agrégation MongoDB
-├── cache/             # RestaurantCacheService (Redis)
-├── sync/              # Client NYC Open Data + SyncService
-├── security/          # JwtUtil + JwtAuthenticationFilter
-├── entity/            # Entités JPA (UserEntity, BookmarkEntity)
-├── repository/        # Spring Data JPA repositories
-├── config/            # SecurityConfig, MongoClientFactory, RedisConfig
-└── util/              # ValidationUtil, ResponseUtil
-
-src/main/resources/templates/
-├── login.html          # Page de connexion
-├── index.html          # Dashboard principal
-├── restaurant.html     # Fiche détail restaurant
-├── hygiene-radar.html  # Recherche restaurants sains
-├── inspection-map.html # Carte de chaleur (admin)
-└── inspection.html     # Tableau de bord agents (admin)
-```
-
----
-
-## Configuration
-
-Variables d'environnement (`.env`) :
-
-```env
-MONGODB_URI=mongodb://localhost:27017
-MONGODB_DATABASE=newyork
-MONGODB_COLLECTION=restaurants
-REDIS_HOST=localhost
-REDIS_PORT=6379
-API_SECRET=<jwt_secret>
-```
-
----
-
-## Commandes utiles
+## Quick Start
 
 ```bash
 # Build
 mvn clean package -DskipTests
 
-# Tests unitaires (21 tests, pas de MongoDB requis)
-mvn test
+# Start all services (MongoDB, Redis, PostgreSQL, app)
+docker compose up -d
 
-# Logs Docker
+# Follow logs
 docker compose logs -f app
+```
 
-# Reconstruire le cache Redis depuis MongoDB (admin)
-curl -X POST http://localhost:8080/api/restaurants/rebuild-cache \
-  -H "Authorization: Bearer $ADMIN_TOKEN"
+App runs on http://localhost:8080. Swagger UI: http://localhost:8080/swagger-ui.html
+
+## Seeded Test Accounts
+
+Two accounts are seeded on startup via `DataSeeder`:
+
+| Username | Password | Role |
+|----------|----------|------|
+| customer_test | password | ROLE_CUSTOMER |
+| controller_test | password | ROLE_CONTROLLER |
+
+## User Roles
+
+**ROLE_CUSTOMER**
+- Search restaurants by name or address
+- View restaurant detail page (grade badge, inspection history)
+- Browse restaurants on the interactive map
+- Bookmark restaurants
+
+**ROLE_CONTROLLER**
+- All customer capabilities
+- File internal inspection reports (`POST /api/reports`)
+- List and filter own reports (`GET /api/reports`)
+- Edit own reports (`PATCH /api/reports/{id}`)
+- Attach photos to reports (`POST /api/reports/{id}/photo`)
+
+Controller registration requires the `CONTROLLER_SIGNUP_CODE` environment variable
+to be set. If absent, all controller signups return HTTP 400.
+
+## API Endpoints
+
+### Authentication
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | /api/auth/register | Register (CUSTOMER or CONTROLLER with signup code) |
+| POST | /api/auth/login | Login → access + refresh JWT |
+| POST | /api/auth/refresh | Refresh access token |
+
+### Restaurants (public read)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/restaurants/by-borough | Count per borough |
+| GET | /api/restaurants/stats | Global stats |
+| GET | /api/restaurants/health | Health check |
+| GET | /api/restaurants/search?q=&limit= | Search by name or address |
+| GET | /api/restaurants/map-points | Lightweight points for map |
+| GET | /api/restaurants/{restaurantId} | Restaurant detail |
+| GET | /api/restaurants/top | Top healthiest restaurants |
+| GET | /api/restaurants/cuisines | All distinct cuisine types |
+| GET | /api/restaurants/by-cuisine | Top cuisines by count |
+| GET | /api/restaurants/hygiene-radar | Healthiest restaurants by borough/cuisine |
+| GET | /api/restaurants/recent-inspections | Restaurants inspected in last N days |
+| GET | /api/restaurants/nearby | Geospatial search (2dsphere) |
+
+### Reports (CONTROLLER only)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | /api/reports | Create inspection report |
+| GET | /api/reports | List own reports (optional ?status=) |
+| PATCH | /api/reports/{id} | Edit own report |
+| POST | /api/reports/{id}/photo | Upload photo |
+| GET | /api/reports/{id}/photo | Stream photo |
+
+### Users (authenticated)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/users/me | Current user profile |
+| GET | /api/users/bookmarks | List bookmarks |
+| POST | /api/users/bookmarks | Add bookmark |
+| DELETE | /api/users/bookmarks/{restaurantId} | Remove bookmark |
+
+## Pages
+
+| URL | Description |
+|-----|-------------|
+| / | Dashboard (analytics charts) |
+| /login | Login / Register |
+| /restaurant/{camis} | Restaurant detail |
+| /inspection-map | Interactive grade-colored map |
+| /my-bookmarks | Saved restaurants |
+
+## Configuration
+
+Key `application.properties` settings:
+
+```properties
+mongodb.uri=mongodb://mongodb:27017
+mongodb.database=newyork
+mongodb.collection=restaurants
+spring.datasource.url=jdbc:postgresql://postgres:5432/restaurantdb
+redis.host=redis
+redis.port=6379
+nyc.api.max_records=0   # 0 = unlimited; set to 5000 for local testing
+jwt.secret=<min 32 chars>
+```
+
+## Tests
+
+```bash
+mvn test                                         # full suite
+mvn test -Dtest=ReportControllerTest,SecurityConfigTest -q   # targeted
 ```
