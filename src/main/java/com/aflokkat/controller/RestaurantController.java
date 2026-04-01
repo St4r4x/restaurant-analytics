@@ -22,8 +22,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.aflokkat.cache.RestaurantCacheService;
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.aggregation.AggregationCount;
-import com.aflokkat.aggregation.BoroughCuisineScore;
-import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.dto.HeatmapPoint;
 import com.aflokkat.dto.TopRestaurantEntry;
 import com.aflokkat.domain.Restaurant;
@@ -65,69 +63,6 @@ public class RestaurantController {
                     restaurantService::getRestaurantCountByBorough);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
-            response.put("data", data);
-            response.put("count", data.size());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return errorResponse(e);
-        }
-    }
-
-    /**
-     * USE CASE 2: Average inspection score per borough for a given cuisine
-     */
-    @Operation(summary = "Average inspection score by borough for a cuisine", description = "For the given cuisine type, returns the average inspection score per borough. Lower score = better health. Cached in Redis.")
-    @GetMapping("/cuisine-scores")
-    public ResponseEntity<Map<String, Object>> getCuisineScores(
-            @Parameter(description = "Cuisine type (e.g. Italian, Chinese, American)", example = "Italian") @RequestParam(defaultValue = "Italian") String cuisine) {
-        try {
-            List<BoroughCuisineScore> data = cacheService.getOrLoadCuisineScores(cuisine,
-                    () -> restaurantService.getAverageScoreByCuisineAndBorough(cuisine));
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("cuisine", cuisine);
-            response.put("data", data);
-            response.put("count", data.size());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return errorResponse(e);
-        }
-    }
-
-    /**
-     * USE CASE 3: Worst cuisines by average score in a borough
-     */
-    @Operation(summary = "Worst cuisines by average inspection score in a borough", description = "Returns the cuisine types with the highest average inspection score (most violations) in a given borough. Cached in Redis.")
-    @GetMapping("/worst-cuisines")
-    public ResponseEntity<Map<String, Object>> getWorstCuisines(
-            @Parameter(description = "Borough name", example = "Manhattan") @RequestParam(defaultValue = "Manhattan") String borough,
-            @Parameter(description = "Maximum number of cuisines to return") @RequestParam(defaultValue = "5") int limit) {
-        try {
-            List<CuisineScore> data = cacheService.getOrLoadWorstCuisines(borough, limit,
-                    () -> restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit));
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("borough", borough);
-            response.put("data", data);
-            response.put("count", data.size());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return errorResponse(e);
-        }
-    }
-
-    /**
-     * USE CASE 4: Cuisines with a minimum restaurant count
-     */
-    @Operation(summary = "Cuisines with a minimum restaurant count", description = "Returns cuisine types that have at least minCount restaurants in the dataset.")
-    @GetMapping("/popular-cuisines")
-    public ResponseEntity<Map<String, Object>> getPopularCuisines(
-            @Parameter(description = "Minimum number of restaurants required") @RequestParam(defaultValue = "500") int minCount) {
-        try {
-            List<String> data = restaurantService.getCuisinesWithMinimumCount(minCount);
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("minCount", minCount);
             response.put("data", data);
             response.put("count", data.size());
             return ResponseEntity.ok(response);
