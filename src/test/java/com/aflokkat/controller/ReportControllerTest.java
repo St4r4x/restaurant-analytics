@@ -37,6 +37,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -403,5 +405,36 @@ class ReportControllerTest {
 
         mockMvc.perform(get("/api/reports/1/photo"))
                 .andExpect(status().isOk());
+    }
+
+    // ── SC-3: file written to AppConfig.getUploadsDir() path is re-readable ─
+    /**
+     * Verifies the file-I/O contract for photo persistence:
+     * a file written to the path returned by AppConfig.getUploadsDir() is readable
+     * using a fresh call to the same method.
+     *
+     * Docker layer: production persistence is guaranteed by the named volume
+     * uploads_data:/app/uploads in docker-compose.yml (APP_UPLOADS_DIR=/app/uploads).
+     * This test cannot invoke docker compose; it verifies the Java plumbing only.
+     */
+    @Test
+    void uploadsDir_fileWrittenAndReadableFromSamePath(@TempDir Path tempDir) throws Exception {
+        // Patch AppConfig static properties field to point to tempDir
+        // (avoids mockStatic which causes VerifyError on Java 25)
+        setUploadsDir(tempDir.toString());
+
+        // Write a file the way the controller would
+        String uploadsDir = AppConfig.getUploadsDir();
+        Path targetDir = Paths.get(uploadsDir, "42");
+        Files.createDirectories(targetDir);
+        Path targetFile = targetDir.resolve("photo.jpg");
+        Files.write(targetFile, "photo-content".getBytes());
+
+        // Re-read using a fresh AppConfig.getUploadsDir() call (simulates a new request)
+        String resolvedDir = AppConfig.getUploadsDir();
+        Path resolvedFile = Paths.get(resolvedDir, "42", "photo.jpg");
+        assertTrue(Files.exists(resolvedFile),
+                "File must exist at path returned by AppConfig.getUploadsDir()");
+        assertArrayEquals("photo-content".getBytes(), Files.readAllBytes(resolvedFile));
     }
 }
