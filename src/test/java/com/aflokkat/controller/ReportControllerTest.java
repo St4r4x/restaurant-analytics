@@ -11,6 +11,7 @@ import com.aflokkat.entity.UserEntity;
 import com.aflokkat.repository.ReportRepository;
 import com.aflokkat.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -63,6 +65,11 @@ class ReportControllerTest {
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
         SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     // helper: build a persisted entity
@@ -203,6 +210,29 @@ class ReportControllerTest {
 
         verify(reportRepository).findByUserId(42L);
         verify(reportRepository, never()).findByUserIdAndStatus(any(), any());
+    }
+
+    // ── SC-2 read path: controller B cannot see controller A's reports ──────
+    @Test
+    void listReports_doesNotReturnOtherControllersReports() throws Exception {
+        // Set up ctrl_b (userId=99L) as the authenticated caller
+        UserEntity callerUser = new UserEntity("ctrl_b", "b@test.com", "hash", "ROLE_CONTROLLER");
+        callerUser.setId(99L);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "ctrl_b", null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        when(userRepository.findByUsername("ctrl_b")).thenReturn(Optional.of(callerUser));
+        // ctrl_b has no reports
+        when(reportRepository.findByUserId(99L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/reports"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.count").value(0));
+
+        // Critical: repository called with ctrl_b's id (99), never with ctrl_a's id (42)
+        verify(reportRepository).findByUserId(99L);
+        verify(reportRepository, never()).findByUserId(42L);
     }
 
     // ── CTRL-03: patch report ──────────────────────────────────────────────
