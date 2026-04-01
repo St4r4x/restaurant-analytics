@@ -31,22 +31,56 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ## v2 Requirements
 
-Deferred to future release. Tracked but not in current roadmap.
+Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
-### Controller Reports (v2)
+### Controller Workspace (Phase 5)
+
+- [ ] **CTRL-05**: Controller can create an inspection report via a web form — search restaurant by name, fill in grade/violations/notes, submit without using the API directly
+- [ ] **CTRL-06**: Controller can view all their reports on a dashboard page with status filter tabs (All / Open / In Progress / Resolved) and grade badges
+- [ ] **CTRL-07**: Controller can edit a report from the dashboard (grade, status, violations, notes) via an inline edit panel, without leaving the page
+- [ ] **CTRL-08**: Controller can upload a photo and see a thumbnail preview on the report card
+
+### Analytics & Stats (Phase 6)
+
+- [ ] **STAT-01**: Public `/analytics` page shows city-wide KPIs: total restaurants, % grade A, average score, count of at-risk (grade C/Z)
+- [ ] **STAT-02**: Analytics page shows per-borough grade distribution — for each of the 5 boroughs, a visual breakdown of A/B/C counts
+- [ ] **STAT-03**: Analytics page shows cuisine hygiene ranking — top 10 cleanest and top 10 worst cuisines by average score
+- [ ] **STAT-04**: Analytics page shows "At Risk" list — restaurants with last grade C or Z, with links to their detail page
+
+### Homepage & Navigation (Phase 7)
+
+- [ ] **UX-01**: Non-authenticated visitors see a landing page with city-wide stats, a search CTA, and 3 sample restaurants — not the full dashboard
+- [ ] **UX-02**: Authenticated users see a personalised dashboard on `/`: recent bookmarks, nearby restaurants (if geolocation allowed), and a summary stats strip
+- [ ] **UX-03**: A persistent top navbar exists on all pages: logo, Search, Map, Analytics links; right side shows Login or username + Logout
+- [ ] **UX-04**: A `/profile` page shows the logged-in user's username, email, role badge, bookmark count, and (for controllers) report count
+
+### Discovery Enhancement (Phase 8)
+
+- [ ] **DISC-01**: The map at `/inspection-map` has filter controls — grade checkboxes (A/B/C/F), borough dropdown, cuisine dropdown — markers update client-side without reload
+- [ ] **DISC-02**: A `/uncontrolled` page lists restaurants not inspected in 12+ months or with last grade C/Z; table is sortable by score and filterable by borough; includes a "Download CSV" button
+- [ ] **DISC-03**: The restaurant detail page shows up to 5 nearby restaurants (within 500m) in a "Nearby" section, each with grade badge and link
+- [ ] **DISC-04**: Search results can be sorted by score (best first), grade, or name; sort control visible above results
+
+### UX Polish (Phase 9)
+
+- [ ] **UX-05**: All list views (search results, reports, bookmarks, analytics at-risk) are paginated — 20 items per page with Previous / Next controls
+- [ ] **UX-06**: All data-fetching sections show skeleton loading cards instead of blank space or a "Loading…" text
+- [ ] **UX-07**: A toast notification system replaces all inline success/error messages — toasts appear bottom-right, auto-dismiss after 3s
+- [ ] **UX-08**: All pages render correctly on mobile viewports (320px–768px) — no horizontal scroll, no overlapping elements
+
+### Admin Tools (Phase 10)
+
+- [ ] **ADM-01**: A `/admin` page (CONTROLLER role) shows the last NYC data sync status, a "Sync Now" button with live progress feedback, and a "Rebuild Cache" button
+- [ ] **ADM-02**: The admin page has an "Export At-Risk CSV" button that triggers the existing `/api/inspection/at-risk/export.csv` endpoint
+- [ ] **ADM-03**: The admin page shows aggregate report statistics across all controllers: count by status (open/in-progress/resolved) and count by grade — without exposing individual reports from other controllers
+
+### Deferred to v3
 
 - **CTRL-V2-01**: Report status change notifications to admin
-- **CTRL-V2-02**: Controller can view reports from all controllers (admin view)
+- **CTRL-V2-02**: Controller can view individual reports from all controllers (admin view)
 - **CTRL-V2-03**: Bulk photo upload (multiple photos per report)
-
-### Customer Features (v2)
-
 - **CUST-V2-01**: Real-time notifications when a bookmarked restaurant gets a new inspection
-- **CUST-V2-02**: Filter map by grade, borough, or cuisine type
 - **CUST-V2-03**: Customer can see hygiene trend over time (is it improving?)
-
-### Platform (v2)
-
 - **PLAT-V2-01**: Admin role can manage controller accounts
 - **PLAT-V2-02**: Export controller reports to PDF
 
@@ -80,11 +114,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CUST-03 | Phase 3 | Complete |
 | CUST-04 | Phase 3 | Complete |
 
-**Coverage:**
+**v1 Coverage:**
 - v1 requirements: 13 total
 - Mapped to phases: 13
 - Unmapped: 0 ✓
 
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CTRL-05 | Phase 5 | Not started |
+| CTRL-06 | Phase 5 | Not started |
+| CTRL-07 | Phase 5 | Not started |
+| CTRL-08 | Phase 5 | Not started |
+| STAT-01 | Phase 6 | Not started |
+| STAT-02 | Phase 6 | Not started |
+| STAT-03 | Phase 6 | Not started |
+| STAT-04 | Phase 6 | Not started |
+| UX-01 | Phase 7 | Not started |
+| UX-02 | Phase 7 | Not started |
+| UX-03 | Phase 7 | Not started |
+| UX-04 | Phase 7 | Not started |
+| DISC-01 | Phase 8 | Not started |
+| DISC-02 | Phase 8 | Not started |
+| DISC-03 | Phase 8 | Not started |
+| DISC-04 | Phase 8 | Not started |
+| UX-05 | Phase 9 | Not started |
+| UX-06 | Phase 9 | Not started |
+| UX-07 | Phase 9 | Not started |
+| UX-08 | Phase 9 | Not started |
+| ADM-01 | Phase 10 | Not started |
+| ADM-02 | Phase 10 | Not started |
+| ADM-03 | Phase 10 | Not started |
+
+**v2 Coverage:**
+- v2 requirements: 23 total
+- Mapped to phases: 23
+- Unmapped: 0 ✓
+
 ---
 *Requirements defined: 2026-03-27*
-*Last updated: 2026-03-27 after roadmap creation*
+*Last updated: 2026-04-01 after v2.0 roadmap creation (phases 5-10)*
