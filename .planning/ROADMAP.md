@@ -103,6 +103,11 @@ Plans:
   2. A controller can open a "New Report" form, search for a restaurant by name (live autocomplete using `/api/restaurants/search`), fill in grade/violations/notes, submit, and see the new card appear in the list without a page reload
   3. A controller can click "Edit" on any of their own report cards and update grade, status, violations, or notes via an inline panel; changes are persisted and the card updates immediately
   4. A controller can click "Upload Photo" on a report card, select an image, and see a thumbnail preview on the card after upload
+**Plans**: 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — ViewController redirect + SecurityConfig /dashboard guard + 6 tests (CTRL-05, CTRL-06)
+- [ ] 05-02-PLAN.md — dashboard.html: tabs, cards, New Report modal, edit panel, photo upload (CTRL-05, CTRL-06, CTRL-07, CTRL-08)
 
 ### Phase 6: Analytics & Stats
 **Goal**: A public analytics page gives any visitor a city-wide picture of NYC restaurant hygiene — borough breakdown, cuisine rankings, at-risk list, and a healthiest restaurants leaderboard
@@ -166,7 +171,7 @@ v2.0: Phase 5 → (6 ∥ 7) → 8 → 9 → 10  (6 and 7 can run in parallel)
 | 2. Controller Reports | 3/3 | Complete | 2026-03-31 |
 | 3. Customer Discovery | 4/4 | Complete | 2026-03-31 |
 | 4. Integration Polish | 4/4 | Complete | 2026-04-01 |
-| 5. Controller Workspace | 0/TBD | Not started | - |
+| 5. Controller Workspace | 0/2 | Not started | - |
 | 6. Analytics & Stats | 0/TBD | Not started | - |
 | 7. Homepage & Navigation | 0/TBD | Not started | - |
 | 8. Discovery Enhancement | 0/TBD | Not started | - |
