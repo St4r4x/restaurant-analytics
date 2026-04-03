@@ -14,6 +14,17 @@
       <div id="p-role" style="margin-bottom:24px"></div>
       <div id="p-stats" style="display:flex;justify-content:center;gap:32px"></div>
     </div>
+
+    <div id="bookmarks-section" class="card" style="max-width:480px;margin:16px auto">
+      <h3 style="font-size:1.1em;font-weight:700;margin-bottom:16px;border-bottom:3px solid #667eea;padding-bottom:8px">
+        Your Bookmarks
+      </h3>
+      <div id="bookmarks-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div style="background:#f0f2ff;border-radius:8px;height:80px"></div>
+        <div style="background:#f0f2ff;border-radius:8px;height:80px"></div>
+        <div style="background:#f0f2ff;border-radius:8px;height:80px"></div>
+      </div>
+    </div>
   </div>
 
   <style>
@@ -22,6 +33,7 @@
     .container { max-width:900px;margin:0 auto;padding:0 16px 48px; }
     .card { background:white;border-radius:12px;padding:32px;box-shadow:0 4px 12px rgba(0,0,0,0.1); }
     .error-msg { color:#b71c1c;font-size:0.85em;margin-top:8px; }
+    .mini-card { background:white;border:1px solid #e8e8e8;border-radius:8px;padding:16px; }
   </style>
 
   <script>
@@ -31,6 +43,29 @@
     function fetchWithAuth(url, options) {
       options = options || {};
       return fetch(url, Object.assign({}, options, { headers: Object.assign({}, options.headers || {}, { 'Authorization': 'Bearer ' + token }) }));
+    }
+
+    function gradeBadgeHtml(grade) {
+      const g = grade || '—';
+      let bg = '#ffebee', color = '#b71c1c';
+      if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
+      else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
+      return '<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:' + bg + ';color:' + color + '">' + g + '</span>';
+    }
+
+    function renderRestaurantCards(containerId, restaurants, emptyHtml) {
+      var grid = document.getElementById(containerId);
+      if (!restaurants || restaurants.length === 0) {
+        grid.innerHTML = emptyHtml;
+        return;
+      }
+      grid.innerHTML = restaurants.slice(0, 3).map(r =>
+        '<div class="mini-card">'
+        + '<div style="font-weight:700;font-size:0.9em;margin-bottom:4px">' + (r.name || '—') + '</div>'
+        + '<div style="font-size:0.82em;color:#666;margin-bottom:8px">' + (r.borough || '—') + '</div>'
+        + gradeBadgeHtml(r.grade)
+        + '<br><a href="/restaurant/' + r.restaurantId + '" style="font-size:0.82em;color:#667eea;text-decoration:none;margin-top:8px;display:inline-block">View Details</a>'
+        + '</div>').join('');
     }
 
     fetchWithAuth('/api/users/me')
@@ -54,10 +89,7 @@
           + roleLabel + '</span>';
 
         // Stats row
-        var statsHtml = '<div style="text-align:center">'
-          + '<div style="font-weight:700;font-size:1em;color:#333">' + (d.bookmarkCount != null ? d.bookmarkCount : '—') + '</div>'
-          + '<div style="font-size:0.82em;color:#555;margin-top:4px">Bookmarks</div>'
-          + '</div>';
+        var statsHtml = '';
         if (d.reportCount != null) {
           statsHtml += '<div style="text-align:center">'
             + '<div style="font-weight:700;font-size:1em;color:#333">' + d.reportCount + '</div>'
@@ -70,6 +102,17 @@
         document.getElementById('profile-card').innerHTML =
           '<p class="error-msg">Could not load your profile. Please sign in again.</p>'
           + '<a href="/login" style="color:#667eea">Sign In</a>';
+      });
+
+    fetchWithAuth('/api/users/me/bookmarks')
+      .then(r => r.json())
+      .then(res => {
+        renderRestaurantCards('bookmarks-grid', res.data,
+          '<p style="color:#666;font-size:0.88em">You haven\'t bookmarked any restaurants yet.</p>');
+      })
+      .catch(() => {
+        document.getElementById('bookmarks-grid').innerHTML =
+          '<p style="color:#b71c1c;font-size:0.85em">Could not load bookmarks.</p>';
       });
   </script>
 </body>
