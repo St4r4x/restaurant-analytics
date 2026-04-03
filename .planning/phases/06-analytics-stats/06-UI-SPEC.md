@@ -45,7 +45,7 @@ Declared values (multiples of 4 only). Sourced from existing template patterns.
 Exceptions (immutable inherited codebase patterns — do NOT introduce in new components):
 - Container top padding: 24px (matches dashboard.html `.container { padding: 24px 16px }`)
 - Header margin-bottom: 20px — immutable codebase inheritance from index.html header strip; not on the 4pt scale and must not be reproduced in new components
-- Touch targets for tab buttons: min 32px height (existing `.tab { padding: 6px 16px }`) — the 6px value is an immutable inherited pattern from the tab component; new components must use 8px (sm) as the minimum vertical padding
+- Touch targets for tab buttons: inherited codebase pattern uses non-standard padding — do NOT reproduce. New components must use `padding-top/bottom: 8px` (sm token) minimum.
 - Chart.js canvas height: fixed at 280px (`maintainAspectRatio: false` + explicit height on container div)
 
 Source: `dashboard.html` lines 10–22, `index.html` lines 12–100.
@@ -57,6 +57,8 @@ Source: `dashboard.html` lines 10–22, `index.html` lines 12–100.
 All sizes expressed in em relative to base 16px browser default. Pixel equivalents provided.
 
 **Declared scale: 4 roles, 2 weights only (400 regular, 700 bold).**
+
+The Body/Label distinction is intentional: Body is content text (weight 400, slightly larger at 0.88em) for reading; Label is metadata/UI chrome (weight 700, slightly smaller at 0.82em) for scanning and identification. Do not conflate them.
 
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
@@ -118,6 +120,8 @@ Source: `dashboard.html` lines 9–23, `index.html` lines 77–97, 138–146.
 
 Components used or introduced in this phase. All implemented as inline HTML + CSS — no external component library.
 
+**Primary focal point:** KPI tile numbers (Display role, 2em, `#667eea`) — the first elements visible on page load, providing the city-wide summary figures. All other components support and contextualize these numbers.
+
 ### KPI Tiles (STAT-01)
 
 - Container: `.dashboard` grid with `grid-template-columns: repeat(4, 1fr)`, gap `16px`, auto-wraps at `<600px`
@@ -157,7 +161,7 @@ Components used or introduced in this phase. All implemented as inline HTML + CS
 - Header row: `font-size: 0.82em; font-weight: 700; color: #555; border-bottom: 2px solid #eee; padding: 6px 8px`
 - Data rows: `font-size: 0.88em; padding: 8px; border-bottom: 1px solid #f0f0f0`; alternate row background `#fafafa` on even rows
 - Grade column: `gradeBadgeHtml(grade)` function — verbatim copy from `index.html`
-- View column: `<a href="/restaurant/{id}" style="color:#667eea;font-size:0.82em;font-weight:700">View →</a>`
+- View column: `<a href="/restaurant/{id}" style="color:#667eea;font-size:0.82em;font-weight:700">View →</a>` — this is a table-cell navigation link, not a CTA; the row's restaurant name provides the accessible noun context; label follows the existing `dashboard.html` convention
 - Fixed limit: 50 rows maximum (no pagination in this phase)
 - Empty state: single row spanning all columns with "No at-risk restaurants found." in `color: #888`
 
@@ -196,7 +200,7 @@ Source: CONTEXT.md "Page structure", `dashboard.html` lines 35–41.
 | Empty state — borough chart | Borough data unavailable. Check back later. |
 | Error state — KPI fetch | Could not load stats. Refresh the page to try again. |
 | Error state — chart fetch | Chart data failed to load. Refresh the page to try again. |
-| View link label | View → |
+| View link label | View → (table-cell navigation link — row restaurant name provides noun context; follows existing dashboard.html convention) |
 | Home nav link label | ← Home |
 | Analytics nav link label (in other pages) | Analytics |
 | Primary CTA | (none — this is a read-only analytics page; no user-initiated action beyond navigation) |
@@ -270,4 +274,4 @@ This CDN inclusion was already vetted by use in `index.html`. No new external sc
 | RESEARCH.md | 8 — AnalyticsController pattern, Chart.js 4.4 stacked bar config (indexAxis/stacked/callbacks), KPI endpoint response shape, `gradeBadgeHtml()` verbatim copy, borough label casing, 4 concurrent fetches, CDN URL, KPI number formatting |
 | Codebase inspection | 15 — font stack, exact spacing values, color hex values, `.card` box-shadow, `.tab` styles, `.btn` padding, `.report-card` pattern, `#667eea` accent uses, `#b71c1c` destructive, `#888`/`#666` muted text, `#f8f9ff` inner surface, `#e2e8f0` border, grade semantic colors, `0.82em` badge font-size, `2px 8px` badge padding |
 | User input | 0 — all decisions answered by upstream artifacts |
-| Revision (checker) | 3 — collapsed typography to 4 sizes / 2 weights, added spacing exception notes |
+| Revision (checker) | 4 — collapsed typography to 4 sizes / 2 weights, added spacing exception notes, fixed non-compliant 6px tab padding entry, added primary focal point, Body/Label distinction note, View link copywriting clarification |
