@@ -35,8 +35,8 @@ Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
 ### Controller Workspace (Phase 5)
 
-- [ ] **CTRL-05**: Controller can create an inspection report via a web form — search restaurant by name, fill in grade/violations/notes, submit without using the API directly
-- [ ] **CTRL-06**: Controller can view all their reports on a dashboard page with status filter tabs (All / Open / In Progress / Resolved) and grade badges
+- [x] **CTRL-05**: Controller can create an inspection report via a web form — search restaurant by name, fill in grade/violations/notes, submit without using the API directly
+- [x] **CTRL-06**: Controller can view all their reports on a dashboard page with status filter tabs (All / Open / In Progress / Resolved) and grade badges
 - [ ] **CTRL-07**: Controller can edit a report from the dashboard (grade, status, violations, notes) via an inline edit panel, without leaving the page
 - [ ] **CTRL-08**: Controller can upload a photo and see a thumbnail preview on the report card
 
