@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Full Product
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-04-03T13:42:59.548Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-04-03T14:29:07.487Z"
 last_activity: "2026-04-03 — Completed 05-01: dashboard routing, security guard, 6 new tests"
 progress:
   total_phases: 10
   completed_phases: 5
   total_plans: 20
-  completed_plans: 18
+  completed_plans: 19
   percent: 0
 ---
 
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-controller-workspace P02 | 525612min | 1 tasks | 1 files |
 | Phase 05-controller-workspace P02 | 12min | 1 tasks | 1 files |
 | Phase 06-analytics-stats P01 | 31 | 2 tasks | 5 files |
+| Phase 06-analytics-stats PP02 | 27 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,8 @@ Recent decisions affecting current work:
 - [Phase 05-controller-workspace]: gradeBadgeHtml and borderColor declared at top-level scope (not IIFE) in dashboard.html so template literals can reference them
 - [Phase 06-analytics-stats]: Wave 0 scaffold approach: all 5 test stubs @Disabled so mvn test exits 0 before any analytics implementation exists
 - [Phase 06-analytics-stats]: Two stub methods added to RestaurantService (getWorstCuisinesByAverageScore, getBestCuisinesByAverageScore) returning empty lists to satisfy test compilation without business logic
+- [Phase 06-analytics-stats]: AnalyticsController injects RestaurantDAO directly (not RestaurantService): Mockito cannot mock constructor-injected services on Java 25 — consistent with RestaurantController search/map-points pattern
+- [Phase 06-analytics-stats]: BSON Document.getInteger(String, int) returns primitive int not Integer — cast to (long) not .longValue()
 
 ### Pending Todos
 
@@ -134,6 +137,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T13:42:59.545Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-04-03T14:29:07.485Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
