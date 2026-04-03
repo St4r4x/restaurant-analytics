@@ -42,10 +42,10 @@ Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
 ### Analytics & Stats (Phase 6)
 
-- [ ] **STAT-01**: Public `/analytics` page shows city-wide KPIs: total restaurants, % grade A, average score, count of at-risk (grade C/Z)
-- [ ] **STAT-02**: Analytics page shows per-borough grade distribution — for each of the 5 boroughs, a visual breakdown of A/B/C counts
-- [ ] **STAT-03**: Analytics page shows cuisine hygiene ranking — top 10 cleanest and top 10 worst cuisines by average score
-- [ ] **STAT-04**: Analytics page shows "At Risk" list — restaurants with last grade C or Z, with links to their detail page
+- [x] **STAT-01**: Public `/analytics` page shows city-wide KPIs: total restaurants, % grade A, average score, count of at-risk (grade C/Z)
+- [x] **STAT-02**: Analytics page shows per-borough grade distribution — for each of the 5 boroughs, a visual breakdown of A/B/C counts
+- [x] **STAT-03**: Analytics page shows cuisine hygiene ranking — top 10 cleanest and top 10 worst cuisines by average score
+- [x] **STAT-04**: Analytics page shows "At Risk" list — restaurants with last grade C or Z, with links to their detail page
 
 ### Homepage & Navigation (Phase 7)
 
