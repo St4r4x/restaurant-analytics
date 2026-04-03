@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Full Product
 status: executing
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-04-03T18:06:49.995Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-04-03T18:22:27.842Z"
 last_activity: "2026-04-03 — Completed 05-01: dashboard routing, security guard, 6 new tests"
 progress:
   total_phases: 10
   completed_phases: 6
   total_plans: 23
-  completed_plans: 21
+  completed_plans: 22
   percent: 0
 ---
 
@@ -73,6 +73,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-analytics-stats PP03 | 15 | 1 tasks | 4 files |
 | Phase 06-analytics-stats P03 | 20min | 2 tasks | 4 files |
 | Phase 07-homepage-navigation PP01 | 36min | 2 tasks | 11 files |
+| Phase 07-homepage-navigation P02 | 13min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -131,6 +132,9 @@ Recent decisions affecting current work:
 - [Phase 06-analytics-stats]: 4 API fetches fire concurrently on DOMContentLoaded — no sequential chaining
 - [Phase 07-homepage-navigation]: restaurantDAO injected directly into RestaurantController for /sample — consistent with search/map-points pattern
 - [Phase 07-homepage-navigation]: .antMatchers('/dashboard').hasRole('CONTROLLER') restored — guard was lost when SecurityConfig was edited during Phase 6
+- [Phase 07-homepage-navigation]: Navbar auth state fully JS-driven: no Spring Security Thymeleaf — stateless JWT app has no server session to query
+- [Phase 07-homepage-navigation]: landing.html has no auth guard: public page must not redirect anonymous visitors
+- [Phase 07-homepage-navigation]: Chart.js and Leaflet CDN references removed from index.html: only needed on analytics.html and inspection-map.html
 
 ### Pending Todos
 
@@ -145,6 +149,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T18:06:49.992Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-04-03T18:22:27.839Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
