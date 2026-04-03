@@ -133,6 +133,39 @@ git merge --no-ff feature/phase-N-<slug> -m "feat(phase-N): merge <slug>"
 
 Never commit phase work directly to `main`. `main` only receives merges from `develop` at milestone boundaries.
 
+### End-of-Milestone Release (MANDATORY)
+
+When the **last phase of a milestone** is complete and all tests pass, executor agents MUST:
+
+1. **Confirm the full test suite is green:**
+   ```bash
+   mvn test
+   ```
+   Do not proceed if any test fails.
+
+2. **Merge `develop` → `main` with a no-ff merge commit:**
+   ```bash
+   git checkout main
+   git merge --no-ff develop -m "release: merge v<X.Y> into main"
+   ```
+
+3. **Tag the release:**
+   ```bash
+   git tag -a v<X.Y> -m "Release v<X.Y> — <milestone name>"
+   ```
+   Example: `git tag -a v2.0 -m "Release v2.0 — Full Product"`
+
+4. **Return to `develop`:**
+   ```bash
+   git checkout develop
+   ```
+
+**Milestones and their final phases:**
+- `v1.0` — Final phase: Phase 4 (Integration Polish) ✅ already shipped
+- `v2.0` — Final phase: Phase 10 (Admin Tools)
+
+Do NOT push to remote unless the user explicitly asks. Do NOT create a GitHub release unless the user asks.
+
 ### End-of-Phase Documentation (MANDATORY)
 
 Before the final commit of any phase, executor agents MUST update:
