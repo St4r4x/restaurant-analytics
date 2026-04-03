@@ -49,10 +49,10 @@ Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
 ### Homepage & Navigation (Phase 7)
 
-- [ ] **UX-01**: Non-authenticated visitors see a landing page with city-wide stats, a search CTA, and 3 sample restaurants — not the full dashboard
-- [ ] **UX-02**: Authenticated users see a personalised dashboard on `/`: recent bookmarks, nearby restaurants (if geolocation allowed), and a summary stats strip
-- [ ] **UX-03**: A persistent top navbar exists on all pages: logo, Search, Map, Analytics links; right side shows Login or username + Logout
-- [ ] **UX-04**: A `/profile` page shows the logged-in user's username, email, role badge, bookmark count, and (for controllers) report count
+- [x] **UX-01**: Non-authenticated visitors see a landing page with city-wide stats, a search CTA, and 3 sample restaurants — not the full dashboard
+- [x] **UX-02**: Authenticated users see a personalised dashboard on `/`: recent bookmarks, nearby restaurants (if geolocation allowed), and a summary stats strip
+- [x] **UX-03**: A persistent top navbar exists on all pages: logo, Search, Map, Analytics links; right side shows Login or username + Logout
+- [x] **UX-04**: A `/profile` page shows the logged-in user's username, email, role badge, bookmark count, and (for controllers) report count
 
 ### Discovery Enhancement (Phase 8)
 
