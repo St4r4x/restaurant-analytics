@@ -139,19 +139,34 @@ public class RestaurantService {
     // =============== ANALYTICS (Phase 06) ===============
 
     /**
-     * Returns the worst N cuisines globally by highest average inspection score.
-     * Stub — real implementation in Plan 06-02.
+     * Returns grade distribution per borough (A, B, C only).
      */
-    public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
-        return Collections.emptyList();
+    public List<org.bson.Document> getBoroughGradeDistribution() {
+        return restaurantDAO.findBoroughGradeDistribution();
     }
 
     /**
-     * Returns the best N cuisines by lowest average inspection score.
-     * Stub — real implementation in Plan 06-02.
+     * Returns the worst N cuisines globally by lowest average inspection score (ascending).
+     * Note: despite the name, this returns cuisines with the LOWEST scores (fewest violations = cleanest).
+     * Used as the "best" list in cuisine rankings.
+     */
+    public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
+        return restaurantDAO.findWorstCuisinesByAverageScore(limit);
+    }
+
+    /**
+     * Returns top N cuisines with highest average score (worst for diners).
+     * Sorted avgScore descending.
      */
     public List<CuisineScore> getBestCuisinesByAverageScore(int limit) {
-        return Collections.emptyList();
+        return restaurantDAO.findBestCuisinesByAverageScore(limit);
+    }
+
+    /**
+     * Returns the total count of at-risk restaurants (last grade C or Z).
+     */
+    public long countAtRiskRestaurants() {
+        return restaurantDAO.countAtRiskRestaurants();
     }
 
     // =============== TOP CUISINES ===============

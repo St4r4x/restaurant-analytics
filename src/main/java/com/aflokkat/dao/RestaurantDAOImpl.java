@@ -373,6 +373,62 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         return results;
     }
 
+    @Override
+    public List<Document> findBoroughGradeDistribution() {
+        List<Document> pipeline = Arrays.asList(
+            new Document("$addFields", new Document("lastGrade",
+                new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))),
+            new Document("$match", new Document("lastGrade",
+                new Document("$in", Arrays.asList("A", "B", "C")))),
+            new Document("$group", new Document()
+                .append("_id", new Document()
+                    .append("borough", "$borough")
+                    .append("grade", "$lastGrade"))
+                .append("count", new Document("$sum", 1))),
+            new Document("$group", new Document()
+                .append("_id", "$_id.borough")
+                .append("grades", new Document("$push", new Document()
+                    .append("grade", "$_id.grade")
+                    .append("count", "$count")))),
+            new Document("$sort", new Document("_id", 1))
+        );
+        List<Document> results = new ArrayList<>();
+        database.getCollection(AppConfig.getMongoCollection())
+            .aggregate(pipeline)
+            .forEach(results::add);
+        return results;
+    }
+
+    @Override
+    public List<CuisineScore> findBestCuisinesByAverageScore(int limit) {
+        // "Best" here means WORST for the diner — highest avg score = most violations
+        return aggregate(Arrays.asList(
+            new Document("$unwind", "$grades"),
+            new Document("$group", new Document()
+                .append("_id", "$cuisine")
+                .append("avgScore", new Document("$avg", "$grades.score"))
+                .append("count", new Document("$sum", 1))),
+            new Document("$sort", new Document("avgScore", -1)),
+            new Document("$limit", limit)
+        ), CuisineScore.class);
+    }
+
+    @Override
+    public long countAtRiskRestaurants() {
+        List<Document> pipeline = Arrays.asList(
+            new Document("$addFields", new Document("lastGrade",
+                new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))),
+            new Document("$match", new Document("lastGrade",
+                new Document("$in", Arrays.asList("C", "Z")))),
+            new Document("$count", "total")
+        );
+        List<Document> results = new ArrayList<>();
+        database.getCollection(AppConfig.getMongoCollection())
+            .aggregate(pipeline)
+            .forEach(results::add);
+        return results.isEmpty() ? 0L : (long) results.get(0).getInteger("total", 0);
+    }
+
     /**
      * Closes the MongoDB connection via the Singleton Factory
      */
