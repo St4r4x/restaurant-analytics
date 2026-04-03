@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .antMatchers("/api/reports/**").hasRole("CONTROLLER")
                 // Any authenticated user (any role)
                 .antMatchers("/api/users/**").authenticated()
+                .antMatchers("/dashboard").hasRole("CONTROLLER")
                 // Non-API view routes: open for now (Phase 3 scope)
                 .anyRequest().permitAll()
             .and()

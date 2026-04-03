@@ -48,6 +48,11 @@ public class SecurityConfigTest {
         public String test() {
             return "ok";
         }
+
+        @GetMapping("/dashboard")
+        public String dashboard() {
+            return "ok";
+        }
     }
 
     @Before
@@ -95,6 +100,33 @@ public class SecurityConfigTest {
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
         mockMvc.perform(get("/api/reports/test")
+                        .with(authentication(auth)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void dashboard_redirectsToLogin_whenUnauthenticated() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    public void dashboard_returns403_forCustomer() throws Exception {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "customer_user", null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
+        mockMvc.perform(get("/dashboard")
+                        .with(authentication(auth)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void dashboard_returns200_forController() throws Exception {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "ctrl_user", null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
+        mockMvc.perform(get("/dashboard")
                         .with(authentication(auth)))
                 .andExpect(status().isOk());
     }
