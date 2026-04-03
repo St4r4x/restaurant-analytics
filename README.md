@@ -98,24 +98,39 @@ to be set. If absent, all controller signups return HTTP 400.
 | POST | /api/reports/{id}/photo | Upload photo |
 | GET | /api/reports/{id}/photo | Stream photo |
 
+### Analytics
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/analytics/kpis | KPI tiles (total, % grade A, avg score, at-risk count) |
+| GET | /api/analytics/borough-grades | Grade distribution by borough |
+| GET | /api/analytics/cuisine-rankings | Top 10 cleanest and worst cuisines |
+| GET | /api/analytics/at-risk | Top 50 restaurants with last grade C or Z |
+
 ### Users (authenticated)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /api/users/me | Current user profile |
-| GET | /api/users/bookmarks | List bookmarks |
-| POST | /api/users/bookmarks | Add bookmark |
-| DELETE | /api/users/bookmarks/{restaurantId} | Remove bookmark |
+| GET | /api/users/me | Current user profile (bookmarkCount + reportCount) |
+| GET | /api/users/me/bookmarks | List bookmarks |
+| POST | /api/users/me/bookmarks/{restaurantId} | Add bookmark |
+| DELETE | /api/users/me/bookmarks/{restaurantId} | Remove bookmark |
 
 ## Pages
 
-| URL | Description |
-|-----|-------------|
-| / | Dashboard (analytics charts) |
-| /login | Login / Register |
-| /restaurant/{camis} | Restaurant detail |
-| /inspection-map | Interactive grade-colored map |
-| /my-bookmarks | Saved restaurants |
+| URL | Auth | Description |
+|-----|------|-------------|
+| / | None | Landing page (anonymous): hero, stat strip, search, sample restaurants |
+| / | JWT | Customer dashboard: bookmarks strip + KPI tiles |
+| /login | None | Login / Register |
+| /profile | Required | User profile: role badge, bookmark count, report count (controllers) |
+| /analytics | None | City-wide analytics: KPI tiles, borough chart, cuisine rankings, at-risk table |
+| /dashboard | CONTROLLER | Inspector dashboard: reports, tabs, New Report modal |
+| /restaurant/{camis} | None | Restaurant detail: grade badge, score chart, inspection history |
+| /inspection-map | None | Interactive grade-colored Leaflet map with clustering |
+| /my-bookmarks | Required | Saved restaurants |
+
+All pages include the persistent sticky navbar (Logo + Search/Map/Analytics + auth area).
 
 ## Configuration
 

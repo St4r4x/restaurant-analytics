@@ -2,6 +2,19 @@
 
 All notable changes are documented by phase.
 
+## [Phase 7] — 2026-04-03 — Homepage & Navigation
+
+### Added
+- Landing page (/) for anonymous visitors: hero section, stat strip, inline restaurant search, 3 sample restaurant cards
+- Authenticated customer dashboard at / (personalised bookmarks strip + KPI tiles, shown when JWT present)
+- Profile page (/profile): username, email, role badge, bookmark count (controller: report count too)
+- Persistent sticky navbar fragment (fragments/navbar.html): Logo + Search/Map/Analytics links + auth area (Sign In or username + Sign Out)
+- Navbar inserted into all 8 templates: landing, index, profile, analytics, dashboard, restaurant, inspection-map, my-bookmarks
+- GET /api/restaurants/sample — 3 random restaurants for landing page discovery section
+- GET /api/users/me — enriched response: bookmarkCount + reportCount fields
+- ViewController routes: /profile (authenticated), / split to landing.html vs index.html by JWT presence
+- SecurityConfig: /profile requires authentication; /api/restaurants/sample is public
+
 ## [Phase 3] — 2026-03-31 — Customer Discovery
 
 ### Added
