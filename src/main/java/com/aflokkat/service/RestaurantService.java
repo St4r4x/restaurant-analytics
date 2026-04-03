@@ -136,6 +136,24 @@ public class RestaurantService {
         return restaurantDAO.findWithFilters(filters, restaurantLimit);
     }
 
+    // =============== ANALYTICS (Phase 06) ===============
+
+    /**
+     * Returns the worst N cuisines globally by highest average inspection score.
+     * Stub — real implementation in Plan 06-02.
+     */
+    public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Returns the best N cuisines by lowest average inspection score.
+     * Stub — real implementation in Plan 06-02.
+     */
+    public List<CuisineScore> getBestCuisinesByAverageScore(int limit) {
+        return Collections.emptyList();
+    }
+
     // =============== TOP CUISINES ===============
 
     /**
