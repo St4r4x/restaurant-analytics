@@ -135,6 +135,12 @@ Plans:
   2. Visiting `/` with a valid JWT shows a personalised dashboard: a "Your Bookmarks" strip (last 3), a "Nearby" strip if geolocation was granted, and the 4 analytics KPI tiles
   3. Every page (`/`, `/restaurant/:id`, `/inspection-map`, `/analytics`, `/my-bookmarks`, `/dashboard`) includes the same top navbar with: logo left, nav links center (Search, Map, Analytics), auth button right (Sign In or username + Logout)
   4. A logged-in user can navigate to `/profile` and see their username, email, role badge, total bookmarks, and (for controllers) total reports filed
+**Plans**: 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — ViewController routing split + /api/restaurants/sample + enriched /api/users/me + /profile security + tests (UX-01, UX-02, UX-03, UX-04)
+- [ ] 07-02-PLAN.md — navbar fragment + landing.html + profile.html + index.html rewrite (UX-01, UX-02, UX-03, UX-04)
+- [ ] 07-03-PLAN.md — Navbar insertion into 5 existing templates + human verify checkpoint (UX-03)
 
 ### Phase 8: Discovery Enhancement
 **Goal**: Users can filter the map by grade/borough/cuisine, find uncontrolled restaurants, discover nearby places from a detail page, and sort search results
@@ -179,7 +185,7 @@ v2.0: Phase 5 → (6 ∥ 7) → 8 → 9 → 10  (6 and 7 can run in parallel)
 | 4. Integration Polish | 4/4 | Complete | 2026-04-01 |
 | 5. Controller Workspace | 2/2 | Complete   | 2026-04-03 |
 | 6. Analytics & Stats | 3/3 | Complete   | 2026-04-03 |
-| 7. Homepage & Navigation | 0/TBD | Not started | - |
+| 7. Homepage & Navigation | 0/3 | Not started | - |
 | 8. Discovery Enhancement | 0/TBD | Not started | - |
 | 9. UX Polish | 0/TBD | Not started | - |
 | 10. Admin Tools | 0/TBD | Not started | - |
