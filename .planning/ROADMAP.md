@@ -119,6 +119,12 @@ Plans:
   3. The borough section shows a grade distribution bar for each of the 5 NYC boroughs — each bar visually encodes the A/B/C proportion using the standard green/yellow/red palette
   4. The cuisine section shows two ranked lists: top 10 cleanest and top 10 worst cuisines by average inspection score, each with the score value visible
   5. The "At Risk" section lists restaurants with last grade C or Z; each row has restaurant name, borough, grade badge, and a link to the detail page
+**Plans**: 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Wave 0 test scaffolds: AnalyticsControllerTest (4 stubs) + ViewControllerAnalyticsTest (1 stub) (STAT-01, STAT-02, STAT-03, STAT-04)
+- [ ] 06-02-PLAN.md — AnalyticsController (4 endpoints) + DAO/Service extensions (borough distribution, best/worst cuisines, at-risk count) (STAT-01, STAT-02, STAT-03, STAT-04)
+- [ ] 06-03-PLAN.md — analytics.html template + ViewController /analytics route + nav links in index.html + dashboard.html (STAT-01, STAT-02, STAT-03, STAT-04)
 
 ### Phase 7: Homepage & Navigation
 **Goal**: Non-authenticated visitors land on a proper public homepage; authenticated users see a personalised dashboard; a consistent top navbar links all sections of the app
@@ -172,7 +178,7 @@ v2.0: Phase 5 → (6 ∥ 7) → 8 → 9 → 10  (6 and 7 can run in parallel)
 | 3. Customer Discovery | 4/4 | Complete | 2026-03-31 |
 | 4. Integration Polish | 4/4 | Complete | 2026-04-01 |
 | 5. Controller Workspace | 2/2 | Complete   | 2026-04-03 |
-| 6. Analytics & Stats | 0/TBD | Not started | - |
+| 6. Analytics & Stats | 0/3 | Not started | - |
 | 7. Homepage & Navigation | 0/TBD | Not started | - |
 | 8. Discovery Enhancement | 0/TBD | Not started | - |
 | 9. UX Polish | 0/TBD | Not started | - |
