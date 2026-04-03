@@ -34,6 +34,6 @@ public class BoroughCuisineScore {
     
     @Override
     public String toString() {
-        return String.format("%-20s | Score moyen: %6.2f", borough, avgScore);
+        return String.format("%-20s | Avg score: %6.2f", borough, avgScore);
     }
 }

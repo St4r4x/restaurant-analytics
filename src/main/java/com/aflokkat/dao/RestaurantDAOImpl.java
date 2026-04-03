@@ -37,7 +37,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 /**
- * Implémentation du DAO pour MongoDB avec pattern Singleton pour la connexion
+ * DAO implementation for MongoDB using a Singleton connection pattern
  */
 @Repository
 public class RestaurantDAOImpl implements RestaurantDAO {
@@ -49,11 +49,11 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     private CodecRegistry pojoCodecRegistry;
     
     public RestaurantDAOImpl() {
-        // Utiliser le MongoClient Singleton
+        // Use the Singleton MongoClient
         this.mongoClient = MongoClientFactory.getInstance();
         this.database = mongoClient.getDatabase(AppConfig.getMongoDatabase());
         
-        // Initialiser le CodecRegistry une seule fois
+        // Initialize the CodecRegistry once
         this.pojoCodecRegistry = getPojoCodecRegistry();
         
         this.restaurantCollection = database.withCodecRegistry(pojoCodecRegistry)
@@ -65,12 +65,12 @@ public class RestaurantDAOImpl implements RestaurantDAO {
             new IndexOptions().background(true)
         );
 
-        logger.info("RestaurantDAOImpl initialisé - DB: {}, Collection: {}",
+        logger.info("RestaurantDAOImpl initialized - DB: {}, Collection: {}",
                 AppConfig.getMongoDatabase(), AppConfig.getMongoCollection());
     }
     
     /**
-     * Crée et retourne le CodecRegistry pour les POJOs (extraction de la redondance)
+     * Creates and returns the CodecRegistry for POJOs (deduplication helper)
      */
     private CodecRegistry getPojoCodecRegistry() {
         return fromRegistries(
@@ -80,7 +80,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     /**
-     * Agrégation générique réutilisable
+     * Generic reusable aggregation helper
      */
     private <T> List<T> aggregate(List<Document> pipeline, Class<T> resultClass) {
         List<T> results = new ArrayList<>();
@@ -134,7 +134,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public Map<String, Long> getStatisticsByBorough() {
+    public Map<String, Long> findStatisticsByBorough() {
         Map<String, Long> stats = new HashMap<>();
         countByField("borough").forEach(count -> stats.put(count.getId(), (long) count.getCount()));
         return stats;
@@ -142,7 +142,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     
     @Override
     public List<AggregationCount> countByField(String fieldName) {
-        logger.debug("Agrégation: comptage par champ '{}'", fieldName);
+        logger.debug("Aggregation: counting by field '{}'", fieldName);
         return aggregate(Arrays.asList(
             new Document("$group", new Document()
                 .append("_id", "$" + fieldName)
@@ -152,14 +152,14 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public List<AggregationCount> getRestaurantCountByBorough() {
-        logger.debug("Requête: Comptage des restaurants par quartier");
+    public List<AggregationCount> findCountByBorough() {
+        logger.debug("Query: counting restaurants per borough");
         return countByField("borough");
     }
     
     @Override
-    public List<BoroughCuisineScore> getAverageScoreByCuisineAndBorough(String cuisine) {
-        logger.debug("Requête: Score moyen par quartier pour cuisine '{}'", cuisine);
+    public List<BoroughCuisineScore> findAverageScoreByCuisineAndBorough(String cuisine) {
+        logger.debug("Query: average score per borough for cuisine '{}'", cuisine);
         return aggregate(Arrays.asList(
             new Document("$match", new Document("cuisine", cuisine)),
             new Document("$unwind", "$grades"),
@@ -171,7 +171,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public List<CuisineScore> getWorstCuisinesByAverageScoreInBorough(String borough, int limit) {
+    public List<CuisineScore> findWorstCuisinesByAverageScoreInBorough(String borough, int limit) {
         return aggregate(Arrays.asList(
             new Document("$match", new Document("borough", borough)),
             new Document("$unwind", "$grades"),
@@ -185,7 +185,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
+    public List<CuisineScore> findWorstCuisinesByAverageScore(int limit) {
         return aggregate(Arrays.asList(
             new Document("$unwind", "$grades"),
             new Document("$group", new Document()
@@ -207,7 +207,14 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<String> getDistinctCuisines() {
+    public List<Restaurant> findSampleRestaurants(int limit) {
+        return aggregate(Arrays.asList(
+            new Document("$sample", new Document("size", limit))
+        ), Restaurant.class);
+    }
+
+    @Override
+    public List<String> findDistinctCuisines() {
         List<String> results = new ArrayList<>();
         restaurantCollection.distinct("cuisine", String.class)
             .forEach(results::add);
@@ -216,7 +223,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<String> getCuisinesWithMinimumCount(int minCount) {
+    public List<String> findCuisinesWithMinimumCount(int minCount) {
         List<String> results = new ArrayList<>();
         aggregate(Arrays.asList(
             new Document("$group", new Document()
@@ -298,7 +305,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<HeatmapPoint> getHeatmapData(String borough, int limit) {
+    public List<HeatmapPoint> findHeatmapData(String borough, int limit) {
         List<Document> pipeline = new ArrayList<>();
         if (borough != null && !borough.isEmpty()) {
             pipeline.add(new Document("$match", new Document("borough", borough)));
@@ -316,7 +323,7 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
-    public List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit) {
+    public List<AtRiskEntry> findAtRiskRestaurants(String borough, int limit) {
         List<Document> pipeline = new ArrayList<>();
         if (borough != null && !borough.isEmpty()) {
             pipeline.add(new Document("$match", new Document("borough", borough)));
@@ -342,12 +349,99 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         return aggregate(pipeline, AtRiskEntry.class);
     }
 
+    @Override
+    public List<Restaurant> searchByNameOrAddress(String q, int limit) {
+        Document regex = new Document("$regex", q).append("$options", "i");
+        Document filter = new Document("$or", Arrays.asList(
+            new Document("name", regex),
+            new Document("address.street", regex)
+        ));
+        List<Restaurant> results = new ArrayList<>();
+        restaurantCollection.find(filter).limit(limit).forEach(results::add);
+        return results;
+    }
+
+    @Override
+    public List<Document> findMapPoints() {
+        List<Document> pipeline = Arrays.asList(
+            new Document("$match", new Document("address.coord", new Document("$exists", true))),
+            new Document("$project", new Document("_id", 0)
+                .append("restaurantId", "$restaurant_id")
+                .append("name", 1)
+                .append("grade", new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))
+                .append("lat",  new Document("$arrayElemAt", Arrays.asList("$address.coord", 1)))
+                .append("lng",  new Document("$arrayElemAt", Arrays.asList("$address.coord", 0)))
+            )
+        );
+        List<Document> results = new ArrayList<>();
+        database.getCollection(AppConfig.getMongoCollection())
+                .aggregate(pipeline)
+                .forEach(results::add);
+        return results;
+    }
+
+    @Override
+    public List<Document> findBoroughGradeDistribution() {
+        List<Document> pipeline = Arrays.asList(
+            new Document("$addFields", new Document("lastGrade",
+                new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))),
+            new Document("$match", new Document("lastGrade",
+                new Document("$in", Arrays.asList("A", "B", "C")))),
+            new Document("$group", new Document()
+                .append("_id", new Document()
+                    .append("borough", "$borough")
+                    .append("grade", "$lastGrade"))
+                .append("count", new Document("$sum", 1))),
+            new Document("$group", new Document()
+                .append("_id", "$_id.borough")
+                .append("grades", new Document("$push", new Document()
+                    .append("grade", "$_id.grade")
+                    .append("count", "$count")))),
+            new Document("$sort", new Document("_id", 1))
+        );
+        List<Document> results = new ArrayList<>();
+        database.getCollection(AppConfig.getMongoCollection())
+            .aggregate(pipeline)
+            .forEach(results::add);
+        return results;
+    }
+
+    @Override
+    public List<CuisineScore> findBestCuisinesByAverageScore(int limit) {
+        // "Best" here means WORST for the diner — highest avg score = most violations
+        return aggregate(Arrays.asList(
+            new Document("$unwind", "$grades"),
+            new Document("$group", new Document()
+                .append("_id", "$cuisine")
+                .append("avgScore", new Document("$avg", "$grades.score"))
+                .append("count", new Document("$sum", 1))),
+            new Document("$sort", new Document("avgScore", -1)),
+            new Document("$limit", limit)
+        ), CuisineScore.class);
+    }
+
+    @Override
+    public long countAtRiskRestaurants() {
+        List<Document> pipeline = Arrays.asList(
+            new Document("$addFields", new Document("lastGrade",
+                new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))),
+            new Document("$match", new Document("lastGrade",
+                new Document("$in", Arrays.asList("C", "Z")))),
+            new Document("$count", "total")
+        );
+        List<Document> results = new ArrayList<>();
+        database.getCollection(AppConfig.getMongoCollection())
+            .aggregate(pipeline)
+            .forEach(results::add);
+        return results.isEmpty() ? 0L : (long) results.get(0).getInteger("total", 0);
+    }
+
     /**
-     * Ferme la connexion MongoDB via le Singleton Factory
+     * Closes the MongoDB connection via the Singleton Factory
      */
     @Override
     public void close() {
-        logger.info("Fermeture du DAO");
+        logger.info("Closing the DAO");
         MongoClientFactory.closeInstance();
     }
 }

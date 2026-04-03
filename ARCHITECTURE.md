@@ -384,8 +384,78 @@ Startup order: `mongodb` (healthy) → `redis` (healthy) → `postgres` (healthy
 
 | Phase | Description | Status |
 |---|---|---|
-| 1 | NYC Open Data API sync (paginated, nightly scheduled) | ✅ Done |
-| 2 | Redis cache layer + top-restaurants sorted set | ✅ Done |
-| 3 | User management (JWT auth, PostgreSQL, BCrypt, refresh tokens, bookmarks) | ✅ Done |
-| 4 | Citizen & inspection agent features (heatmap, at-risk, detail page, geospatial) | ✅ Done |
-| 5 | Stretch goals (Elasticsearch, Kafka, Prometheus, CI/CD, GraphQL) | ⏳ Post-académique |
+| 1 | NYC Open Data API sync (paginated, nightly scheduled) | Done |
+| 2 | Redis cache layer + top-restaurants sorted set | Done |
+| 3 | User management (JWT auth, PostgreSQL, BCrypt, refresh tokens, bookmarks) | Done |
+| 4 | Citizen & inspection agent features (heatmap, at-risk, detail page, geospatial) | Done |
+
+---
+
+## Phase 1 Additions — Role Infrastructure
+
+### UserEntity changes
+- Added `role` field (String, stored as `ROLE_CUSTOMER` or `ROLE_CONTROLLER`)
+- `hasRole()` used consistently via Spring Security; ROLE_ prefix always stored
+
+### Security
+- `SecurityConfig`: antMatchers lock `/api/reports/**` to `ROLE_CONTROLLER`
+- `JwtAuthenticationFilter`: extracts role from JWT and populates `SecurityContext`
+- `Bucket4j` rate limiter on `/api/auth/**` (configurable threshold)
+- Controller signup gated by `CONTROLLER_SIGNUP_CODE` env var
+
+### Seeded accounts
+- `DataSeeder` (ApplicationRunner): seeds `customer_test` and `controller_test` on startup
+  using idempotent findByUsername().isPresent() guard
+
+---
+
+## Phase 2 Additions — Controller Reports
+
+### New JPA entities (PostgreSQL)
+- `InspectionReportEntity`: id (Long), restaurantId (String, references MongoDB by camis),
+  grade (Grade enum), status (Status enum), violationCodes (String), notes (String),
+  photoPath (String), createdAt (Date), updatedAt (Date), user (ManyToOne → UserEntity)
+- `Grade` enum (com.aflokkat.entity): A, B, C, F
+- `Status` enum (com.aflokkat.entity): OPEN, IN_PROGRESS, RESOLVED
+
+### New repository
+- `ReportRepository` (Spring JPA): findByUserId(Long), findByUserIdAndStatus(Long, Status)
+
+### New controller
+- `ReportController`: POST /api/reports, GET /api/reports, PATCH /api/reports/{id},
+  POST /api/reports/{id}/photo, GET /api/reports/{id}/photo
+- Ownership check: PATCH and GET photo verify entity.getUser().getId() == caller.getId()
+- Photo upload writes to `AppConfig.getUploadsDir()/{reportId}/{timestamp}_{originalFilename}`
+
+### AppConfig.getUploadsDir()
+- Priority: APP_UPLOADS_DIR env var → .env file → `app.uploads.dir` properties field
+- Default in Docker: `/app/uploads` (bound to `uploads_data` named volume)
+
+### Docker volume
+- `uploads_data:/app/uploads` in docker-compose.yml — persists photos across restarts
+
+---
+
+## Phase 3 Additions — Customer Discovery
+
+### New DAO methods (RestaurantDAO / RestaurantDAOImpl)
+- `searchByNameOrAddress(String q, int limit)`: case-insensitive $regex on name and
+  address.street, returns List<Restaurant>
+- `findMapPoints()`: returns List<Document> with projection
+  {restaurantId, name, lat, lng, grade} for all restaurants with coordinates
+
+### New REST endpoints (RestaurantController)
+- GET /api/restaurants/search?q=&limit= — delegates to searchByNameOrAddress
+- GET /api/restaurants/map-points — delegates to findMapPoints
+
+### New page routes (ViewController)
+- GET /my-bookmarks → my-bookmarks.html
+
+### New templates
+- `my-bookmarks.html`: standalone client-side page, fetch-only (no Thymeleaf th: attributes)
+- `restaurant.html`: grade badge, cleanliness score, inspection history timeline,
+  bookmark toggle (auth required on toggle only)
+- `inspection-map.html`: Leaflet + markerCluster, grade-colored markers, ~27K points
+
+### Bookmark endpoints (UserController)
+- GET /api/users/bookmarks, POST /api/users/bookmarks, DELETE /api/users/bookmarks/{id}

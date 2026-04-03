@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar"
+     style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            height:56px;display:flex;align-items:center;
+            padding:0 24px;justify-content:space-between;
+            position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
+
+  <!-- Logo (left) -->
+  <a href="/" style="color:white;text-decoration:none;font-size:1.1em;font-weight:700;white-space:nowrap">
+    NYC Inspections
+  </a>
+
+  <!-- Nav links (center) -->
+  <div style="display:flex;gap:8px">
+    <a href="/" data-nav="/" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Search</a>
+    <a href="/inspection-map" data-nav="/inspection-map" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Map</a>
+    <a href="/analytics" data-nav="/analytics" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Analytics</a>
+  </div>
+
+  <!-- Auth area (right) — filled by JS -->
+  <span id="nav-auth" style="display:flex;align-items:center;gap:12px;font-size:0.85em"></span>
+</nav>
+
+<script>
+  (function() {
+    // Auth state
+    var t = localStorage.getItem('accessToken');
+    var el = document.getElementById('nav-auth');
+    if (!t) {
+      el.innerHTML = '<a href="/login" style="color:white;background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600">Sign In</a>';
+    } else {
+      try {
+        var sub = JSON.parse(atob(t.split('.')[1])).sub;
+        el.innerHTML = '<a href="/profile" style="color:rgba(255,255,255,0.9);text-decoration:none">' + sub + '</a>'
+          + ' <button onclick="(function(){localStorage.removeItem(\'accessToken\');localStorage.removeItem(\'refreshToken\');window.location.href=\'/login\';})()" '
+          + 'style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);color:white;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.82em">Sign Out</button>';
+      } catch(e) {
+        el.innerHTML = '<a href="/login" style="color:white;background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600">Sign In</a>';
+      }
+    }
+    // Active link highlight
+    document.querySelectorAll('nav a[data-nav]').forEach(function(link) {
+      if (window.location.pathname === link.getAttribute('data-nav')) {
+        link.style.background = 'rgba(255,255,255,0.28)';
+        link.style.border = '1px solid rgba(255,255,255,0.5)';
+      }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,166 +1,319 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Restaurant Analytics - Login</title>
+    <title>Restaurant Analytics - Sign In</title>
     <style>
+      *, *::before, *::after { box-sizing: border-box; }
+
       body {
         background: #161b22;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        color: #fff;
+        color: #e2e8f0;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0;
       }
+
       .auth-card {
-        width: 360px;
-        background: rgba(28, 35, 45, 0.95);
-        border-radius: 12px;
+        width: 380px;
+        background: #1c232d;
+        border-radius: 14px;
         border: 1px solid #2e333d;
-        box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
-        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        padding: 32px 28px 24px;
       }
-      h1 {
-        font-size: 1.4rem;
-        margin-bottom: 18px;
+
+      .brand {
+        text-align: center;
+        margin-bottom: 24px;
       }
-      label {
-        display: block;
-        margin-top: 10px;
-        font-size: 0.9rem;
-        color: #cbd5e1;
+      .brand-icon {
+        font-size: 2rem;
+        margin-bottom: 6px;
       }
-      input {
-        width: 100%;
-        padding: 10px;
-        margin-top: 6px;
-        border: 1px solid #475569;
-        border-radius: 6px;
-        background: #0f172a;
-        color: #e2e8f0;
+      .brand h1 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #f1f5f9;
+        margin: 0;
       }
-      button {
-        width: 100%;
-        margin-top: 16px;
-        padding: 10px;
+      .brand p {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin: 4px 0 0;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid #2e333d;
+        margin-bottom: 22px;
+      }
+      .tab-btn {
+        flex: 1;
+        background: none;
         border: none;
-        border-radius: 6px;
+        padding: 9px 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: color .15s, border-color .15s;
+        margin-bottom: -1px;
+      }
+      .tab-btn.active {
+        color: #818cf8;
+        border-bottom-color: #818cf8;
+      }
+
+      /* Form */
+      .form-section { display: none; }
+      .form-section.active { display: block; }
+
+      .field {
+        margin-bottom: 14px;
+      }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #94a3b8;
+        margin-bottom: 5px;
+      }
+      .field input {
+        width: 100%;
+        padding: 10px 12px;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 7px;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+        transition: border-color .15s;
+        outline: none;
+      }
+      .field input:focus {
+        border-color: #6366f1;
+      }
+      .field input::placeholder { color: #475569; }
+
+      .hint {
+        font-size: 0.75rem;
+        color: #475569;
+        margin-top: 3px;
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 11px;
+        margin-top: 6px;
         background: #4f46e5;
-        color: white;
+        border: none;
+        border-radius: 7px;
+        color: #fff;
+        font-size: 0.92rem;
         font-weight: 600;
         cursor: pointer;
+        transition: background .15s;
       }
-      button:hover {
-        background: #4338ca;
-      }
-      .error {
+      .submit-btn:hover { background: #4338ca; }
+      .submit-btn:disabled { background: #334155; cursor: default; }
+
+      .error-msg {
         margin-top: 12px;
+        padding: 9px 12px;
+        background: rgba(248, 113, 113, 0.1);
+        border: 1px solid rgba(248, 113, 113, 0.3);
+        border-radius: 6px;
         color: #f87171;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
+        display: none;
       }
-      .footer {
-        text-align: center;
-        margin-top: 14px;
-        font-size: 0.8rem;
-        color: #94a3b8;
-      }
-      .footer a {
-        color: #7c3aed;
-        text-decoration: none;
+      .success-msg {
+        margin-top: 12px;
+        padding: 9px 12px;
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 6px;
+        color: #4ade80;
+        font-size: 0.82rem;
+        display: none;
       }
     </style>
   </head>
   <body>
     <div class="auth-card">
-      <h1>Connexion</h1>
-      <label for="username">Username</label>
-      <input id="username" placeholder="nom d'utilisateur" />
-      <label for="password">Password</label>
-      <input id="password" type="password" placeholder="mot de passe" />
-      <button id="loginBtn">Se connecter</button>
-      <p id="loginError" class="error" style="display: none"></p>
-      <p class="footer">
-        Pas de compte ? <a href="#" id="registerLink">Créer un compte</a>
-      </p>
+      <div class="brand">
+        <div class="brand-icon">🍽️</div>
+        <h1>Restaurant Analytics</h1>
+        <p>NYC hygiene inspection data</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+      </div>
+
+      <!-- Login form -->
+      <div class="form-section active" id="sectionLogin">
+        <div class="field">
+          <label for="loginUsername">Username</label>
+          <input id="loginUsername" type="text" placeholder="your username" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button class="submit-btn" id="loginBtn">Sign In</button>
+        <div class="error-msg" id="loginError"></div>
+      </div>
+
+      <!-- Register form -->
+      <div class="form-section" id="sectionRegister">
+        <div class="field">
+          <label for="regUsername">Username</label>
+          <input id="regUsername" type="text" placeholder="choose a username" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="regEmail">Email</label>
+          <input id="regEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="regPassword">Password</label>
+          <input id="regPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label for="regSignupCode">Inspector Code <span style="color:#475569;font-weight:400">(optional)</span></label>
+          <input id="regSignupCode" type="text" placeholder="leave empty for customer account" />
+          <div class="hint">Leave blank to register as a customer. Enter the inspector code to register as a controller.</div>
+        </div>
+        <button class="submit-btn" id="registerBtn">Create Account</button>
+        <div class="error-msg" id="registerError"></div>
+        <div class="success-msg" id="registerSuccess"></div>
+      </div>
     </div>
 
     <script>
-      const accessToken = localStorage.getItem("accessToken");
-      if (accessToken) {
-        window.location.href = "/";
+      // Redirect if already logged in
+      (function() {
+        const t = localStorage.getItem("accessToken");
+        if (!t) return;
+        try {
+          const role = JSON.parse(atob(t.split(".")[1])).role;
+          window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : "/";
+        } catch { window.location.href = "/"; }
+      })();
+
+      function switchTab(tab) {
+        document.getElementById("tabLogin").classList.toggle("active", tab === "login");
+        document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+        document.getElementById("sectionLogin").classList.toggle("active", tab === "login");
+        document.getElementById("sectionRegister").classList.toggle("active", tab === "register");
       }
 
+      // Allow Enter key to submit
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const loginActive = document.getElementById("sectionLogin").classList.contains("active");
+        if (loginActive) document.getElementById("loginBtn").click();
+        else document.getElementById("registerBtn").click();
+      });
+
       document.getElementById("loginBtn").addEventListener("click", () => {
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value;
-        const loginError = document.getElementById("loginError");
+        const username = document.getElementById("loginUsername").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        const errorEl = document.getElementById("loginError");
+        errorEl.style.display = "none";
 
         if (!username || !password) {
-          loginError.style.display = "block";
-          loginError.textContent =
-            "Veuillez renseigner username et mot de passe.";
+          errorEl.style.display = "block";
+          errorEl.textContent = "Please enter your username and password.";
           return;
         }
+
+        const btn = document.getElementById("loginBtn");
+        btn.disabled = true;
+        btn.textContent = "Signing in…";
 
         fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password }),
         })
-          .then((res) =>
-            res.json().then((data) => ({ status: res.status, body: data })),
-          )
+          .then((res) => res.json().then((data) => ({ status: res.status, body: data })))
           .then((result) => {
-            if (result.status !== 200 || !result.body.accessToken) {
-              loginError.style.display = "block";
-              loginError.textContent =
-                result.body.message || "Identifiants invalides";
-            } else {
+            if (result.status === 200 && result.body.accessToken) {
               localStorage.setItem("accessToken", result.body.accessToken);
               localStorage.setItem("refreshToken", result.body.refreshToken);
-              window.location.href = "/";
+              try {
+                const role = JSON.parse(atob(result.body.accessToken.split(".")[1])).role;
+                window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : "/";
+              } catch { window.location.href = "/"; }
+            } else {
+              errorEl.style.display = "block";
+              errorEl.textContent = result.body.message || "Invalid username or password.";
+              btn.disabled = false;
+              btn.textContent = "Sign In";
             }
           })
-          .catch((err) => {
-            loginError.style.display = "block";
-            loginError.textContent = "Erreur réseau, réessayez.";
-            console.error(err);
+          .catch(() => {
+            errorEl.style.display = "block";
+            errorEl.textContent = "Network error, please try again.";
+            btn.disabled = false;
+            btn.textContent = "Sign In";
           });
       });
 
-      document.getElementById("registerLink").addEventListener("click", (e) => {
-        e.preventDefault();
-        const username = prompt("Username :");
-        const email = prompt("Email :");
-        const password = prompt("Mot de passe :");
-        if (!username || !email || !password) return;
+      document.getElementById("registerBtn").addEventListener("click", () => {
+        const username = document.getElementById("regUsername").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const password = document.getElementById("regPassword").value;
+        const signupCode = document.getElementById("regSignupCode").value.trim();
+        const errorEl = document.getElementById("registerError");
+        const successEl = document.getElementById("registerSuccess");
+        errorEl.style.display = "none";
+        successEl.style.display = "none";
+
+        if (!username || !email || !password) {
+          errorEl.style.display = "block";
+          errorEl.textContent = "Username, email and password are required.";
+          return;
+        }
+
+        const btn = document.getElementById("registerBtn");
+        btn.disabled = true;
+        btn.textContent = "Creating account…";
+
+        const body = { username, email, password };
+        if (signupCode) body.signupCode = signupCode;
 
         fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password }),
+          body: JSON.stringify(body),
         })
-          .then((res) =>
-            res.json().then((data) => ({ status: res.status, body: data })),
-          )
+          .then((res) => res.json().then((data) => ({ status: res.status, body: data })))
           .then((result) => {
             if (result.status === 200 && result.body.accessToken) {
               localStorage.setItem("accessToken", result.body.accessToken);
               localStorage.setItem("refreshToken", result.body.refreshToken);
               window.location.href = "/";
             } else {
-              loginError.style.display = "block";
-              loginError.textContent =
-                result.body.message || "Impossible de créer le compte";
+              errorEl.style.display = "block";
+              errorEl.textContent = result.body.message || "Could not create account.";
+              btn.disabled = false;
+              btn.textContent = "Create Account";
             }
           })
-          .catch((err) => {
-            loginError.style.display = "block";
-            loginError.textContent = "Erreur réseau, réessayez.";
-            console.error(err);
+          .catch(() => {
+            errorEl.style.display = "block";
+            errorEl.textContent = "Network error, please try again.";
+            btn.disabled = false;
+            btn.textContent = "Create Account";
           });
       });
     </script>

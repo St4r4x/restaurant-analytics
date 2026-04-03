@@ -1,6 +1,7 @@
 package com.aflokkat.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +10,7 @@ import com.aflokkat.dto.JwtResponse;
 import com.aflokkat.dto.RegisterRequest;
 import com.aflokkat.entity.UserEntity;
 import com.aflokkat.repository.UserRepository;
-import com.aflokkat.security.JwtUtil;
+import com.aflokkat.security.JwtService;
 import com.aflokkat.util.ValidationUtil;
 
 @Service
@@ -22,7 +23,24 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtService jwtUtil;
+
+    /** Injected from ${controller.signup.code} / CONTROLLER_SIGNUP_CODE env var. Null = disabled. */
+    private final String controllerSignupCode;
+
+    @Autowired
+    public AuthService(@Value("${controller.signup.code:#{null}}") String controllerSignupCode) {
+        this.controllerSignupCode = controllerSignupCode;
+    }
+
+    /** Package-visible constructor for unit tests — sets signup code directly. */
+    AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                JwtService jwtUtil, String controllerSignupCode) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+        this.controllerSignupCode = controllerSignupCode;
+    }
 
     public JwtResponse register(RegisterRequest request) {
         ValidationUtil.requireNonEmpty(request.getUsername(), "username");
@@ -38,7 +56,23 @@ public class AuthService {
         }
 
         String hash = passwordEncoder.encode(request.getPassword());
-        UserEntity userEntity = new UserEntity(request.getUsername(), request.getEmail(), hash, "ROLE_USER");
+
+        String providedCode = request.getSignupCode();
+
+        String role;
+        if (providedCode == null || providedCode.isEmpty()) {
+            role = "ROLE_CUSTOMER";
+        } else {
+            // Controller signup is disabled when env var is not set — fail-safe
+            if (controllerSignupCode == null || controllerSignupCode.isEmpty()) {
+                throw new IllegalArgumentException("Invalid registration request");
+            }
+            if (!controllerSignupCode.equals(providedCode)) {
+                throw new IllegalArgumentException("Invalid registration request");
+            }
+            role = "ROLE_CONTROLLER";
+        }
+        UserEntity userEntity = new UserEntity(request.getUsername(), request.getEmail(), hash, role);
         userEntity = userRepository.save(userEntity);
 
         String accessToken = jwtUtil.generateAccessToken(userEntity.getUsername(), userEntity.getRole());

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Restaurant Analytics</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+               min-height: 100vh; padding: 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+        .card { background: white; border-radius: 12px; padding: 20px 24px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.12); margin-bottom: 16px; }
+        .dashboard { display: grid; gap: 16px; }
+        .card h3 { font-size: 1.1em; font-weight: 700; color: #333;
+                   border-bottom: 3px solid #667eea; padding-bottom: 8px; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { font-size: 0.82em; font-weight: 700; color: #555; border-bottom: 2px solid #eee;
+             padding: 6px 8px; text-align: left; }
+        td { font-size: 0.88em; padding: 8px; border-bottom: 1px solid #f0f0f0; }
+        tr:nth-child(even) td { background: #fafafa; }
+        ol.cuisine-list { padding-left: 0; list-style: none; }
+        ol.cuisine-list li { display: flex; justify-content: space-between; align-items: center;
+                             padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.88em; }
+        ol.cuisine-list li:last-child { border-bottom: none; }
+        .cuisine-rank { font-weight: 700; color: #667eea; min-width: 24px; }
+        .cuisine-score { color: #555; font-size: 0.88em; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div th:replace="fragments/navbar :: navbar"></div>
+<div class="container" style="padding-top: 72px">
+
+    <!-- Header strip -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 24px; margin-bottom: 16px; border-radius: 0 0 16px 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1 style="color:white;margin:0;font-size:1.5em;font-weight:700">NYC Restaurant Analytics</h1>
+                <p style="color:rgba(255,255,255,0.8);font-size:0.82em;margin-top:4px">City-wide hygiene data — updated live</p>
+            </div>
+            <div style="display:flex;gap:8px">
+                <a href="/" style="background:rgba(255,255,255,0.15);border-radius:6px;padding:7px 14px;color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82em">&#8592; Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI tiles -->
+    <div class="dashboard" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="card" style="text-align:center">
+            <div id="kpi-total" style="font-size:2em;font-weight:700;color:#667eea">&#8212;</div>
+            <div style="font-size:0.82em;color:#666;margin-top:4px">Total Restaurants</div>
+        </div>
+        <div class="card" style="text-align:center">
+            <div id="kpi-grade-a" style="font-size:2em;font-weight:700;color:#667eea">&#8212;</div>
+            <div style="font-size:0.82em;color:#666;margin-top:4px">Grade A</div>
+        </div>
+        <div class="card" style="text-align:center">
+            <div id="kpi-avg-score" style="font-size:2em;font-weight:700;color:#667eea">&#8212;</div>
+            <div style="font-size:0.82em;color:#666;margin-top:4px">Avg Score</div>
+        </div>
+        <div class="card" style="text-align:center">
+            <div id="kpi-at-risk" style="font-size:2em;font-weight:700;color:#667eea">&#8212;</div>
+            <div style="font-size:0.82em;color:#666;margin-top:4px">At-Risk Count</div>
+        </div>
+    </div>
+
+    <!-- Borough chart -->
+    <div class="card">
+        <h3>Grade Distribution by Borough</h3>
+        <div style="position:relative;height:280px">
+            <canvas id="boroughChart" aria-label="Borough grade distribution chart" role="img"></canvas>
+        </div>
+    </div>
+
+    <!-- Cuisine rankings -->
+    <div class="dashboard" style="grid-template-columns: repeat(2, 1fr)">
+        <div class="card">
+            <h3>Top 10 Cleanest Cuisines</h3>
+            <ol id="cuisine-best" class="cuisine-list"></ol>
+        </div>
+        <div class="card">
+            <h3>Top 10 Worst Cuisines</h3>
+            <ol id="cuisine-worst" class="cuisine-list"></ol>
+        </div>
+    </div>
+
+    <!-- At-risk section -->
+    <div class="card">
+        <h3>At-Risk Restaurants</h3>
+        <p style="font-size:0.82em;color:#666;margin-bottom:12px">Restaurants with last grade C or Z (showing top 50)</p>
+        <table>
+            <caption style="display:none">At-Risk Restaurants</caption>
+            <thead>
+                <tr>
+                    <th>Restaurant Name</th>
+                    <th>Borough</th>
+                    <th>Grade</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody id="at-risk-body"></tbody>
+        </table>
+    </div>
+
+</div>
+<script>
+function gradeBadgeHtml(grade) {
+    const g = grade || '—';
+    let bg = '#ffebee', color = '#b71c1c';
+    if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
+    else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
+    return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${bg};color:${color}" aria-label="Grade ${g}">${g}</span>`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // 1. KPI tiles
+    fetch('/api/analytics/kpis')
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('kpi-total').textContent = (data.totalRestaurants || 0).toLocaleString();
+                document.getElementById('kpi-grade-a').textContent = (data.percentGradeA || 0).toFixed(1) + '%';
+                document.getElementById('kpi-avg-score').textContent = (data.avgScore || 0).toFixed(1);
+                document.getElementById('kpi-at-risk').textContent = (data.atRiskCount || 0).toLocaleString();
+            } else {
+                ['kpi-total','kpi-grade-a','kpi-avg-score','kpi-at-risk'].forEach(id => {
+                    document.getElementById(id).textContent = 'Could not load stats. Refresh the page to try again.';
+                    document.getElementById(id).style.fontSize = '0.82em';
+                    document.getElementById(id).style.color = '#b71c1c';
+                });
+            }
+        })
+        .catch(() => {
+            ['kpi-total','kpi-grade-a','kpi-avg-score','kpi-at-risk'].forEach(id => {
+                document.getElementById(id).textContent = 'Error';
+                document.getElementById(id).style.fontSize = '0.82em';
+            });
+        });
+
+    // 2. Borough chart
+    fetch('/api/analytics/borough-grades')
+        .then(r => r.json())
+        .then(data => {
+            if (data.status !== 'success' || !data.data || data.data.length === 0) {
+                document.getElementById('boroughChart').closest('div[style]').innerHTML =
+                    '<p style="color:#888;font-size:0.88em">Borough data unavailable. Check back later.</p>';
+                return;
+            }
+            const boroughs = data.data.map(d => d.borough);
+            const rawCounts = {};
+            const totals = {};
+            data.data.forEach(d => {
+                rawCounts[d.borough] = {};
+                totals[d.borough] = 0;
+                (d.grades || []).forEach(g => {
+                    rawCounts[d.borough][g.grade] = g.count;
+                    totals[d.borough] += g.count;
+                });
+            });
+            const percentA = boroughs.map(b => totals[b] > 0 ? ((rawCounts[b]['A'] || 0) / totals[b] * 100) : 0);
+            const percentB = boroughs.map(b => totals[b] > 0 ? ((rawCounts[b]['B'] || 0) / totals[b] * 100) : 0);
+            const percentC = boroughs.map(b => totals[b] > 0 ? ((rawCounts[b]['C'] || 0) / totals[b] * 100) : 0);
+
+            const ctx = document.getElementById('boroughChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: boroughs,
+                    datasets: [
+                        { label: 'A', data: percentA, backgroundColor: '#22c55e' },
+                        { label: 'B', data: percentB, backgroundColor: '#eab308' },
+                        { label: 'C', data: percentC, backgroundColor: '#ef4444' }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, max: 100, ticks: { callback: v => v + '%' } },
+                        y: { stacked: true }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const borough = ctx.label;
+                                    const grade = ctx.dataset.label;
+                                    const count = (rawCounts[borough] && rawCounts[borough][grade]) || 0;
+                                    return `${grade}: ${count.toLocaleString()} (${ctx.parsed.x.toFixed(1)}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(() => {
+            document.getElementById('boroughChart').closest('div[style]').innerHTML =
+                '<p style="color:#b71c1c;font-size:0.88em">Chart data failed to load. Refresh the page to try again.</p>';
+        });
+
+    // 3. Cuisine rankings
+    fetch('/api/analytics/cuisine-rankings')
+        .then(r => r.json())
+        .then(data => {
+            function renderCuisineList(listId, items) {
+                const ol = document.getElementById(listId);
+                if (!items || items.length === 0) {
+                    ol.innerHTML = '<li style="color:#888">No cuisine data available.</li>';
+                    return;
+                }
+                ol.innerHTML = items.map((item, i) =>
+                    `<li>
+                        <span class="cuisine-rank">${i + 1}.</span>
+                        <span style="flex:1;padding:0 8px">${item.cuisine || item._id || '—'}</span>
+                        <span class="cuisine-score">${item.avgScore != null ? item.avgScore.toFixed(1) : '—'}</span>
+                    </li>`
+                ).join('');
+            }
+            if (data.status === 'success') {
+                renderCuisineList('cuisine-best', data.best);
+                renderCuisineList('cuisine-worst', data.worst);
+            }
+        })
+        .catch(() => {
+            ['cuisine-best','cuisine-worst'].forEach(id => {
+                document.getElementById(id).innerHTML = '<li style="color:#888">No cuisine data available.</li>';
+            });
+        });
+
+    // 4. At-risk table
+    fetch('/api/analytics/at-risk')
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.getElementById('at-risk-body');
+            if (!data.data || data.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#888;text-align:center;padding:16px">No at-risk restaurants found.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.data.map(entry =>
+                `<tr>
+                    <td>${entry.name || '—'}</td>
+                    <td>${entry.borough || '—'}</td>
+                    <td>${gradeBadgeHtml(entry.lastGrade)}</td>
+                    <td><a href="/restaurant/${entry.restaurantId}" style="color:#667eea;font-size:0.82em;font-weight:700;text-decoration:none">View &#8594;</a></td>
+                </tr>`
+            ).join('');
+        })
+        .catch(() => {
+            document.getElementById('at-risk-body').innerHTML =
+                '<tr><td colspan="4" style="color:#b71c1c;text-align:center">Failed to load data. Refresh to try again.</td></tr>';
+        });
+});
+</script>
+</body>
+</html>

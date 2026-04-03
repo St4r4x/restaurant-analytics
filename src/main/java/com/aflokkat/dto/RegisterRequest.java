@@ -28,4 +28,14 @@ public class RegisterRequest {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    private String signupCode;
+
+    public String getSignupCode() {
+        return signupCode;
+    }
+
+    public void setSignupCode(String signupCode) {
+        this.signupCode = signupCode;
+    }
 }

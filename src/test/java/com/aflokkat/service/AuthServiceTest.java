@@ -6,9 +6,10 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,17 +19,25 @@ import com.aflokkat.dto.JwtResponse;
 import com.aflokkat.dto.RegisterRequest;
 import com.aflokkat.entity.UserEntity;
 import com.aflokkat.repository.UserRepository;
-import com.aflokkat.security.JwtUtil;
+import com.aflokkat.security.JwtService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtUtil jwtUtil;
+    @Mock private JwtService jwtUtil;
 
-    @InjectMocks
+    /** Default AuthService: CONTROLLER_SIGNUP_CODE not set (null = disabled). */
     private AuthService authService;
+
+    @BeforeEach
+    void setUp() {
+        authService = new AuthService(userRepository, passwordEncoder, jwtUtil, null);
+    }
 
     // ── register ──────────────────────────────────────────────────────────────
 
@@ -37,9 +46,9 @@ class AuthServiceTest {
         when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password123")).thenReturn("hashed");
-        UserEntity saved = new UserEntity("alice", "alice@example.com", "hashed", "ROLE_USER");
+        UserEntity saved = new UserEntity("alice", "alice@example.com", "hashed", "ROLE_CUSTOMER");
         when(userRepository.save(any(UserEntity.class))).thenReturn(saved);
-        when(jwtUtil.generateAccessToken("alice", "ROLE_USER")).thenReturn("access-token");
+        when(jwtUtil.generateAccessToken("alice", "ROLE_CUSTOMER")).thenReturn("access-token");
         when(jwtUtil.generateRefreshToken("alice")).thenReturn("refresh-token");
 
         RegisterRequest req = new RegisterRequest();
@@ -48,7 +57,6 @@ class AuthServiceTest {
         req.setPassword("password123");
 
         JwtResponse response = authService.register(req);
-
         assertEquals("access-token", response.getAccessToken());
         assertEquals("refresh-token", response.getRefreshToken());
     }
@@ -136,8 +144,8 @@ class AuthServiceTest {
 
     @Test
     void refresh_returnsNewTokens_forValidRefreshToken() {
-        io.jsonwebtoken.Claims claims = mock(io.jsonwebtoken.Claims.class);
-        when(claims.getSubject()).thenReturn("carol");
+        // Build a real Claims object instead of mocking (avoids Byte Buddy on Java 25)
+        Claims claims = Jwts.claims().setSubject("carol");
         when(jwtUtil.getClaimsIfValid("valid-refresh")).thenReturn(claims);
 
         UserEntity user = new UserEntity("carol", "carol@example.com", "hashed", "ROLE_ADMIN");
@@ -161,5 +169,84 @@ class AuthServiceTest {
     @Test
     void refresh_throws_whenTokenIsBlank() {
         assertThrows(IllegalArgumentException.class, () -> authService.refresh(""));
+    }
+
+    // ── role-assignment ───────────────────────────────────────────────────────
+
+    @Test
+    void register_assignsCustomerRole_whenNoSignupCode() {
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(any())).thenReturn("hashed");
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(jwtUtil.generateAccessToken(any(), any())).thenReturn("token");
+        when(jwtUtil.generateRefreshToken(any())).thenReturn("refresh");
+
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("alice");
+        req.setEmail("alice@example.com");
+        req.setPassword("pass");
+        // signupCode NOT set (null) → ROLE_CUSTOMER
+
+        authService.register(req);
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals("ROLE_CUSTOMER", captor.getValue().getRole());
+    }
+
+    @Test
+    void register_assignsControllerRole_whenCorrectSignupCode() {
+        // AuthService with signup code "secret123" configured
+        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123");
+
+        when(userRepository.findByUsername("ctrl")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("ctrl@test.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(any())).thenReturn("hashed");
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(jwtUtil.generateAccessToken(any(), any())).thenReturn("token");
+        when(jwtUtil.generateRefreshToken(any())).thenReturn("refresh");
+
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("ctrl");
+        req.setEmail("ctrl@test.com");
+        req.setPassword("pass");
+        req.setSignupCode("secret123");
+
+        serviceWithCode.register(req);
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals("ROLE_CONTROLLER", captor.getValue().getRole());
+    }
+
+    @Test
+    void register_throws_whenWrongSignupCode() {
+        // AuthService with signup code "secret123" configured
+        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123");
+
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("alice");
+        req.setEmail("alice@example.com");
+        req.setPassword("pass");
+        req.setSignupCode("wrongcode");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> serviceWithCode.register(req));
+        assertEquals("Invalid registration request", ex.getMessage());
+    }
+
+    @Test
+    void register_throws_whenSignupCodeEnvVarAbsent() {
+        // authService has null signup code (the default setUp)
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("alice");
+        req.setEmail("alice@example.com");
+        req.setPassword("pass");
+        req.setSignupCode("anything");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.register(req));
+        assertEquals("Invalid registration request", ex.getMessage());
     }
 }

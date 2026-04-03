@@ -11,6 +11,7 @@ import com.aflokkat.entity.BookmarkEntity;
 @Repository
 public interface BookmarkRepository extends JpaRepository<BookmarkEntity, Long> {
     List<BookmarkEntity> findByUserId(Long userId);
+    long countByUserId(Long userId);
     Optional<BookmarkEntity> findByUserIdAndRestaurantId(Long userId, String restaurantId);
     boolean existsByUserIdAndRestaurantId(Long userId, String restaurantId);
     void deleteByUserIdAndRestaurantId(Long userId, String restaurantId);

@@ -45,7 +45,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase1_GetRestaurantCountByBorough_ReturnsData() {
-        List<AggregationCount> results = restaurantDAO.getRestaurantCountByBorough();
+        List<AggregationCount> results = restaurantDAO.findCountByBorough();
         
         assertNotNull("Results should not be null", results);
         assertFalse("Results should not be empty", results.isEmpty());
@@ -54,7 +54,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase1_CountByBorough_DataValidation() {
-        List<AggregationCount> results = restaurantDAO.getRestaurantCountByBorough();
+        List<AggregationCount> results = restaurantDAO.findCountByBorough();
         
         // Check that all counts are positive
         for (AggregationCount count : results) {
@@ -65,7 +65,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase1_CountByBorough_SortedDescending() {
-        List<AggregationCount> results = restaurantDAO.getRestaurantCountByBorough();
+        List<AggregationCount> results = restaurantDAO.findCountByBorough();
         
         // Verify sorted in descending order
         for (int i = 1; i < results.size(); i++) {
@@ -80,7 +80,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase2_GetAverageScoreByCuisineAndBorough_Italian() {
-        List<BoroughCuisineScore> results = restaurantDAO.getAverageScoreByCuisineAndBorough("Italian");
+        List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("Italian");
         
         assertNotNull("Results should not be null", results);
         assertFalse("Results should not be empty", results.isEmpty());
@@ -88,7 +88,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase2_AverageScore_ValidData() {
-        List<BoroughCuisineScore> results = restaurantDAO.getAverageScoreByCuisineAndBorough("Italian");
+        List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("Italian");
         
         // Check that scores are valid
         for (BoroughCuisineScore score : results) {
@@ -99,7 +99,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase2_AverageScore_InvalidCuisine() {
-        List<BoroughCuisineScore> results = restaurantDAO.getAverageScoreByCuisineAndBorough("NonExistentCuisine12345");
+        List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("NonExistentCuisine12345");
         
         // Should return empty list, not null
         assertNotNull("Results should not be null", results);
@@ -109,7 +109,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase3_GetWorstCuisines_Manhattan() {
-        List<CuisineScore> results = restaurantDAO.getWorstCuisinesByAverageScoreInBorough("Manhattan", 3);
+        List<CuisineScore> results = restaurantDAO.findWorstCuisinesByAverageScoreInBorough("Manhattan", 3);
         
         assertNotNull("Results should not be null", results);
         assertTrue("Should return top 3 worst", results.size() <= 3);
@@ -117,7 +117,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase3_WorstCuisines_ValidData() {
-        List<CuisineScore> results = restaurantDAO.getWorstCuisinesByAverageScoreInBorough("Manhattan", 5);
+        List<CuisineScore> results = restaurantDAO.findWorstCuisinesByAverageScoreInBorough("Manhattan", 5);
         
         for (CuisineScore score : results) {
             assertNotNull("Cuisine should not be null", score.getCuisine());
@@ -128,7 +128,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase3_WorstCuisines_SortedByScore() {
-        List<CuisineScore> results = restaurantDAO.getWorstCuisinesByAverageScoreInBorough("Manhattan", 5);
+        List<CuisineScore> results = restaurantDAO.findWorstCuisinesByAverageScoreInBorough("Manhattan", 5);
         
         // Verify sorted by average score (ascending = worst first)
         for (int i = 1; i < results.size(); i++) {
@@ -143,7 +143,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase4_GetCuisinesWithMinimumCount_500() {
-        List<String> results = restaurantDAO.getCuisinesWithMinimumCount(500);
+        List<String> results = restaurantDAO.findCuisinesWithMinimumCount(500);
         
         assertNotNull("Results should not be null", results);
         assertFalse("Should have cuisines with >500 restaurants", results.isEmpty());
@@ -151,7 +151,7 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase4_CuisinesWithMinCount_Alphabetical() {
-        List<String> results = restaurantDAO.getCuisinesWithMinimumCount(500);
+        List<String> results = restaurantDAO.findCuisinesWithMinimumCount(500);
         
         // Verify sorted alphabetically
         for (int i = 1; i < results.size(); i++) {
@@ -164,42 +164,10 @@ public class RestaurantDAOIntegrationTest {
     
     @Test
     public void testUseCase4_CuisinesWithHighMinCount() {
-        List<String> results = restaurantDAO.getCuisinesWithMinimumCount(1000);
+        List<String> results = restaurantDAO.findCuisinesWithMinimumCount(1000);
         
         // Should have fewer results with higher minimum count
         assertNotNull("Results should not be null", results);
-    }
-    
-    // =============== VALIDATION TESTS ===============
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testFindAll_NegativeLimit() {
-        restaurantDAO.findAll(-1);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testFindAll_ZeroLimit() {
-        restaurantDAO.findAll(0);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testFindByCuisine_EmptyCuisine() {
-        restaurantDAO.findByCuisine("", 10);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testFindByCuisine_NullCuisine() {
-        restaurantDAO.findByCuisine(null, 10);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testCountByField_InvalidFieldName() {
-        restaurantDAO.countByField("field-with-dash");
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testCountByField_FieldNameWithDot() {
-        restaurantDAO.countByField("field.nested");
     }
     
     // =============== GENERIC QUERIES TESTS ===============

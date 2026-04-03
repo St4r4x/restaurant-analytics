@@ -20,9 +20,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.aflokkat.cache.RestaurantCacheService;
+import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.aggregation.AggregationCount;
-import com.aflokkat.aggregation.BoroughCuisineScore;
-import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.dto.HeatmapPoint;
 import com.aflokkat.dto.TopRestaurantEntry;
 import com.aflokkat.domain.Restaurant;
@@ -30,15 +29,19 @@ import com.aflokkat.service.RestaurantService;
 import com.aflokkat.sync.SyncResult;
 import com.aflokkat.sync.SyncService;
 import com.aflokkat.util.ResponseUtil;
+import org.bson.Document;
 
 /**
- * REST API Controller pour l'accès aux données MongoDB
+ * REST API controller for MongoDB restaurant data
  */
 @Tag(name = "Restaurants", description = "NYC restaurant inspection data — analytics, sync and leaderboard")
 @RestController
 @RequestMapping("/api/restaurants")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class RestaurantController {
+
+    @Autowired
+    private RestaurantDAO restaurantDAO;
 
     @Autowired
     private RestaurantService restaurantService;
@@ -50,7 +53,7 @@ public class RestaurantController {
     private RestaurantCacheService cacheService;
 
     /**
-     * USE CASE 1: Nombre de restaurants par quartier
+     * USE CASE 1: Restaurant count per borough
      */
     @Operation(summary = "Restaurant count per borough", description = "Returns the number of restaurants in each NYC borough, sorted by count. Result is cached in Redis for 1 hour.")
     @GetMapping("/by-borough")
@@ -69,70 +72,7 @@ public class RestaurantController {
     }
 
     /**
-     * USE CASE 2: Score moyen par quartier pour une cuisine donnée
-     */
-    @Operation(summary = "Average inspection score by borough for a cuisine", description = "For the given cuisine type, returns the average inspection score per borough. Lower score = better health. Cached in Redis.")
-    @GetMapping("/cuisine-scores")
-    public ResponseEntity<Map<String, Object>> getCuisineScores(
-            @Parameter(description = "Cuisine type (e.g. Italian, Chinese, American)", example = "Italian") @RequestParam(defaultValue = "Italian") String cuisine) {
-        try {
-            List<BoroughCuisineScore> data = cacheService.getOrLoadCuisineScores(cuisine,
-                    () -> restaurantService.getAverageScoreByCuisineAndBorough(cuisine));
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("cuisine", cuisine);
-            response.put("data", data);
-            response.put("count", data.size());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return errorResponse(e);
-        }
-    }
-
-    /**
-     * USE CASE 3: Pires cuisines dans un quartier
-     */
-    @Operation(summary = "Worst cuisines by average inspection score in a borough", description = "Returns the cuisine types with the highest average inspection score (most violations) in a given borough. Cached in Redis.")
-    @GetMapping("/worst-cuisines")
-    public ResponseEntity<Map<String, Object>> getWorstCuisines(
-            @Parameter(description = "Borough name", example = "Manhattan") @RequestParam(defaultValue = "Manhattan") String borough,
-            @Parameter(description = "Maximum number of cuisines to return") @RequestParam(defaultValue = "5") int limit) {
-        try {
-            List<CuisineScore> data = cacheService.getOrLoadWorstCuisines(borough, limit,
-                    () -> restaurantService.getWorstCuisinesByAverageScoreInBorough(borough, limit));
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("borough", borough);
-            response.put("data", data);
-            response.put("count", data.size());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return errorResponse(e);
-        }
-    }
-
-    /**
-     * USE CASE 4: Cuisines avec minimum de restaurants
-     */
-    @Operation(summary = "Cuisines with a minimum restaurant count", description = "Returns cuisine types that have at least minCount restaurants in the dataset.")
-    @GetMapping("/popular-cuisines")
-    public ResponseEntity<Map<String, Object>> getPopularCuisines(
-            @Parameter(description = "Minimum number of restaurants required") @RequestParam(defaultValue = "500") int minCount) {
-        try {
-            List<String> data = restaurantService.getCuisinesWithMinimumCount(minCount);
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("minCount", minCount);
-            response.put("data", data);
-            response.put("count", data.size());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return errorResponse(e);
-        }
-    }
-
-    /**
-     * Statistiques générales
+     * Global statistics
      */
     @Operation(summary = "Global statistics", description = "Total restaurant count and breakdown by borough.")
     @GetMapping("/stats")
@@ -161,7 +101,7 @@ public class RestaurantController {
     }
 
     /**
-     * HYGIENE RADAR: Obtient les pires restaurants avec leurs coordonnées GPS
+     * HYGIENE RADAR: Returns the worst restaurants with their GPS coordinates
      */
     @Operation(summary = "Hygiene Radar", description = "Returns restaurants from the worst-scoring cuisines, optionally filtered by borough, cuisine and max score. Useful for finding the most violation-prone establishments.")
     @GetMapping("/hygiene-radar")
@@ -186,7 +126,7 @@ public class RestaurantController {
     }
 
     /**
-     * Tous les types de cuisine distincts (pour alimenter les filtres)
+     * All distinct cuisine types (for populating filter dropdowns)
      */
     @Operation(summary = "All distinct cuisine types", description = "Returns a sorted list of all cuisine types present in the dataset. Useful for populating filter dropdowns.")
     @GetMapping("/cuisines")
@@ -204,7 +144,7 @@ public class RestaurantController {
     }
 
     /**
-     * Top N cuisines par nombre de restaurants
+     * Top N cuisines by restaurant count
      */
     @Operation(summary = "Top N cuisines by restaurant count")
     @GetMapping("/by-cuisine")
@@ -312,11 +252,30 @@ public class RestaurantController {
         }
     }
 
+    @Operation(summary = "Random sample of restaurants", description = "Returns N randomly-selected restaurants via $sample aggregation. Default limit is 3.")
+    @GetMapping("/sample")
+    public ResponseEntity<Map<String, Object>> getSample(
+            @RequestParam(defaultValue = "3") int limit) {
+        try {
+            List<Restaurant> data = restaurantDAO.findSampleRestaurants(limit);
+            List<Map<String, Object>> views = data.stream()
+                .map(RestaurantService::toView)
+                .collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", views);
+            response.put("count", views.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
     @Operation(summary = "Restaurant detail", description = "Returns the full document for a single restaurant, including all grades and computed badge fields.")
     @GetMapping("/{restaurantId}")
     public ResponseEntity<Map<String, Object>> getById(@PathVariable String restaurantId) {
         try {
-            Restaurant data = restaurantService.findByRestaurantId(restaurantId);
+            Restaurant data = restaurantService.getByRestaurantId(restaurantId);
             Map<String, Object> response = new HashMap<>();
             if (data == null) {
                 response.put("status", "error");
@@ -358,7 +317,7 @@ public class RestaurantController {
             @RequestParam(defaultValue = "500") int radius,
             @RequestParam(defaultValue = "20") int limit) {
         try {
-            List<Map<String, Object>> data = restaurantService.findNearby(lat, lng, radius, limit)
+            List<Map<String, Object>> data = restaurantService.getNearbyRestaurants(lat, lng, radius, limit)
                     .stream().map(RestaurantService::toView).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -401,6 +360,41 @@ public class RestaurantController {
             response.put("status", "success");
             response.put("restaurantsProcessed", restaurants.size());
             response.put("message", "Cache rebuilt successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Search restaurants by name or address", description = "Case-insensitive regex search on restaurant name and street address. Returns at most limit results (default 20).")
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchRestaurants(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "20") int limit) {
+        try {
+            List<Restaurant> data = restaurantDAO.searchByNameOrAddress(q, limit);
+            List<Map<String, Object>> views = data.stream()
+                .map(RestaurantService::toView)
+                .collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", views);
+            response.put("count", views.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Map points for all restaurants", description = "Returns lightweight projection documents (restaurantId, name, lat, lng, grade) for all restaurants that have coordinates.")
+    @GetMapping("/map-points")
+    public ResponseEntity<Map<String, Object>> getMapPoints() {
+        try {
+            List<Document> data = restaurantDAO.findMapPoints();
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", data);
+            response.put("count", data.size());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return errorResponse(e);
