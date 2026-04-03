@@ -1,5 +1,6 @@
 package com.aflokkat.controller;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -8,9 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 @Controller
 public class ViewController {
-    
+
     @GetMapping("/")
-    public String index() {
+    public String index(Authentication auth) {
+        if (auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CONTROLLER"))) {
+            return "redirect:/dashboard";
+        }
         return "index";
     }
 
@@ -18,7 +23,7 @@ public class ViewController {
     public String login() {
         return "login";
     }
-    
+
     @GetMapping("/restaurant/{id}")
     public String restaurantDetail() {
         return "restaurant";
@@ -32,5 +37,10 @@ public class ViewController {
     @GetMapping("/my-bookmarks")
     public String myBookmarks() {
         return "my-bookmarks";
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboard() {
+        return "dashboard";
     }
 }
