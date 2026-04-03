@@ -112,6 +112,45 @@ docker compose down
 
 App runs on `http://localhost:8080`.
 
+## Git Workflow
+
+### Branch Strategy
+
+- **`develop`** — main integration branch; all phase work lands here
+- **`feature/phase-N-<slug>`** — one branch per phase (e.g. `feature/phase-7-homepage-navigation`)
+
+**When starting a phase (executor agents MUST do this):**
+```bash
+git checkout develop
+git checkout -b feature/phase-N-<slug>
+```
+
+**When a phase is complete (executor agents MUST do this before the phase summary commit):**
+```bash
+git checkout develop
+git merge --no-ff feature/phase-N-<slug> -m "feat(phase-N): merge <slug>"
+```
+
+Never commit phase work directly to `main`. `main` only receives merges from `develop` at milestone boundaries.
+
+### End-of-Phase Documentation (MANDATORY)
+
+Before the final commit of any phase, executor agents MUST update:
+
+1. **`CHANGELOG.md`** — add an entry under `## [Unreleased]` (or create the file if absent):
+   ```
+   ### Phase N: <Name> (YYYY-MM-DD)
+   - <one-line per significant feature/endpoint added>
+   - <new routes, new DB methods, template changes>
+   ```
+
+2. **`README.md`** — update any sections that are now stale:
+   - API Endpoints table (if new endpoints were added)
+   - Architecture diagram (if new packages/classes were introduced)
+   - New pages/routes (if new Thymeleaf templates were added)
+
+Both files must be committed as part of the phase's final commit, not as a separate follow-up.
+
 ## Key Notes
 
 - Data comes from NYC Open Data API (no `restaurants.json` import needed in normal use)
