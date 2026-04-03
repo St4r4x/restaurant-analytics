@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: planning
-stopped_at: Completed 05-controller-workspace 05-01-PLAN.md
-last_updated: "2026-04-03T07:33:00Z"
-last_activity: 2026-04-03 — Phase 05 Plan 01 completed: dashboard routing and security guard
+milestone: v2.0
+milestone_name: — Full Product
+status: executing
+stopped_at: Completed 05-controller-workspace 05-02-PLAN.md
+last_updated: "2026-04-03T08:15:11.372Z"
+last_activity: "2026-04-03 — Completed 05-01: dashboard routing, security guard, 6 new tests"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 15
-  completed_plans: 15
+  total_phases: 10
+  completed_phases: 5
+  total_plans: 17
+  completed_plans: 17
   percent: 0
 ---
 
@@ -66,6 +66,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-integration-polish P03 | 125 | 2 tasks | 3 files |
 | Phase 04-integration-polish P04 | 35 | 2 tasks | 1 files |
 | Phase 05-controller-workspace P01 | 27 | 3 tasks | 4 files |
+| Phase 05-controller-workspace P02 | 525612min | 1 tasks | 1 files |
+| Phase 05-controller-workspace P02 | 12min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -113,6 +115,8 @@ Recent decisions affecting current work:
 - [Phase 04-integration-polish]: @AfterEach SecurityContextHolder.clearContext() added to ReportControllerTest to prevent auth context leaks between tests that override the default @BeforeEach security context
 - [Phase 05-controller-workspace]: Mockito mock(Authentication.class) fails on Java 25 — use UsernamePasswordAuthenticationToken concrete class instead (consistent with existing project test patterns)
 - [Phase 05-controller-workspace]: antMatchers("/dashboard").hasRole("CONTROLLER") inserted immediately before anyRequest().permitAll() in SecurityConfig
+- [Phase 05-controller-workspace]: uploadPhoto uses raw fetch() to preserve multipart boundary; fetchWithAuth would corrupt it with Content-Type: application/json
+- [Phase 05-controller-workspace]: gradeBadgeHtml and borderColor declared at top-level scope (not IIFE) in dashboard.html so template literals can reference them
 
 ### Pending Todos
 
@@ -127,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T07:06:59Z
-Stopped at: Completed 05-controller-workspace 05-01-PLAN.md
+Last session: 2026-04-03T08:15:11.369Z
+Stopped at: Completed 05-controller-workspace 05-02-PLAN.md
 Resume file: None
