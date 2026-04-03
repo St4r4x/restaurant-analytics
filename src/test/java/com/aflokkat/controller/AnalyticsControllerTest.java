@@ -1,11 +1,10 @@
 package com.aflokkat.controller;
 
 import com.aflokkat.aggregation.CuisineScore;
+import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.dto.AtRiskEntry;
-import com.aflokkat.service.RestaurantService;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.mockito.Mockito.when;
@@ -23,15 +21,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Wave 0 test scaffold for STAT-01 through STAT-04.
- * All tests are @Disabled until AnalyticsController is created in Plan 06-02.
+ * Tests for STAT-01 through STAT-04 analytics endpoints.
  * Pattern: @ExtendWith(MockitoExtension.class) + standaloneSetup — NEVER @WebMvcTest.
+ * Mocks RestaurantDAO (interface) directly — RestaurantService cannot be mocked on Java 25
+ * due to constructor-injection Mockito limitation (consistent with RestaurantControllerSearchTest).
  */
 @ExtendWith(MockitoExtension.class)
 class AnalyticsControllerTest {
 
     @Mock
-    private RestaurantService restaurantService;
+    private RestaurantDAO restaurantDAO;
 
     @InjectMocks
     private AnalyticsController analyticsController;
@@ -47,24 +46,27 @@ class AnalyticsControllerTest {
      * STAT-01: GET /api/analytics/kpis returns 200 with all four KPI fields.
      */
     @Test
-    @Disabled("Wave 0 stub — enable when AnalyticsController is created in Plan 06-02")
     void testKpis_returns200() throws Exception {
-        when(restaurantService.countAll()).thenReturn(27000L);
+        when(restaurantDAO.countAll()).thenReturn(27000L);
+        when(restaurantDAO.countAtRiskRestaurants()).thenReturn(412L);
+        when(restaurantDAO.findBoroughGradeDistribution()).thenReturn(Collections.emptyList());
+        when(restaurantDAO.findWorstCuisinesByAverageScore(200)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/analytics/kpis"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalRestaurants").exists())
+                .andExpect(jsonPath("$.totalRestaurants").value(27000))
                 .andExpect(jsonPath("$.percentGradeA").exists())
                 .andExpect(jsonPath("$.avgScore").exists())
-                .andExpect(jsonPath("$.atRiskCount").exists());
+                .andExpect(jsonPath("$.atRiskCount").value(412));
     }
 
     /**
      * STAT-02: GET /api/analytics/borough-grades returns 200 with borough data.
      */
     @Test
-    @Disabled("Wave 0 stub — enable when AnalyticsController is created in Plan 06-02")
     void testBoroughGrades_returns5Boroughs() throws Exception {
+        when(restaurantDAO.findBoroughGradeDistribution()).thenReturn(Collections.emptyList());
+
         mockMvc.perform(get("/api/analytics/borough-grades"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray());
@@ -74,25 +76,25 @@ class AnalyticsControllerTest {
      * STAT-03: GET /api/analytics/cuisine-rankings returns two ranked lists of 10.
      */
     @Test
-    @Disabled("Wave 0 stub — enable when AnalyticsController is created in Plan 06-02")
     void testCuisineRankings_returnsTwoLists() throws Exception {
         CuisineScore cs = new CuisineScore("Italian", 12.4, 500);
-        when(restaurantService.getWorstCuisinesByAverageScore(10))
+        when(restaurantDAO.findWorstCuisinesByAverageScore(10))
                 .thenReturn(Collections.nCopies(10, cs));
-        when(restaurantService.getBestCuisinesByAverageScore(10))
+        when(restaurantDAO.findBestCuisinesByAverageScore(10))
                 .thenReturn(Collections.nCopies(10, cs));
 
         mockMvc.perform(get("/api/analytics/cuisine-rankings"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.best").isArray())
-                .andExpect(jsonPath("$.worst").isArray());
+                .andExpect(jsonPath("$.worst").isArray())
+                .andExpect(jsonPath("$.best.length()").value(10))
+                .andExpect(jsonPath("$.worst.length()").value(10));
     }
 
     /**
      * STAT-04: GET /api/analytics/at-risk returns 200 with data array containing entries.
      */
     @Test
-    @Disabled("Wave 0 stub — enable when AnalyticsController is created in Plan 06-02")
     void testAtRisk_returnsEntries() throws Exception {
         AtRiskEntry entry = new AtRiskEntry();
         entry.setRestaurantId("12345");
@@ -100,7 +102,7 @@ class AnalyticsControllerTest {
         entry.setBorough("MANHATTAN");
         entry.setLastGrade("C");
 
-        when(restaurantService.getAtRiskRestaurants(null, 50))
+        when(restaurantDAO.findAtRiskRestaurants(null, 50))
                 .thenReturn(Collections.singletonList(entry));
 
         mockMvc.perform(get("/api/analytics/at-risk"))
