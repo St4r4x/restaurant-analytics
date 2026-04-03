@@ -64,7 +64,7 @@
   <body>
     <div id="toolbar">
       <a href="/">← Dashboard</a>
-      <a href="/inspection">Agent dashboard</a>
+      <a href="/dashboard" id="dashboardLink" style="display:none">Inspector Dashboard</a>
       <h1>Restaurant Map</h1>
       <select id="borough-filter">
         <option value="">All boroughs</option>
@@ -150,6 +150,18 @@
       }
 
       loadMapPoints();
+
+      // Show dashboard link for controllers
+      (function() {
+        try {
+          const t = localStorage.getItem('accessToken');
+          if (!t) return;
+          const payload = JSON.parse(atob(t.split('.')[1]));
+          if (payload.role === 'ROLE_CONTROLLER') {
+            document.getElementById('dashboardLink').style.display = '';
+          }
+        } catch {}
+      })();
       // ── End grade-colored clustered markers ──────────────────────────
     </script>
   </body>
