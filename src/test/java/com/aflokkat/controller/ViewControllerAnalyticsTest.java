@@ -1,6 +1,5 @@
 package com.aflokkat.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +21,6 @@ public class ViewControllerAnalyticsTest {
      * STAT-04: GET /analytics returns the "analytics" view (fully public — no auth required).
      */
     @Test
-    @Disabled("Wave 0 stub — enable when ViewController.analytics() is added in Plan 06-03")
     public void testAnalyticsPage_returns200() {
         assertEquals("analytics", viewController.analytics());
     }
