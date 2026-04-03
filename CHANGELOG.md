@@ -12,8 +12,9 @@ All notable changes are documented by phase.
 - Navbar inserted into all 8 templates: landing, index, profile, analytics, dashboard, restaurant, inspection-map, my-bookmarks
 - GET /api/restaurants/sample — 3 random restaurants for landing page discovery section
 - GET /api/users/me — enriched response: bookmarkCount + reportCount fields
-- ViewController routes: /profile (authenticated), / split to landing.html vs index.html by JWT presence
-- SecurityConfig: /profile requires authentication; /api/restaurants/sample is public
+- ViewController routes: /profile, / split to landing.html vs index.html by JWT presence
+- /profile and /dashboard protected client-side (localStorage token check); browser navigation does not forward Bearer headers
+- /api/restaurants/sample is public (no auth required)
 
 ## [Phase 3] — 2026-03-31 — Customer Discovery
 
