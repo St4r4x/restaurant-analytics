@@ -43,4 +43,13 @@ public class ViewController {
     public String dashboard() {
         return "dashboard";
     }
+
+    /**
+     * Wave 0 stub — route registered here so ViewControllerAnalyticsTest compiles.
+     * Thymeleaf template created in Plan 06-03.
+     */
+    @GetMapping("/analytics")
+    public String analytics() {
+        return "analytics";
+    }
 }
