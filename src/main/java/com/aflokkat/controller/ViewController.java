@@ -12,7 +12,10 @@ public class ViewController {
 
     @GetMapping("/")
     public String index(Authentication auth) {
-        if (auth != null && auth.getAuthorities().stream()
+        if (auth == null) {
+            return "landing";
+        }
+        if (auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_CONTROLLER"))) {
             return "redirect:/dashboard";
         }
@@ -51,5 +54,10 @@ public class ViewController {
     @GetMapping("/analytics")
     public String analytics() {
         return "analytics";
+    }
+
+    @GetMapping("/profile")
+    public String profile() {
+        return "profile";
     }
 }

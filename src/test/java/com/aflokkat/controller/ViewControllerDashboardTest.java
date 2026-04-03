@@ -27,8 +27,8 @@ public class ViewControllerDashboardTest {
     }
 
     @Test
-    public void index_returnsIndex_forAnonymous() {
-        assertEquals("index", viewController.index(null));
+    public void index_returnsLanding_forAnonymous() {
+        assertEquals("landing", viewController.index(null));
     }
 
     @Test
