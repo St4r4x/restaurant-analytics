@@ -82,6 +82,11 @@ public interface RestaurantDAO {
     Restaurant findRandom();
 
     /**
+     * Returns N randomly-selected restaurants via $sample aggregation.
+     */
+    List<Restaurant> findSampleRestaurants(int limit);
+
+    /**
      * Upserts a batch of restaurants keyed by restaurantId (camis).
      * Inserts if not present, replaces if already exists.
      *

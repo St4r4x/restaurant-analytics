@@ -11,4 +11,5 @@ import java.util.List;
 public interface ReportRepository extends JpaRepository<InspectionReportEntity, Long> {
     List<InspectionReportEntity> findByUserId(Long userId);
     List<InspectionReportEntity> findByUserIdAndStatus(Long userId, Status status);
+    long countByUserId(Long userId);
 }

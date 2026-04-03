@@ -207,6 +207,13 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
 
     @Override
+    public List<Restaurant> findSampleRestaurants(int limit) {
+        return aggregate(Arrays.asList(
+            new Document("$sample", new Document("size", limit))
+        ), Restaurant.class);
+    }
+
+    @Override
     public List<String> findDistinctCuisines() {
         List<String> results = new ArrayList<>();
         restaurantCollection.distinct("cuisine", String.class)
