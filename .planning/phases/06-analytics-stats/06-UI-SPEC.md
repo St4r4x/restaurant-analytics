@@ -42,10 +42,10 @@ Declared values (multiples of 4 only). Sourced from existing template patterns.
 | 2xl | 48px | Not explicitly used — available for major section breaks on analytics page |
 | 3xl | 64px | Not used — available for page-level top/bottom spacing if needed |
 
-Exceptions:
+Exceptions (immutable inherited codebase patterns — do NOT introduce in new components):
 - Container top padding: 24px (matches dashboard.html `.container { padding: 24px 16px }`)
-- Header margin-bottom: 20px (matches index.html pattern for header strip)
-- Touch targets for tab buttons: min 32px height (existing `.tab { padding: 6px 16px }`)
+- Header margin-bottom: 20px — immutable codebase inheritance from index.html header strip; not on the 4pt scale and must not be reproduced in new components
+- Touch targets for tab buttons: min 32px height (existing `.tab { padding: 6px 16px }`) — the 6px value is an immutable inherited pattern from the tab component; new components must use 8px (sm) as the minimum vertical padding
 - Chart.js canvas height: fixed at 280px (`maintainAspectRatio: false` + explicit height on container div)
 
 Source: `dashboard.html` lines 10–22, `index.html` lines 12–100.
@@ -56,17 +56,23 @@ Source: `dashboard.html` lines 10–22, `index.html` lines 12–100.
 
 All sizes expressed in em relative to base 16px browser default. Pixel equivalents provided.
 
+**Declared scale: 4 roles, 2 weights only (400 regular, 700 bold).**
+
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 0.88em (~14px) | 400 regular | 1.5 | Table cell text, list items, description text |
-| Label | 0.82em (~13px) | 600 semibold | 1.4 | Form labels, badge text, small metadata (date, borough under card title) |
+| Label | 0.82em (~13px) | 700 bold | 1.4 | Form labels, badge text, small metadata (date, borough under card title), tab labels, nav links, table headers, KPI tile sub-label, "View →" link |
 | Heading | 1.1em–1.25em (~18–20px) | 700 bold | 1.2 | Card section headings (`.card h3`), modal title |
 | Display | 2em (~32px) | 700 bold | 1.0 | KPI tile large number (e.g. "27,000", "73.4%") |
 
-Additional documented sizes from codebase (do not introduce new sizes beyond these):
-- Navigation / subheading: 0.85em at weight 600 (tab labels, nav links)
-- Page title: 1.5em at weight 700 (header strip H1, matches dashboard.html line 37)
-- KPI tile label below number: 0.85em at weight 400 color `#666` (matches index.html `.stat-label` pattern)
+Size mapping notes:
+- KPI tile label below number: maps to Label role (0.82em, weight 400 for muted metadata variant — color `#666`)
+- Navigation / subheading text (tab labels, nav links): maps to Label role (0.82em, weight 700)
+- Table headers: maps to Label role (0.82em, weight 700)
+- No weight 600 (semibold) anywhere in this phase; all emphasis uses weight 700
+
+Codebase-inherited exceptions (present in existing templates but NOT reproduced in new components):
+- Page header H1: 1.5em at weight 700 — this size exists only in the header strip inherited from dashboard.html line 37; it is not a fourth scale step and must not be used for any new element in analytics.html beyond the single H1 in the header strip
 
 Source: `dashboard.html` lines 12–37, `index.html` lines 37–55, 105, 230–238.
 
@@ -117,7 +123,7 @@ Components used or introduced in this phase. All implemented as inline HTML + CS
 - Container: `.dashboard` grid with `grid-template-columns: repeat(4, 1fr)`, gap `16px`, auto-wraps at `<600px`
 - Each tile: `.card` base style (`background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.12)`) plus `text-align: center`
 - Number element: `<div id="kpi-total" style="font-size:2em;font-weight:700;color:#667eea">—</div>`
-- Label element: `<div style="font-size:0.85em;color:#666;margin-top:4px">Total Restaurants</div>`
+- Label element: `<div style="font-size:0.82em;color:#666;margin-top:4px">Total Restaurants</div>`
 - Loading state: display `—` (em dash U+2014) in each number element until API data resolves
 - No spinner on KPI tiles — em dash is sufficient for loading (consistent with existing pattern)
 
@@ -148,10 +154,10 @@ Components used or introduced in this phase. All implemented as inline HTML + CS
 - Container: `.card` full-width
 - Table: `<table style="width:100%;border-collapse:collapse">`
 - Columns: Restaurant Name | Borough | Grade | View
-- Header row: `font-size: 0.82em; font-weight: 600; color: #555; border-bottom: 2px solid #eee; padding: 6px 8px`
+- Header row: `font-size: 0.82em; font-weight: 700; color: #555; border-bottom: 2px solid #eee; padding: 6px 8px`
 - Data rows: `font-size: 0.88em; padding: 8px; border-bottom: 1px solid #f0f0f0`; alternate row background `#fafafa` on even rows
 - Grade column: `gradeBadgeHtml(grade)` function — verbatim copy from `index.html`
-- View column: `<a href="/restaurant/{id}" style="color:#667eea;font-size:0.82em;font-weight:600">View →</a>`
+- View column: `<a href="/restaurant/{id}" style="color:#667eea;font-size:0.82em;font-weight:700">View →</a>`
 - Fixed limit: 50 rows maximum (no pagination in this phase)
 - Empty state: single row spanning all columns with "No at-risk restaurants found." in `color: #888`
 
@@ -159,9 +165,9 @@ Components used or introduced in this phase. All implemented as inline HTML + CS
 
 - Background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
 - Content: H1 page title + subtitle paragraph + nav link back to home
-- H1: `font-size: 1.5em; font-weight: 700; color: white`
-- Subtitle: `font-size: 0.85em; color: rgba(255,255,255,0.8)`
-- Home link: pill style matching dashboard.html line 41 — `background: rgba(255,255,255,0.15); border-radius: 6px; padding: 7px 14px; color: rgba(255,255,255,0.85); font-size: 0.85em`
+- H1: `font-size: 1.5em; font-weight: 700; color: white` (codebase-inherited exception — see Typography section)
+- Subtitle: `font-size: 0.82em; color: rgba(255,255,255,0.8)` (Label role)
+- Home link: pill style matching dashboard.html line 41 — `background: rgba(255,255,255,0.15); border-radius: 6px; padding: 7px 14px; color: rgba(255,255,255,0.85); font-size: 0.82em`
 - Nav link to Analytics in existing pages: add `<a href="/analytics">Analytics</a>` in the header of `index.html` and `dashboard.html` matching the existing nav link pill style
 
 Source: CONTEXT.md "Page structure", `dashboard.html` lines 35–41.
@@ -264,3 +270,4 @@ This CDN inclusion was already vetted by use in `index.html`. No new external sc
 | RESEARCH.md | 8 — AnalyticsController pattern, Chart.js 4.4 stacked bar config (indexAxis/stacked/callbacks), KPI endpoint response shape, `gradeBadgeHtml()` verbatim copy, borough label casing, 4 concurrent fetches, CDN URL, KPI number formatting |
 | Codebase inspection | 15 — font stack, exact spacing values, color hex values, `.card` box-shadow, `.tab` styles, `.btn` padding, `.report-card` pattern, `#667eea` accent uses, `#b71c1c` destructive, `#888`/`#666` muted text, `#f8f9ff` inner surface, `#e2e8f0` border, grade semantic colors, `0.82em` badge font-size, `2px 8px` badge padding |
 | User input | 0 — all decisions answered by upstream artifacts |
+| Revision (checker) | 3 — collapsed typography to 4 sizes / 2 weights, added spacing exception notes |
