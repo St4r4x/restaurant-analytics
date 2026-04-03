@@ -43,11 +43,11 @@ Declared values (must be multiples of 4):
 | 2xl | 48px | Hero top/bottom padding |
 | 3xl | 64px | Not used in this phase |
 
-**Source:** Measured from existing templates. `dashboard.html` uses padding:20px 24px on .card; analytics.html uses padding:24px 16px on .container; nav pill uses padding:7px 14px.
+**Source:** Measured from existing templates. `dashboard.html` uses padding:20px 24px on .card; analytics.html uses padding:24px 16px on .container.
 
 Exceptions:
 - Navbar height: 56px total (16px padding top + bottom + content) — fixed bar, sits above `.container`
-- Nav pill buttons: `padding: 7px 14px` (7px is not on scale; retained for visual consistency with existing pill links)
+- Nav pill buttons: `padding: 8px 16px` (uses `sm=8px` vertical, `md=16px` horizontal from scale)
 - Touch targets on all interactive nav elements: minimum 44px height on mobile
 
 ---
@@ -56,10 +56,10 @@ Exceptions:
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
-| Body | 14px (0.88em at 16px base) | 400 regular | 1.5 |
-| Label | 13px (0.82em at 16px base) | 600 semibold | 1.3 |
-| Heading | 18px (1.1em at 16px base) | 700 bold | 1.2 |
-| Display | 24px (1.5em at 16px base) | 700 bold | 1.1 |
+| Body | 14px (0.88em at 16px base) | 400 | 1.5 |
+| Label | 13px (0.82em at 16px base) | 400 | 1.3 |
+| Heading | 18px (1.1em at 16px base) | 700 | 1.2 |
+| Display | 24px (1.5em at 16px base) | 700 | 1.1 |
 
 **Source:** Measured directly from existing templates.
 - Body text in tables/lists: `font-size: 0.88em` — analytics.html td, my-bookmarks.html card text
@@ -69,7 +69,7 @@ Exceptions:
 
 New in Phase 7:
 - Hero tagline on landing.html: Display size (1.5em / 24px), weight 700, color white, on gradient background
-- Hero stat values (KPI numbers): Display size (2em / 32px), weight 700, color `#667eea`
+- Hero stat values (KPI numbers): Display size (1.5em / 24px), weight 700, color `#667eea`
 
 ---
 
@@ -120,17 +120,17 @@ Secondary semantic colors (not accent, not destructive):
 #### 1. Navbar fragment (`fragments/navbar.html`)
 
 ```
-[ Logo text ] ··· [ Search ] [ Map ] [ Analytics ] ··· [ Sign In ] or [ {username} | Logout ]
+[ Logo text ] ··· [ Search ] [ Map ] [ Analytics ] ··· [ Sign In ] or [ {username} | Sign Out ]
 ```
 
 - Height: 56px fixed
 - Background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
 - Logo: text "NYC Inspections" left-aligned, font-size 1.1em, weight 700, color white
-- Nav links (center): pill style — `padding: 7px 16px; background: rgba(255,255,255,0.15); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.82em`
+- Nav links (center): pill style — `padding: 8px 16px; background: rgba(255,255,255,0.15); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.82em`
 - Active page: pill background `rgba(255,255,255,0.28)`, border `1px solid rgba(255,255,255,0.5)`
 - Auth area (right): placeholder `<span id="nav-auth">` filled by JS on DOMContentLoaded
   - Logged out: `<a href="/login" class="btn btn-primary btn-sm">Sign In</a>`
-  - Logged in: `<a href="/profile" style="color:rgba(255,255,255,0.9);font-size:0.85em">{username}</a>` + `<button onclick="logout()" class="btn btn-secondary btn-sm">Logout</button>`
+  - Logged in: `<a href="/profile" style="color:rgba(255,255,255,0.9);font-size:0.85em">{username}</a>` + `<button onclick="logout()" class="btn btn-secondary btn-sm">Sign Out</button>`
 - Username decoded from JWT: `JSON.parse(atob(localStorage.getItem("accessToken").split('.')[1])).sub`
 - Navbar sits above the `.container` div (not inside it). Top-level `<nav>` element.
 - Thymeleaf insertion: `th:replace="fragments/navbar :: navbar"` inserted as first child of `<body>` in every template except `login.html`
@@ -149,6 +149,7 @@ Secondary semantic colors (not accent, not destructive):
 - White `.card` below the hero
 - Card heading: "Search Restaurants"
 - Input: full-width text input, `placeholder="Restaurant name or address…"`, debounce 300ms
+- Button label: "Search Restaurants"
 - Results: inline list of result rows below input — each row: `name · borough · grade badge · link to /restaurant/{id}`
 - Empty results: "No restaurants found for '{query}'. Try a different name or address."
 - Error (fetch failed): "Could not load results. Check your connection and try again."
@@ -157,7 +158,7 @@ Secondary semantic colors (not accent, not destructive):
 - White `.card` below search card
 - Card heading: "Discover Restaurants"
 - 3 cards in a `display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px`
-- Each card: name (body weight 600), borough (label gray `#666`), grade badge, `<a href="/restaurant/{id}">View Details</a>` link
+- Each card: name (body weight 400), borough (label gray `#666`), grade badge, `<a href="/restaurant/{id}">View Details</a>` link
 - Data from `GET /api/restaurants/sample?limit=3`
 - Loading: 3 placeholder rectangles with `background: #f0f2ff; border-radius: 8px; height: 80px` (no animated skeleton — that is Phase 9)
 - Empty/error: "Could not load sample restaurants. Refresh to try again."
@@ -193,7 +194,7 @@ Three strips stacked vertically inside `.container`:
 - Email: Body size, weight 400, color `#666`, centered
 - Role badge: pill — CUSTOMER green `#22c55e`, CONTROLLER orange `#f97316`, white text, `border-radius: 20px; padding: 4px 12px; font-size: 0.78em; font-weight: 700`
 - Stats row: `Bookmarks: {N}` · `Reports: {N}` (reports only shown when role is CONTROLLER)
-- Stats displayed as label (0.82em, weight 600, color #555) + value (body, weight 700, color #333)
+- Stats displayed as label (0.82em, weight 400, color #555) + value (body, weight 700, color #333)
 - Data from `GET /api/users/me`
 - Loading: `—` em dash while fetch in flight
 
@@ -206,7 +207,7 @@ Three strips stacked vertically inside `.container`:
 | Trigger | Behavior |
 |---------|----------|
 | Page load | Read `localStorage.getItem("accessToken")`. If token present and not expired, decode `.sub`, render logged-in state. If absent or expired, render logged-out state. |
-| Logout button click | Call `localStorage.removeItem("accessToken")` + `localStorage.removeItem("refreshToken")`, redirect to `/login` |
+| Sign Out button click | Call `localStorage.removeItem("accessToken")` + `localStorage.removeItem("refreshToken")`, redirect to `/login` |
 | `/profile` link click | Navigates to `/profile`; if no token in localStorage, redirect to `/login` instead |
 | Active link detection | Compare `window.location.pathname` to each nav link href; apply active pill style to matching link |
 
@@ -240,7 +241,7 @@ Three strips stacked vertically inside `.container`:
 
 | Element | Copy |
 |---------|------|
-| Primary CTA (landing) | "Search Restaurants" (button label: "Search") |
+| Primary CTA (landing) | "Search Restaurants" (button label: "Search Restaurants") |
 | Landing hero tagline | "Search 27,000+ restaurants. Know before you go." |
 | Landing stat strip | "{N} restaurants tracked · {N}% Grade A in NYC" |
 | Empty state — bookmarks strip | "You haven't bookmarked any restaurants yet." + sub-line: "Search for a restaurant and save it to your list." |
@@ -250,7 +251,7 @@ Three strips stacked vertically inside `.container`:
 | Search — fetch error | "Could not load results. Check your connection and try again." |
 | Profile — load error | "Could not load your profile. Please sign in again." + "Sign In" link |
 | Navbar — logged out | "Sign In" |
-| Navbar — logged in | "{username}" (link to /profile) + "Logout" button |
+| Navbar — logged in | "{username}" (link to /profile) + "Sign Out" button |
 | Profile — role badge CUSTOMER | "CUSTOMER" |
 | Profile — role badge CONTROLLER | "CONTROLLER" |
 
