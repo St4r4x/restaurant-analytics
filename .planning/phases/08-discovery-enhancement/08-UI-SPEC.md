@@ -108,7 +108,7 @@ All components are inline HTML+CSS per the established project pattern (no share
 - `<select id="cuisine-filter">` — styled identically to existing `#borough-filter` select in inspection-map.html
 - First option: `<option value="">All cuisines</option>`
 - Populated via `GET /api/restaurants/cuisines` on `DOMContentLoaded`
-- Style: `padding: 6px 10px; background: rgba(255,255,255,0.1); border: 1px solid #667eea; border-radius: 5px; color: #fff; font-size: 0.88em`
+- Style: `padding: 8px 12px; background: rgba(255,255,255,0.1); border: 1px solid #667eea; border-radius: 5px; color: #fff; font-size: 0.88em`
 
 ### New: Marker Count Badge (DISC-01)
 - `<span id="marker-count">` inside `#toolbar`, after all filter controls
@@ -121,7 +121,7 @@ All components are inline HTML+CSS per the established project pattern (no share
 - Placement: Above `#search-results` div in landing.html, visible only when `lastResults.length > 0`
 - Widget: Native `<select id="sort-control">` (source: CONTEXT.md — Claude's discretion; select chosen for consistency with existing dropdowns in the project)
 - Options: `<option value="">Sort: Relevance</option>`, `<option value="best">Best Score first</option>`, `<option value="worst">Worst Score first</option>`, `<option value="az">A → Z</option>`
-- Style: `padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85em; background: white; color: #333; margin-bottom: 8px`
+- Style: `padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.88em; background: white; color: #333; margin-bottom: 8px`
 - Default value: `""` (relevance) — reset to `""` when a new search query fires
 - Hidden when `lastResults` is empty: `display: none` toggled via JS
 
@@ -133,8 +133,8 @@ All components are inline HTML+CSS per the established project pattern (no share
 - Column header "Last Score" and "Days Since Inspection" include sort indicators: ↑ / ↓ appended to heading text when that column is active sort
 - Row hover: `background: #f0f2ff` (matches landing.html `.result-row:hover`)
 - Even row stripe: `background: #fafafa` (matches analytics.html `tr:nth-child(even)`)
-- Borough filter dropdown above table: same style as sort control — `<select id="borough-filter-uncontrolled">`
-- CSV button: right-aligned above table, style matches the back-link pill pattern — `background: rgba(102,126,234,0.1); border: 1px solid #667eea; border-radius: 6px; padding: 6px 14px; color: #667eea; font-size: 0.82em; cursor: pointer; text-decoration: none`
+- Borough filter dropdown above table: same style as sort control — `<select id="borough-filter-uncontrolled">` with `padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.88em; background: white; color: #333`
+- CSV button: right-aligned above table, style matches the back-link pill pattern — `background: rgba(102,126,234,0.1); border: 1px solid #667eea; border-radius: 6px; padding: 8px 16px; color: #667eea; font-size: 0.82em; cursor: pointer; text-decoration: none`
 
 ### New: Nearby Section (DISC-03)
 - Heading: `<h3>` with same style as existing card headings — `font-size: 1.1em; font-weight: 700; border-bottom: 3px solid #667eea; padding-bottom: 8px; margin-bottom: 16px`
