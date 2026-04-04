@@ -2,6 +2,14 @@
 
 All notable changes are documented by phase.
 
+## [Phase 8] — 2026-04-04 — Discovery Enhancement
+
+### Added
+- DISC-01: inspection-map.html filter bar with grade checkboxes (A/B/C/F), borough dropdown, cuisine dropdown; client-side marker filtering with live count badge
+- DISC-02: /uncontrolled public page listing restaurants with grade C/Z or uninspected 12+ months; borough filter, score/days sort, CSV download; GET /api/inspection/uncontrolled + export.csv endpoints
+- DISC-03: restaurant.html Nearby Restaurants section showing up to 5 restaurants within 500m; self-excludes current restaurant
+- DISC-04: landing.html sort control above search results (Best Score / Worst Score / A→Z); client-side reorder, no new API calls
+
 ## [Phase 7] — 2026-04-03 — Homepage & Navigation
 
 ### Added

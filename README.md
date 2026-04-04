@@ -88,6 +88,13 @@ to be set. If absent, all controller signups return HTTP 400.
 | GET | /api/restaurants/recent-inspections | Restaurants inspected in last N days |
 | GET | /api/restaurants/nearby | Geospatial search (2dsphere) |
 
+### Inspections (public)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/inspection/uncontrolled | Uncontrolled restaurants (grade C/Z or no inspection in 12 months) |
+| GET | /api/inspection/uncontrolled/export.csv | Download uncontrolled restaurants as CSV |
+
 ### Reports (CONTROLLER only)
 
 | Method | Path | Description |
