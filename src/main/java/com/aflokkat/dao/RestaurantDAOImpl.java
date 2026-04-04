@@ -369,6 +369,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
                 .append("restaurantId", "$restaurant_id")
                 .append("name", 1)
                 .append("grade", new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))
+                .append("borough", 1)
+                .append("cuisine", 1)
                 .append("lat",  new Document("$arrayElemAt", Arrays.asList("$address.coord", 1)))
                 .append("lng",  new Document("$arrayElemAt", Arrays.asList("$address.coord", 0)))
             )
@@ -434,6 +436,64 @@ public class RestaurantDAOImpl implements RestaurantDAO {
             .aggregate(pipeline)
             .forEach(results::add);
         return results.isEmpty() ? 0L : (long) results.get(0).getInteger("total", 0);
+    }
+
+    @Override
+    public List<com.aflokkat.dto.UncontrolledEntry> findUncontrolled(String borough, int limit) {
+        long twelveMonthsAgoMs = System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000;
+        List<Document> pipeline = new ArrayList<>();
+
+        // Optional borough pre-filter
+        if (borough != null && !borough.isEmpty()) {
+            pipeline.add(new Document("$match", new Document("borough", borough)));
+        }
+
+        // Extract last grade, last score, last inspection date from grades array
+        pipeline.add(new Document("$addFields", new Document()
+            .append("lastGrade", new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))
+            .append("lastScore", new Document("$arrayElemAt", Arrays.asList("$grades.score", 0)))
+            .append("lastInspectionDate", new Document("$arrayElemAt", Arrays.asList("$grades.date", 0)))
+        ));
+
+        // Convert lastInspectionDate to milliseconds for comparison
+        pipeline.add(new Document("$addFields", new Document(
+            "lastInspectionMs", new Document("$toLong",
+                new Document("$toDate", new Document("$ifNull",
+                    Arrays.asList("$lastInspectionDate", new java.util.Date(0)))))
+        )));
+
+        // Match: grade C or Z  OR  last inspection older than 12 months
+        pipeline.add(new Document("$match", new Document("$or", Arrays.asList(
+            new Document("lastGrade", new Document("$in", Arrays.asList("C", "Z"))),
+            new Document("lastInspectionMs", new Document("$lt", twelveMonthsAgoMs))
+        ))));
+
+        // Project final fields and compute daysSinceInspection
+        pipeline.add(new Document("$project", new Document()
+            .append("_id", 0)
+            .append("restaurant_id", "$restaurant_id")
+            .append("name", 1)
+            .append("borough", 1)
+            .append("cuisine", 1)
+            .append("lastGrade", 1)
+            .append("lastScore", 1)
+            .append("daysSinceInspection", new Document("$toInt",
+                new Document("$divide", Arrays.asList(
+                    new Document("$subtract", Arrays.asList(System.currentTimeMillis(), "$lastInspectionMs")),
+                    86_400_000L
+                ))
+            ))
+        ));
+
+        pipeline.add(new Document("$sort", new Document("lastScore", -1)));
+        pipeline.add(new Document("$limit", limit));
+
+        List<com.aflokkat.dto.UncontrolledEntry> results = new ArrayList<>();
+        database.withCodecRegistry(pojoCodecRegistry)
+            .getCollection(AppConfig.getMongoCollection(), com.aflokkat.dto.UncontrolledEntry.class)
+            .aggregate(pipeline)
+            .forEach(results::add);
+        return results;
     }
 
     /**
