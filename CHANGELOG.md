@@ -10,6 +10,15 @@ All notable changes are documented by phase.
 - DISC-03: restaurant.html Nearby Restaurants section showing up to 5 restaurants within 500m; self-excludes current restaurant
 - DISC-04: landing.html sort control above search results (Best Score / Worst Score / A→Z); client-side reorder, no new API calls
 
+### Fixed (Phase 8 UAT gap-closure — 08-05)
+- navbar.html: controller role nav link (Uncontrolled) shown only when JWT payload.role === ROLE_CONTROLLER
+- uncontrolled.html: restaurant name cell is now a clickable link to /restaurant/{restaurantId}
+- uncontrolled.html: CSV download button has flex-shrink:0 so it remains visible at narrow viewports
+- inspection-map.html: removed redundant <h1>Restaurant Map</h1> from toolbar
+- inspection-map.html: grade checkbox labels are color-coded (A=green, B=yellow, C/F=red)
+- landing.html: search result rows restructured to 2-group flex layout for consistent borough alignment
+- RestaurantService.java: added SLF4J debug logging in getLatitude for null-coord diagnosis
+
 ## [Phase 7] — 2026-04-03 — Homepage & Navigation
 
 ### Added
