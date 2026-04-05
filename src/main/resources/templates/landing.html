@@ -126,8 +126,10 @@
     function renderResults(arr) {
       searchResults.innerHTML = arr.map(function(r) {
         return '<div class="result-row" onclick="window.location.href=\'/restaurant/' + r.restaurantId + '\'">'
-          + '<span style="font-weight:600;font-size:0.9em">' + (r.name || '—') + '</span>'
-          + '<span style="color:#666;font-size:0.82em">' + (r.borough || '—') + '</span>'
+          + '<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">'
+          +   '<span style="font-weight:600;font-size:0.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (r.name || '—') + '</span>'
+          +   '<span style="color:#666;font-size:0.82em">' + (r.borough || '—') + '</span>'
+          + '</div>'
           + gradeBadgeHtml(r.grade)
           + '</div>';
       }).join('');
