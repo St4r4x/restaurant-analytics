@@ -152,13 +152,14 @@ Plans:
   3. The restaurant detail page has a "Nearby restaurants" section showing up to 5 restaurants within 500m, each with name, grade badge, and a link to their detail page (calls `/api/restaurants/nearby`)
   4. Above the search results on the homepage, a sort control (Best Score / Worst Score / A→Z) reorders the current result set client-side
 
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
 - [ ] 08-01-PLAN.md — Wave 0 tests + DISC-02 backend (UncontrolledEntry DTO, findUncontrolled DAO, InspectionController endpoints, ViewController route, findMapPoints extension)
 - [ ] 08-02-PLAN.md — uncontrolled.html template (DISC-02)
 - [ ] 08-03-PLAN.md — inspection-map.html filter bar: grade checkboxes, cuisine dropdown, count badge (DISC-01)
 - [ ] 08-04-PLAN.md — restaurant.html Nearby section + landing.html sort control (DISC-03, DISC-04)
+- [ ] 08-05-PLAN.md — Gap-closure fixes: controller nav link, name links, coordinate debug, map grade colors, borough alignment, CSV button (DISC-01, DISC-02, DISC-03, DISC-04)
 
 ### Phase 9: UX Polish
 **Goal**: Every list is paginated, every async operation shows a skeleton, errors surface as toasts, and all pages work on mobile
