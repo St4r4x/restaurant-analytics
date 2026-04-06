@@ -56,6 +56,11 @@ public class ViewController {
         return "analytics";
     }
 
+    @GetMapping("/uncontrolled")
+    public String uncontrolled() {
+        return "uncontrolled";
+    }
+
     @GetMapping("/profile")
     public String profile() {
         return "profile";

@@ -27,6 +27,14 @@
       </h3>
       <input id="search-input" type="text" placeholder="Restaurant name or address&#8230;"
              style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;box-sizing:border-box;margin-bottom:12px">
+      <div id="sort-control-wrapper" style="display:none;margin-bottom:8px">
+        <select id="sort-control" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.88em;background:white;color:#333">
+          <option value="">Sort: Relevance</option>
+          <option value="best">Best Score first</option>
+          <option value="worst">Worst Score first</option>
+          <option value="az">A &#8594; Z</option>
+        </select>
+      </div>
       <div id="search-results"></div>
     </div>
 
@@ -106,7 +114,34 @@
     var searchInput = document.getElementById('search-input');
     var searchResults = document.getElementById('search-results');
 
-    function hideResults() { searchResults.innerHTML = ''; }
+    var lastResults = [];
+
+    function hideResults() {
+      searchResults.innerHTML = '';
+      lastResults = [];
+      document.getElementById('sort-control-wrapper').style.display = 'none';
+      document.getElementById('sort-control').value = '';
+    }
+
+    function renderResults(arr) {
+      searchResults.innerHTML = arr.map(function(r) {
+        return '<div class="result-row" onclick="window.location.href=\'/restaurant/' + r.restaurantId + '\'">'
+          + '<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">'
+          +   '<span style="font-weight:600;font-size:0.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (r.name || '—') + '</span>'
+          +   '<span style="color:#666;font-size:0.82em">' + (r.borough || '—') + '</span>'
+          + '</div>'
+          + gradeBadgeHtml(r.grade)
+          + '</div>';
+      }).join('');
+    }
+
+    function sortResults(arr, mode) {
+      var copy = arr.slice();
+      if (mode === 'best')  return copy.sort(function(a, b) { return (a.latestScore == null ? 999 : a.latestScore) - (b.latestScore == null ? 999 : b.latestScore); });
+      if (mode === 'worst') return copy.sort(function(a, b) { return (b.latestScore == null ? 0 : b.latestScore) - (a.latestScore == null ? 0 : a.latestScore); });
+      if (mode === 'az')    return copy.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
+      return copy;
+    }
 
     function doSearch(q) {
       fetch('/api/restaurants/search?q=' + encodeURIComponent(q) + '&limit=10')
@@ -114,19 +149,23 @@
         .then(res => {
           if (!res.data || res.data.length === 0) {
             searchResults.innerHTML = '<div class="error-msg">No restaurants found for \'' + q + '\'. Try a different name or address.</div>';
+            lastResults = [];
+            document.getElementById('sort-control-wrapper').style.display = 'none';
             return;
           }
-          searchResults.innerHTML = res.data.map(r =>
-            '<div class="result-row" onclick="window.location.href=\'/restaurant/' + r.restaurantId + '\'">'
-            + '<span style="font-weight:600;font-size:0.9em">' + (r.name || '—') + '</span>'
-            + '<span style="color:#666;font-size:0.82em">' + (r.borough || '—') + '</span>'
-            + gradeBadgeHtml(r.grade)
-            + '</div>').join('');
+          lastResults = res.data;
+          document.getElementById('sort-control').value = '';
+          document.getElementById('sort-control-wrapper').style.display = 'block';
+          renderResults(lastResults);
         })
         .catch(() => {
           searchResults.innerHTML = '<div class="error-msg">Could not load results. Check your connection and try again.</div>';
         });
     }
+
+    document.getElementById('sort-control').addEventListener('change', function() {
+      renderResults(sortResults(lastResults, this.value));
+    });
 
     searchInput.addEventListener('input', function() {
       clearTimeout(searchTimer);
