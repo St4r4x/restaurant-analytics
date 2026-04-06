@@ -18,6 +18,8 @@
     <a href="/inspection-map" data-nav="/inspection-map" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Map</a>
     <a href="/analytics" data-nav="/analytics" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Analytics</a>
     <a id="nav-bookmarks" href="/my-bookmarks" data-nav="/my-bookmarks" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Bookmarks</a>
+    <a id="nav-dashboard" href="/dashboard" data-nav="/dashboard"
+       style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Dashboard</a>
     <a id="nav-uncontrolled" href="/uncontrolled" data-nav="/uncontrolled"
        style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Uncontrolled</a>
   </div>
@@ -41,6 +43,7 @@
           + 'style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);color:white;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.82em">Sign Out</button>';
         document.getElementById('nav-bookmarks').style.display = 'inline-block';
         if (payload.role === 'ROLE_CONTROLLER') {
+          document.getElementById('nav-dashboard').style.display = 'inline-block';
           document.getElementById('nav-uncontrolled').style.display = 'inline-block';
         }
       } catch(e) {
