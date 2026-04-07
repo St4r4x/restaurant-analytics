@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Full Product
 status: executing
-stopped_at: Phase 08 complete — human UAT checks pending
-last_updated: "2026-04-06T00:00:00.000Z"
-last_activity: 2026-04-06 -- Phase 08 verified (6/6 must-haves), human runtime checks pending
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-04-07T18:07:42.702Z"
+last_activity: 2026-04-07 -- Phase 09 execution started
 progress:
   total_phases: 10
   completed_phases: 8
-  total_plans: 29
+  total_plans: 34
   completed_plans: 29
-  percent: 100
+  percent: 85
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
-**Current focus:** Phase 09 — next phase
+**Current focus:** Phase 09 — ux-polish
 
 ## Current Position
 
-Phase: 08 (discovery-enhancement) — COMPLETE (human UAT checks pending)
-Plan: 5 of 5
-Status: Phase 08 verified. Next: Phase 09.
-Last activity: 2026-04-06 -- Phase 08 verified (6/6 must-haves pass; 4 runtime checks for human UAT)
+Phase: 09 (ux-polish) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 09
+Last activity: 2026-04-07 -- Phase 09 execution started
 
 Progress: [██████████] 100% (8/10 phases complete)
 
