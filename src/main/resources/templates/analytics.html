@@ -103,39 +103,85 @@
             </thead>
             <tbody id="at-risk-body"></tbody>
         </table>
+        <div id="at-risk-pagination" style="margin-top:8px"></div>
     </div>
 
 </div>
 <script>
+// -- At-risk pagination state (module scope for onclick handlers) --
+var atRiskAll = [];
+var atRiskPage = 0;
+var AT_RISK_PAGE_SIZE = 20;
+
 function gradeBadgeHtml(grade) {
-    const g = grade || '—';
-    let bg = '#ffebee', color = '#b71c1c';
+    var g = grade || '\u2014';
+    var bg = '#ffebee', color = '#b71c1c';
     if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
     else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
-    return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${bg};color:${color}" aria-label="Grade ${g}">${g}</span>`;
+    return '<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:' + bg + ';color:' + color + '" aria-label="Grade ' + g + '">' + g + '</span>';
+}
+
+function renderAtRiskPage() {
+    var start = atRiskPage * AT_RISK_PAGE_SIZE;
+    var slice = atRiskAll.slice(start, start + AT_RISK_PAGE_SIZE);
+    var tbody = document.getElementById('at-risk-body');
+    if (slice.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:#888;text-align:center;padding:16px">No at-risk restaurants found.</td></tr>';
+        document.getElementById('at-risk-pagination').innerHTML = '';
+        return;
+    }
+    tbody.innerHTML = slice.map(function(entry) {
+        return '<tr>'
+            + '<td>' + (entry.name || '\u2014') + '</td>'
+            + '<td>' + (entry.borough || '\u2014') + '</td>'
+            + '<td>' + gradeBadgeHtml(entry.lastGrade) + '</td>'
+            + '<td><a href="/restaurant/' + entry.restaurantId + '" style="color:#667eea;font-size:0.82em;font-weight:700;text-decoration:none">View \u2192</a></td>'
+            + '</tr>';
+    }).join('');
+    renderAtRiskPagination();
+}
+
+function renderAtRiskPagination() {
+    var totalPages = Math.ceil(atRiskAll.length / AT_RISK_PAGE_SIZE);
+    var el = document.getElementById('at-risk-pagination');
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+    el.innerHTML =
+        '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;justify-content:center">'
+        + '<button onclick="goAtRiskPage(-1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (atRiskPage === 0 ? ' disabled' : '') + '>\u2190 Prev</button>'
+        + '<span style="font-size:0.88em;color:#555">Page ' + (atRiskPage + 1) + ' of ' + totalPages + '</span>'
+        + '<button onclick="goAtRiskPage(1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (atRiskPage >= totalPages - 1 ? ' disabled' : '') + '>Next \u2192</button>'
+        + '</div>';
+}
+
+function goAtRiskPage(delta) {
+    var maxPage = Math.ceil(atRiskAll.length / AT_RISK_PAGE_SIZE) - 1;
+    atRiskPage = Math.max(0, Math.min(maxPage, atRiskPage + delta));
+    renderAtRiskPage();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
 
     // 1. KPI tiles
     fetch('/api/analytics/kpis')
-        .then(r => r.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
             if (data.status === 'success') {
                 document.getElementById('kpi-total').textContent = (data.totalRestaurants || 0).toLocaleString();
                 document.getElementById('kpi-grade-a').textContent = (data.percentGradeA || 0).toFixed(1) + '%';
                 document.getElementById('kpi-avg-score').textContent = (data.avgScore || 0).toFixed(1);
                 document.getElementById('kpi-at-risk').textContent = (data.atRiskCount || 0).toLocaleString();
             } else {
-                ['kpi-total','kpi-grade-a','kpi-avg-score','kpi-at-risk'].forEach(id => {
+                ['kpi-total','kpi-grade-a','kpi-avg-score','kpi-at-risk'].forEach(function(id) {
                     document.getElementById(id).textContent = 'Could not load stats. Refresh the page to try again.';
                     document.getElementById(id).style.fontSize = '0.82em';
                     document.getElementById(id).style.color = '#b71c1c';
                 });
             }
         })
-        .catch(() => {
-            ['kpi-total','kpi-grade-a','kpi-avg-score','kpi-at-risk'].forEach(id => {
+        .catch(function() {
+            ['kpi-total','kpi-grade-a','kpi-avg-score','kpi-at-risk'].forEach(function(id) {
                 document.getElementById(id).textContent = 'Error';
                 document.getElementById(id).style.fontSize = '0.82em';
             });
@@ -143,29 +189,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 2. Borough chart
     fetch('/api/analytics/borough-grades')
-        .then(r => r.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
             if (data.status !== 'success' || !data.data || data.data.length === 0) {
                 document.getElementById('boroughChart').closest('div[style]').innerHTML =
                     '<p style="color:#888;font-size:0.88em">Borough data unavailable. Check back later.</p>';
                 return;
             }
-            const boroughs = data.data.map(d => d.borough);
-            const rawCounts = {};
-            const totals = {};
-            data.data.forEach(d => {
+            var boroughs = data.data.map(function(d) { return d.borough; });
+            var rawCounts = {};
+            var totals = {};
+            data.data.forEach(function(d) {
                 rawCounts[d.borough] = {};
                 totals[d.borough] = 0;
-                (d.grades || []).forEach(g => {
+                (d.grades || []).forEach(function(g) {
                     rawCounts[d.borough][g.grade] = g.count;
                     totals[d.borough] += g.count;
                 });
             });
-            const percentA = boroughs.map(b => totals[b] > 0 ? ((rawCounts[b]['A'] || 0) / totals[b] * 100) : 0);
-            const percentB = boroughs.map(b => totals[b] > 0 ? ((rawCounts[b]['B'] || 0) / totals[b] * 100) : 0);
-            const percentC = boroughs.map(b => totals[b] > 0 ? ((rawCounts[b]['C'] || 0) / totals[b] * 100) : 0);
+            var percentA = boroughs.map(function(b) { return totals[b] > 0 ? ((rawCounts[b]['A'] || 0) / totals[b] * 100) : 0; });
+            var percentB = boroughs.map(function(b) { return totals[b] > 0 ? ((rawCounts[b]['B'] || 0) / totals[b] * 100) : 0; });
+            var percentC = boroughs.map(function(b) { return totals[b] > 0 ? ((rawCounts[b]['C'] || 0) / totals[b] * 100) : 0; });
 
-            const ctx = document.getElementById('boroughChart').getContext('2d');
+            var ctx = document.getElementById('boroughChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -181,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        x: { stacked: true, max: 100, ticks: { callback: v => v + '%' } },
+                        x: { stacked: true, max: 100, ticks: { callback: function(v) { return v + '%'; } } },
                         y: { stacked: true }
                     },
                     plugins: {
@@ -189,10 +235,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         tooltip: {
                             callbacks: {
                                 label: function(ctx) {
-                                    const borough = ctx.label;
-                                    const grade = ctx.dataset.label;
-                                    const count = (rawCounts[borough] && rawCounts[borough][grade]) || 0;
-                                    return `${grade}: ${count.toLocaleString()} (${ctx.parsed.x.toFixed(1)}%)`;
+                                    var borough = ctx.label;
+                                    var grade = ctx.dataset.label;
+                                    var count = (rawCounts[borough] && rawCounts[borough][grade]) || 0;
+                                    return grade + ': ' + count.toLocaleString() + ' (' + ctx.parsed.x.toFixed(1) + '%)';
                                 }
                             }
                         }
@@ -200,61 +246,65 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         })
-        .catch(() => {
+        .catch(function() {
             document.getElementById('boroughChart').closest('div[style]').innerHTML =
                 '<p style="color:#b71c1c;font-size:0.88em">Chart data failed to load. Refresh the page to try again.</p>';
         });
 
-    // 3. Cuisine rankings
+    // 3. Cuisine rankings — show skeleton before fetch
+    var skelItems = Array(5).fill('<li style="padding:8px 0;border-bottom:1px solid #eee"><div class="skel" style="height:14px;border-radius:3px;width:80%"></div></li>').join('');
+    document.getElementById('cuisine-best').innerHTML = skelItems;
+    document.getElementById('cuisine-worst').innerHTML = skelItems;
+
     fetch('/api/analytics/cuisine-rankings')
-        .then(r => r.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
             function renderCuisineList(listId, items) {
-                const ol = document.getElementById(listId);
+                var ol = document.getElementById(listId);
                 if (!items || items.length === 0) {
                     ol.innerHTML = '<li style="color:#888">No cuisine data available.</li>';
                     return;
                 }
-                ol.innerHTML = items.map((item, i) =>
-                    `<li>
-                        <span class="cuisine-rank">${i + 1}.</span>
-                        <span style="flex:1;padding:0 8px">${item.cuisine || item._id || '—'}</span>
-                        <span class="cuisine-score">${item.avgScore != null ? item.avgScore.toFixed(1) : '—'}</span>
-                    </li>`
-                ).join('');
+                ol.innerHTML = items.map(function(item, i) {
+                    return '<li>'
+                        + '<span class="cuisine-rank">' + (i + 1) + '.</span>'
+                        + '<span style="flex:1;padding:0 8px">' + (item.cuisine || item._id || '\u2014') + '</span>'
+                        + '<span class="cuisine-score">' + (item.avgScore != null ? item.avgScore.toFixed(1) : '\u2014') + '</span>'
+                        + '</li>';
+                }).join('');
             }
             if (data.status === 'success') {
                 renderCuisineList('cuisine-best', data.best);
                 renderCuisineList('cuisine-worst', data.worst);
             }
         })
-        .catch(() => {
-            ['cuisine-best','cuisine-worst'].forEach(id => {
+        .catch(function() {
+            ['cuisine-best','cuisine-worst'].forEach(function(id) {
                 document.getElementById(id).innerHTML = '<li style="color:#888">No cuisine data available.</li>';
             });
         });
 
-    // 4. At-risk table
+    // 4. At-risk table — show skeleton before fetch
+    document.getElementById('at-risk-body').innerHTML = Array(5).fill(
+        '<tr>'
+        + '<td><div class="skel" style="height:14px;border-radius:3px;width:70%"></div></td>'
+        + '<td><div class="skel" style="height:14px;border-radius:3px;width:50%"></div></td>'
+        + '<td><div class="skel" style="height:14px;border-radius:3px;width:30%"></div></td>'
+        + '<td><div class="skel" style="height:14px;border-radius:3px;width:40%"></div></td>'
+        + '</tr>'
+    ).join('');
+
     fetch('/api/analytics/at-risk')
-        .then(r => r.json())
-        .then(data => {
-            const tbody = document.getElementById('at-risk-body');
-            if (!data.data || data.data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#888;text-align:center;padding:16px">No at-risk restaurants found.</td></tr>';
-                return;
-            }
-            tbody.innerHTML = data.data.map(entry =>
-                `<tr>
-                    <td>${entry.name || '—'}</td>
-                    <td>${entry.borough || '—'}</td>
-                    <td>${gradeBadgeHtml(entry.lastGrade)}</td>
-                    <td><a href="/restaurant/${entry.restaurantId}" style="color:#667eea;font-size:0.82em;font-weight:700;text-decoration:none">View &#8594;</a></td>
-                </tr>`
-            ).join('');
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            atRiskAll = data.data || [];
+            atRiskPage = 0;
+            renderAtRiskPage();
         })
-        .catch(() => {
+        .catch(function() {
             document.getElementById('at-risk-body').innerHTML =
                 '<tr><td colspan="4" style="color:#b71c1c;text-align:center">Failed to load data. Refresh to try again.</td></tr>';
+            document.getElementById('at-risk-pagination').innerHTML = '';
         });
 });
 </script>

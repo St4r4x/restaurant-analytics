@@ -70,6 +70,7 @@
                 <tr><td colspan="6" style="text-align: center; padding: 24px; color: #666">Loading&hellip;</td></tr>
             </tbody>
         </table>
+        <div id="pagination-controls" style="margin-top:8px"></div>
     </div>
 
 </div>
@@ -86,15 +87,20 @@ function gradeBadgeHtml(grade) {
 var allRows = [];
 var sortCol  = null;   // 'score' | 'days' | null
 var sortAsc  = true;
+var currentPage = 0;
+var PAGE_SIZE = 20;
 
 // -- render --
 function renderTable(rows) {
     var tbody = document.getElementById('uncontrolled-tbody');
     if (!rows.length) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#666">No uncontrolled restaurants found.</td></tr>';
+        document.getElementById('pagination-controls').innerHTML = '';
         return;
     }
-    tbody.innerHTML = rows.map(function(r) {
+    var start = currentPage * PAGE_SIZE;
+    var slice = rows.slice(start, start + PAGE_SIZE);
+    tbody.innerHTML = slice.map(function(r) {
         var daysStyle = r.daysSinceInspection > 365 ? 'color:#b71c1c;font-weight:700' : '';
         return '<tr>'
             + '<td style="padding:10px 12px;font-size:0.88em">'
@@ -110,6 +116,27 @@ function renderTable(rows) {
             + '<td style="padding:10px 12px;font-size:0.88em;text-align:right;' + daysStyle + '">' + (r.daysSinceInspection != null ? r.daysSinceInspection : '&mdash;') + '</td>'
             + '</tr>';
     }).join('');
+    renderPagination(rows.length);
+}
+
+function renderPagination(totalItems) {
+    var totalPages = Math.ceil(totalItems / PAGE_SIZE);
+    var el = document.getElementById('pagination-controls');
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+    el.innerHTML =
+        '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;justify-content:center">'
+        + '<button onclick="goPage(-1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (currentPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>\u2190 Prev</button>'
+        + '<span style="font-size:0.88em;color:#555">Page ' + (currentPage + 1) + ' of ' + totalPages + '</span>'
+        + '<button onclick="goPage(1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (currentPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>Next \u2192</button>'
+        + '</div>';
+}
+
+function goPage(delta) {
+    var maxPage = Math.ceil(allRows.length / PAGE_SIZE) - 1;
+    currentPage = Math.max(0, Math.min(maxPage, currentPage + delta));
+    sortAndRender();
 }
 
 function sortAndRender() {
@@ -138,12 +165,23 @@ function updateSortHeaders() {
         'Days Since Inspection' + (sortCol === 'days' ? (sortAsc ? ' \u2191' : ' \u2193') : '');
 }
 
+function showSkeletonRows() {
+    document.getElementById('uncontrolled-tbody').innerHTML = Array(5).fill(
+        '<tr>' + ['70%','50%','60%','30%','40%','45%'].map(function(w) {
+            return '<td style="padding:10px 12px"><div class="skel" style="height:14px;border-radius:3px;width:' + w + '"></div></td>';
+        }).join('') + '</tr>'
+    ).join('');
+    document.getElementById('pagination-controls').innerHTML = '';
+}
+
 function loadData(borough) {
+    showSkeletonRows();
     var url = '/api/inspection/uncontrolled' + (borough ? '?borough=' + encodeURIComponent(borough) : '?limit=500');
     fetch(url)
         .then(function(r) { return r.json(); })
         .then(function(json) {
             allRows = json.data || [];
+            currentPage = 0;
             sortCol = null;
             sortAsc = true;
             updateSortHeaders();
@@ -168,11 +206,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('sort-score-header').addEventListener('click', function() {
         if (sortCol === 'score') { sortAsc = !sortAsc; } else { sortCol = 'score'; sortAsc = true; }
+        currentPage = 0;
         sortAndRender();
     });
 
     document.getElementById('sort-days-header').addEventListener('click', function() {
         if (sortCol === 'days') { sortAsc = !sortAsc; } else { sortCol = 'days'; sortAsc = true; }
+        currentPage = 0;
         sortAndRender();
     });
 });
