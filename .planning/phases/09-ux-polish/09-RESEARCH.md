@@ -575,22 +575,25 @@ Step 2.5: SKIPPED — Phase 09 is not a rename/refactor/migration phase. No stor
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `#nav-auth` collapse into the hamburger menu on mobile?**
    - What we know: currently auth state is shown in the right side of the navbar
    - What's unclear: requirements don't specify whether "Sign In" / username should be accessible in the collapsed hamburger menu
    - Recommendation: include auth link as last item in collapsed nav menu (simple: copy the same JS logic that populates `#nav-auth`)
+   - **RESOLVED:** Keep `#nav-auth` (username + Sign Out) visible at all widths on the right side of the navbar. The hamburger collapses only the center nav links. This avoids the risk of locking users out of Sign In on mobile.
 
 2. **Search pagination: raise limit to 100 or implement "search more" button?**
    - What we know: current `&limit=10` means only 10 results are ever fetched
    - What's unclear: whether the intent is to show 10 results paginated (nonsensical with 20/page) or to load more results and paginate them
    - Recommendation: raise to 100 (or at minimum to `PAGE_SIZE * 3 = 60`) in the fetch call
+   - **RESOLVED:** Raise to `&limit=200` in landing.html. This gives up to 10 pages of 20, covers all practical searches, and avoids a backend change. Plan 09-02 implements this.
 
 3. **Should `at-risk` in analytics.html support more than 50 items?**
    - What we know: `AnalyticsController.getAtRisk()` is hardcoded to `limit=50`; the template already says "showing top 50"
    - What's unclear: UX-05 says "20 items/page" — with 50 items that's 3 pages, which is fine
    - Recommendation: no backend change needed; pagination with 3 pages is acceptable
+   - **RESOLVED:** No backend change. 50 items / 20 per page = 3 pages. The template already labels this "top 50 at-risk restaurants." Plan 09-03 implements client-side pagination only.
 
 ---
 
