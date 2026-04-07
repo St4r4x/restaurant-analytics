@@ -37,6 +37,7 @@
         </select>
       </div>
       <div id="search-results"></div>
+      <div id="pagination-controls" style="margin-top:8px"></div>
     </div>
 
     <!-- Section 3: Sample restaurants -->
@@ -117,15 +118,19 @@
     var searchResults = document.getElementById('search-results');
 
     var lastResults = [];
+    var PAGE_SIZE = 20;
+    var currentPage = 0;
 
     function hideResults() {
       searchResults.innerHTML = '';
       lastResults = [];
+      currentPage = 0;
+      document.getElementById('pagination-controls').innerHTML = '';
       document.getElementById('sort-control-wrapper').style.display = 'none';
       document.getElementById('sort-control').value = '';
     }
 
-    function renderResults(arr) {
+    function renderResultRows(arr) {
       searchResults.innerHTML = arr.map(function(r) {
         return '<div class="result-row" onclick="window.location.href=\'/restaurant/' + r.restaurantId + '\'">'
           + '<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">'
@@ -135,6 +140,36 @@
           + gradeBadgeHtml(r.grade)
           + '</div>';
       }).join('');
+    }
+
+    function renderPagination() {
+      var totalPages = Math.ceil(lastResults.length / PAGE_SIZE);
+      var el = document.getElementById('pagination-controls');
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      el.innerHTML =
+        '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;justify-content:center">'
+        + '<button onclick="goPage(-1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (currentPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '')
+        + '>&larr; Prev</button>'
+        + '<span style="font-size:0.88em;color:#555">Page ' + (currentPage + 1) + ' of ' + totalPages + '</span>'
+        + '<button onclick="goPage(1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (currentPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '')
+        + '>Next &rarr;</button>'
+        + '</div>';
+    }
+
+    function renderPage() {
+      var start = currentPage * PAGE_SIZE;
+      var sorted = sortResults(lastResults, document.getElementById('sort-control').value);
+      var slice = sorted.slice(start, start + PAGE_SIZE);
+      renderResultRows(slice);
+      renderPagination();
+    }
+
+    function goPage(delta) {
+      var maxPage = Math.ceil(lastResults.length / PAGE_SIZE) - 1;
+      currentPage = Math.max(0, Math.min(maxPage, currentPage + delta));
+      renderPage();
     }
 
     function sortResults(arr, mode) {
@@ -155,21 +190,25 @@
           if (!res.data || res.data.length === 0) {
             searchResults.innerHTML = '<div class="error-msg">No restaurants found for \'' + q + '\'. Try a different name or address.</div>';
             lastResults = [];
+            document.getElementById('pagination-controls').innerHTML = '';
             document.getElementById('sort-control-wrapper').style.display = 'none';
             return;
           }
           lastResults = res.data;
+          currentPage = 0;
           document.getElementById('sort-control').value = '';
           document.getElementById('sort-control-wrapper').style.display = 'block';
-          renderResults(lastResults);
+          renderPage();
         })
         .catch(() => {
           searchResults.innerHTML = '<div class="error-msg">Could not load results. Check your connection and try again.</div>';
+          document.getElementById('pagination-controls').innerHTML = '';
         });
     }
 
     document.getElementById('sort-control').addEventListener('change', function() {
-      renderResults(sortResults(lastResults, this.value));
+      currentPage = 0;
+      renderPage();
     });
 
     searchInput.addEventListener('input', function() {
