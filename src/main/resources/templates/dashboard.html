@@ -183,11 +183,13 @@ function loadReports() {
             if (data.status === 'success') {
                 renderReportList(data.data || []);
             } else {
-                list.innerHTML = '<p style="color:#b71c1c;font-size:0.88em">' + (data.message || 'Error loading reports') + '</p>';
+                showToast(data.message || 'Error loading reports', 'error');
+                list.innerHTML = '<p style="color:#888;font-size:0.88em;text-align:center;padding:24px">Could not load data</p>';
             }
         })
         .catch(() => {
-            list.innerHTML = '<p style="color:#b71c1c;font-size:0.88em">Failed to load reports</p>';
+            showToast('Failed to load reports', 'error');
+            list.innerHTML = '<p style="color:#888;font-size:0.88em;text-align:center;padding:24px">Could not load data</p>';
         });
 }
 
@@ -293,9 +295,10 @@ function saveEdit(id) {
         if (data.status === 'success') {
             closeEditPanel(id);
             updateCardInPlace(data.data);
+            showToast('Report updated', 'success');
         }
     })
-    .catch(() => {});
+    .catch(function() { showToast('Failed to save changes', 'error'); });
 }
 
 function updateCardInPlace(r) {
@@ -396,9 +399,10 @@ function submitNewReport() {
         if (data.status === 'success') {
             closeModal();
             prependCard(data.data);
+            showToast('Report created', 'success');
         }
     })
-    .catch(() => {});
+    .catch(() => { showToast('Failed to create report', 'error'); });
 }
 
 function prependCard(r) {
@@ -431,9 +435,10 @@ function uploadPhoto(reportId, fileInput) {
         if (data.status === 'success') {
             refreshThumbnail(reportId);
             fileInput.value = '';
+            showToast('Photo uploaded', 'success');
         }
     })
-    .catch(() => {});
+    .catch(function() { showToast('Photo upload failed', 'error'); });
 }
 
 function refreshThumbnail(reportId) {

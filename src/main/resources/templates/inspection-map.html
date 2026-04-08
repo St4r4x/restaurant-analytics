@@ -185,7 +185,7 @@
             document.getElementById('status').textContent = `${allPoints.length} restaurants loaded`;
           })
           .catch(() => {
-            if (statusEl) statusEl.textContent = 'Failed to load restaurants. Refresh the page to try again.';
+            showToast('Map data failed to load', 'error');
             document.getElementById('status').textContent = 'Network error';
           });
       }

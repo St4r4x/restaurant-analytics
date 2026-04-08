@@ -245,9 +245,17 @@
         const method = saved ? 'DELETE' : 'POST';
         fetchWithAuth('/api/users/me/bookmarks/' + currentRestaurantId, { method })
           .then(r => {
-            if (!r || !r.ok) updateBookmarkBtn(saved); // revert on error
+            if (!r || !r.ok) {
+              updateBookmarkBtn(saved); // revert on error
+              showToast('Could not update bookmark', 'error');
+            } else {
+              showToast(saved ? 'Bookmark removed' : 'Bookmarked!', 'success');
+            }
           })
-          .catch(() => updateBookmarkBtn(saved));
+          .catch(() => {
+            updateBookmarkBtn(saved);
+            showToast('Could not update bookmark', 'error');
+          });
       }
 
       function gradeClass(g) {
@@ -482,7 +490,8 @@
         })
         .then(resp => {
           if (resp.status !== "success") {
-            document.getElementById("header-card").innerHTML = `<div class="error">${resp.message}</div>`;
+            showToast('Could not load restaurant details', 'error');
+            document.getElementById("header-card").innerHTML = '<p style="color:#888;padding:24px;text-align:center">Restaurant data unavailable</p>';
             return;
           }
           const r = resp.data;
@@ -510,7 +519,8 @@
           }
         })
         .catch(e => {
-          document.getElementById("header-card").innerHTML = `<div class="error">Error: ${e.message}</div>`;
+          showToast('Could not load restaurant details', 'error');
+          document.getElementById("header-card").innerHTML = '<p style="color:#888;padding:24px;text-align:center">Restaurant data unavailable</p>';
         });
     </script>
   </body>

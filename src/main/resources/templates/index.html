@@ -109,8 +109,9 @@
           + 'Search for a restaurant and save it to your list.</p>');
       })
       .catch(() => {
+        showToast('Could not load bookmarks', 'error');
         document.getElementById('bookmarks-grid').innerHTML =
-          '<p style="color:#b71c1c;font-size:0.85em">Could not load bookmarks.</p>';
+          '<p style="color:#888;font-size:0.88em">Unavailable</p>';
       });
 
     // Strip B: Nearby (only if geolocation available)
@@ -144,7 +145,7 @@
           document.getElementById('kpi-risk').textContent = d.atRiskCount != null ? d.atRiskCount.toLocaleString() : '—';
         }
       })
-      .catch(() => {});
+      .catch(function() { showToast('Could not load stats', 'error'); });
   </script>
 </body>
 </html>
