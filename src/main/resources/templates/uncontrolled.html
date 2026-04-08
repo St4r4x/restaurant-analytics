@@ -18,6 +18,9 @@
         .grade-badge { display: inline-block; padding: 2px 8px; border-radius: 4px;
                        font-size: 0.82em; font-weight: 700; }
         .error-msg { color: #b71c1c; padding: 16px; text-align: center; }
+        @media (max-width: 768px) {
+          .container { padding: 12px 8px !important; padding-top: 72px !important; }
+        }
     </style>
 </head>
 <body>
@@ -53,6 +56,7 @@
     <!-- Main table card -->
     <div class="card">
         <!-- error-msg replaced by showToast() calls -->
+        <div style="overflow-x:auto">
         <table id="uncontrolled-table" style="width: 100%; border-collapse: collapse">
             <thead>
                 <tr style="background: #f8f9fa; border-bottom: 2px solid #e9ecef">
@@ -68,6 +72,7 @@
                 <tr><td colspan="6" style="text-align: center; padding: 24px; color: #666">Loading&hellip;</td></tr>
             </tbody>
         </table>
+        </div>
         <div id="pagination-controls" style="margin-top:8px"></div>
     </div>
 

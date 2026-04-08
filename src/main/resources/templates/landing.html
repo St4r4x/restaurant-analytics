@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NYC Restaurant Inspector</title>
   <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
 </head>
@@ -65,6 +66,9 @@
     .result-row:last-child { border-bottom:none; }
     .sample-card { background:white;border:1px solid #e8e8e8;border-radius:8px;padding:16px; }
     .error-msg { color:#b71c1c;font-size:0.85em;margin-top:8px; }
+    @media (max-width: 768px) {
+      #sample-grid { grid-template-columns: 1fr !important; }
+    }
   </style>
 
   <script>

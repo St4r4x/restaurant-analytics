@@ -5,15 +5,18 @@
      style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
             height:56px;display:flex;align-items:center;
             padding:0 24px;justify-content:space-between;
-            position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
+            position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15);position:relative">
 
   <!-- Logo (left) -->
   <a href="/" style="color:white;text-decoration:none;font-size:1.1em;font-weight:700;white-space:nowrap">
     NYC Inspections
   </a>
 
+  <!-- Hamburger button (mobile only) -->
+  <button id="hamburger-btn" style="display:none;background:none;border:none;cursor:pointer;color:white;font-size:1.4em;padding:4px 8px" aria-label="Menu">&#9776;</button>
+
   <!-- Nav links (center) -->
-  <div style="display:flex;gap:8px">
+  <div id="nav-links" style="display:flex;gap:8px">
     <a href="/" data-nav="/" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Search</a>
     <a href="/inspection-map" data-nav="/inspection-map" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Map</a>
     <a href="/analytics" data-nav="/analytics" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Analytics</a>
@@ -27,6 +30,28 @@
   <!-- Auth area (right) — filled by JS -->
   <span id="nav-auth" style="display:flex;align-items:center;gap:12px;font-size:0.85em"></span>
 
+<style>
+@media (max-width: 768px) {
+  #nav-links {
+    display: none !important;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    flex-direction: column;
+    padding: 8px 16px 16px;
+    gap: 4px;
+    z-index: 99;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  #nav-links.open { display: flex !important; }
+  #nav-links a { padding: 10px 16px !important; border-radius: 6px; }
+  #hamburger-btn { display: block !important; }
+  #nav-auth { font-size: 0.78em; }
+  nav { position: relative; }
+}
+</style>
 <script>
   (function() {
     // Auth state
@@ -58,6 +83,19 @@
       }
     });
   })();
+  // Hamburger toggle
+  var hb = document.getElementById('hamburger-btn');
+  if (hb) {
+    hb.addEventListener('click', function() {
+      document.getElementById('nav-links').classList.toggle('open');
+    });
+    // Close menu on link click
+    document.querySelectorAll('#nav-links a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        document.getElementById('nav-links').classList.remove('open');
+      });
+    });
+  }
 </script>
 </nav>
 </body>
