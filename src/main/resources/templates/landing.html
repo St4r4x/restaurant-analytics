@@ -201,7 +201,8 @@
           renderPage();
         })
         .catch(() => {
-          searchResults.innerHTML = '<div class="error-msg">Could not load results. Check your connection and try again.</div>';
+          showToast('Could not load search results', 'error');
+          searchResults.innerHTML = '';
           document.getElementById('pagination-controls').innerHTML = '';
         });
     }

@@ -52,9 +52,7 @@
 
     <!-- Main table card -->
     <div class="card">
-        <div id="error-msg" class="error-msg" style="display: none">
-            Could not load data. Refresh the page to try again.
-        </div>
+        <!-- error-msg replaced by showToast() calls -->
         <table id="uncontrolled-table" style="width: 100%; border-collapse: collapse">
             <thead>
                 <tr style="background: #f8f9fa; border-bottom: 2px solid #e9ecef">
@@ -191,8 +189,8 @@ function loadData(borough) {
             document.getElementById('csv-btn').href = csvHref;
         })
         .catch(function() {
-            document.getElementById('error-msg').style.display = 'block';
-            document.getElementById('uncontrolled-tbody').innerHTML = '';
+            showToast('Could not load uncontrolled restaurants', 'error');
+            document.getElementById('uncontrolled-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#888">Data unavailable</td></tr>';
         });
 }
 

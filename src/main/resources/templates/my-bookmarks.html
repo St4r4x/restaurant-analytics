@@ -224,7 +224,12 @@
               renderBookmarkPage();
             } else {
               if (row) row.style.opacity = '1'; // revert on error
+              showToast('Could not remove bookmark', 'error');
             }
+          })
+          .catch(function() {
+            if (row) row.style.opacity = '1';
+            showToast('Could not remove bookmark', 'error');
           });
       }
 
