@@ -52,6 +52,7 @@
             <button class="btn btn-primary btn-sm" onclick="openModal()">+ New Report</button>
         </div>
         <div id="report-list"><div class="spinner"></div></div>
+        <div id="report-pagination"></div>
     </div>
 </div>
 
@@ -163,11 +164,17 @@ function logout() {
 let currentTab = 'All';
 let openEditId = null;
 
+// ── Report pagination state ────────────────────────────────────────────────
+var allReports = [];
+var reportPage = 0;
+var REPORT_PAGE_SIZE = 20;
+
 function switchTab(btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     currentTab = btn.dataset.status;
     openEditId = null;  // CRITICAL: reset before re-render destroys edit panel DOM
+    reportPage = 0;
     loadReports();
 }
 
@@ -194,12 +201,43 @@ function loadReports() {
 }
 
 function renderReportList(reports) {
-    const list = document.getElementById('report-list');
-    if (reports.length === 0) {
+    allReports = reports;
+    reportPage = 0;
+    renderReportPage();
+}
+
+function renderReportPage() {
+    var start = reportPage * REPORT_PAGE_SIZE;
+    var slice = allReports.slice(start, start + REPORT_PAGE_SIZE);
+    var list = document.getElementById('report-list');
+    if (!allReports.length) {
         list.innerHTML = '<p style="text-align:center;color:#888;padding:24px 0;font-size:0.9em">No reports yet. Click <strong>+ New Report</strong> to file one.</p>';
-        return;
+    } else {
+        list.innerHTML = slice.map(function(r) { return renderCardHtml(r) + renderEditPanelHtml(r); }).join('');
     }
-    list.innerHTML = reports.map(r => renderCardHtml(r) + renderEditPanelHtml(r)).join('');
+    renderReportPagination();
+}
+
+function renderReportPagination() {
+    var totalPages = Math.ceil(allReports.length / REPORT_PAGE_SIZE);
+    var ctrl = document.getElementById('report-pagination');
+    if (!ctrl) return;
+    if (totalPages <= 1) { ctrl.innerHTML = ''; return; }
+    ctrl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0">'
+        + '<button onclick="changeReportPage(-1)"'
+        + (reportPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #667eea;border-radius:6px;background:white;color:#667eea;cursor:pointer"')
+        + '>\u2190 Prev</button>'
+        + '<span style="font-size:0.88em;color:#555">Page ' + (reportPage + 1) + ' of ' + totalPages + '</span>'
+        + '<button onclick="changeReportPage(1)"'
+        + (reportPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #667eea;border-radius:6px;background:white;color:#667eea;cursor:pointer"')
+        + '>Next \u2192</button>'
+        + '</div>';
+}
+
+function changeReportPage(delta) {
+    var maxPage = Math.max(0, Math.ceil(allReports.length / REPORT_PAGE_SIZE) - 1);
+    reportPage = Math.max(0, Math.min(maxPage, reportPage + delta));
+    renderReportPage();
 }
 
 function renderCardHtml(r) {
