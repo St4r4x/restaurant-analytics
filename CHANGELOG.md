@@ -2,6 +2,18 @@
 
 All notable changes are documented by phase.
 
+## [Phase 9] — 2026-04-08 — UX Polish
+
+### Added
+- Shared `fragments/ux-utils.html` fragment: skeleton shimmer CSS + `showToast()` notification system
+- Pagination (20/page, Prev/Next) on search results, at-risk list, uncontrolled list, bookmarks list, and report list
+- Skeleton loading cards replace all "Loading…" text across data-fetching sections
+- Toast notifications replace all inline error/success messages (login.html excepted)
+- Mobile-responsive navbar with hamburger menu at <=768px (dropdown with close-on-link-click)
+- Viewport meta tag added to landing.html, index.html, and profile.html
+- Table `overflow-x:auto` scroll wrappers on at-risk table (analytics.html) and uncontrolled table
+- Responsive grid breakpoints: sample-grid, bookmarks-grid, nearby-grid, dashboard grids stack to 1-col at <=768px; KPI tiles go 2×2
+
 ## [Phase 8] — 2026-04-04 — Discovery Enhancement
 
 ### Added

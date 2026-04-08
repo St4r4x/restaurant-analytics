@@ -138,6 +138,7 @@ to be set. If absent, all controller signups return HTTP 400.
 | /my-bookmarks | Required | Saved restaurants |
 
 All pages include the persistent sticky navbar (Logo + Search/Map/Analytics + auth area).
+All pages also include `fragments/ux-utils.html` which provides the shared skeleton shimmer CSS and `showToast()` notification system. All pages are mobile-responsive at ≤768px via a hamburger navbar and responsive grid breakpoints.
 
 ## Configuration
 
