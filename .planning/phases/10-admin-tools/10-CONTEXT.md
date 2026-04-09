@@ -6,18 +6,21 @@
 <domain>
 ## Phase Boundary
 
-A `/admin` page accessible to CONTROLLER-role users only. It surfaces three capabilities:
+A `/admin` page accessible to **ADMIN-role users only** (`ROLE_ADMIN`). ADMIN is a distinct role from CONTROLLER (hygiene inspectors) and CUSTOMER. Admins manage platform-level operations.
+
+The page surfaces three capabilities:
 1. Data sync control — last sync date/status, "Sync NYC Data" button with live 2s-poll progress, "Rebuild Cache" button
 2. At-risk CSV export — "Download At-Risk CSV" button triggering the existing `/api/inspection/at-risk/export.csv` endpoint
 3. Aggregate report statistics — counts by status (OPEN/IN_PROGRESS/RESOLVED) and by grade (A/B/C/F) across all controllers, without exposing individual reports
 
-No new sync or cache backend logic — all backend endpoints already exist. The new work is:
+No new sync or cache backend logic — all backend endpoints already exist (and already have `@PreAuthorize("hasRole('ADMIN')")`). The new work is:
+- `ROLE_ADMIN` signup code path added to `AuthService` (same mechanism as CONTROLLER signup code)
 - One new Thymeleaf template (`admin.html`)
 - One new ViewController route (`GET /admin`)
-- One new REST endpoint (`GET /api/reports/stats` — aggregate counts)
+- One new REST endpoint (`GET /api/reports/stats` — aggregate counts, ADMIN only)
 - New ReportRepository aggregate query
-- SecurityConfig entries for both `/admin` and `/api/reports/stats`
-- Navbar entry for CONTROLLER role
+- SecurityConfig entries for `/admin` and `/api/reports/stats`
+- Navbar entry for ADMIN role only
 
 </domain>
 
@@ -43,7 +46,7 @@ No new sync or cache backend logic — all backend endpoints already exist. The 
 - **D-07:** Badge style mirrors the `.grade-btn` visual from `dashboard.html` — pill/badge shape, color-coded (e.g. Open=orange, In Progress=blue, Resolved=green; grades use existing grade badge colors from `index.html` / `dashboard.html`).
 
 ### Report Stats API
-- **D-08:** New REST endpoint: `GET /api/reports/stats` (CONTROLLER role only). Returns:
+- **D-08:** New REST endpoint: `GET /api/reports/stats` (ADMIN role only). Returns:
   ```json
   {
     "byStatus": { "OPEN": 4, "IN_PROGRESS": 2, "RESOLVED": 11 },
@@ -54,13 +57,16 @@ No new sync or cache backend logic — all backend endpoints already exist. The 
 - **D-10:** Aggregate query uses `ReportRepository` — add two `@Query` methods (or use Spring Data `countBy` derivations): one group-by-status, one group-by-grade. Must NOT filter by userId (aggregate across all controllers). Must NOT return individual report data.
 
 ### Navbar
-- **D-11:** Add "Admin" link to the navbar fragment (`fragments/navbar.html` or equivalent) visible only when the user has `ROLE_CONTROLLER`. Use same conditional rendering pattern as existing CONTROLLER-only nav items.
+- **D-11:** Add "Admin" link to the navbar fragment (`fragments/navbar.html` or equivalent) visible only when the user has `ROLE_ADMIN`. CONTROLLER and CUSTOMER users do NOT see this link.
+
+### Admin Signup Code
+- **D-12:** Extend `AuthService` to support a third signup code path that assigns `ROLE_ADMIN` (same mechanism as the existing CONTROLLER signup code). The admin signup code must be distinct from the controller code and configurable (e.g., via `application.properties`).
 
 ### Security
-- **D-12:** Add to SecurityConfig:
-  - `/admin` → `hasRole("CONTROLLER")`
-  - `/api/reports/stats` → `hasRole("CONTROLLER")`
-  - (Existing: `/api/reports/**` already has `hasRole("CONTROLLER")` — confirm stats endpoint falls under this or add separately)
+- **D-13:** Add to SecurityConfig:
+  - `/admin` → `hasRole("ADMIN")`
+  - `/api/reports/stats` → `hasRole("ADMIN")`
+  - (Note: `/api/reports/**` currently has `hasRole("CONTROLLER")` — `/api/reports/stats` must be carved out before that rule, or placed in a separate matcher that takes precedence)
 
 ### Claude's Discretion
 - Exact badge/pill CSS for the stat counters (can reuse `.grade-btn` conventions)
@@ -93,7 +99,10 @@ No new sync or cache backend logic — all backend endpoints already exist. The 
 
 ### UI patterns to replicate
 - `src/main/resources/templates/dashboard.html` — spinner CSS, `.card` class, `.btn` variants, JS polling pattern, tab structure reference
-- `src/main/resources/templates/fragments/` — navbar fragment (add CONTROLLER-only "Admin" link)
+- `src/main/resources/templates/fragments/` — navbar fragment (add ADMIN-only "Admin" link)
+
+### Auth
+- `src/main/java/com/aflokkat/service/AuthService.java` — add ROLE_ADMIN signup code path here
 
 ### Requirements
 - `.planning/REQUIREMENTS.md` — ADM-01, ADM-02, ADM-03
@@ -107,7 +116,7 @@ No new sync or cache backend logic — all backend endpoints already exist. The 
 - `.spinner` CSS class in `dashboard.html` — use for sync progress animation
 - `.card`, `.btn`, `.btn-primary`, `.btn-secondary` classes — reuse for all admin page UI
 - `.grade-btn` CSS — reuse as visual base for stat badge counters
-- Navbar fragment in `src/main/resources/templates/fragments/` — add Admin link with CONTROLLER condition
+- Navbar fragment in `src/main/resources/templates/fragments/` — add Admin link with ROLE_ADMIN condition only
 - JS polling pattern from `dashboard.html` — `setInterval` / `fetch` pattern for the 2s sync-status poll
 
 ### Established Patterns
