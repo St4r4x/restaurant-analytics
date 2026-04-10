@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Restaurant Details</title>
+    <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -136,10 +137,17 @@
         color: #aaa;
         font-size: 0.9em;
       }
+      .nearby-card {
+        background: white;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 16px;
+      }
     </style>
   </head>
   <body>
-    <div class="container">
+    <div th:replace="fragments/navbar :: navbar"></div>
+    <div class="container" style="padding-top: 72px">
       <a href="/" class="back-link">← Dashboard</a>
 
       <div id="header-card" class="header-card">
@@ -168,6 +176,15 @@
         <h2 style="color:#667eea;margin:0 0 16px 0;font-size:1.25em;font-weight:600">Inspection History</h2>
         <div id="history-container">
           <div class="spinner" style="width:24px;height:24px;border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;animation:spin 0.8s linear infinite;margin:10px auto"></div>
+        </div>
+      </div>
+
+      <div id="nearby-section" style="display:none; margin-top: 24px">
+        <div class="card" style="background:white;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
+          <h3 style="font-size:1.1em;font-weight:700;border-bottom:3px solid #667eea;padding-bottom:8px;margin-bottom:16px;margin-top:0">Nearby Restaurants</h3>
+          <p id="nearby-loading" style="color:#666;font-size:0.88em">Loading nearby restaurants&hellip;</p>
+          <div id="nearby-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;display:none"></div>
+          <p id="nearby-empty" style="display:none;color:#666;font-size:0.88em">No restaurants found within 500m.</p>
         </div>
       </div>
     </div>
@@ -228,9 +245,17 @@
         const method = saved ? 'DELETE' : 'POST';
         fetchWithAuth('/api/users/me/bookmarks/' + currentRestaurantId, { method })
           .then(r => {
-            if (!r || !r.ok) updateBookmarkBtn(saved); // revert on error
+            if (!r || !r.ok) {
+              updateBookmarkBtn(saved); // revert on error
+              showToast('Could not update bookmark', 'error');
+            } else {
+              showToast(saved ? 'Bookmark removed' : 'Bookmarked!', 'success');
+            }
           })
-          .catch(() => updateBookmarkBtn(saved));
+          .catch(() => {
+            updateBookmarkBtn(saved);
+            showToast('Could not update bookmark', 'error');
+          });
       }
 
       function gradeClass(g) {
@@ -238,6 +263,42 @@
         if (g === "B") return "grade-b";
         if (g === "C") return "grade-c";
         return "grade-bad";
+      }
+
+      function gradeBadgeHtml(grade) {
+        if (grade === 'A') return '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.82em;font-weight:700;background:#e8f5e9;color:#2e7d32;border:1px solid #4caf50">A</span>';
+        if (grade === 'B') return '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.82em;font-weight:700;background:#fff8e1;color:#f57f17;border:1px solid #ffc107">B</span>';
+        return '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.82em;font-weight:700;background:#ffebee;color:#b71c1c;border:1px solid #f44336">' + (grade || '&mdash;') + '</span>';
+      }
+
+      function loadNearby(lat, lng, currentId) {
+        if (!lat || !lng) return;
+        document.getElementById('nearby-section').style.display = 'block';
+        fetch('/api/restaurants/nearby?lat=' + lat + '&lng=' + lng + '&radius=500&limit=6')
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            document.getElementById('nearby-loading').style.display = 'none';
+            var others = (data || []).filter(function(r) {
+              return r.restaurantId !== currentId;
+            }).slice(0, 5);
+            if (others.length === 0) {
+              document.getElementById('nearby-empty').style.display = 'block';
+              return;
+            }
+            var grid = document.getElementById('nearby-grid');
+            grid.style.display = 'grid';
+            grid.innerHTML = others.map(function(r) {
+              return '<div class="nearby-card">'
+                + '<div style="font-weight:700;font-size:0.88em;margin-bottom:4px">' + (r.name || '&mdash;') + '</div>'
+                + '<div style="font-size:0.82em;color:#666;margin-bottom:8px">' + (r.borough || '&mdash;') + '</div>'
+                + gradeBadgeHtml(r.grade)
+                + '<br><a href="/restaurant/' + r.restaurantId + '" style="font-size:0.82em;color:#667eea;text-decoration:none;margin-top:8px;display:inline-block">View Details</a>'
+                + '</div>';
+            }).join('');
+          })
+          .catch(function() {
+            document.getElementById('nearby-section').style.display = 'none';
+          });
       }
 
       function formatDate(d) {
@@ -429,7 +490,8 @@
         })
         .then(resp => {
           if (resp.status !== "success") {
-            document.getElementById("header-card").innerHTML = `<div class="error">${resp.message}</div>`;
+            showToast('Could not load restaurant details', 'error');
+            document.getElementById("header-card").innerHTML = '<p style="color:#888;padding:24px;text-align:center">Restaurant data unavailable</p>';
             return;
           }
           const r = resp.data;
@@ -439,6 +501,8 @@
           renderScoreChart(r.grades);
           renderInspections(r.grades);
           renderHistoryTable(r.grades);
+          var currentId = window.location.pathname.split('/').pop();
+          loadNearby(r.latitude, r.longitude, currentId);
 
           // Bookmark toggle state (only if logged in)
           if (localStorage.getItem('accessToken')) {
@@ -455,7 +519,8 @@
           }
         })
         .catch(e => {
-          document.getElementById("header-card").innerHTML = `<div class="error">Error: ${e.message}</div>`;
+          showToast('Could not load restaurant details', 'error');
+          document.getElementById("header-card").innerHTML = '<p style="color:#888;padding:24px;text-align:center">Restaurant data unavailable</p>';
         });
     </script>
   </body>

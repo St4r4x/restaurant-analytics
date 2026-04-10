@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — NYC Restaurant Inspections</title>
+    <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+        .card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); margin-bottom: 20px; }
+        .card h2 { font-size: 1.1em; font-weight: 700; color: #2d3748; margin-bottom: 12px; }
+        .btn { cursor: pointer; border: none; border-radius: 6px; padding: 7px 14px; font-size: 0.82em; font-weight: 600; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-secondary { background: #f0f2ff; color: #667eea; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status-text { font-size: 0.85em; color: #718096; margin-top: 8px; }
+        .sync-result { display: none; font-size: 0.85em; font-weight: 600; margin-top: 8px; }
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .desc-text { font-size: 0.88em; color: #4a5568; margin-bottom: 14px; }
+        .badge-row { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; align-items: center; }
+        .badge-label { font-size: 0.82em; font-weight: 600; color: #4a5568; min-width: 80px; }
+        @media (max-width: 768px) {
+            .container { padding: 12px 8px !important; }
+            .btn-row { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+<div class="container" style="padding-top: 72px">
+    <div style="margin-bottom: 20px">
+        <h1 style="color:white;font-size:1.5em;font-weight:700">Admin Panel</h1>
+        <p style="color:rgba(255,255,255,0.8);font-size:0.85em;margin-top:2px">System management for administrators</p>
+    </div>
+
+    <!-- Card 1: Sync Controls -->
+    <div class="card">
+        <h2>Sync NYC Data</h2>
+        <p id="sync-status-text" class="status-text">Loading sync status…</p>
+        <div class="btn-row" style="margin-top: 12px">
+            <button id="sync-btn" class="btn btn-primary" onclick="startSync()">Sync NYC Data</button>
+            <button id="rebuild-btn" class="btn btn-secondary" onclick="rebuildCache()">Rebuild Cache</button>
+        </div>
+        <div id="sync-result" class="sync-result"></div>
+    </div>
+
+    <!-- Card 2: At-Risk CSV Download -->
+    <div class="card">
+        <h2>At-Risk Export</h2>
+        <p class="desc-text">Download the current at-risk restaurant list as a CSV file.</p>
+        <button class="btn btn-primary" onclick="window.location.href='/api/inspection/at-risk/export.csv'">Download At-Risk CSV</button>
+    </div>
+
+    <!-- Card 3: Report Statistics -->
+    <div class="card">
+        <h2>Report Statistics</h2>
+        <div style="margin-top: 8px">
+            <div class="badge-row">
+                <span class="badge-label">By Status</span>
+                <div id="stats-status-row" style="display:inline-flex;flex-wrap:wrap;gap:4px"></div>
+            </div>
+            <div class="badge-row" style="margin-top: 8px">
+                <span class="badge-label">By Grade</span>
+                <div id="stats-grade-row" style="display:inline-flex;flex-wrap:wrap;gap:4px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Client-side ADMIN auth guard — must run before any other JS
+(function() {
+    var token = localStorage.getItem('accessToken');
+    if (!token) { window.location.href = '/login'; return; }
+    try {
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.role !== 'ROLE_ADMIN') {
+            window.location.href = '/';
+        }
+    } catch (e) { window.location.href = '/login'; }
+})();
+
+// Auth utilities
+function getAuthHeaders() {
+    var token = localStorage.getItem('accessToken');
+    if (!token) return { 'Content-Type': 'application/json' };
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+}
+function handleFetchErrorResponse(response) {
+    if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+        throw new Error('Unauthorized');
+    }
+    return response;
+}
+function fetchWithAuth(url, options) {
+    options = options || {};
+    options.headers = Object.assign({}, getAuthHeaders(), options.headers || {});
+    return fetch(url, options).then(handleFetchErrorResponse);
+}
+
+// Sync polling
+var syncPollInterval = null;
+
+function startSyncPoll() {
+    syncPollInterval = setInterval(function() {
+        fetchWithAuth('/api/restaurants/sync-status')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status !== 'running') {
+                    clearInterval(syncPollInterval);
+                    syncPollInterval = null;
+                    showSyncResult(data);
+                    document.getElementById('sync-btn').disabled = false;
+                } else {
+                    document.getElementById('sync-status-text').textContent = 'Sync in progress…';
+                }
+            })
+            .catch(function() {
+                clearInterval(syncPollInterval);
+                syncPollInterval = null;
+                document.getElementById('sync-btn').disabled = false;
+            });
+    }, 2000);
+}
+
+function showSyncResult(data) {
+    var el = document.getElementById('sync-result');
+    if (data.status === 'success') {
+        el.textContent = 'Done — ' + (data.upsertedRestaurants || 0) + ' records upserted';
+        el.style.color = '#2e7d32';
+    } else if (data.status === 'error') {
+        el.textContent = 'Error: ' + (data.error || 'Unknown error');
+        el.style.color = '#b71c1c';
+    } else if (data.status === 'never_run') {
+        el.textContent = 'No sync has run yet';
+        el.style.color = '#555';
+    }
+    el.style.display = 'block';
+    setTimeout(function() { el.style.display = 'none'; }, 10000);
+}
+
+function startSync() {
+    var btn = document.getElementById('sync-btn');
+    // Clear any previous result
+    var resultEl = document.getElementById('sync-result');
+    resultEl.style.display = 'none';
+    resultEl.textContent = '';
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Starting…';
+    document.getElementById('sync-status-text').textContent = 'Sync in progress…';
+
+    fetchWithAuth('/api/restaurants/refresh', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function() {
+            btn.innerHTML = 'Sync NYC Data';
+            startSyncPoll();
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.innerHTML = 'Sync NYC Data';
+            document.getElementById('sync-status-text').textContent = 'Failed to start sync';
+        });
+}
+
+function rebuildCache() {
+    var btn = document.getElementById('rebuild-btn');
+    btn.disabled = true;
+    btn.textContent = 'Rebuilding…';
+    fetchWithAuth('/api/restaurants/rebuild-cache', { method: 'POST' })
+        .then(function() {
+            btn.disabled = false;
+            btn.textContent = 'Rebuild Cache';
+            if (window.showToast) { showToast('Cache rebuilt successfully', 'success'); }
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.textContent = 'Rebuild Cache';
+        });
+}
+
+// On page load: fetch sync status and report statistics
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch sync status
+    fetchWithAuth('/api/restaurants/sync-status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var textEl = document.getElementById('sync-status-text');
+            if (data.status === 'never_run') {
+                textEl.textContent = 'Last synced: never';
+            } else if (data.status === 'running') {
+                textEl.textContent = 'Sync currently in progress…';
+                document.getElementById('sync-btn').disabled = true;
+                startSyncPoll();
+            } else if (data.status === 'success') {
+                textEl.textContent = 'Last sync: ' + (data.upsertedRestaurants || 0) + ' records';
+            } else if (data.status === 'error') {
+                textEl.textContent = 'Last sync failed: ' + (data.error || 'Unknown');
+            }
+        })
+        .catch(function() {
+            document.getElementById('sync-status-text').textContent = 'Status unavailable';
+        });
+
+    // Fetch report statistics
+    fetchWithAuth('/api/reports/stats')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var byStatus = data.byStatus || {};
+            var byGrade = data.byGrade || {};
+
+            // Status badges
+            var statusColors = { OPEN: '#e65100', IN_PROGRESS: '#1565c0', RESOLVED: '#2e7d32' };
+            var statusEl = document.getElementById('stats-status-row');
+            ['OPEN', 'IN_PROGRESS', 'RESOLVED'].forEach(function(key) {
+                var label = key.replace('_', ' ');
+                statusEl.innerHTML += '<span style="display:inline-flex;align-items:center;gap:6px;'
+                    + 'padding:6px 16px;border-radius:20px;background:' + statusColors[key] + '22;'
+                    + 'color:' + statusColors[key] + ';font-weight:700;font-size:0.88em;margin:4px">'
+                    + label + ': <strong>' + (byStatus[key] !== undefined ? byStatus[key] : 0) + '</strong></span>';
+            });
+
+            // Grade badges
+            var gradeColors = { A: '#2e7d32', B: '#f9a825', C: '#e65100', F: '#b71c1c' };
+            var gradeEl = document.getElementById('stats-grade-row');
+            ['A', 'B', 'C', 'F'].forEach(function(key) {
+                gradeEl.innerHTML += '<span style="display:inline-flex;align-items:center;gap:6px;'
+                    + 'padding:6px 16px;border-radius:20px;background:' + gradeColors[key] + '22;'
+                    + 'color:' + gradeColors[key] + ';font-weight:700;font-size:0.88em;margin:4px">'
+                    + 'Grade ' + key + ': <strong>' + (byGrade[key] !== undefined ? byGrade[key] : 0) + '</strong></span>';
+            });
+        })
+        .catch(function() {
+            document.getElementById('stats-status-row').textContent = 'Stats unavailable';
+        });
+});
+</script>
+</body>
+</html>

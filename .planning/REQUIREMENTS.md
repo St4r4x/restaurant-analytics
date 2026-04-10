@@ -35,24 +35,24 @@ Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
 ### Controller Workspace (Phase 5)
 
-- [ ] **CTRL-05**: Controller can create an inspection report via a web form — search restaurant by name, fill in grade/violations/notes, submit without using the API directly
-- [ ] **CTRL-06**: Controller can view all their reports on a dashboard page with status filter tabs (All / Open / In Progress / Resolved) and grade badges
-- [ ] **CTRL-07**: Controller can edit a report from the dashboard (grade, status, violations, notes) via an inline edit panel, without leaving the page
-- [ ] **CTRL-08**: Controller can upload a photo and see a thumbnail preview on the report card
+- [x] **CTRL-05**: Controller can create an inspection report via a web form — search restaurant by name, fill in grade/violations/notes, submit without using the API directly
+- [x] **CTRL-06**: Controller can view all their reports on a dashboard page with status filter tabs (All / Open / In Progress / Resolved) and grade badges
+- [x] **CTRL-07**: Controller can edit a report from the dashboard (grade, status, violations, notes) via an inline edit panel, without leaving the page
+- [x] **CTRL-08**: Controller can upload a photo and see a thumbnail preview on the report card
 
 ### Analytics & Stats (Phase 6)
 
-- [ ] **STAT-01**: Public `/analytics` page shows city-wide KPIs: total restaurants, % grade A, average score, count of at-risk (grade C/Z)
-- [ ] **STAT-02**: Analytics page shows per-borough grade distribution — for each of the 5 boroughs, a visual breakdown of A/B/C counts
-- [ ] **STAT-03**: Analytics page shows cuisine hygiene ranking — top 10 cleanest and top 10 worst cuisines by average score
-- [ ] **STAT-04**: Analytics page shows "At Risk" list — restaurants with last grade C or Z, with links to their detail page
+- [x] **STAT-01**: Public `/analytics` page shows city-wide KPIs: total restaurants, % grade A, average score, count of at-risk (grade C/Z)
+- [x] **STAT-02**: Analytics page shows per-borough grade distribution — for each of the 5 boroughs, a visual breakdown of A/B/C counts
+- [x] **STAT-03**: Analytics page shows cuisine hygiene ranking — top 10 cleanest and top 10 worst cuisines by average score
+- [x] **STAT-04**: Analytics page shows "At Risk" list — restaurants with last grade C or Z, with links to their detail page
 
 ### Homepage & Navigation (Phase 7)
 
-- [ ] **UX-01**: Non-authenticated visitors see a landing page with city-wide stats, a search CTA, and 3 sample restaurants — not the full dashboard
-- [ ] **UX-02**: Authenticated users see a personalised dashboard on `/`: recent bookmarks, nearby restaurants (if geolocation allowed), and a summary stats strip
-- [ ] **UX-03**: A persistent top navbar exists on all pages: logo, Search, Map, Analytics links; right side shows Login or username + Logout
-- [ ] **UX-04**: A `/profile` page shows the logged-in user's username, email, role badge, bookmark count, and (for controllers) report count
+- [x] **UX-01**: Non-authenticated visitors see a landing page with city-wide stats, a search CTA, and 3 sample restaurants — not the full dashboard
+- [x] **UX-02**: Authenticated users see a personalised dashboard on `/`: recent bookmarks, nearby restaurants (if geolocation allowed), and a summary stats strip
+- [x] **UX-03**: A persistent top navbar exists on all pages: logo, Search, Map, Analytics links; right side shows Login or username + Logout
+- [x] **UX-04**: A `/profile` page shows the logged-in user's username, email, role badge, bookmark count, and (for controllers) report count
 
 ### Discovery Enhancement (Phase 8)
 
@@ -70,9 +70,9 @@ Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
 ### Admin Tools (Phase 10)
 
-- [ ] **ADM-01**: A `/admin` page (CONTROLLER role) shows the last NYC data sync status, a "Sync Now" button with live progress feedback, and a "Rebuild Cache" button
-- [ ] **ADM-02**: The admin page has an "Export At-Risk CSV" button that triggers the existing `/api/inspection/at-risk/export.csv` endpoint
-- [ ] **ADM-03**: The admin page shows aggregate report statistics across all controllers: count by status (open/in-progress/resolved) and count by grade — without exposing individual reports from other controllers
+- [x] **ADM-01**: A `/admin` page (ADMIN role) shows the last NYC data sync status, a "Sync Now" button with live progress feedback, and a "Rebuild Cache" button
+- [x] **ADM-02**: The admin page has an "Export At-Risk CSV" button that triggers the existing `/api/inspection/at-risk/export.csv` endpoint
+- [x] **ADM-03**: The admin page shows aggregate report statistics across all controllers: count by status (open/in-progress/resolved) and count by grade — without exposing individual reports from other controllers
 
 ### Deferred to v3
 

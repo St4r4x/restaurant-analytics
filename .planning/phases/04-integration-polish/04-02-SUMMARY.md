@@ -99,3 +99,12 @@ None - no external service configuration required.
 ---
 *Phase: 04-integration-polish*
 *Completed: 2026-04-01*
+
+## Self-Check: PASSED
+
+- ViewController.java: FOUND
+- RestaurantController.java: FOUND
+- hygiene-radar.html: FOUND (deleted)
+- inspection.html: FOUND (deleted)
+- Commit a85e84f: FOUND
+- Commit 5d8c3fe: FOUND

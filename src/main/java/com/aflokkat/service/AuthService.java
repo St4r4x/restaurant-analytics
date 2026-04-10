@@ -28,18 +28,25 @@ public class AuthService {
     /** Injected from ${controller.signup.code} / CONTROLLER_SIGNUP_CODE env var. Null = disabled. */
     private final String controllerSignupCode;
 
+    /** Injected from ${admin.signup.code} / ADMIN_SIGNUP_CODE env var. Null = disabled. */
+    private final String adminSignupCode;
+
     @Autowired
-    public AuthService(@Value("${controller.signup.code:#{null}}") String controllerSignupCode) {
+    public AuthService(
+            @Value("${controller.signup.code:#{null}}") String controllerSignupCode,
+            @Value("${admin.signup.code:#{null}}") String adminSignupCode) {
         this.controllerSignupCode = controllerSignupCode;
+        this.adminSignupCode = adminSignupCode;
     }
 
-    /** Package-visible constructor for unit tests — sets signup code directly. */
+    /** Package-visible constructor for unit tests — sets signup codes directly. */
     AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                JwtService jwtUtil, String controllerSignupCode) {
+                JwtService jwtUtil, String controllerSignupCode, String adminSignupCode) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.controllerSignupCode = controllerSignupCode;
+        this.adminSignupCode = adminSignupCode;
     }
 
     public JwtResponse register(RegisterRequest request) {
@@ -62,6 +69,10 @@ public class AuthService {
         String role;
         if (providedCode == null || providedCode.isEmpty()) {
             role = "ROLE_CUSTOMER";
+        } else if (adminSignupCode != null && !adminSignupCode.isEmpty()
+                   && adminSignupCode.equals(providedCode)) {
+            // Admin signup code takes priority over controller code
+            role = "ROLE_ADMIN";
         } else {
             // Controller signup is disabled when env var is not set — fail-safe
             if (controllerSignupCode == null || controllerSignupCode.isEmpty()) {

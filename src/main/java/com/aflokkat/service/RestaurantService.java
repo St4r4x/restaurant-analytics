@@ -27,6 +27,8 @@ import com.aflokkat.util.ValidationUtil;
 @Service
 public class RestaurantService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RestaurantService.class);
+
     private final RestaurantDAO restaurantDAO;
 
     @Autowired
@@ -136,6 +138,39 @@ public class RestaurantService {
         return restaurantDAO.findWithFilters(filters, restaurantLimit);
     }
 
+    // =============== ANALYTICS (Phase 06) ===============
+
+    /**
+     * Returns grade distribution per borough (A, B, C only).
+     */
+    public List<org.bson.Document> getBoroughGradeDistribution() {
+        return restaurantDAO.findBoroughGradeDistribution();
+    }
+
+    /**
+     * Returns the worst N cuisines globally by lowest average inspection score (ascending).
+     * Note: despite the name, this returns cuisines with the LOWEST scores (fewest violations = cleanest).
+     * Used as the "best" list in cuisine rankings.
+     */
+    public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
+        return restaurantDAO.findWorstCuisinesByAverageScore(limit);
+    }
+
+    /**
+     * Returns top N cuisines with highest average score (worst for diners).
+     * Sorted avgScore descending.
+     */
+    public List<CuisineScore> getBestCuisinesByAverageScore(int limit) {
+        return restaurantDAO.findBestCuisinesByAverageScore(limit);
+    }
+
+    /**
+     * Returns the total count of at-risk restaurants (last grade C or Z).
+     */
+    public long countAtRiskRestaurants() {
+        return restaurantDAO.countAtRiskRestaurants();
+    }
+
     // =============== TOP CUISINES ===============
 
     /**
@@ -242,18 +277,16 @@ public class RestaurantService {
 
     public static Double getLatitude(Restaurant r) {
         Address a = r.getAddress();
-        if (a != null && a.getCoord() != null && a.getCoord().size() >= 2) {
-            return a.getCoord().get(1); // GeoJSON: [longitude, latitude]
-        }
-        return null;
+        if (a == null) { log.debug("getLatitude: address is null for {}", r.getRestaurantId()); return null; }
+        if (a.getCoord() == null) { log.debug("getLatitude: coord is null for {}", r.getRestaurantId()); return null; }
+        if (a.getCoord().size() < 2) { log.debug("getLatitude: coord has {} elements for {}", a.getCoord().size(), r.getRestaurantId()); return null; }
+        return a.getCoord().get(1); // GeoJSON: [longitude, latitude]
     }
 
     public static Double getLongitude(Restaurant r) {
         Address a = r.getAddress();
-        if (a != null && a.getCoord() != null && a.getCoord().size() >= 2) {
-            return a.getCoord().get(0); // GeoJSON: [longitude, latitude]
-        }
-        return null;
+        if (a == null || a.getCoord() == null || a.getCoord().size() < 2) return null;
+        return a.getCoord().get(0); // GeoJSON: [longitude, latitude]
     }
 
     /**

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller Dashboard — NYC Restaurant Inspections</title>
+    <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+        .card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+        .btn { cursor: pointer; border: none; border-radius: 6px; padding: 7px 14px; font-size: 0.82em; font-weight: 600; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-secondary { background: #f0f2ff; color: #667eea; }
+        .btn-sm { padding: 4px 10px; font-size: 0.78em; }
+        .spinner { width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 32px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .tab { cursor: pointer; padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: 600; border: none; background: transparent; color: #555; }
+        .tab.active { background: #667eea; color: white; }
+        .report-card { background: #f8f9ff; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .edit-panel { background: #f0f2ff; border-radius: 8px; padding: 16px; margin-bottom: 8px; border-left: 4px solid #667eea; }
+        .grade-btn { cursor: pointer; padding: 5px 12px; border-radius: 6px; border: 2px solid #e2e8f0; font-weight: 700; font-size: 0.85em; background: white; }
+        .grade-btn.selected { border-color: #667eea; background: #f0f2ff; color: #667eea; }
+        label { font-size: 0.82em; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
+        input[type=text], select, textarea { width: 100%; padding: 7px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 0.88em; font-family: inherit; outline: none; }
+        input[type=text]:focus, select:focus, textarea:focus { border-color: #667eea; }
+        .autocomplete-dropdown { position: absolute; z-index: 50; background: white; border: 1.5px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-height: 220px; overflow-y: auto; width: 100%; }
+        .autocomplete-item { padding: 9px 12px; cursor: pointer; font-size: 0.88em; }
+        .autocomplete-item:hover { background: #f0f2ff; }
+        .error-msg { color: #b71c1c; font-size: 0.82em; margin-top: 4px; }
+        @media (max-width: 768px) {
+          .container { padding: 12px 8px !important; }
+          .report-card { flex-wrap: wrap; }
+          .edit-panel { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+  <div th:replace="fragments/navbar :: navbar"></div>
+<div class="container" style="padding-top: 72px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+            <h1 style="color:white;font-size:1.5em;font-weight:700">Inspector Dashboard</h1>
+            <p style="color:rgba(255,255,255,0.8);font-size:0.85em;margin-top:2px">NYC Restaurant Inspection Reports</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+            <div id="tabs" style="display:flex;gap:4px">
+                <button class="tab active" data-status="All" onclick="switchTab(this)">All</button>
+                <button class="tab" data-status="Open" onclick="switchTab(this)">Open</button>
+                <button class="tab" data-status="In Progress" onclick="switchTab(this)">In Progress</button>
+                <button class="tab" data-status="Resolved" onclick="switchTab(this)">Resolved</button>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openModal()">+ New Report</button>
+        </div>
+        <div id="report-list"><div class="spinner"></div></div>
+        <div id="report-pagination"></div>
+    </div>
+</div>
+
+<div id="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:12px;padding:28px 32px;max-width:520px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.4)">
+        <h2 style="margin-bottom:18px;font-size:1.1em;color:#333">New Inspection Report</h2>
+        <div style="margin-bottom:14px;position:relative">
+            <label>Restaurant *</label>
+            <input type="text" id="modal-restaurant-input" placeholder="Type restaurant name..." autocomplete="off">
+            <div id="modal-autocomplete-dropdown" class="autocomplete-dropdown" style="display:none"></div>
+            <div id="modal-restaurant-error" class="error-msg" style="display:none">Please select a restaurant from the list</div>
+        </div>
+        <div style="margin-bottom:14px">
+            <label>Grade *</label>
+            <div id="modal-grade-btns" style="display:flex;gap:6px">
+                <button class="grade-btn" data-grade="A" onclick="selectGrade('modal', 'A')">A</button>
+                <button class="grade-btn" data-grade="B" onclick="selectGrade('modal', 'B')">B</button>
+                <button class="grade-btn" data-grade="C" onclick="selectGrade('modal', 'C')">C</button>
+                <button class="grade-btn" data-grade="F" onclick="selectGrade('modal', 'F')">F</button>
+            </div>
+            <div id="modal-grade-error" class="error-msg" style="display:none">Please select a grade</div>
+        </div>
+        <div style="margin-bottom:14px">
+            <label>Status</label>
+            <select id="modal-status">
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="RESOLVED">Resolved</option>
+            </select>
+        </div>
+        <div style="margin-bottom:14px">
+            <label>Violation Codes</label>
+            <input type="text" id="modal-violations" placeholder="e.g. 04L,10F">
+        </div>
+        <div style="margin-bottom:20px">
+            <label>Notes</label>
+            <textarea id="modal-notes" rows="3" placeholder="Optional notes..."></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitNewReport()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Auth guard (client-side — JWT is in localStorage, not HTTP headers) ────
+(function() {
+    const token = localStorage.getItem('accessToken');
+    if (!token) { window.location.href = '/login'; return; }
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.role !== 'ROLE_CONTROLLER') {
+            window.location.href = '/';
+        }
+    } catch { window.location.href = '/login'; }
+})();
+
+// ── Auth utilities ─────────────────────────────────────────────────────────
+function getAuthHeaders() {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return { "Content-Type": "application/json" };
+    return { "Content-Type": "application/json", Authorization: "Bearer " + token };
+}
+function handleFetchErrorResponse(response) {
+    if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
+        throw new Error("Unauthorized");
+    }
+    return response;
+}
+function fetchWithAuth(url, options = {}) {
+    options.headers = { ...getAuthHeaders(), ...(options.headers || {}) };
+    return fetch(url, options).then(handleFetchErrorResponse);
+}
+
+// ── Grade/color utilities (top-level — NOT inside IIFE) ───────────────────
+function gradeBadgeHtml(grade) {
+    const g = grade || '—';
+    let bg = '#ffebee', color = '#b71c1c';
+    if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
+    else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
+    return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${bg};color:${color}">${g}</span>`;
+}
+function borderColor(grade) {
+    if (grade === 'A') return '#22c55e';
+    if (grade === 'B') return '#eab308';
+    return '#ef4444';
+}
+
+// ── Status maps ────────────────────────────────────────────────────────────
+const STATUS_VALUES = { 'All': null, 'Open': 'OPEN', 'In Progress': 'IN_PROGRESS', 'Resolved': 'RESOLVED' };
+const STATUS_LABELS = { 'OPEN': 'Open', 'IN_PROGRESS': 'In Progress', 'RESOLVED': 'Resolved' };
+
+function formatDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function logout() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    window.location.href = '/login';
+}
+
+// ── Tab state ──────────────────────────────────────────────────────────────
+let currentTab = 'All';
+let openEditId = null;
+
+// ── Report pagination state ────────────────────────────────────────────────
+var allReports = [];
+var reportPage = 0;
+var REPORT_PAGE_SIZE = 20;
+
+function switchTab(btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab = btn.dataset.status;
+    openEditId = null;  // CRITICAL: reset before re-render destroys edit panel DOM
+    reportPage = 0;
+    loadReports();
+}
+
+// ── Load reports ───────────────────────────────────────────────────────────
+function loadReports() {
+    const list = document.getElementById('report-list');
+    list.innerHTML = '<div class="spinner"></div>';
+    const statusVal = STATUS_VALUES[currentTab];
+    const url = statusVal ? '/api/reports?status=' + statusVal : '/api/reports';
+    fetchWithAuth(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                renderReportList(data.data || []);
+            } else {
+                showToast(data.message || 'Error loading reports', 'error');
+                list.innerHTML = '<p style="color:#888;font-size:0.88em;text-align:center;padding:24px">Could not load data</p>';
+            }
+        })
+        .catch(() => {
+            showToast('Failed to load reports', 'error');
+            list.innerHTML = '<p style="color:#888;font-size:0.88em;text-align:center;padding:24px">Could not load data</p>';
+        });
+}
+
+function renderReportList(reports) {
+    allReports = reports;
+    reportPage = 0;
+    renderReportPage();
+}
+
+function renderReportPage() {
+    var start = reportPage * REPORT_PAGE_SIZE;
+    var slice = allReports.slice(start, start + REPORT_PAGE_SIZE);
+    var list = document.getElementById('report-list');
+    if (!allReports.length) {
+        list.innerHTML = '<p style="text-align:center;color:#888;padding:24px 0;font-size:0.9em">No reports yet. Click <strong>+ New Report</strong> to file one.</p>';
+    } else {
+        list.innerHTML = slice.map(function(r) { return renderCardHtml(r) + renderEditPanelHtml(r); }).join('');
+    }
+    renderReportPagination();
+}
+
+function renderReportPagination() {
+    var totalPages = Math.ceil(allReports.length / REPORT_PAGE_SIZE);
+    var ctrl = document.getElementById('report-pagination');
+    if (!ctrl) return;
+    if (totalPages <= 1) { ctrl.innerHTML = ''; return; }
+    ctrl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0">'
+        + '<button onclick="changeReportPage(-1)"'
+        + (reportPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #667eea;border-radius:6px;background:white;color:#667eea;cursor:pointer"')
+        + '>\u2190 Prev</button>'
+        + '<span style="font-size:0.88em;color:#555">Page ' + (reportPage + 1) + ' of ' + totalPages + '</span>'
+        + '<button onclick="changeReportPage(1)"'
+        + (reportPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #667eea;border-radius:6px;background:white;color:#667eea;cursor:pointer"')
+        + '>Next \u2192</button>'
+        + '</div>';
+}
+
+function changeReportPage(delta) {
+    var maxPage = Math.max(0, Math.ceil(allReports.length / REPORT_PAGE_SIZE) - 1);
+    reportPage = Math.max(0, Math.min(maxPage, reportPage + delta));
+    renderReportPage();
+}
+
+function renderCardHtml(r) {
+    const thumbHtml = r.photoPath
+        ? `<img id="thumb-${r.id}" src="/api/reports/${r.id}/photo" alt="photo" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">`
+        : `<div id="thumb-${r.id}" style="width:48px;height:48px;flex-shrink:0"></div>`;
+    return `
+    <div id="card-${r.id}" class="report-card" style="border-left:4px solid ${borderColor(r.grade)}">
+        ${gradeBadgeHtml(r.grade)}
+        <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:0.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.restaurantName || r.restaurantId}</div>
+            <div style="font-size:0.78em;color:#888">${r.borough || ''} · ${formatDate(r.createdAt)}</div>
+            <div style="font-size:0.78em;color:#888">Status: ${STATUS_LABELS[r.status] || r.status}</div>
+        </div>
+        ${thumbHtml}
+        <button class="btn btn-secondary btn-sm" onclick="openEditPanel(${r.id})">Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('file-${r.id}').click()">Photo</button>
+        <input type="file" id="file-${r.id}" accept="image/*" style="display:none" onchange="uploadPhoto(${r.id}, this)">
+    </div>`;
+}
+
+function renderEditPanelHtml(r) {
+    const grades = ['A', 'B', 'C', 'F'];
+    const gradeButtons = grades.map(g =>
+        `<button class="grade-btn${r.grade === g ? ' selected' : ''}" data-grade="${g}" onclick="selectGrade('edit-${r.id}', '${g}')">${g}</button>`
+    ).join('');
+    return `
+    <div id="edit-panel-${r.id}" class="edit-panel" style="display:none">
+        <div style="margin-bottom:12px">
+            <label>Grade</label>
+            <div id="edit-${r.id}-grade-btns" style="display:flex;gap:6px">${gradeButtons}</div>
+        </div>
+        <div style="margin-bottom:12px">
+            <label>Status</label>
+            <select id="edit-status-${r.id}">
+                <option value="OPEN"${r.status === 'OPEN' ? ' selected' : ''}>Open</option>
+                <option value="IN_PROGRESS"${r.status === 'IN_PROGRESS' ? ' selected' : ''}>In Progress</option>
+                <option value="RESOLVED"${r.status === 'RESOLVED' ? ' selected' : ''}>Resolved</option>
+            </select>
+        </div>
+        <div style="margin-bottom:12px">
+            <label>Violation Codes</label>
+            <input type="text" id="edit-violations-${r.id}" value="${r.violationCodes || ''}">
+        </div>
+        <div style="margin-bottom:16px">
+            <label>Notes</label>
+            <textarea id="edit-notes-${r.id}" rows="2">${r.notes || ''}</textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveEdit(${r.id})">Save</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeEditPanel(${r.id})">Cancel</button>
+        </div>
+    </div>`;
+}
+
+function openEditPanel(id) {
+    if (openEditId !== null && openEditId !== id) {
+        closeEditPanel(openEditId);
+    }
+    openEditId = id;
+    document.getElementById('edit-panel-' + id).style.display = 'block';
+}
+
+function closeEditPanel(id) {
+    const panel = document.getElementById('edit-panel-' + id);
+    if (panel) panel.style.display = 'none';
+    if (openEditId === id) openEditId = null;
+}
+
+function selectGrade(context, grade) {
+    const container = document.getElementById(context + '-grade-btns');
+    if (!container) return;
+    container.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
+    const target = container.querySelector('[data-grade="' + grade + '"]');
+    if (target) target.classList.add('selected');
+}
+
+function saveEdit(id) {
+    const container = document.getElementById('edit-' + id + '-grade-btns');
+    const selectedGradeBtn = container ? container.querySelector('.grade-btn.selected') : null;
+    const body = {};
+    if (selectedGradeBtn) body.grade = selectedGradeBtn.dataset.grade;
+    body.status = document.getElementById('edit-status-' + id).value;
+    // Send "" not null — empty string clears field; null leaves it unchanged (PATCH semantics)
+    body.violationCodes = document.getElementById('edit-violations-' + id).value;
+    body.notes = document.getElementById('edit-notes-' + id).value;
+    fetchWithAuth('/api/reports/' + id, {
+        method: 'PATCH',
+        body: JSON.stringify(body)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            closeEditPanel(id);
+            updateCardInPlace(data.data);
+            showToast('Report updated', 'success');
+        }
+    })
+    .catch(function() { showToast('Failed to save changes', 'error'); });
+}
+
+function updateCardInPlace(r) {
+    const card = document.getElementById('card-' + r.id);
+    if (!card) return;
+    const temp = document.createElement('div');
+    temp.innerHTML = renderCardHtml(r);
+    card.replaceWith(temp.firstElementChild);
+}
+
+// ── Modal state ────────────────────────────────────────────────────────────
+let selectedRestaurantId = null;
+let autocompleteTimer = null;
+
+function openModal() {
+    document.getElementById('modal-backdrop').style.display = 'flex';
+    selectedRestaurantId = null;
+    document.getElementById('modal-restaurant-input').value = '';
+    document.getElementById('modal-autocomplete-dropdown').style.display = 'none';
+    document.getElementById('modal-restaurant-error').style.display = 'none';
+    document.getElementById('modal-grade-error').style.display = 'none';
+    document.getElementById('modal-grade-btns').querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('modal-status').value = 'OPEN';
+    document.getElementById('modal-violations').value = '';
+    document.getElementById('modal-notes').value = '';
+}
+
+function closeModal() {
+    document.getElementById('modal-backdrop').style.display = 'none';
+}
+
+document.getElementById('modal-backdrop').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.getElementById('modal-restaurant-input').addEventListener('input', function() {
+    selectedRestaurantId = null;
+    clearTimeout(autocompleteTimer);
+    const q = this.value.trim();
+    if (q.length < 2) {
+        document.getElementById('modal-autocomplete-dropdown').style.display = 'none';
+        return;
+    }
+    autocompleteTimer = setTimeout(() => doAutocomplete(q), 300);
+});
+
+function doAutocomplete(q) {
+    fetch('/api/restaurants/search?q=' + encodeURIComponent(q) + '&limit=10')
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') renderAutocompleteDropdown(data.data || []);
+        })
+        .catch(() => {});
+}
+
+function renderAutocompleteDropdown(restaurants) {
+    const dd = document.getElementById('modal-autocomplete-dropdown');
+    if (restaurants.length === 0) { dd.style.display = 'none'; return; }
+    dd.innerHTML = restaurants.map(item =>
+        `<div class="autocomplete-item" data-id="${item.restaurantId}" data-name="${(item.name || '').replace(/"/g, '&quot;')}"
+              onclick="selectRestaurant(this)">${item.name} — ${item.borough || ''}</div>`
+    ).join('');
+    dd.style.display = 'block';
+}
+
+function selectRestaurant(el) {
+    selectedRestaurantId = el.dataset.id;
+    document.getElementById('modal-restaurant-input').value = el.dataset.name;
+    document.getElementById('modal-autocomplete-dropdown').style.display = 'none';
+    document.getElementById('modal-restaurant-error').style.display = 'none';
+}
+
+function submitNewReport() {
+    let valid = true;
+    if (!selectedRestaurantId) {
+        document.getElementById('modal-restaurant-error').style.display = 'block';
+        valid = false;
+    }
+    const selectedGradeBtn = document.getElementById('modal-grade-btns').querySelector('.grade-btn.selected');
+    if (!selectedGradeBtn) {
+        document.getElementById('modal-grade-error').style.display = 'block';
+        valid = false;
+    }
+    if (!valid) return;
+    const body = {
+        restaurantId: selectedRestaurantId,
+        grade: selectedGradeBtn.dataset.grade,
+        status: document.getElementById('modal-status').value,
+        violationCodes: document.getElementById('modal-violations').value || null,
+        notes: document.getElementById('modal-notes').value || null
+    };
+    fetchWithAuth('/api/reports', {
+        method: 'POST',
+        body: JSON.stringify(body)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            closeModal();
+            prependCard(data.data);
+            showToast('Report created', 'success');
+        }
+    })
+    .catch(() => { showToast('Failed to create report', 'error'); });
+}
+
+function prependCard(r) {
+    const list = document.getElementById('report-list');
+    if (list.querySelector('p')) list.innerHTML = '';
+    const temp = document.createElement('div');
+    temp.innerHTML = renderCardHtml(r) + renderEditPanelHtml(r);
+    while (temp.firstElementChild) {
+        list.insertBefore(temp.firstElementChild, list.firstChild);
+    }
+}
+
+// ── Photo upload ───────────────────────────────────────────────────────────
+// CRITICAL: Do NOT use fetchWithAuth() here.
+// fetchWithAuth injects Content-Type: application/json which breaks multipart boundary.
+// Use raw fetch() with only the Authorization header.
+function uploadPhoto(reportId, fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);  // param name must match @RequestParam("file")
+    const token = localStorage.getItem('accessToken');
+    fetch('/api/reports/' + reportId + '/photo', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            refreshThumbnail(reportId);
+            fileInput.value = '';
+            showToast('Photo uploaded', 'success');
+        }
+    })
+    .catch(function() { showToast('Photo upload failed', 'error'); });
+}
+
+function refreshThumbnail(reportId) {
+    const el = document.getElementById('thumb-' + reportId);
+    if (!el) return;
+    if (el.tagName === 'IMG') {
+        el.src = '/api/reports/' + reportId + '/photo?t=' + Date.now();
+    } else {
+        const img = document.createElement('img');
+        img.id = 'thumb-' + reportId;
+        img.src = '/api/reports/' + reportId + '/photo?t=' + Date.now();
+        img.alt = 'photo';
+        img.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0';
+        el.replaceWith(img);
+    }
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+loadReports();
+</script>
+</body>
+</html>

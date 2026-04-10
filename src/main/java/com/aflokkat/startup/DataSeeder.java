@@ -44,6 +44,7 @@ public class DataSeeder implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         seedUser("customer_test", "customer@test.com", "ROLE_CUSTOMER");
         seedUser("controller_test", "controller@test.com", "ROLE_CONTROLLER");
+        seedUser("admin_test", "admin@test.com", "ROLE_ADMIN");
     }
 
     private void seedUser(String username, String email, String role) {

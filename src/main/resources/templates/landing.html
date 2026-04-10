@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NYC Restaurant Inspector</title>
+  <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
+</head>
+<body>
+  <div th:replace="fragments/navbar :: navbar"></div>
+  <div class="container" style="padding-top: 72px">
+
+    <!-- Section 1: Hero -->
+    <div style="text-align:center;padding:48px 16px 32px">
+      <h1 style="font-size:1.5em;font-weight:700;color:white;margin-bottom:12px">
+        NYC Restaurant Inspector
+      </h1>
+      <p style="font-size:1em;color:rgba(255,255,255,0.9);margin-bottom:20px">
+        Search 27,000+ restaurants. Know before you go.
+      </p>
+      <!-- KPI stat strip: 2 live values from /api/analytics/kpi -->
+      <div id="hero-stats" style="color:rgba(255,255,255,0.85);font-size:0.88em">&#8212;</div>
+    </div>
+
+    <!-- Section 2: Search CTA -->
+    <div class="card">
+      <h3 style="font-size:1.1em;font-weight:700;margin-bottom:16px;border-bottom:3px solid #667eea;padding-bottom:8px">
+        Search Restaurants
+      </h3>
+      <input id="search-input" type="text" placeholder="Restaurant name or address&#8230;"
+             style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.9em;box-sizing:border-box;margin-bottom:12px">
+      <div id="sort-control-wrapper" style="display:none;margin-bottom:8px">
+        <select id="sort-control" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.88em;background:white;color:#333">
+          <option value="">Sort: Relevance</option>
+          <option value="best">Best Score first</option>
+          <option value="worst">Worst Score first</option>
+          <option value="az">A &#8594; Z</option>
+        </select>
+      </div>
+      <div id="search-results"></div>
+      <div id="pagination-controls" style="margin-top:8px"></div>
+    </div>
+
+    <!-- Section 3: Sample restaurants -->
+    <div class="card" style="margin-top:24px">
+      <h3 style="font-size:1.1em;font-weight:700;margin-bottom:16px;border-bottom:3px solid #667eea;padding-bottom:8px">
+        Discover Restaurants
+      </h3>
+      <div id="sample-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <!-- Skeleton placeholders while loading -->
+        <div class="skel" style="height:80px;border-radius:8px"></div>
+        <div class="skel" style="height:80px;border-radius:8px"></div>
+        <div class="skel" style="height:80px;border-radius:8px"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+           background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh; }
+    .container { max-width:900px;margin:0 auto;padding:0 16px 48px; }
+    .card { background:white;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .result-row { padding:10px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center; }
+    .result-row:hover { background:#f0f2ff; }
+    .result-row:last-child { border-bottom:none; }
+    .sample-card { background:white;border:1px solid #e8e8e8;border-radius:8px;padding:16px; }
+    .error-msg { color:#b71c1c;font-size:0.85em;margin-top:8px; }
+    @media (max-width: 768px) {
+      #sample-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+
+  <script>
+    function gradeBadgeHtml(grade) {
+      const g = grade || '—';
+      let bg = '#ffebee', color = '#b71c1c';
+      if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
+      else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
+      return '<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:' + bg + ';color:' + color + '">' + g + '</span>';
+    }
+
+    // Load KPI stats for hero
+    fetch('/api/analytics/kpi')
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === 'success' && res.data) {
+          const d = res.data;
+          document.getElementById('hero-stats').textContent =
+            (d.totalRestaurants ? d.totalRestaurants.toLocaleString() : '—')
+            + ' restaurants tracked \u00b7 '
+            + (d.pctGradeA != null ? d.pctGradeA.toFixed(1) : '—')
+            + '% Grade A in NYC';
+        }
+      })
+      .catch(() => {});
+
+    // Load sample restaurants
+    fetch('/api/restaurants/sample?limit=3')
+      .then(r => r.json())
+      .then(res => {
+        const grid = document.getElementById('sample-grid');
+        if (!res.data || res.data.length === 0) {
+          grid.innerHTML = '<p class="error-msg">Could not load sample restaurants. Refresh to try again.</p>';
+          return;
+        }
+        grid.innerHTML = res.data.map(r => '<div class="sample-card">'
+          + '<div style="font-weight:700;font-size:0.9em;margin-bottom:4px">' + (r.name || '—') + '</div>'
+          + '<div style="font-size:0.82em;color:#666;margin-bottom:8px">' + (r.borough || '—') + '</div>'
+          + gradeBadgeHtml(r.grade)
+          + '<br><a href="/restaurant/' + r.restaurantId + '" style="font-size:0.82em;color:#667eea;text-decoration:none;margin-top:8px;display:inline-block">View Details</a>'
+          + '</div>').join('');
+      })
+      .catch(() => {
+        showToast('Could not load sample restaurants', 'error');
+        document.getElementById('sample-grid').innerHTML = '<p style="color:#888;font-size:0.88em;text-align:center;padding:16px">Could not load restaurants.</p>';
+      });
+
+    // Search with debounce
+    var searchTimer;
+    var searchInput = document.getElementById('search-input');
+    var searchResults = document.getElementById('search-results');
+
+    var lastResults = [];
+    var PAGE_SIZE = 20;
+    var currentPage = 0;
+
+    function hideResults() {
+      searchResults.innerHTML = '';
+      lastResults = [];
+      currentPage = 0;
+      document.getElementById('pagination-controls').innerHTML = '';
+      document.getElementById('sort-control-wrapper').style.display = 'none';
+      document.getElementById('sort-control').value = '';
+    }
+
+    function renderResultRows(arr) {
+      searchResults.innerHTML = arr.map(function(r) {
+        return '<div class="result-row" onclick="window.location.href=\'/restaurant/' + r.restaurantId + '\'">'
+          + '<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">'
+          +   '<span style="font-weight:600;font-size:0.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (r.name || '—') + '</span>'
+          +   '<span style="color:#666;font-size:0.82em">' + (r.borough || '—') + '</span>'
+          + '</div>'
+          + gradeBadgeHtml(r.grade)
+          + '</div>';
+      }).join('');
+    }
+
+    function renderPagination() {
+      var totalPages = Math.ceil(lastResults.length / PAGE_SIZE);
+      var el = document.getElementById('pagination-controls');
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      el.innerHTML =
+        '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;justify-content:center">'
+        + '<button onclick="goPage(-1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (currentPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '')
+        + '>&larr; Prev</button>'
+        + '<span style="font-size:0.88em;color:#555">Page ' + (currentPage + 1) + ' of ' + totalPages + '</span>'
+        + '<button onclick="goPage(1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+        + (currentPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '')
+        + '>Next &rarr;</button>'
+        + '</div>';
+    }
+
+    function renderPage() {
+      var start = currentPage * PAGE_SIZE;
+      var sorted = sortResults(lastResults, document.getElementById('sort-control').value);
+      var slice = sorted.slice(start, start + PAGE_SIZE);
+      renderResultRows(slice);
+      renderPagination();
+    }
+
+    function goPage(delta) {
+      var maxPage = Math.ceil(lastResults.length / PAGE_SIZE) - 1;
+      currentPage = Math.max(0, Math.min(maxPage, currentPage + delta));
+      renderPage();
+    }
+
+    function sortResults(arr, mode) {
+      var copy = arr.slice();
+      if (mode === 'best')  return copy.sort(function(a, b) { return (a.latestScore == null ? 999 : a.latestScore) - (b.latestScore == null ? 999 : b.latestScore); });
+      if (mode === 'worst') return copy.sort(function(a, b) { return (b.latestScore == null ? 0 : b.latestScore) - (a.latestScore == null ? 0 : a.latestScore); });
+      if (mode === 'az')    return copy.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
+      return copy;
+    }
+
+    function doSearch(q) {
+      searchResults.innerHTML = Array(5).fill(
+        '<div class="skel" style="height:44px;border-radius:6px;margin-bottom:6px"></div>'
+      ).join('');
+      fetch('/api/restaurants/search?q=' + encodeURIComponent(q) + '&limit=200')
+        .then(r => r.json())
+        .then(res => {
+          if (!res.data || res.data.length === 0) {
+            searchResults.innerHTML = '<div class="error-msg">No restaurants found for \'' + q + '\'. Try a different name or address.</div>';
+            lastResults = [];
+            document.getElementById('pagination-controls').innerHTML = '';
+            document.getElementById('sort-control-wrapper').style.display = 'none';
+            return;
+          }
+          lastResults = res.data;
+          currentPage = 0;
+          document.getElementById('sort-control').value = '';
+          document.getElementById('sort-control-wrapper').style.display = 'block';
+          renderPage();
+        })
+        .catch(() => {
+          showToast('Could not load search results', 'error');
+          searchResults.innerHTML = '';
+          document.getElementById('pagination-controls').innerHTML = '';
+        });
+    }
+
+    document.getElementById('sort-control').addEventListener('change', function() {
+      currentPage = 0;
+      renderPage();
+    });
+
+    searchInput.addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      const q = this.value.trim();
+      if (q.length < 2) { hideResults(); return; }
+      searchTimer = setTimeout(() => doSearch(q), 300);
+    });
+  </script>
+</body>
+</html>

@@ -22,6 +22,7 @@ import com.aflokkat.domain.Restaurant;
 import com.aflokkat.entity.BookmarkEntity;
 import com.aflokkat.entity.UserEntity;
 import com.aflokkat.repository.BookmarkRepository;
+import com.aflokkat.repository.ReportRepository;
 import com.aflokkat.repository.UserRepository;
 import com.aflokkat.util.ResponseUtil;
 
@@ -34,6 +35,9 @@ public class UserController {
 
     @Autowired
     private BookmarkRepository bookmarkRepository;
+
+    @Autowired
+    private ReportRepository reportRepository;
 
     @Autowired
     private RestaurantDAO restaurantDAO;
@@ -54,6 +58,13 @@ public class UserController {
             data.put("email", user.getEmail());
             data.put("role", user.getRole());
             data.put("createdAt", user.getCreatedAt());
+            long bookmarkCount = bookmarkRepository.countByUserId(user.getId());
+            Long reportCount = null;
+            if ("ROLE_CONTROLLER".equals(user.getRole())) {
+                reportCount = reportRepository.countByUserId(user.getId());
+            }
+            data.put("bookmarkCount", bookmarkCount);
+            data.put("reportCount", reportCount);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);

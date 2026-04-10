@@ -252,6 +252,25 @@ public class RestaurantController {
         }
     }
 
+    @Operation(summary = "Random sample of restaurants", description = "Returns N randomly-selected restaurants via $sample aggregation. Default limit is 3.")
+    @GetMapping("/sample")
+    public ResponseEntity<Map<String, Object>> getSample(
+            @RequestParam(defaultValue = "3") int limit) {
+        try {
+            List<Restaurant> data = restaurantDAO.findSampleRestaurants(limit);
+            List<Map<String, Object>> views = data.stream()
+                .map(RestaurantService::toView)
+                .collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("data", views);
+            response.put("count", views.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
     @Operation(summary = "Restaurant detail", description = "Returns the full document for a single restaurant, including all grades and computed badge fields.")
     @GetMapping("/{restaurantId}")
     public ResponseEntity<Map<String, Object>> getById(@PathVariable String restaurantId) {

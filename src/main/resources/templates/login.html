@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Restaurant Analytics - Sign In</title>
+    <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <style>
       *, *::before, *::after { box-sizing: border-box; }
 
@@ -199,9 +200,14 @@
 
     <script>
       // Redirect if already logged in
-      if (localStorage.getItem("accessToken")) {
-        window.location.href = "/";
-      }
+      (function() {
+        const t = localStorage.getItem("accessToken");
+        if (!t) return;
+        try {
+          const role = JSON.parse(atob(t.split(".")[1])).role;
+          window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : "/";
+        } catch { window.location.href = "/"; }
+      })();
 
       function switchTab(tab) {
         document.getElementById("tabLogin").classList.toggle("active", tab === "login");
@@ -244,7 +250,10 @@
             if (result.status === 200 && result.body.accessToken) {
               localStorage.setItem("accessToken", result.body.accessToken);
               localStorage.setItem("refreshToken", result.body.refreshToken);
-              window.location.href = "/";
+              try {
+                const role = JSON.parse(atob(result.body.accessToken.split(".")[1])).role;
+                window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : "/";
+              } catch { window.location.href = "/"; }
             } else {
               errorEl.style.display = "block";
               errorEl.textContent = result.body.message || "Invalid username or password.";

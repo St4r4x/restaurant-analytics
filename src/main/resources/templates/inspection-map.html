@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Carte des Restaurants</title>
+    <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -59,13 +60,30 @@
       .marker-cluster-large { background-color: rgba(239,68,68,0.6); }
       .marker-cluster-large div { background-color: rgba(239,68,68,0.9); }
       .marker-cluster div { color: white; }
+      @media (max-width: 768px) {
+        #toolbar { padding: 8px 12px; gap: 8px; }
+        #toolbar h1 { font-size: 0.95em; }
+        #toolbar select { font-size: 0.78em; padding: 4px 8px; }
+      }
     </style>
   </head>
   <body>
+    <div th:replace="fragments/navbar :: navbar"></div>
     <div id="toolbar">
       <a href="/">← Dashboard</a>
-      <a href="/inspection">Agent dashboard</a>
-      <h1>Restaurant Map</h1>
+      <a href="/dashboard" id="dashboardLink" style="display:none">Inspector Dashboard</a>
+      <label style="font-size:0.82em;display:inline-flex;align-items:center;gap:4px;margin-right:8px">
+        <input type="checkbox" id="grade-A" checked style="width:16px;height:16px"> <span style="color:#22c55e;font-weight:700">A</span>
+      </label>
+      <label style="font-size:0.82em;display:inline-flex;align-items:center;gap:4px;margin-right:8px">
+        <input type="checkbox" id="grade-B" checked style="width:16px;height:16px"> <span style="color:#eab308;font-weight:700">B</span>
+      </label>
+      <label style="font-size:0.82em;display:inline-flex;align-items:center;gap:4px;margin-right:8px">
+        <input type="checkbox" id="grade-C" checked style="width:16px;height:16px"> <span style="color:#ef4444;font-weight:700">C</span>
+      </label>
+      <label style="font-size:0.82em;display:inline-flex;align-items:center;gap:4px;margin-right:16px">
+        <input type="checkbox" id="grade-F" checked style="width:16px;height:16px"> <span style="color:#ef4444;font-weight:700">F</span>
+      </label>
       <select id="borough-filter">
         <option value="">All boroughs</option>
         <option value="Manhattan">Manhattan</option>
@@ -74,7 +92,11 @@
         <option value="Bronx">Bronx</option>
         <option value="Staten Island">Staten Island</option>
       </select>
+      <select id="cuisine-filter" style="padding:8px 12px;background:rgba(255,255,255,0.1);border:1px solid #667eea;border-radius:5px;color:#fff;font-size:0.88em">
+        <option value="">All cuisines</option>
+      </select>
       <span id="status">Loading...</span>
+      <span id="marker-count" style="font-size:0.82em;color:#a78bfa;margin-left:auto;white-space:nowrap"></span>
     </div>
     <div id="map-wrapper">
       <div id="map"></div>
@@ -94,13 +116,61 @@
         maxZoom: 18
       }).addTo(map);
 
-      // ── Grade-colored clustered markers ─────────────────────────────
+      // ── Grade-colored clustered markers with filter bar ──────────────
       const statusEl = document.getElementById('map-status');
+
+      // Module-level state
+      let allPoints = [];
+      let markers = L.markerClusterGroup();
 
       function gradeColor(grade) {
         if (grade === 'A') return '#22c55e';
         if (grade === 'B') return '#eab308';
         return '#ef4444';
+      }
+
+      function applyFilters() {
+        const activeGrades = ['A','B','C','F'].filter(g =>
+          document.getElementById('grade-' + g).checked
+        );
+        const borough = document.getElementById('borough-filter').value;
+        const cuisine = document.getElementById('cuisine-filter').value;
+
+        map.removeLayer(markers);
+        markers = L.markerClusterGroup();
+
+        const shown = allPoints.filter(r => {
+          const gradeMatch = activeGrades.includes(r.grade) || (!r.grade && activeGrades.length > 0);
+          const boroughMatch = !borough || r.borough === borough;
+          const cuisineMatch = !cuisine || r.cuisine === cuisine;
+          return gradeMatch && boroughMatch && cuisineMatch;
+        });
+
+        shown.forEach(r => {
+          if (r.lat == null || r.lng == null) return;
+          const color = gradeColor(r.grade);
+          const icon = L.divIcon({
+            className: '',
+            html: `<div style="width:12px;height:12px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+          });
+          const marker = L.marker([r.lat, r.lng], { icon });
+          const grade = r.grade || '—';
+          let badgeBg = '#ffebee', badgeColor = '#b71c1c';
+          if (grade === 'A') { badgeBg = '#e8f5e9'; badgeColor = '#2e7d32'; }
+          else if (grade === 'B') { badgeBg = '#fff8e1'; badgeColor = '#f57f17'; }
+          marker.bindPopup(`<div style="font-size:0.88em;max-width:200px">
+            <strong>${r.name || '—'}</strong><br>
+            Grade: <span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${badgeBg};color:${badgeColor}">${grade}</span><br>
+            <a href="/restaurant/${r.restaurantId}" style="color:#667eea;font-weight:600">View details →</a>
+          </div>`);
+          markers.addLayer(marker);
+        });
+
+        map.addLayer(markers);
+        const countEl = document.getElementById('marker-count');
+        if (countEl) countEl.textContent = shown.length.toLocaleString() + ' markers shown';
       }
 
       function loadMapPoints() {
@@ -114,42 +184,52 @@
               document.getElementById('status').textContent = 'Loading error';
               return;
             }
-            const points = data.data || [];
-            const markers = L.markerClusterGroup();
-
-            points.forEach(r => {
-              if (r.lat == null || r.lng == null) return;
-              const color = gradeColor(r.grade);
-              const icon = L.divIcon({
-                className: '',
-                html: `<div style="width:12px;height:12px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
-              });
-              const marker = L.marker([r.lat, r.lng], { icon });
-              const grade = r.grade || '—';
-              let badgeBg = '#ffebee', badgeColor = '#b71c1c';
-              if (grade === 'A') { badgeBg = '#e8f5e9'; badgeColor = '#2e7d32'; }
-              else if (grade === 'B') { badgeBg = '#fff8e1'; badgeColor = '#f57f17'; }
-              marker.bindPopup(`<div style="font-size:0.88em;max-width:200px">
-                <strong>${r.name || '—'}</strong><br>
-                Grade: <span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${badgeBg};color:${badgeColor}">${grade}</span><br>
-                <a href="/restaurant/${r.restaurantId}" style="color:#667eea;font-weight:600">View details →</a>
-              </div>`);
-              markers.addLayer(marker);
-            });
-
-            map.addLayer(markers);
-            if (statusEl) statusEl.textContent = `${points.length} restaurants loaded`;
-            document.getElementById('status').textContent = `${points.length} restaurants loaded`;
+            allPoints = data.data || [];
+            applyFilters();
+            if (statusEl) statusEl.textContent = `${allPoints.length} restaurants loaded`;
+            document.getElementById('status').textContent = `${allPoints.length} restaurants loaded`;
           })
           .catch(() => {
-            if (statusEl) statusEl.textContent = 'Failed to load restaurants. Refresh the page to try again.';
+            showToast('Map data failed to load', 'error');
             document.getElementById('status').textContent = 'Network error';
           });
       }
 
-      loadMapPoints();
+      document.addEventListener('DOMContentLoaded', function() {
+        loadMapPoints();
+
+        // Populate cuisine dropdown
+        fetch('/api/restaurants/cuisines')
+          .then(r => r.json())
+          .then(resp => {
+            const sel = document.getElementById('cuisine-filter');
+            (resp.data || []).forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = c;
+              opt.textContent = c;
+              sel.appendChild(opt);
+            });
+          })
+          .catch(function() {}); // silent failure per UI-SPEC
+
+        // Wire filter events
+        ['grade-A','grade-B','grade-C','grade-F'].forEach(id => {
+          document.getElementById(id).addEventListener('change', applyFilters);
+        });
+        document.getElementById('borough-filter').addEventListener('change', applyFilters);
+        document.getElementById('cuisine-filter').addEventListener('change', applyFilters);
+
+        // Show dashboard link for controllers
+        try {
+          const t = localStorage.getItem('accessToken');
+          if (t) {
+            const payload = JSON.parse(atob(t.split('.')[1]));
+            if (payload.role === 'ROLE_CONTROLLER') {
+              document.getElementById('dashboardLink').style.display = '';
+            }
+          }
+        } catch(e) {}
+      });
       // ── End grade-colored clustered markers ──────────────────────────
     </script>
   </body>

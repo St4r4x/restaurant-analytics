@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Profile — NYC Restaurant Inspector</title>
+  <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
+</head>
+<body>
+  <div th:replace="fragments/navbar :: navbar"></div>
+  <div class="container" style="padding-top: 72px">
+    <div id="profile-card" class="card" style="max-width:480px;margin:48px auto;text-align:center">
+      <div style="font-size:48px;color:#667eea;margin-bottom:16px">&#128100;</div>
+      <div id="p-username" style="font-size:1.5em;font-weight:700;color:#333;margin-bottom:4px">&#8212;</div>
+      <div id="p-email" style="font-size:0.9em;color:#666;margin-bottom:16px">&#8212;</div>
+      <div id="p-role" style="margin-bottom:24px"></div>
+      <div id="p-stats" style="display:flex;justify-content:center;gap:32px"></div>
+    </div>
+
+    <div id="bookmarks-section" class="card" style="max-width:480px;margin:16px auto">
+      <h3 style="font-size:1.1em;font-weight:700;margin-bottom:16px;border-bottom:3px solid #667eea;padding-bottom:8px">
+        Your Bookmarks
+      </h3>
+      <div id="bookmarks-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div style="background:#f0f2ff;border-radius:8px;height:80px"></div>
+        <div style="background:#f0f2ff;border-radius:8px;height:80px"></div>
+        <div style="background:#f0f2ff;border-radius:8px;height:80px"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+           background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh; }
+    .container { max-width:900px;margin:0 auto;padding:0 16px 48px; }
+    .card { background:white;border-radius:12px;padding:32px;box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .error-msg { color:#b71c1c;font-size:0.85em;margin-top:8px; }
+    .mini-card { background:white;border:1px solid #e8e8e8;border-radius:8px;padding:16px; }
+  </style>
+
+  <script>
+    var token = localStorage.getItem('accessToken');
+    if (!token) { window.location.href = '/login'; }
+
+    function fetchWithAuth(url, options) {
+      options = options || {};
+      return fetch(url, Object.assign({}, options, { headers: Object.assign({}, options.headers || {}, { 'Authorization': 'Bearer ' + token }) }));
+    }
+
+    function gradeBadgeHtml(grade) {
+      const g = grade || '—';
+      let bg = '#ffebee', color = '#b71c1c';
+      if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
+      else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
+      return '<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:' + bg + ';color:' + color + '">' + g + '</span>';
+    }
+
+    function renderRestaurantCards(containerId, restaurants, emptyHtml) {
+      var grid = document.getElementById(containerId);
+      if (!restaurants || restaurants.length === 0) {
+        grid.innerHTML = emptyHtml;
+        return;
+      }
+      grid.innerHTML = restaurants.slice(0, 3).map(r =>
+        '<div class="mini-card">'
+        + '<div style="font-weight:700;font-size:0.9em;margin-bottom:4px">' + (r.name || '—') + '</div>'
+        + '<div style="font-size:0.82em;color:#666;margin-bottom:8px">' + (r.borough || '—') + '</div>'
+        + gradeBadgeHtml(r.grade)
+        + '<br><a href="/restaurant/' + r.restaurantId + '" style="font-size:0.82em;color:#667eea;text-decoration:none;margin-top:8px;display:inline-block">View Details</a>'
+        + '</div>').join('');
+    }
+
+    fetchWithAuth('/api/users/me')
+      .then(r => r.json())
+      .then(res => {
+        if (res.status !== 'success' || !res.data) {
+          document.getElementById('profile-card').innerHTML =
+            '<p class="error-msg">Could not load your profile. Please sign in again.</p>'
+            + '<a href="/login" style="color:#667eea">Sign In</a>';
+          return;
+        }
+        var d = res.data;
+        document.getElementById('p-username').textContent = d.username || '—';
+        document.getElementById('p-email').textContent = d.email || '—';
+
+        // Role badge: strip ROLE_ prefix
+        var roleLabel = (d.role || '').replace('ROLE_', '');
+        var roleBg = roleLabel === 'CUSTOMER' ? '#22c55e' : '#f97316';
+        document.getElementById('p-role').innerHTML =
+          '<span style="background:' + roleBg + ';color:white;border-radius:20px;padding:4px 12px;font-size:0.78em;font-weight:700">'
+          + roleLabel + '</span>';
+
+        // Stats row
+        var statsHtml = '';
+        if (d.reportCount != null) {
+          statsHtml += '<div style="text-align:center">'
+            + '<div style="font-weight:700;font-size:1em;color:#333">' + d.reportCount + '</div>'
+            + '<div style="font-size:0.82em;color:#555;margin-top:4px">Reports</div>'
+            + '</div>';
+        }
+        document.getElementById('p-stats').innerHTML = statsHtml;
+      })
+      .catch(() => {
+        document.getElementById('profile-card').innerHTML =
+          '<p class="error-msg">Could not load your profile. Please sign in again.</p>'
+          + '<a href="/login" style="color:#667eea">Sign In</a>';
+      });
+
+    fetchWithAuth('/api/users/me/bookmarks')
+      .then(r => r.json())
+      .then(res => {
+        renderRestaurantCards('bookmarks-grid', res.data,
+          '<p style="color:#666;font-size:0.88em">You haven\'t bookmarked any restaurants yet.</p>');
+      })
+      .catch(() => {
+        document.getElementById('bookmarks-grid').innerHTML =
+          '<p style="color:#b71c1c;font-size:0.85em">Could not load bookmarks.</p>';
+      });
+  </script>
+</body>
+</html>
