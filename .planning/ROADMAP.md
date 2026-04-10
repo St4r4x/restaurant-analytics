@@ -179,7 +179,7 @@ Plans:
   1. A logged-in controller navigating to `/admin` sees the last sync date/status and a "Sync NYC Data" button; clicking it triggers the sync and shows live progress (polling the sync-status endpoint every 2s) until completion
   2. The admin page has a "Download At-Risk CSV" button that triggers a file download of the existing `/api/inspection/at-risk/export.csv` endpoint
   3. The admin page shows a "Report Statistics" panel with counts grouped by status (Open / In Progress / Resolved) and by grade (A/B/C/F) across all controllers' reports — the aggregate query must NOT return individual reports from other controllers
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 10-01-PLAN.md — AuthService ROLE_ADMIN signup code + DataSeeder admin_test + AuthServiceTest update (ADM-01)
@@ -203,4 +203,4 @@ v2.0: Phase 5 → (6 ∥ 7) → 8 → 9 → 10  (6 and 7 can run in parallel)
 | 7. Homepage & Navigation | 4/4 | Complete   | 2026-04-03 |
 | 8. Discovery Enhancement | 0/TBD | Not started | - |
 | 9. UX Polish | 0/TBD | Not started | - |
-| 10. Admin Tools | 1/3 | In Progress|  |
+| 10. Admin Tools | 2/3 | In Progress|  |

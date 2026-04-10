@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Full Product
 status: executing
-stopped_at: Completed 10-02-PLAN.md (AdminController + ReportRepository aggregates)
-last_updated: "2026-04-10T15:24:15.381Z"
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-04-10T15:26:24.919Z"
 last_activity: 2026-04-09 -- Phase 10 execution started
 progress:
   total_phases: 10
   completed_phases: 9
   total_plans: 37
-  completed_plans: 35
+  completed_plans: 36
   percent: 100
 ---
 
@@ -79,6 +79,7 @@ Progress: [██████████] 100% (8/10 phases complete)
 | Phase 07-homepage-navigation PP03 | 12min | 2 tasks | 5 files |
 | Phase 07 P04 | 5 | 1 tasks | 1 files |
 | Phase 10-admin-tools P02 | 2 | 1 tasks | 4 files |
+| Phase 10 P01 | 5 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,9 @@ Recent decisions affecting current work:
 - [Phase 10-02]: AdminController uses @Autowired ReportRepository directly (no service wrapper) — consistent with existing AnalyticsController pattern
 - [Phase 10-02]: AuthService 5-arg constructor added (controllerSignupCode + adminSignupCode) — ADMIN check runs before CONTROLLER check to prevent code collision
 - [Phase 10-02]: Pre-populate LinkedHashMap with all enum.values() at 0L before merging JPQL GROUP BY results — guarantees all enum keys always present
+- [Phase 10-01]: Admin signup code checked before controller code in role-assignment — admin takes priority when both are set
+- [Phase 10-01]: admin.signup.code= (empty) is default — admin accounts created via DataSeeder, not self-registration
+- [Phase 10-01]: ADMIN_SIGNUP_CODE defaults to empty string in docker-compose.yml (admin signup disabled in Docker)
 
 ### Pending Todos
 
@@ -159,6 +163,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T15:24:15.376Z
-Stopped at: Completed 10-02-PLAN.md (AdminController + ReportRepository aggregates)
+Last session: 2026-04-10T15:26:24.913Z
+Stopped at: Completed 10-01-PLAN.md
 Resume file: None
