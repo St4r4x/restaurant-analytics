@@ -32,37 +32,42 @@ class DataSeederTest {
     private DataSeeder dataSeeder;
 
     @Test
-    void run_createsCustomerAndController_whenAbsent() throws Exception {
-        // Neither account exists yet
+    void run_createsCustomerControllerAndAdmin_whenAbsent() throws Exception {
+        // No accounts exist yet
         when(userRepository.findByUsername("customer_test")).thenReturn(Optional.empty());
         when(userRepository.findByUsername("controller_test")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("admin_test")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("Test1234!")).thenReturn("hashed");
         when(userRepository.save(any(UserEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
         dataSeeder.run(args);
 
-        // save() must be called twice
+        // save() must be called three times (customer, controller, admin)
         ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
-        verify(userRepository, times(2)).save(captor.capture());
+        verify(userRepository, times(3)).save(captor.capture());
 
-        // First saved entity: ROLE_CUSTOMER
         UserEntity customer = captor.getAllValues().get(0);
         assertEquals("customer_test", customer.getUsername());
         assertEquals("ROLE_CUSTOMER", customer.getRole());
 
-        // Second saved entity: ROLE_CONTROLLER
         UserEntity controller = captor.getAllValues().get(1);
         assertEquals("controller_test", controller.getUsername());
         assertEquals("ROLE_CONTROLLER", controller.getRole());
+
+        UserEntity admin = captor.getAllValues().get(2);
+        assertEquals("admin_test", admin.getUsername());
+        assertEquals("ROLE_ADMIN", admin.getRole());
     }
 
     @Test
     void run_skipsExisting_whenAlreadySeeded() throws Exception {
-        // Both accounts already exist
+        // All three accounts already exist
         when(userRepository.findByUsername("customer_test"))
                 .thenReturn(Optional.of(new UserEntity("customer_test", "customer@test.com", "hash", "ROLE_CUSTOMER")));
         when(userRepository.findByUsername("controller_test"))
                 .thenReturn(Optional.of(new UserEntity("controller_test", "controller@test.com", "hash", "ROLE_CONTROLLER")));
+        when(userRepository.findByUsername("admin_test"))
+                .thenReturn(Optional.of(new UserEntity("admin_test", "admin@test.com", "hash", "ROLE_ADMIN")));
 
         dataSeeder.run(args);
 

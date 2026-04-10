@@ -25,6 +25,8 @@
        style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Dashboard</a>
     <a id="nav-uncontrolled" href="/uncontrolled" data-nav="/uncontrolled"
        style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Uncontrolled</a>
+    <a id="nav-admin" href="/admin" data-nav="/admin"
+       style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Admin</a>
   </div>
 
   <!-- Auth area (right) — filled by JS -->
@@ -70,6 +72,9 @@
         if (payload.role === 'ROLE_CONTROLLER') {
           document.getElementById('nav-dashboard').style.display = 'inline-block';
           document.getElementById('nav-uncontrolled').style.display = 'inline-block';
+        }
+        if (payload.role === 'ROLE_ADMIN') {
+          document.getElementById('nav-admin').style.display = 'inline-block';
         }
       } catch(e) {
         el.innerHTML = '<a href="/login" style="color:white;background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600">Sign In</a>';

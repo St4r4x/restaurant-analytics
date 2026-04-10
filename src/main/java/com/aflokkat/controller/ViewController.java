@@ -65,4 +65,9 @@ public class ViewController {
     public String profile() {
         return "profile";
     }
+
+    @GetMapping("/admin")
+    public String admin() {
+        return "admin";
+    }
 }

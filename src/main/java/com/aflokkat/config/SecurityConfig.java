@@ -61,10 +61,14 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/webjars/**"
                 ).permitAll()
+                // Admin-only endpoints (MUST be before /api/reports/** wildcard)
+                .antMatchers("/api/reports/stats").hasRole("ADMIN")
                 // Controller-only endpoints
                 .antMatchers("/api/reports/**").hasRole("CONTROLLER")
                 // Any authenticated user (any role)
                 .antMatchers("/api/users/**").authenticated()
+                // Admin view route
+                .antMatchers("/admin").hasRole("ADMIN")
                 // Non-API view routes: open for now (Phase 3 scope)
                 .anyRequest().permitAll()
             .and()
