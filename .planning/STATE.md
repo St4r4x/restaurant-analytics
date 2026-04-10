@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Full Product
 status: executing
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-04-10T15:26:24.919Z"
+stopped_at: "Checkpoint 10-03-PLAN.md Task 3: human-verify admin page"
+last_updated: "2026-04-10T15:51:58.601Z"
 last_activity: 2026-04-09 -- Phase 10 execution started
 progress:
   total_phases: 10
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 37
-  completed_plans: 36
+  completed_plans: 37
   percent: 100
 ---
 
@@ -80,6 +80,7 @@ Progress: [██████████] 100% (8/10 phases complete)
 | Phase 07 P04 | 5 | 1 tasks | 1 files |
 | Phase 10-admin-tools P02 | 2 | 1 tasks | 4 files |
 | Phase 10 P01 | 5 | 3 tasks | 8 files |
+| Phase 10-admin-tools P03 | 15 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,10 @@ Recent decisions affecting current work:
 - [Phase 10-01]: Admin signup code checked before controller code in role-assignment — admin takes priority when both are set
 - [Phase 10-01]: admin.signup.code= (empty) is default — admin accounts created via DataSeeder, not self-registration
 - [Phase 10-01]: ADMIN_SIGNUP_CODE defaults to empty string in docker-compose.yml (admin signup disabled in Docker)
+- [Phase 10-admin-tools]: antMatcher /api/reports/stats placed BEFORE /api/reports/** wildcard — first-match-wins Spring Security ordering
+- [Phase 10-admin-tools]: SecurityConfigTest dashboard tests updated: Phase 7 removed server-side /dashboard guard (client-side IIFE only) — tests updated to match
+- [Phase 10-admin-tools]: DataSeederTest updated to expect 3 seed users (customer, controller, admin) after Phase 10-01 added admin_test
+- [Phase 10-admin-tools]: fetchWithAuth defined inline in admin.html (same pattern as dashboard.html, not extracted to ux-utils)
 
 ### Pending Todos
 
@@ -163,6 +168,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T15:26:24.913Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-04-10T15:51:43.537Z
+Stopped at: Checkpoint 10-03-PLAN.md Task 3: human-verify admin page
 Resume file: None
