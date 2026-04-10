@@ -72,7 +72,7 @@ Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
 - [ ] **ADM-01**: A `/admin` page (ADMIN role) shows the last NYC data sync status, a "Sync Now" button with live progress feedback, and a "Rebuild Cache" button
 - [ ] **ADM-02**: The admin page has an "Export At-Risk CSV" button that triggers the existing `/api/inspection/at-risk/export.csv` endpoint
-- [ ] **ADM-03**: The admin page shows aggregate report statistics across all controllers: count by status (open/in-progress/resolved) and count by grade — without exposing individual reports from other controllers
+- [x] **ADM-03**: The admin page shows aggregate report statistics across all controllers: count by status (open/in-progress/resolved) and count by grade — without exposing individual reports from other controllers
 
 ### Deferred to v3
 
