@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Full Product
 status: executing
-stopped_at: "Checkpoint 10-03-PLAN.md Task 3: human-verify admin page"
-last_updated: "2026-04-10T15:51:58.601Z"
-last_activity: 2026-04-09 -- Phase 10 execution started
+stopped_at: Completed 10-03-PLAN.md — Phase 10 admin tools fully verified
+last_updated: "2026-04-10T16:23:59.831Z"
+last_activity: 2026-04-10
 progress:
   total_phases: 10
   completed_phases: 10
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Phase: 10 (admin-tools) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 10
-Last activity: 2026-04-09 -- Phase 10 execution started
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-10
 
 Progress: [██████████] 100% (8/10 phases complete)
 
@@ -81,6 +81,7 @@ Progress: [██████████] 100% (8/10 phases complete)
 | Phase 10-admin-tools P02 | 2 | 1 tasks | 4 files |
 | Phase 10 P01 | 5 | 3 tasks | 8 files |
 | Phase 10-admin-tools P03 | 15 | 2 tasks | 6 files |
+| Phase 10-admin-tools P03 | 15min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -154,6 +155,9 @@ Recent decisions affecting current work:
 - [Phase 10-admin-tools]: SecurityConfigTest dashboard tests updated: Phase 7 removed server-side /dashboard guard (client-side IIFE only) — tests updated to match
 - [Phase 10-admin-tools]: DataSeederTest updated to expect 3 seed users (customer, controller, admin) after Phase 10-01 added admin_test
 - [Phase 10-admin-tools]: fetchWithAuth defined inline in admin.html (same pattern as dashboard.html, not extracted to ux-utils)
+- [Phase 10-admin-tools]: antMatcher /api/reports/stats placed BEFORE /api/reports/** wildcard — first-match-wins Spring Security ordering
+- [Phase 10-admin-tools]: Removed hasRole(ADMIN) on /admin view route — browser nav does not send Authorization header; client-side IIFE guard in admin.html handles role enforcement
+- [Phase 10-admin-tools]: fetchWithAuth defined inline in admin.html same as dashboard.html pattern, not extracted to ux-utils fragment
 
 ### Pending Todos
 
@@ -168,6 +172,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T15:51:43.537Z
-Stopped at: Checkpoint 10-03-PLAN.md Task 3: human-verify admin page
+Last session: 2026-04-10T16:23:59.827Z
+Stopped at: Completed 10-03-PLAN.md — Phase 10 admin tools fully verified
 Resume file: None

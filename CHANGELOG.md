@@ -2,6 +2,19 @@
 
 All notable changes are documented by phase.
 
+## [Phase 10] — 2026-04-10 — Admin Tools
+
+### Added
+- ROLE_ADMIN role: `admin.signup.code` property, `ADMIN_SIGNUP_CODE` env var, AuthService admin registration path
+- `admin_test` seed account (ROLE_ADMIN) created by DataSeeder on startup (password: `Test1234!`)
+- GET `/api/reports/stats` endpoint (AdminController, ADMIN-only): aggregate counts for inspection reports by status (OPEN/IN_PROGRESS/RESOLVED) and grade (A/B/C/F)
+- GET `/api/inspection/at-risk/export.csv` download endpoint: at-risk restaurants as downloadable CSV
+- SecurityConfig: `/api/reports/stats` ADMIN-only antMatcher declared before `/api/reports/**` CONTROLLER wildcard (first-match-wins ordering)
+- GET `/admin` ViewController route returning admin Thymeleaf view
+- `admin.html`: three-card admin page — Sync Controls (POST /api/restaurants/refresh, 2s polling, 10s auto-dismiss result), At-Risk CSV Download, Report Statistics (badge pills by status and grade)
+- `navbar.html`: Admin nav link (hidden by default, visible only for ROLE_ADMIN via JS IIFE)
+- Client-side ROLE_ADMIN IIFE guard in admin.html redirects non-ADMIN users to /
+
 ## [Phase 9] — 2026-04-08 — UX Polish
 
 ### Added
