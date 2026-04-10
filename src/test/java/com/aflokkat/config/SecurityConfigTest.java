@@ -49,8 +49,18 @@ public class SecurityConfigTest {
             return "ok";
         }
 
+        @GetMapping("/api/reports/stats")
+        public String stats() {
+            return "ok";
+        }
+
         @GetMapping("/dashboard")
         public String dashboard() {
+            return "ok";
+        }
+
+        @GetMapping("/admin")
+        public String admin() {
             return "ok";
         }
     }
@@ -104,21 +114,25 @@ public class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
+    // Phase 7 decision: /dashboard uses client-side IIFE auth guard only (not server-side antMatcher).
+    // The server allows any request to /dashboard via anyRequest().permitAll() — the IIFE in
+    // dashboard.html redirects non-CONTROLLER users to / on the client side.
+
     @Test
-    public void dashboard_redirectsToLogin_whenUnauthenticated() throws Exception {
+    public void dashboard_isAccessible_whenUnauthenticated() throws Exception {
         SecurityContextHolder.clearContext();
         mockMvc.perform(get("/dashboard"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isOk());
     }
 
     @Test
-    public void dashboard_returns403_forCustomer() throws Exception {
+    public void dashboard_isAccessible_forCustomer() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "customer_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
         mockMvc.perform(get("/dashboard")
                         .with(authentication(auth)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -127,6 +141,56 @@ public class SecurityConfigTest {
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
         mockMvc.perform(get("/dashboard")
+                        .with(authentication(auth)))
+                .andExpect(status().isOk());
+    }
+
+    // /admin is protected server-side: ROLE_ADMIN only.
+    // Unauthenticated access redirects to /login (non-API path triggers redirect in authenticationEntryPoint).
+    @Test
+    public void admin_redirectsToLogin_whenUnauthenticated() throws Exception {
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/admin"))
+                .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    public void admin_returns403_forController() throws Exception {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "ctrl_user", null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
+        mockMvc.perform(get("/admin")
+                        .with(authentication(auth)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void admin_returns200_forAdmin() throws Exception {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "admin_user", null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        mockMvc.perform(get("/admin")
+                        .with(authentication(auth)))
+                .andExpect(status().isOk());
+    }
+
+    // /api/reports/stats is ADMIN-only (antMatcher before /api/reports/** wildcard)
+    @Test
+    public void reportStats_returns403_forController() throws Exception {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "ctrl_user", null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
+        mockMvc.perform(get("/api/reports/stats")
+                        .with(authentication(auth)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void reportStats_returns200_forAdmin() throws Exception {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "admin_user", null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        mockMvc.perform(get("/api/reports/stats")
                         .with(authentication(auth)))
                 .andExpect(status().isOk());
     }

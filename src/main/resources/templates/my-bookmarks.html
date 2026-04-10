@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Bookmarks</title>
+    <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -92,24 +93,11 @@
         font-size: 0.82em;
         white-space: nowrap;
       }
-
-      .spinner {
-        width: 24px;
-        height: 24px;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #667eea;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin: 20px auto;
-      }
-
-      @keyframes spin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
     <div th:replace="fragments/navbar :: navbar"></div>
     <div class="container" style="padding-top: 72px">
-      <a class="back-link" href="/">← Dashboard</a>
 
       <header>
         <h1>My Bookmarks</h1>
@@ -119,12 +107,20 @@
       <div class="card" id="bookmarks-card">
         <h2>My Bookmarks</h2>
         <div id="bookmarks-list">
-          <div class="spinner"></div>
+          <div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>
+          <div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>
+          <div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>
         </div>
+        <div id="pagination-controls" style="margin-top:8px"></div>
       </div>
     </div>
 
     <script>
+      // ── Pagination state ─────────────────────────────────────────────
+      var allBookmarks = [];
+      var currentPage = 0;
+      var PAGE_SIZE = 20;
+
       // ── Auth ─────────────────────────────────────────────────────────
       function getAuthHeaders() {
         const token = localStorage.getItem("accessToken");
@@ -145,79 +141,115 @@
         return response;
       }
 
-      function fetchWithAuth(url, options = {}) {
-        options.headers = { ...getAuthHeaders(), ...(options.headers || {}) };
+      function fetchWithAuth(url, options) {
+        options = options || {};
+        options.headers = Object.assign({}, getAuthHeaders(), options.headers || {});
         return fetch(url, options).then(handleFetchErrorResponse);
       }
 
       // ── Bookmarks ────────────────────────────────────────────────────
-      const bookmarkedIds = new Set();
-
       function gradeBadgeHtml(grade) {
-        const g = grade || '—';
+        const g = grade || '\u2014';
         let bg = '#ffebee', color = '#b71c1c';
         if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
         else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
-        return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${bg};color:${color}">${g}</span>`;
+        return '<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:' + bg + ';color:' + color + '">' + g + '</span>';
       }
 
       function renderBookmarks(restaurants) {
-        const list = document.getElementById('bookmarks-list');
-        if (!restaurants.length) {
+        allBookmarks = restaurants;
+        currentPage = 0;
+        renderBookmarkPage();
+      }
+
+      function renderBookmarkPage() {
+        var list = document.getElementById('bookmarks-list');
+        if (!allBookmarks.length) {
           list.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:20px 0;text-align:center">You have no saved restaurants yet. <a href="/" style="color:#667eea;font-weight:600">Search for restaurants</a> to bookmark them.</p>';
+          document.getElementById('pagination-controls').innerHTML = '';
           return;
         }
-        list.innerHTML = restaurants.map(r => {
-          const grade = r.latestGrade || (r.grades && r.grades.length ? r.grades[0].grade : '—') || '—';
-          const rid = r.restaurantId;
-          return `<div class="top-restaurant-item" id="bm-${rid}" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f9ff;border-radius:6px;margin-bottom:6px">
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:600;font-size:0.9em">${r.name || '—'}</div>
-              <div style="font-size:0.82em;color:#666">${r.borough || '—'}</div>
-            </div>
-            ${gradeBadgeHtml(grade)}
-            <button class="btn-bookmark bookmarked" data-id="${rid}"
-                    onclick="removeBookmark('${rid}', this)"
-                    style="min-width:44px;min-height:44px;background:none;border:none;cursor:pointer;font-size:1.1em;color:#f5a623">★</button>
-            <a href="/restaurant/${rid}" style="text-decoration:none;color:#667eea;font-weight:600;font-size:0.82em;white-space:nowrap">View →</a>
-          </div>`;
+        var start = currentPage * PAGE_SIZE;
+        var slice = allBookmarks.slice(start, start + PAGE_SIZE);
+        list.innerHTML = slice.map(function(r) {
+          var grade = r.latestGrade || (r.grades && r.grades.length ? r.grades[0].grade : '\u2014') || '\u2014';
+          var rid = r.restaurantId;
+          return '<div class="top-restaurant-item" id="bm-' + rid + '" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f9ff;border-radius:6px;margin-bottom:6px">'
+            + '<div style="flex:1;min-width:0">'
+            + '<div style="font-weight:600;font-size:0.9em">' + (r.name || '\u2014') + '</div>'
+            + '<div style="font-size:0.82em;color:#666">' + (r.borough || '\u2014') + '</div>'
+            + '</div>'
+            + gradeBadgeHtml(grade)
+            + '<button class="btn-bookmark bookmarked" data-id="' + rid + '"'
+            + ' onclick="removeBookmark(\'' + rid + '\', this)"'
+            + ' style="min-width:44px;min-height:44px;background:none;border:none;cursor:pointer;font-size:1.1em;color:#f5a623">\u2605</button>'
+            + '<a href="/restaurant/' + rid + '" style="text-decoration:none;color:#667eea;font-weight:600;font-size:0.82em;white-space:nowrap">View \u2192</a>'
+            + '</div>';
         }).join('');
+        renderPagination();
+      }
+
+      function renderPagination() {
+        var totalPages = Math.ceil(allBookmarks.length / PAGE_SIZE);
+        var el = document.getElementById('pagination-controls');
+        if (totalPages <= 1) { el.innerHTML = ''; return; }
+        el.innerHTML =
+          '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;justify-content:center">'
+          + '<button onclick="goPage(-1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+          + (currentPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>\u2190 Prev</button>'
+          + '<span style="font-size:0.88em;color:#555">Page ' + (currentPage + 1) + ' of ' + totalPages + '</span>'
+          + '<button onclick="goPage(1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
+          + (currentPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>Next \u2192</button>'
+          + '</div>';
+      }
+
+      function goPage(delta) {
+        var maxPage = Math.ceil(allBookmarks.length / PAGE_SIZE) - 1;
+        currentPage = Math.max(0, Math.min(maxPage, currentPage + delta));
+        renderBookmarkPage();
       }
 
       function removeBookmark(restaurantId, btn) {
         // Optimistic: fade the row immediately
-        const row = document.getElementById('bm-' + restaurantId);
+        var row = document.getElementById('bm-' + restaurantId);
         if (row) row.style.opacity = '0.4';
         fetchWithAuth('/api/users/me/bookmarks/' + restaurantId, { method: 'DELETE' })
-          .then(r => {
+          .then(function(r) {
             if (r && r.ok) {
               if (row) row.remove();
-              // Show empty state if no more rows
-              const list = document.getElementById('bookmarks-list');
-              if (list && !list.querySelector('.top-restaurant-item')) {
-                renderBookmarks([]);
-              }
+              allBookmarks = allBookmarks.filter(function(b) { return b.restaurantId !== restaurantId; });
+              var maxPage = Math.max(0, Math.ceil(allBookmarks.length / PAGE_SIZE) - 1);
+              currentPage = Math.min(currentPage, maxPage);
+              renderBookmarkPage();
             } else {
               if (row) row.style.opacity = '1'; // revert on error
+              showToast('Could not remove bookmark', 'error');
             }
+          })
+          .catch(function() {
+            if (row) row.style.opacity = '1';
+            showToast('Could not remove bookmark', 'error');
           });
       }
 
       function loadBookmarks() {
         if (!localStorage.getItem('accessToken')) { window.location.href = '/login'; return; }
+        document.getElementById('bookmarks-list').innerHTML = Array(3).fill(
+          '<div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>'
+        ).join('');
         fetchWithAuth('/api/users/me/bookmarks')
-          .then(r => r ? r.json() : null)
-          .then(data => {
+          .then(function(r) { return r ? r.json() : null; })
+          .then(function(data) {
             if (data && data.status === 'success') {
               renderBookmarks(data.data || []);
             } else {
-              document.getElementById('bookmarks-list').innerHTML =
-                '<p style="color:#c33;padding:10px">Failed to load bookmarks.</p>';
+              showToast('Failed to load bookmarks.', 'error');
+              document.getElementById('bookmarks-list').innerHTML = '';
             }
           })
-          .catch(() => {
-            document.getElementById('bookmarks-list').innerHTML =
-              '<p style="color:#c33;padding:10px">Failed to load bookmarks.</p>';
+          .catch(function() {
+            showToast('Failed to load bookmarks.', 'error');
+            document.getElementById('bookmarks-list').innerHTML = '';
           });
       }
 

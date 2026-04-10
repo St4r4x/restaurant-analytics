@@ -61,10 +61,14 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/webjars/**"
                 ).permitAll()
+                // Admin-only endpoints (MUST be before /api/reports/** wildcard)
+                .antMatchers("/api/reports/stats").hasRole("ADMIN")
                 // Controller-only endpoints
                 .antMatchers("/api/reports/**").hasRole("CONTROLLER")
                 // Any authenticated user (any role)
                 .antMatchers("/api/users/**").authenticated()
+                // Admin view route: protected by client-side IIFE guard in admin.html
+                // (JWT lives in localStorage, not cookies → browser navigation has no Auth header)
                 // Non-API view routes: open for now (Phase 3 scope)
                 .anyRequest().permitAll()
             .and()

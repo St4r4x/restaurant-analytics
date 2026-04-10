@@ -116,19 +116,17 @@ App runs on `http://localhost:8080`.
 
 ### Branch Strategy
 
+Branching is managed automatically by **GSD** (`branching_strategy: "phase"` in `.planning/config.json`).
+
 - **`develop`** — main integration branch; all phase work lands here
-- **`feature/phase-N-<slug>`** — one branch per phase (e.g. `feature/phase-7-homepage-navigation`)
+- **`gsd/phase-N-<slug>`** — one branch per phase, created and merged by GSD (e.g. `gsd/phase-09-ux-polish`)
 
-**When starting a phase (executor agents MUST do this):**
-```bash
-git checkout develop
-git checkout -b feature/phase-N-<slug>
-```
+GSD creates the phase branch automatically on execution start and merges it into `develop` after verification. Do not create or merge phase branches manually.
 
-**When a phase is complete (executor agents MUST do this before the phase summary commit):**
+**Worktree cleanup (after each wave):** GSD parallel execution uses temporary `worktree-agent-*` branches backed by directories in `.claude/worktrees/`. After a wave completes, remove them:
 ```bash
-git checkout develop
-git merge --no-ff feature/phase-N-<slug> -m "feat(phase-N): merge <slug>"
+git worktree remove --force .claude/worktrees/agent-<id>
+git branch -D worktree-agent-<id>
 ```
 
 Never commit phase work directly to `main`. `main` only receives merges from `develop` at milestone boundaries.

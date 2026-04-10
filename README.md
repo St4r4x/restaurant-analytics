@@ -36,12 +36,13 @@ App runs on http://localhost:8080. Swagger UI: http://localhost:8080/swagger-ui.
 
 ## Seeded Test Accounts
 
-Two accounts are seeded on startup via `DataSeeder`:
+Three accounts are seeded on startup via `DataSeeder`:
 
 | Username | Password | Role |
 |----------|----------|------|
 | customer_test | password | ROLE_CUSTOMER |
 | controller_test | password | ROLE_CONTROLLER |
+| admin_test | Test1234! | ROLE_ADMIN |
 
 ## User Roles
 
@@ -60,6 +61,16 @@ Two accounts are seeded on startup via `DataSeeder`:
 
 Controller registration requires the `CONTROLLER_SIGNUP_CODE` environment variable
 to be set. If absent, all controller signups return HTTP 400.
+
+**ROLE_ADMIN**
+- Access admin panel at `/admin`
+- Trigger NYC Open Data sync (`POST /api/restaurants/refresh`)
+- Rebuild Redis cache (`POST /api/restaurants/rebuild-cache`)
+- Download at-risk restaurant CSV (`GET /api/inspection/at-risk/export.csv`)
+- View inspection report statistics by status and grade (`GET /api/reports/stats`)
+
+Admin accounts are created via `DataSeeder` on startup. Self-registration requires the
+`ADMIN_SIGNUP_CODE` environment variable (empty by default — admin signup disabled in Docker).
 
 ## API Endpoints
 
@@ -88,6 +99,14 @@ to be set. If absent, all controller signups return HTTP 400.
 | GET | /api/restaurants/recent-inspections | Restaurants inspected in last N days |
 | GET | /api/restaurants/nearby | Geospatial search (2dsphere) |
 
+### Inspections (public)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/inspection/uncontrolled | Uncontrolled restaurants (grade C/Z or no inspection in 12 months) |
+| GET | /api/inspection/uncontrolled/export.csv | Download uncontrolled restaurants as CSV |
+| GET | /api/inspection/at-risk/export.csv | Download at-risk restaurants as CSV (ADMIN only) |
+
 ### Reports (CONTROLLER only)
 
 | Method | Path | Description |
@@ -106,6 +125,12 @@ to be set. If absent, all controller signups return HTTP 400.
 | GET | /api/analytics/borough-grades | Grade distribution by borough |
 | GET | /api/analytics/cuisine-rankings | Top 10 cleanest and worst cuisines |
 | GET | /api/analytics/at-risk | Top 50 restaurants with last grade C or Z |
+
+### Admin (ADMIN only)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/reports/stats | Inspection report counts by status and grade |
 
 ### Users (authenticated)
 
@@ -129,8 +154,10 @@ to be set. If absent, all controller signups return HTTP 400.
 | /restaurant/{camis} | None | Restaurant detail: grade badge, score chart, inspection history |
 | /inspection-map | None | Interactive grade-colored Leaflet map with clustering |
 | /my-bookmarks | Required | Saved restaurants |
+| /admin | ADMIN | Admin panel: sync controls, at-risk CSV download, report statistics |
 
 All pages include the persistent sticky navbar (Logo + Search/Map/Analytics + auth area).
+All pages also include `fragments/ux-utils.html` which provides the shared skeleton shimmer CSS and `showToast()` notification system. All pages are mobile-responsive at ≤768px via a hamburger navbar and responsive grid breakpoints.
 
 ## Configuration
 

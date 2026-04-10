@@ -153,8 +153,15 @@ public interface RestaurantDAO {
     List<Restaurant> searchByNameOrAddress(String q, int limit);
 
     /**
+     * Returns restaurants with last grade C/Z OR not inspected in the past 12 months.
+     * @param borough optional borough filter (null or empty = all boroughs)
+     * @param limit   max results to return
+     */
+    List<com.aflokkat.dto.UncontrolledEntry> findUncontrolled(String borough, int limit);
+
+    /**
      * Returns lightweight map points for all restaurants with coordinates.
-     * Each Document contains: restaurantId, name, lat, lng, grade.
+     * Each Document contains: restaurantId, name, lat, lng, grade, borough, cuisine.
      */
     List<org.bson.Document> findMapPoints();
 

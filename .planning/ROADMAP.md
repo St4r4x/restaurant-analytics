@@ -152,13 +152,14 @@ Plans:
   3. The restaurant detail page has a "Nearby restaurants" section showing up to 5 restaurants within 500m, each with name, grade badge, and a link to their detail page (calls `/api/restaurants/nearby`)
   4. Above the search results on the homepage, a sort control (Best Score / Worst Score / A→Z) reorders the current result set client-side
 
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
 - [ ] 08-01-PLAN.md — Wave 0 tests + DISC-02 backend (UncontrolledEntry DTO, findUncontrolled DAO, InspectionController endpoints, ViewController route, findMapPoints extension)
 - [ ] 08-02-PLAN.md — uncontrolled.html template (DISC-02)
 - [ ] 08-03-PLAN.md — inspection-map.html filter bar: grade checkboxes, cuisine dropdown, count badge (DISC-01)
 - [ ] 08-04-PLAN.md — restaurant.html Nearby section + landing.html sort control (DISC-03, DISC-04)
+- [ ] 08-05-PLAN.md — Gap-closure fixes: controller nav link, name links, coordinate debug, map grade colors, borough alignment, CSV button (DISC-01, DISC-02, DISC-03, DISC-04)
 
 ### Phase 9: UX Polish
 **Goal**: Every list is paginated, every async operation shows a skeleton, errors surface as toasts, and all pages work on mobile
@@ -178,6 +179,12 @@ Plans:
   1. A logged-in controller navigating to `/admin` sees the last sync date/status and a "Sync NYC Data" button; clicking it triggers the sync and shows live progress (polling the sync-status endpoint every 2s) until completion
   2. The admin page has a "Download At-Risk CSV" button that triggers a file download of the existing `/api/inspection/at-risk/export.csv` endpoint
   3. The admin page shows a "Report Statistics" panel with counts grouped by status (Open / In Progress / Resolved) and by grade (A/B/C/F) across all controllers' reports — the aggregate query must NOT return individual reports from other controllers
+**Plans:** 3/3 plans complete
+
+Plans:
+- [x] 10-01-PLAN.md — AuthService ROLE_ADMIN signup code + DataSeeder admin_test + AuthServiceTest update (ADM-01)
+- [x] 10-02-PLAN.md — ReportRepository aggregate @Query methods + AdminController GET /api/reports/stats (ADM-03)
+- [x] 10-03-PLAN.md — SecurityConfig antMatchers + ViewController /admin + admin.html + navbar ADMIN link (ADM-01, ADM-02, ADM-03)
 
 ## Progress
 
@@ -196,4 +203,4 @@ v2.0: Phase 5 → (6 ∥ 7) → 8 → 9 → 10  (6 and 7 can run in parallel)
 | 7. Homepage & Navigation | 4/4 | Complete   | 2026-04-03 |
 | 8. Discovery Enhancement | 0/TBD | Not started | - |
 | 9. UX Polish | 0/TBD | Not started | - |
-| 10. Admin Tools | 0/TBD | Not started | - |
+| 10. Admin Tools | 3/3 | Complete   | 2026-04-10 |

@@ -2,7 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — NYC Restaurant Inspector</title>
+  <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
 </head>
 <body>
   <div th:replace="fragments/navbar :: navbar"></div>
@@ -37,7 +39,7 @@
       <h3 style="font-size:1.1em;font-weight:700;margin-bottom:16px;border-bottom:3px solid #667eea;padding-bottom:8px">
         NYC Hygiene Overview
       </h3>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+      <div id="kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
         <div style="text-align:center">
           <div id="kpi-total" style="font-size:2em;font-weight:700;color:#667eea">&#8212;</div>
           <div style="font-size:0.82em;color:#666;margin-top:4px">Total Restaurants</div>
@@ -65,6 +67,10 @@
     .container { max-width:900px;margin:0 auto;padding:0 16px 48px; }
     .card { background:white;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1); }
     .mini-card { background:white;border:1px solid #e8e8e8;border-radius:8px;padding:16px; }
+    @media (max-width: 768px) {
+      #bookmarks-grid, #nearby-grid { grid-template-columns: 1fr !important; }
+      #kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
   </style>
 
   <script>
@@ -108,8 +114,9 @@
           + 'Search for a restaurant and save it to your list.</p>');
       })
       .catch(() => {
+        showToast('Could not load bookmarks', 'error');
         document.getElementById('bookmarks-grid').innerHTML =
-          '<p style="color:#b71c1c;font-size:0.85em">Could not load bookmarks.</p>';
+          '<p style="color:#888;font-size:0.88em">Unavailable</p>';
       });
 
     // Strip B: Nearby (only if geolocation available)
@@ -143,7 +150,7 @@
           document.getElementById('kpi-risk').textContent = d.atRiskCount != null ? d.atRiskCount.toLocaleString() : '—';
         }
       })
-      .catch(() => {});
+      .catch(function() { showToast('Could not load stats', 'error'); });
   </script>
 </body>
 </html>

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Full Product
 status: executing
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-04-03T20:02:54.610Z"
-last_activity: "2026-04-03 — Completed 05-01: dashboard routing, security guard, 6 new tests"
+stopped_at: Completed 10-03-PLAN.md — Phase 10 admin tools fully verified
+last_updated: "2026-04-10T16:23:59.831Z"
+last_activity: 2026-04-10
 progress:
   total_phases: 10
-  completed_phases: 7
-  total_plans: 24
-  completed_plans: 24
-  percent: 0
+  completed_phases: 10
+  total_plans: 37
+  completed_plans: 37
+  percent: 100
 ---
 
 # Project State
@@ -21,20 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
-**Current focus:** Phase 1 — Role Infrastructure
+**Current focus:** Phase 10 — admin-tools
 
 ## Current Position
 
-Phase: 5 of 10 (Controller Workspace)
-Plan: 1 of 2 completed in current phase
-Status: In progress
-Last activity: 2026-04-03 — Completed 05-01: dashboard routing, security guard, 6 new tests
+Phase: 10 (admin-tools) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-10
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100% (8/10 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0
 - Average duration: -
 - Total execution time: -
@@ -46,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: -
 - Trend: -
 
@@ -76,6 +78,10 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-homepage-navigation P02 | 13min | 2 tasks | 4 files |
 | Phase 07-homepage-navigation PP03 | 12min | 2 tasks | 5 files |
 | Phase 07 P04 | 5 | 1 tasks | 1 files |
+| Phase 10-admin-tools P02 | 2 | 1 tasks | 4 files |
+| Phase 10 P01 | 5 | 3 tasks | 8 files |
+| Phase 10-admin-tools P03 | 15 | 2 tasks | 6 files |
+| Phase 10-admin-tools P03 | 15min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -139,6 +145,19 @@ Recent decisions affecting current work:
 - [Phase 07-homepage-navigation]: Chart.js and Leaflet CDN references removed from index.html: only needed on analytics.html and inspection-map.html
 - [Phase 07-03]: inspection-map.html uses body flex-column layout so navbar integrates as first flex child above toolbar — no explicit padding-top needed
 - [Phase 07]: Reused gradeBadgeHtml and renderRestaurantCards verbatim from index.html — no abstraction layer needed for two pages
+- [Phase 10-02]: AdminController uses @Autowired ReportRepository directly (no service wrapper) — consistent with existing AnalyticsController pattern
+- [Phase 10-02]: AuthService 5-arg constructor added (controllerSignupCode + adminSignupCode) — ADMIN check runs before CONTROLLER check to prevent code collision
+- [Phase 10-02]: Pre-populate LinkedHashMap with all enum.values() at 0L before merging JPQL GROUP BY results — guarantees all enum keys always present
+- [Phase 10-01]: Admin signup code checked before controller code in role-assignment — admin takes priority when both are set
+- [Phase 10-01]: admin.signup.code= (empty) is default — admin accounts created via DataSeeder, not self-registration
+- [Phase 10-01]: ADMIN_SIGNUP_CODE defaults to empty string in docker-compose.yml (admin signup disabled in Docker)
+- [Phase 10-admin-tools]: antMatcher /api/reports/stats placed BEFORE /api/reports/** wildcard — first-match-wins Spring Security ordering
+- [Phase 10-admin-tools]: SecurityConfigTest dashboard tests updated: Phase 7 removed server-side /dashboard guard (client-side IIFE only) — tests updated to match
+- [Phase 10-admin-tools]: DataSeederTest updated to expect 3 seed users (customer, controller, admin) after Phase 10-01 added admin_test
+- [Phase 10-admin-tools]: fetchWithAuth defined inline in admin.html (same pattern as dashboard.html, not extracted to ux-utils)
+- [Phase 10-admin-tools]: antMatcher /api/reports/stats placed BEFORE /api/reports/** wildcard — first-match-wins Spring Security ordering
+- [Phase 10-admin-tools]: Removed hasRole(ADMIN) on /admin view route — browser nav does not send Authorization header; client-side IIFE guard in admin.html handles role enforcement
+- [Phase 10-admin-tools]: fetchWithAuth defined inline in admin.html same as dashboard.html pattern, not extracted to ux-utils fragment
 
 ### Pending Todos
 
@@ -153,6 +172,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T20:02:54.607Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-discovery-enhancement/08-UI-SPEC.md
+Last session: 2026-04-10T16:23:59.827Z
+Stopped at: Completed 10-03-PLAN.md — Phase 10 admin tools fully verified
+Resume file: None
