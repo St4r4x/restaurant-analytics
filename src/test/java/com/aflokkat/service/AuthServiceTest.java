@@ -36,7 +36,7 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        authService = new AuthService(userRepository, passwordEncoder, jwtUtil, null);
+        authService = new AuthService(userRepository, passwordEncoder, jwtUtil, null, null);
     }
 
     // ── register ──────────────────────────────────────────────────────────────
@@ -198,7 +198,7 @@ class AuthServiceTest {
     @Test
     void register_assignsControllerRole_whenCorrectSignupCode() {
         // AuthService with signup code "secret123" configured
-        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123");
+        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123", null);
 
         when(userRepository.findByUsername("ctrl")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("ctrl@test.com")).thenReturn(Optional.empty());
@@ -223,7 +223,7 @@ class AuthServiceTest {
     @Test
     void register_throws_whenWrongSignupCode() {
         // AuthService with signup code "secret123" configured
-        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123");
+        AuthService serviceWithCode = new AuthService(userRepository, passwordEncoder, jwtUtil, "secret123", null);
 
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
