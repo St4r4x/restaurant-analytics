@@ -249,4 +249,66 @@ class AuthServiceTest {
                 () -> authService.register(req));
         assertEquals("Invalid registration request", ex.getMessage());
     }
+
+    @Test
+    void register_assignsAdminRole_whenCorrectAdminSignupCode() {
+        AuthService adminService = new AuthService(userRepository, passwordEncoder, jwtUtil, null, "admincode");
+        when(userRepository.findByUsername("adm")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("adm@test.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(any())).thenReturn("hashed");
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(jwtUtil.generateAccessToken(any(), any())).thenReturn("token");
+        when(jwtUtil.generateRefreshToken(any())).thenReturn("refresh");
+
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("adm");
+        req.setEmail("adm@test.com");
+        req.setPassword("pass");
+        req.setSignupCode("admincode");
+
+        adminService.register(req);
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals("ROLE_ADMIN", captor.getValue().getRole());
+    }
+
+    @Test
+    void register_doesNotAssignAdmin_whenAdminCodeDisabled() {
+        // adminSignupCode is null — admin path disabled; controller code also null so any code -> 400
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("adm");
+        req.setEmail("adm@test.com");
+        req.setPassword("pass");
+        req.setSignupCode("admincode");
+
+        // authService has (null, null) — both codes disabled
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.register(req));
+        assertEquals("Invalid registration request", ex.getMessage());
+    }
+
+    @Test
+    void register_adminCodeTakesPriorityOverControllerCode() {
+        // Both codes set but distinct; providing adminCode should produce ROLE_ADMIN, not ROLE_CONTROLLER
+        AuthService bothCodes = new AuthService(userRepository, passwordEncoder, jwtUtil, "ctrlcode", "admincode");
+        when(userRepository.findByUsername("adm")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("adm@test.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(any())).thenReturn("hashed");
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(jwtUtil.generateAccessToken(any(), any())).thenReturn("token");
+        when(jwtUtil.generateRefreshToken(any())).thenReturn("refresh");
+
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("adm");
+        req.setEmail("adm@test.com");
+        req.setPassword("pass");
+        req.setSignupCode("admincode");
+
+        bothCodes.register(req);
+
+        ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(userRepository).save(captor.capture());
+        assertEquals("ROLE_ADMIN", captor.getValue().getRole());
+    }
 }
