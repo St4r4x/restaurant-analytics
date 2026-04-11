@@ -8,6 +8,20 @@ A web application that connects restaurant hygiene controllers and customers aro
 
 A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
 
+## Current Milestone: v3.0 Production Readiness
+
+**Goal:** Transform the academic project into a portfolio-grade, deployable application with full CI/CD pipeline, comprehensive test coverage, and production-quality code across every layer.
+
+**Target features:**
+- CI/CD: GitHub Actions pipeline — build, unit tests, integration tests (Testcontainers), E2E (Playwright), Docker build & push to registry
+- Testing: Unit (services/DAOs), integration (real DB), E2E browser tests, JaCoCo coverage report with minimum threshold
+- Database: MongoDB indexes, query optimization, data model cleanup, validation constraints
+- Config/secrets: No hardcoded secrets, proper env var handling for all environments
+- Docker: Production-grade Compose, health checks, resource limits
+- Code quality: Structured logging, dead code removal, complete OpenAPI docs, proper HTTP error responses
+- Security: CORS policy, rate limiting, input validation, HTTPS-ready config
+- UI: Full visual redesign — modern dark/neutral SaaS look (Vercel/Linear aesthetic), consistent design system
+
 ## Current State
 
 **Shipped: v2.0 — Full Product (2026-04-11)**
@@ -101,5 +115,22 @@ Production-grade Spring Boot 2.6.15 monolith:
 | uploadPhoto uses raw fetch() (not fetchWithAuth) | fetchWithAuth sets Content-Type: application/json, corrupts multipart boundary | ✓ Validated |
 | ADMIN role separate from CONTROLLER | Admin-specific signup code, separate DataSeeder seed user | ✓ Validated |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-11 — v2.0 milestone complete*
+*Last updated: 2026-04-11 — v3.0 milestone started*
