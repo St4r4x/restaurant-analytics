@@ -22,7 +22,7 @@ Academic project (Aflokkat / big data module).
 ## Architecture
 
 ```
-com.aflokkat/
+com.st4r4x/
 ├── Application.java
 ├── config/           # AppConfig, MongoClientFactory, RedisConfig, SecurityConfig, OpenApiConfig
 ├── controller/       # RestaurantController, InspectionController, AuthController, UserController, ViewController
