@@ -24,7 +24,11 @@ A customer can search any NYC restaurant and immediately know whether it's clean
 
 ## Current State
 
-**Shipped: v2.0 — Full Product (2026-04-11)**
+**In progress: v3.0 — Production Readiness**
+
+Phase 11 complete. Logging infrastructure added: Logback JSON/plaintext profile-switched config, request-ID tracing via MDC + X-Request-ID header.
+
+**Previously shipped: v2.0 — Full Product (2026-04-11)**
 
 All 10 phases complete. 36/36 requirements validated. The app is a fully deployed Spring Boot monolith with:
 - Dual-role auth (CUSTOMER / CONTROLLER / ADMIN) via JWT
@@ -66,6 +70,12 @@ All 10 phases complete. 36/36 requirements validated. The app is a fully deploye
 - ✓ Sort control on search results
 - ✓ Pagination (20 items/page), skeleton loading, toast notifications, mobile responsive
 - ✓ Admin tools: sync controls, CSV export, aggregate report stats (ADMIN role)
+
+### Validated (v3.0 — in progress)
+
+- ✓ Logback JSON/plaintext profile-switched logging (QA-01) — Validated in Phase 11: logging-infrastructure
+- ✓ LogstashEncoder JSON output in prod profile (QA-02) — Validated in Phase 11: logging-infrastructure
+- ✓ Request-ID tracing: UUID in MDC + X-Request-ID response header (QA-03) — Validated in Phase 11: logging-infrastructure
 
 ### Deferred to v3
 
@@ -133,4 +143,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 — v3.0 milestone started*
+*Last updated: 2026-04-11 — Phase 11 complete (logging infrastructure)*
