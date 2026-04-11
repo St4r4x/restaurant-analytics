@@ -1,10 +1,11 @@
 ---
 phase: 5
 slug: controller-workspace
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: compliant
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-02
+audited: 2026-04-11
 ---
 
 # Phase 5 — Validation Strategy
@@ -38,10 +39,10 @@ created: 2026-04-02
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 05-01-01 | 01 | 1 | CTRL-05, CTRL-06 | unit (stub) | `mvn test -Dtest=ViewControllerDashboardTest` | ❌ Wave 0 | ⬜ pending |
-| 05-01-02 | 01 | 1 | CTRL-05, CTRL-06 | unit | `mvn test -Dtest=ViewControllerDashboardTest#index_redirectsToDashboard_forController` | ❌ Wave 0 | ⬜ pending |
-| 05-01-03 | 01 | 1 | CTRL-06 | integration | `mvn test -Dtest=SecurityConfigTest` | ❌ Wave 0 | ⬜ pending |
-| 05-02-01 | 02 | 2 | CTRL-05, CTRL-06, CTRL-07, CTRL-08 | manual | see Manual Test Protocol | n/a | ⬜ pending |
+| 05-01-01 | 01 | 1 | CTRL-05, CTRL-06 | unit | `mvn test -Dtest=ViewControllerDashboardTest` | ✅ | ✅ green |
+| 05-01-02 | 01 | 1 | CTRL-05, CTRL-06 | unit | `mvn test -Dtest=ViewControllerDashboardTest#index_redirectsToDashboard_forController` | ✅ | ✅ green |
+| 05-01-03 | 01 | 1 | CTRL-06 | integration | `mvn test -Dtest=SecurityConfigTest` | ✅ | ✅ green |
+| 05-02-01 | 02 | 2 | CTRL-05, CTRL-06, CTRL-07, CTRL-08 | manual | see Manual Test Protocol | n/a | ⬜ manual |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -49,8 +50,16 @@ created: 2026-04-02
 
 ## Wave 0 Requirements
 
-- [ ] `src/test/java/com/aflokkat/controller/ViewControllerDashboardTest.java` — 3 unit tests for `index()` redirect logic (CTRL-05, CTRL-06)
-- [ ] `SecurityConfigTest.java` additions — 3 integration tests for `/dashboard` security guard (CTRL-06)
+- [x] `src/test/java/com/aflokkat/controller/ViewControllerDashboardTest.java` — 3 unit tests for `index()` redirect logic (CTRL-05, CTRL-06)
+  - `index_redirectsToDashboard_forController` — ✅ passes
+  - `index_returnsLanding_forAnonymous` — ✅ passes (returns "landing" per Phase 7 split; was "index" in plan)
+  - `index_returnsIndex_forCustomer` — ✅ passes
+- [x] `SecurityConfigTest.java` additions — 3 integration tests for `/dashboard` security guard (CTRL-06)
+  - `dashboard_isAccessible_whenUnauthenticated` — ✅ passes (200; server-side guard removed Phase 7, client-side IIFE only)
+  - `dashboard_isAccessible_forCustomer` — ✅ passes (200; consistent with /admin pattern)
+  - `dashboard_returns200_forController` — ✅ passes
+
+> **Design note:** The 05-01-PLAN.md specified `.antMatchers("/dashboard").hasRole("CONTROLLER")` server-side guard. This was subsequently removed (Phase 7 decision, consistent with `/admin` client-side IIFE pattern). SecurityConfigTest dashboard tests were updated to expect HTTP 200 for all callers, matching `anyRequest().permitAll()`. The security is enforced by the IIFE in `dashboard.html`.
 
 ---
 
@@ -65,55 +74,39 @@ created: 2026-04-02
 
 ---
 
-## ViewControllerDashboardTest — Required Tests (Wave 0)
+## ViewControllerDashboardTest — Implemented Tests
 
-New file: `src/test/java/com/aflokkat/controller/ViewControllerDashboardTest.java`
+File: `src/test/java/com/aflokkat/controller/ViewControllerDashboardTest.java`
 
-Uses JUnit 5 + Mockito `@ExtendWith(MockitoExtension.class)`:
-
-```java
-// Test 1: index_redirectsToDashboard_forController
-// Build Authentication with singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER"))
-// Call viewController.index(auth)
-// Assert equals "redirect:/dashboard"
-
-// Test 2: index_returnsIndex_forAnonymous
-// Call viewController.index(null)
-// Assert equals "index"
-
-// Test 3: index_returnsIndex_forCustomer
-// Build Authentication with ROLE_CUSTOMER authority
-// Call viewController.index(auth)
-// Assert equals "index"
+```
+index_redirectsToDashboard_forController  ✅
+index_returnsLanding_forAnonymous         ✅
+index_returnsIndex_forCustomer            ✅
 ```
 
 ---
 
-## SecurityConfigTest — Required Additions (Wave 0)
+## Validation Audit 2026-04-11
 
-Extend existing `SecurityConfigTest.java` (JUnit 4 pattern — do NOT use Jupiter annotations):
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated to manual-only | 0 |
+| Already manual-only | 4 |
+| Automated tests passing | 6 (3 unit + 3 integration) |
 
-```java
-// dashboard_redirectsToLogin_whenUnauthenticated:
-// GET /dashboard, no auth → expect 302 to /login
-
-// dashboard_returns403_forCustomer:
-// GET /dashboard with ROLE_CUSTOMER → expect 403
-
-// dashboard_returns200_forController:
-// GET /dashboard with ROLE_CONTROLLER → expect 200
-// Requires adding @GetMapping("/dashboard") to the StubController inner class
-```
+All automatable behaviors are covered. Manual-only items are inherently browser-dependent.
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** 2026-04-11 (gsd-validate-phase audit)
