@@ -4,7 +4,7 @@ import com.aflokkat.config.AppConfig;
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.dto.ReportRequest;
-import com.aflokkat.entity.Grade;
+import com.aflokkat.entity.InspectionGrade;
 import com.aflokkat.entity.InspectionReportEntity;
 import com.aflokkat.entity.Status;
 import com.aflokkat.entity.UserEntity;
@@ -75,7 +75,7 @@ class ReportControllerTest {
     }
 
     // helper: build a persisted entity
-    private InspectionReportEntity makeEntity(Long id, String restaurantId, Grade grade, Status status) {
+    private InspectionReportEntity makeEntity(Long id, String restaurantId, InspectionGrade grade, Status status) {
         InspectionReportEntity e = new InspectionReportEntity();
         e.setId(id);
         e.setRestaurantId(restaurantId);
@@ -98,7 +98,7 @@ class ReportControllerTest {
         user.setId(42L);
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
 
-        InspectionReportEntity saved = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        InspectionReportEntity saved = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
         when(reportRepository.save(any(InspectionReportEntity.class))).thenReturn(saved);
 
         Restaurant restaurant = new Restaurant("Joe's", "Italian", "Manhattan");
@@ -106,7 +106,7 @@ class ReportControllerTest {
 
         ReportRequest req = new ReportRequest();
         req.setRestaurantId("R1");
-        req.setGrade(Grade.A);
+        req.setGrade(InspectionGrade.A);
         req.setStatus(Status.OPEN);
 
         mockMvc.perform(post("/api/reports")
@@ -124,7 +124,7 @@ class ReportControllerTest {
     @Test
     void createReport_returns400_whenRestaurantIdMissing() throws Exception {
         ReportRequest req = new ReportRequest();
-        req.setGrade(Grade.A);
+        req.setGrade(InspectionGrade.A);
         // restaurantId intentionally null
 
         mockMvc.perform(post("/api/reports")
@@ -141,13 +141,13 @@ class ReportControllerTest {
         user.setId(42L);
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
 
-        InspectionReportEntity saved = makeEntity(2L, "UNKNOWN", Grade.B, Status.OPEN);
+        InspectionReportEntity saved = makeEntity(2L, "UNKNOWN", InspectionGrade.B, Status.OPEN);
         when(reportRepository.save(any(InspectionReportEntity.class))).thenReturn(saved);
         when(restaurantDAO.findByRestaurantId("UNKNOWN")).thenReturn(null);
 
         ReportRequest req = new ReportRequest();
         req.setRestaurantId("UNKNOWN");
-        req.setGrade(Grade.B);
+        req.setGrade(InspectionGrade.B);
 
         mockMvc.perform(post("/api/reports")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -165,8 +165,8 @@ class ReportControllerTest {
         user.setId(42L);
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
 
-        InspectionReportEntity e1 = makeEntity(1L, "R1", Grade.A, Status.OPEN);
-        InspectionReportEntity e2 = makeEntity(2L, "R2", Grade.B, Status.RESOLVED);
+        InspectionReportEntity e1 = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
+        InspectionReportEntity e2 = makeEntity(2L, "R2", InspectionGrade.B, Status.RESOLVED);
         when(reportRepository.findByUserId(42L)).thenReturn(Arrays.asList(e1, e2));
         when(restaurantDAO.findByRestaurantId(anyString())).thenReturn(null);
 
@@ -186,7 +186,7 @@ class ReportControllerTest {
         user.setId(42L);
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
 
-        InspectionReportEntity e1 = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        InspectionReportEntity e1 = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
         when(reportRepository.findByUserIdAndStatus(42L, Status.OPEN)).thenReturn(Collections.singletonList(e1));
         when(restaurantDAO.findByRestaurantId(anyString())).thenReturn(null);
 
@@ -242,7 +242,7 @@ class ReportControllerTest {
     @Test
     void patchReport_updatesOwnedReport_andReturns200() throws Exception {
         // Entity owned by user 42L (same as ctx user)
-        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        InspectionReportEntity entity = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
         UserEntity user = new UserEntity("ctrl_user", "ctrl@test.com", "hash", "ROLE_CONTROLLER");
         user.setId(42L);
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
@@ -251,7 +251,7 @@ class ReportControllerTest {
         when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
 
         ReportRequest req = new ReportRequest();
-        req.setGrade(Grade.B);
+        req.setGrade(InspectionGrade.B);
         req.setStatus(Status.IN_PROGRESS);
 
         mockMvc.perform(patch("/api/reports/1")
@@ -267,7 +267,7 @@ class ReportControllerTest {
     @Test
     void patchReport_returns403_whenNotOwner() throws Exception {
         // Entity owned by user 99L — caller is 42L
-        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        InspectionReportEntity entity = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
         UserEntity owner = new UserEntity("other_user", "other@test.com", "hash", "ROLE_CONTROLLER");
         owner.setId(99L);
         entity.setUser(owner);
@@ -278,7 +278,7 @@ class ReportControllerTest {
         when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
 
         ReportRequest req = new ReportRequest();
-        req.setGrade(Grade.C);
+        req.setGrade(InspectionGrade.C);
 
         mockMvc.perform(patch("/api/reports/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -293,7 +293,7 @@ class ReportControllerTest {
     @Test
     void patchReport_appliesOnlyNonNullFields_leavingOthersUnchanged() throws Exception {
         // Entity starts with grade=A, status=OPEN, notes=null, violationCodes=null
-        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        InspectionReportEntity entity = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
 
         UserEntity user = new UserEntity("ctrl_user", "ctrl@test.com", "hash", "ROLE_CONTROLLER");
         user.setId(42L);
@@ -304,7 +304,7 @@ class ReportControllerTest {
 
         // Only grade and violationCodes are non-null; status and notes are intentionally null
         ReportRequest req = new ReportRequest();
-        req.setGrade(Grade.C);
+        req.setGrade(InspectionGrade.C);
         req.setViolationCodes("10F");
         // status and notes stay null in the request
 
@@ -319,7 +319,7 @@ class ReportControllerTest {
         verify(reportRepository).save(captor.capture());
         InspectionReportEntity saved = captor.getValue();
         // grade and violationCodes must be updated
-        org.junit.jupiter.api.Assertions.assertEquals(Grade.C, saved.getGrade());
+        org.junit.jupiter.api.Assertions.assertEquals(InspectionGrade.C, saved.getGrade());
         org.junit.jupiter.api.Assertions.assertEquals("10F", saved.getViolationCodes());
         // status must remain OPEN (not overwritten), notes must remain null
         org.junit.jupiter.api.Assertions.assertEquals(Status.OPEN, saved.getStatus());
@@ -349,7 +349,7 @@ class ReportControllerTest {
         user.setId(42L);
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
 
-        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        InspectionReportEntity entity = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
         when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
         when(reportRepository.save(any(InspectionReportEntity.class))).thenAnswer(inv -> inv.getArgument(0));
         when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
@@ -399,7 +399,7 @@ class ReportControllerTest {
         Path photoFile = photoDir.resolve("123456789_test.jpg");
         Files.write(photoFile, "fake-jpeg-bytes".getBytes());
 
-        InspectionReportEntity entity = makeEntity(1L, "R1", Grade.A, Status.OPEN);
+        InspectionReportEntity entity = makeEntity(1L, "R1", InspectionGrade.A, Status.OPEN);
         entity.setPhotoPath(photoFile.toString());
         when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
 

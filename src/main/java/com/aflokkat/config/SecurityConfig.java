@@ -67,9 +67,12 @@ public class SecurityConfig {
                 .antMatchers("/api/reports/**").hasRole("CONTROLLER")
                 // Any authenticated user (any role)
                 .antMatchers("/api/users/**").authenticated()
-                // Admin view route: protected by client-side IIFE guard in admin.html
-                // (JWT lives in localStorage, not cookies → browser navigation has no Auth header)
-                // Non-API view routes: open for now (Phase 3 scope)
+                // INTENTIONAL: view routes are open at the Spring Security layer.
+                // JWT lives in localStorage, not cookies — browser navigation carries no
+                // Authorization header, so server-side enforcement would block every page
+                // load for authenticated users.  Access control for sensitive views
+                // (admin.html, dashboard.html) is enforced client-side via an IIFE guard
+                // that reads localStorage and redirects unauthenticated users to /login.
                 .anyRequest().permitAll()
             .and()
             .exceptionHandling()

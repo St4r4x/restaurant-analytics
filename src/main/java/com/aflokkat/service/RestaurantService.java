@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aflokkat.aggregation.AggregationCount;
-import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.dao.RestaurantDAO;
 import com.aflokkat.domain.Address;
@@ -45,16 +44,6 @@ public class RestaurantService {
         return restaurantDAO.findCountByBorough();
     }
     
-    // =============== USE CASE 2 ===============
-    
-    /**
-     * USE CASE 2: Average inspection score per borough for a given cuisine
-     */
-    public List<BoroughCuisineScore> getAverageScoreByCuisineAndBorough(String cuisine) {
-        ValidationUtil.requireNonEmpty(cuisine, "cuisine");
-        return restaurantDAO.findAverageScoreByCuisineAndBorough(cuisine);
-    }
-    
     // =============== USE CASE 3 ===============
     
     /**
@@ -64,16 +53,6 @@ public class RestaurantService {
         ValidationUtil.requireNonEmpty(borough, "borough");
         ValidationUtil.requirePositive(limit, "limit");
         return restaurantDAO.findWorstCuisinesByAverageScoreInBorough(borough, limit);
-    }
-    
-    // =============== USE CASE 4 ===============
-    
-    /**
-     * USE CASE 4: Cuisines with a minimum restaurant count
-     */
-    public List<String> getCuisinesWithMinimumCount(int minCount) {
-        ValidationUtil.requirePositive(minCount, "minCount");
-        return restaurantDAO.findCuisinesWithMinimumCount(minCount);
     }
     
     // =============== GENERIC QUERIES ===============

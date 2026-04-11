@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 — Server Error | NYC Restaurant Inspector</title>
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+           background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;
+           display:flex;align-items:center;justify-content:center; }
+    .card { background:white;border-radius:16px;padding:48px 40px;text-align:center;
+            max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.15); }
+    .code { font-size:5em;font-weight:800;color:#e53935;line-height:1; }
+    h1 { font-size:1.4em;font-weight:700;color:#1a1a2e;margin:12px 0 8px; }
+    p { color:#666;font-size:0.95em;margin-bottom:24px; }
+    a { display:inline-block;padding:10px 24px;background:#667eea;color:white;
+        border-radius:8px;text-decoration:none;font-weight:600;font-size:0.9em; }
+    a:hover { background:#764ba2; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="code">500</div>
+    <h1>Something went wrong</h1>
+    <p>An unexpected error occurred on our end. Please try again in a moment.</p>
+    <a href="/">Back to home</a>
+  </div>
+</body>
+</html>

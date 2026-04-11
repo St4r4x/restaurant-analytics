@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.aflokkat.aggregation.AggregationCount;
-import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.domain.Restaurant;
 import com.aflokkat.dto.AtRiskEntry;
@@ -15,11 +14,6 @@ public interface RestaurantDAO {
      * Returns all restaurants up to the given limit
      */
     List<Restaurant> findAll(int limit);
-    
-    /**
-     * Returns restaurants of the specified cuisine type
-     */
-    List<Restaurant> findByCuisine(String cuisine, int limit);
     
     /**
      * Search with multiple filters
@@ -37,11 +31,6 @@ public interface RestaurantDAO {
     long countAll();
     
     /**
-     * Returns the restaurant count for a specific cuisine
-     */
-    long countByCuisine(String cuisine);
-    
-    /**
      * Returns statistics per borough
      */
     Map<String, Long> findStatisticsByBorough();
@@ -52,11 +41,6 @@ public interface RestaurantDAO {
     List<AggregationCount> findCountByBorough();
     
     /**
-     * USE CASE 2: Compute average inspection score per borough for a given cuisine
-     */
-    List<BoroughCuisineScore> findAverageScoreByCuisineAndBorough(String cuisine);
-    
-    /**
      * USE CASE 3: Return the worst cuisines (highest average score) in a borough
      */
     List<CuisineScore> findWorstCuisinesByAverageScoreInBorough(String borough, int limit);
@@ -65,11 +49,6 @@ public interface RestaurantDAO {
      * USE CASE 3 (global): Worst cuisines across all boroughs
      */
     List<CuisineScore> findWorstCuisinesByAverageScore(int limit);
-
-    /**
-     * USE CASE 4: Return cuisine types with at least minCount restaurants
-     */
-    List<String> findCuisinesWithMinimumCount(int minCount);
 
     /**
      * Returns all distinct cuisine types, sorted alphabetically

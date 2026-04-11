@@ -72,6 +72,17 @@
   </style>
 
   <script>
+    // Redirect authenticated non-customer users to their proper home
+    (function() {
+      var t = localStorage.getItem("accessToken");
+      if (!t) return;
+      try {
+        var role = JSON.parse(atob(t.split(".")[1])).role;
+        if (role === "ROLE_CONTROLLER") { window.location.replace("/dashboard"); return; }
+        if (role === "ROLE_ADMIN") { window.location.replace("/admin"); return; }
+      } catch (e) {}
+    })();
+
     function gradeBadgeHtml(grade) {
       const g = grade || '—';
       let bg = '#ffebee', color = '#b71c1c';

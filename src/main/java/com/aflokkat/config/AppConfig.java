@@ -72,10 +72,6 @@ public class AppConfig {
         return getLongProperty("redis.cache.ttl-seconds", 3600L);
     }
 
-    public static int getRedisTopLimit() {
-        return getIntProperty("redis.top.limit", 10);
-    }
-
     public static String getJwtSecret() {
         return getProperty("jwt.secret", "changeit-please-change-it");
     }

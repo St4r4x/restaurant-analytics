@@ -31,7 +31,7 @@ public class InspectionReportEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Grade grade;
+    private InspectionGrade grade;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -63,8 +63,8 @@ public class InspectionReportEntity {
     public String getRestaurantId() { return restaurantId; }
     public void setRestaurantId(String restaurantId) { this.restaurantId = restaurantId; }
 
-    public Grade getGrade() { return grade; }
-    public void setGrade(Grade grade) { this.grade = grade; }
+    public InspectionGrade getGrade() { return grade; }
+    public void setGrade(InspectionGrade grade) { this.grade = grade; }
 
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }

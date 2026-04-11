@@ -8,10 +8,10 @@
     <relativePath/>
   </parent>
   <groupId>com.aflokkat</groupId>
-  <artifactId>quickstart-app</artifactId>
+  <artifactId>restaurant-hygiene-app</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>quickstart-app</name>
+  <version>2.0</version>
+  <name>Restaurant Hygiene Control App</name>
   <properties>
     <java.version>11</java.version>
     <maven.compiler.source>11</maven.compiler.source>

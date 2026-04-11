@@ -11,9 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.aflokkat.aggregation.AggregationCount;
-import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
-import com.aflokkat.domain.Restaurant;
 
 /**
  * Tests d'intégration pour les 4 use cases
@@ -76,35 +74,6 @@ public class RestaurantDAOIntegrationTest {
         }
     }
     
-    // =============== USE CASE 2 TESTS ===============
-    
-    @Test
-    public void testUseCase2_GetAverageScoreByCuisineAndBorough_Italian() {
-        List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("Italian");
-        
-        assertNotNull("Results should not be null", results);
-        assertFalse("Results should not be empty", results.isEmpty());
-    }
-    
-    @Test
-    public void testUseCase2_AverageScore_ValidData() {
-        List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("Italian");
-        
-        // Check that scores are valid
-        for (BoroughCuisineScore score : results) {
-            assertNotNull("Borough should not be null", score.getBorough());
-            assertTrue("Average score should be positive", score.getAvgScore() > 0);
-        }
-    }
-    
-    @Test
-    public void testUseCase2_AverageScore_InvalidCuisine() {
-        List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("NonExistentCuisine12345");
-        
-        // Should return empty list, not null
-        assertNotNull("Results should not be null", results);
-    }
-    
     // =============== USE CASE 3 TESTS ===============
     
     @Test
@@ -139,37 +108,6 @@ public class RestaurantDAOIntegrationTest {
         }
     }
     
-    // =============== USE CASE 4 TESTS ===============
-    
-    @Test
-    public void testUseCase4_GetCuisinesWithMinimumCount_500() {
-        List<String> results = restaurantDAO.findCuisinesWithMinimumCount(500);
-        
-        assertNotNull("Results should not be null", results);
-        assertFalse("Should have cuisines with >500 restaurants", results.isEmpty());
-    }
-    
-    @Test
-    public void testUseCase4_CuisinesWithMinCount_Alphabetical() {
-        List<String> results = restaurantDAO.findCuisinesWithMinimumCount(500);
-        
-        // Verify sorted alphabetically
-        for (int i = 1; i < results.size(); i++) {
-            assertTrue(
-                "Should be sorted alphabetically",
-                results.get(i - 1).compareTo(results.get(i)) <= 0
-            );
-        }
-    }
-    
-    @Test
-    public void testUseCase4_CuisinesWithHighMinCount() {
-        List<String> results = restaurantDAO.findCuisinesWithMinimumCount(1000);
-        
-        // Should have fewer results with higher minimum count
-        assertNotNull("Results should not be null", results);
-    }
-    
     // =============== GENERIC QUERIES TESTS ===============
     
     @Test
@@ -178,16 +116,4 @@ public class RestaurantDAOIntegrationTest {
         assertTrue("Total count should be positive", count > 0);
     }
     
-    @Test
-    public void testCountByCuisine_Italian() {
-        long count = restaurantDAO.countByCuisine("Italian");
-        assertTrue("Italian restaurants count should be positive", count > 0);
-    }
-    
-    @Test
-    public void testFindByCuisine_Italian() {
-        List<Restaurant> results = restaurantDAO.findByCuisine("Italian", 10);
-        assertNotNull("Results should not be null", results);
-        assertFalse("Should find Italian restaurants", results.isEmpty());
-    }
 }
