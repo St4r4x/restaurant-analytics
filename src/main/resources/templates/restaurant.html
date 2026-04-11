@@ -278,7 +278,7 @@
           .then(function(res) { return res.json(); })
           .then(function(data) {
             document.getElementById('nearby-loading').style.display = 'none';
-            var others = (data || []).filter(function(r) {
+            var others = (data.data || []).filter(function(r) {
               return r.restaurantId !== currentId;
             }).slice(0, 5);
             if (others.length === 0) {

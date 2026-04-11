@@ -205,7 +205,7 @@
         if (!t) return;
         try {
           const role = JSON.parse(atob(t.split(".")[1])).role;
-          window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : "/";
+          window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : role === "ROLE_ADMIN" ? "/admin" : "/";
         } catch { window.location.href = "/"; }
       })();
 
@@ -252,7 +252,7 @@
               localStorage.setItem("refreshToken", result.body.refreshToken);
               try {
                 const role = JSON.parse(atob(result.body.accessToken.split(".")[1])).role;
-                window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : "/";
+                window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : role === "ROLE_ADMIN" ? "/admin" : "/";
               } catch { window.location.href = "/"; }
             } else {
               errorEl.style.display = "block";
