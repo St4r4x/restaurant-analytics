@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: Production Readiness
-status: in_progress
-stopped_at: Roadmap created — Phase 11 ready to plan
-last_updated: "2026-04-11T00:00:00.000Z"
-last_activity: 2026-04-11
+milestone_name: phases
+status: planning
+stopped_at: Phase 11 context gathered
+last_updated: "2026-04-11T19:56:41.736Z"
+last_activity: 2026-04-11 — v3.0 roadmap created (10 phases, 63 requirements)
 progress:
   total_phases: 10
   completed_phases: 0
@@ -39,6 +39,7 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 
 Carried over from v2.0:
+
 - anyRequest().permitAll() with client-side IIFE guards for /admin, /dashboard — browser navigation does not send Authorization header
 - uploadPhoto uses raw fetch() (not fetchWithAuth) — fetchWithAuth sets Content-Type: application/json, corrupts multipart boundary
 - ADMIN role separate from CONTROLLER — Admin-specific signup code, separate DataSeeder seed user
@@ -46,6 +47,7 @@ Carried over from v2.0:
 - mockStatic(AppConfig.class) causes VerifyError on Java 25 — use reflection to patch AppConfig.properties static field in tests
 
 New for v3.0 (from research):
+
 - Testcontainers must stay at 1.x (1.19.8) — 2.x dropped JUnit 4 support; project uses junit-vintage-engine
 - logstash-logback-encoder pinned at 7.3 — 7.4+ dropped Logback 1.2.x support; Spring Boot 2.6.15 ships Logback 1.2.12
 - Bucket4j must stay at 7.6.1 — 8.11.0+ requires JDK 17
@@ -68,6 +70,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-11
-Stopped at: v3.0 roadmap created — 10 phases (11-20), 63 requirements, all mapped
-Resume file: None
+Last session: 2026-04-11T19:56:41.730Z
+Stopped at: Phase 11 context gathered
+Resume file: .planning/phases/11-logging-infrastructure/11-CONTEXT.md
