@@ -7,7 +7,7 @@
     <version>2.6.15</version>
     <relativePath/>
   </parent>
-  <groupId>com.aflokkat</groupId>
+  <groupId>com.st4r4x</groupId>
   <artifactId>restaurant-hygiene-app</artifactId>
   <packaging>jar</packaging>
   <version>2.0</version>
