@@ -8,68 +8,98 @@ A web application that connects restaurant hygiene controllers and customers aro
 
 A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
 
+## Current State
+
+**Shipped: v2.0 — Full Product (2026-04-11)**
+
+All 10 phases complete. 36/36 requirements validated. The app is a fully deployed Spring Boot monolith with:
+- Dual-role auth (CUSTOMER / CONTROLLER / ADMIN) via JWT
+- Controller dashboard: report filing, inline edit, photo upload
+- Public analytics page: city-wide KPIs, borough breakdown, cuisine rankings, at-risk list
+- Dual landing/home routing (anonymous vs. authenticated `/`)
+- Persistent navbar across all 10 pages + `/profile` page
+- Map filters (grade/borough/cuisine), `/uncontrolled` tracker, nearby restaurants, sort controls
+- UX polish: pagination (20/page), skeleton loading, toast notifications, mobile responsive
+- Admin tools: sync controls, at-risk CSV export, aggregate report stats
+
 ## Requirements
 
-### Validated
+### Validated (v1.0 — shipped 2026-04-01)
 
-- ✓ NYC Open Data API sync into MongoDB — existing
-- ✓ Restaurant data queryable by borough, cuisine, score, grade — existing
-- ✓ JWT authentication (register, login, refresh) — existing
-- ✓ User accounts in PostgreSQL — existing
-- ✓ Redis TTL cache for expensive analytics queries — existing
-- ✓ REST API with Swagger documentation — existing
-- ✓ Web dashboard with HTML templates (ViewController) — existing
+- ✓ NYC Open Data API sync into MongoDB
+- ✓ Restaurant data queryable by borough, cuisine, score, grade
+- ✓ JWT authentication (register, login, refresh)
+- ✓ User accounts in PostgreSQL
+- ✓ Redis TTL cache for expensive analytics queries
+- ✓ REST API with Swagger documentation
+- ✓ Web dashboard with HTML templates (ViewController)
+- ✓ Separate controller registration (signup code)
+- ✓ Role-based access control (CUSTOMER / CONTROLLER roles)
+- ✓ Controller can create, view, edit inspection reports with photos
+- ✓ Customer can search restaurants and see hygiene grade + inspection history
+- ✓ Customer can browse restaurants on an interactive map
+- ✓ Customer can bookmark restaurants
 
-### Active
+### Validated (v2.0 — shipped 2026-04-11)
 
-- [ ] Separate controller registration (signup code / dedicated route)
-- [ ] Role-based access control (CUSTOMER vs CONTROLLER roles)
-- [ ] Controller can create an internal inspection report for a restaurant
-- [ ] Inspection report contains: violations found, overall score/grade, photos, status/follow-up
-- [ ] Controller can view, edit, and update their submitted reports
-- [ ] Customer can search restaurants by name or address
-- [ ] Customer sees hygiene grade and cleanliness score for a restaurant
-- [ ] Customer can browse restaurants on an interactive map
-- [ ] Restaurant detail page shows grade, score, and NYC inspection history
+- ✓ Controller dashboard UI (status tabs, report cards, inline edit, photo thumbnails)
+- ✓ Public analytics page (KPIs, borough distribution, cuisine rankings, at-risk list)
+- ✓ Dual landing/home routing based on auth state
+- ✓ Persistent navbar across all pages + `/profile` page
+- ✓ Map filters (grade, borough, cuisine) — client-side, no reload
+- ✓ `/uncontrolled` page (C/Z grade or >12 months without inspection) + CSV export
+- ✓ Nearby restaurants section on detail page
+- ✓ Sort control on search results
+- ✓ Pagination (20 items/page), skeleton loading, toast notifications, mobile responsive
+- ✓ Admin tools: sync controls, CSV export, aggregate report stats (ADMIN role)
+
+### Deferred to v3
+
+- Report status notifications to admin
+- Cross-controller report view (admin)
+- Bulk photo upload
+- Real-time notifications for bookmarked restaurant updates
+- Hygiene trends over time
+- Admin manages controller accounts
+- PDF export of reports
 
 ### Out of Scope
 
-- Pushing controller reports to the NYC Open Data API — no write access in v1
-- Customer-visible controller reports — internal reports are for controllers only in v1
+- Pushing controller reports to NYC Open Data API — no write access
+- Customer-visible controller reports — internal only
 - Mobile native app — web-first
-- Real-time notifications — defer to v2
 - Multi-city support — NYC only
+- Object storage for photos (S3, GCS) — Docker volume sufficient
 
 ## Context
 
-The codebase is a production-grade Spring Boot 2.6.15 monolith with:
-- MongoDB for restaurant/inspection data (raw `mongodb-driver-sync`, no Spring Data)
-- PostgreSQL for users/bookmarks (Spring Data JPA)
-- Redis 7 for caching
-- JWT security (Spring Security)
-- Existing auth supports single user role — needs extending for CUSTOMER/CONTROLLER split
-- Existing `UserEntity` in PostgreSQL — role field needs adding
-- `ViewController.java` already serves Thymeleaf/HTML templates — customer UI can extend this
-- `BookmarkRepository` exists in PostgreSQL — can model for controller reports too
-
-Deployment: Docker Compose (4 containers: app, MongoDB, Redis, Postgres).
+Production-grade Spring Boot 2.6.15 monolith:
+- MongoDB for restaurant/inspection data (`mongodb-driver-sync`, raw aggregation pipelines)
+- PostgreSQL for users/bookmarks/reports (Spring Data JPA)
+- Redis 7 for caching (TTL 3600s)
+- JWT security (15-min access / 7-day refresh tokens)
+- Deployment: Docker Compose (4 containers: app, MongoDB, Redis, Postgres)
 
 ## Constraints
 
-- **Tech stack**: Java 11, Spring Boot 2.6.15 — no framework upgrade in v1
-- **Database**: MongoDB for restaurant data, PostgreSQL for user/report metadata — stay with existing split
+- **Tech stack**: Java 11, Spring Boot 2.6.15 — no framework upgrade
+- **Database**: MongoDB for restaurant data, PostgreSQL for user/report metadata
 - **Auth**: JWT — extend existing system, don't replace
-- **NYC API**: Read-only — no write access to external data source
-- **Academic**: This is an academic project (Aflokkat / big data module)
+- **NYC API**: Read-only
+- **Academic**: Academic project (Aflokkat / big data module)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Controller reports stored in PostgreSQL (JPA) | Structured relational data, fits existing JPA layer, not restaurant data | — Pending |
-| Role field added to UserEntity | Simplest extension of existing auth — no new table | — Pending |
-| Controller signup via registration code | Prevents open public access to filing reports | — Pending |
-| Customer UI extends existing ViewController | Reuses Thymeleaf template infrastructure already in place | — Pending |
+| Controller reports stored in PostgreSQL (JPA) | Structured relational data, fits existing JPA layer | ✓ Validated |
+| Role field added to UserEntity | Simplest extension of existing auth — no new table | ✓ Validated |
+| Controller signup via registration code | Prevents open public access to filing reports | ✓ Validated |
+| Customer UI extends existing ViewController | Reuses Thymeleaf template infrastructure | ✓ Validated |
+| Navbar auth state fully JS-driven | Stateless JWT app has no server session for Thymeleaf Security | ✓ Validated |
+| anyRequest().permitAll() with client-side IIFE guards for /admin, /dashboard | Browser navigation does not send Authorization header | ✓ Validated |
+| uploadPhoto uses raw fetch() (not fetchWithAuth) | fetchWithAuth sets Content-Type: application/json, corrupts multipart boundary | ✓ Validated |
+| ADMIN role separate from CONTROLLER | Admin-specific signup code, separate DataSeeder seed user | ✓ Validated |
 
 ---
-*Last updated: 2026-03-27 after initialization*
+*Last updated: 2026-04-11 — v2.0 milestone complete*

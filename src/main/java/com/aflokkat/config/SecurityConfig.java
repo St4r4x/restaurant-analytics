@@ -53,7 +53,7 @@ public class SecurityConfig {
                 // Public: auth endpoints, read-only NYC data, Swagger
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/restaurants/**").permitAll()
-                .antMatchers("/api/inspections/**").permitAll()
+                .antMatchers("/api/inspection/**").permitAll()
                 .antMatchers(
                     "/swagger-ui.html",
                     "/swagger-ui/**",

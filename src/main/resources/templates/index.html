@@ -139,15 +139,14 @@
     }
 
     // Strip C: KPI tiles
-    fetch('/api/analytics/kpi')
+    fetch('/api/analytics/kpis')
       .then(r => r.json())
       .then(res => {
-        if (res.status === 'success' && res.data) {
-          var d = res.data;
-          document.getElementById('kpi-total').textContent = d.totalRestaurants != null ? d.totalRestaurants.toLocaleString() : '—';
-          document.getElementById('kpi-pct').textContent = d.pctGradeA != null ? d.pctGradeA.toFixed(1) + '%' : '—';
-          document.getElementById('kpi-avg').textContent = d.avgScore != null ? d.avgScore.toFixed(1) : '—';
-          document.getElementById('kpi-risk').textContent = d.atRiskCount != null ? d.atRiskCount.toLocaleString() : '—';
+        if (res.status === 'success') {
+          document.getElementById('kpi-total').textContent = res.totalRestaurants != null ? res.totalRestaurants.toLocaleString() : '—';
+          document.getElementById('kpi-pct').textContent = res.percentGradeA != null ? res.percentGradeA.toFixed(1) + '%' : '—';
+          document.getElementById('kpi-avg').textContent = res.avgScore != null ? res.avgScore.toFixed(1) : '—';
+          document.getElementById('kpi-risk').textContent = res.atRiskCount != null ? res.atRiskCount.toLocaleString() : '—';
         }
       })
       .catch(function() { showToast('Could not load stats', 'error'); });

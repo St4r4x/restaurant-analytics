@@ -18,7 +18,7 @@
       <p style="font-size:1em;color:rgba(255,255,255,0.9);margin-bottom:20px">
         Search 27,000+ restaurants. Know before you go.
       </p>
-      <!-- KPI stat strip: 2 live values from /api/analytics/kpi -->
+      <!-- KPI stat strip: 2 live values from /api/analytics/kpis -->
       <div id="hero-stats" style="color:rgba(255,255,255,0.85);font-size:0.88em">&#8212;</div>
     </div>
 
@@ -81,15 +81,14 @@
     }
 
     // Load KPI stats for hero
-    fetch('/api/analytics/kpi')
+    fetch('/api/analytics/kpis')
       .then(r => r.json())
       .then(res => {
-        if (res.status === 'success' && res.data) {
-          const d = res.data;
+        if (res.status === 'success') {
           document.getElementById('hero-stats').textContent =
-            (d.totalRestaurants ? d.totalRestaurants.toLocaleString() : '—')
+            (res.totalRestaurants ? res.totalRestaurants.toLocaleString() : '—')
             + ' restaurants tracked \u00b7 '
-            + (d.pctGradeA != null ? d.pctGradeA.toFixed(1) : '—')
+            + (res.percentGradeA != null ? res.percentGradeA.toFixed(1) : '—')
             + '% Grade A in NYC';
         }
       })

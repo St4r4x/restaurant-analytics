@@ -51,7 +51,7 @@
     <div class="card">
         <h2>At-Risk Export</h2>
         <p class="desc-text">Download the current at-risk restaurant list as a CSV file.</p>
-        <button class="btn btn-primary" onclick="window.location.href='/api/inspection/at-risk/export.csv'">Download At-Risk CSV</button>
+        <button class="btn btn-primary" onclick="downloadAtRiskCsv()">Download At-Risk CSV</button>
     </div>
 
     <!-- Card 3: Report Statistics -->
@@ -167,6 +167,30 @@ function startSync() {
             btn.innerHTML = 'Sync NYC Data';
             document.getElementById('sync-status-text').textContent = 'Failed to start sync';
         });
+}
+
+function downloadAtRiskCsv() {
+    var token = localStorage.getItem('accessToken');
+    fetch('/api/inspection/at-risk/export.csv', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r) {
+        if (!r.ok) throw new Error('Download failed: ' + r.status);
+        return r.blob();
+    })
+    .then(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'at-risk-restaurants.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    })
+    .catch(function() {
+        if (window.showToast) { showToast('CSV download failed', 'error'); }
+    });
 }
 
 function rebuildCache() {
