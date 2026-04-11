@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 ### v3.0 phases (11-20)
 
-- [ ] **Phase 11: Logging Infrastructure** - Replace non-functional simplelogger.properties with structured Logback, add request ID propagation via MDC
+- [x] **Phase 11: Logging Infrastructure** - Replace non-functional simplelogger.properties with structured Logback, add request ID propagation via MDC (completed 2026-04-11)
 - [ ] **Phase 12: Maven Build Hardening** - Wire JaCoCo coverage report and Failsafe plugin with correct argLine late-binding to unblock all test infrastructure
 - [ ] **Phase 13: Config & Docker Hardening** - Eliminate all hardcoded secrets, production-grade Docker Compose with health checks and resource limits
 - [ ] **Phase 14: Testcontainers Integration Tests** - Make existing integration test self-contained against real MongoDB and PostgreSQL via Testcontainers
@@ -65,8 +65,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. No log output contains raw stack traces from `simplelogger.properties` — that file is deleted and its configuration is inert
 **Plans**: 2 plans
 Plans:
-- [ ] 11-01-PLAN.md — Add logstash-logback-encoder 7.3 dependency, create logback-spring.xml (prod JSON / dev plaintext with requestId), delete simplelogger.properties
-- [ ] 11-02-PLAN.md — Create RequestIdFilter (@Component @Order(0)) with 5-test TDD suite covering UUID generation, X-Request-ID header, MDC cleanup, and client-value rejection
+- [x] 11-01-PLAN.md — Add logstash-logback-encoder 7.3 dependency, create logback-spring.xml (prod JSON / dev plaintext with requestId), delete simplelogger.properties
+- [x] 11-02-PLAN.md — Create RequestIdFilter (@Component @Order(0)) with 5-test TDD suite covering UUID generation, X-Request-ID header, MDC cleanup, and client-value rejection
 
 ---
 
@@ -212,7 +212,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 8. Discovery Enhancement | 5/5 | Complete | 2026-04-10 |
 | 9. UX Polish | 5/5 | Complete | 2026-04-10 |
 | 10. Admin Tools | 3/3 | Complete | 2026-04-11 |
-| 11. Logging Infrastructure | 0/2 | Not started | - |
+| 11. Logging Infrastructure | 2/2 | Complete    | 2026-04-11 |
 | 12. Maven Build Hardening | 0/? | Not started | - |
 | 13. Config & Docker Hardening | 0/? | Not started | - |
 | 14. Testcontainers Integration Tests | 0/? | Not started | - |
