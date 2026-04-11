@@ -145,23 +145,24 @@ public class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
-    // /admin is protected server-side: ROLE_ADMIN only.
-    // Unauthenticated access redirects to /login (non-API path triggers redirect in authenticationEntryPoint).
+    // /admin is NOT protected server-side: JWT lives in localStorage, browsers never send
+    // Authorization headers on page navigation. Security is enforced by the client-side
+    // IIFE guard in admin.html. anyRequest().permitAll() applies, so all callers get 200.
     @Test
-    public void admin_redirectsToLogin_whenUnauthenticated() throws Exception {
+    public void admin_returns200_whenUnauthenticated() throws Exception {
         SecurityContextHolder.clearContext();
         mockMvc.perform(get("/admin"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isOk());
     }
 
     @Test
-    public void admin_returns403_forController() throws Exception {
+    public void admin_returns200_forController() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
         mockMvc.perform(get("/admin")
                         .with(authentication(auth)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test

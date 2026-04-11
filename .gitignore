@@ -22,8 +22,8 @@ target/
 .DS_Store
 Thumbs.db
 
-# gstack internal
-.gstack/
+# Playwright MCP snapshots
+.playwright-mcp/
 
 # Large data files (import manually)
 restaurants.json
