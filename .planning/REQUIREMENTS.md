@@ -56,17 +56,17 @@ Active requirements for milestone v2.0. Each maps to roadmap phases 5-10.
 
 ### Discovery Enhancement (Phase 8)
 
-- [ ] **DISC-01**: The map at `/inspection-map` has filter controls — grade checkboxes (A/B/C/F), borough dropdown, cuisine dropdown — markers update client-side without reload
-- [ ] **DISC-02**: A `/uncontrolled` page lists restaurants not inspected in 12+ months or with last grade C/Z; table is sortable by score and filterable by borough; includes a "Download CSV" button
-- [ ] **DISC-03**: The restaurant detail page shows up to 5 nearby restaurants (within 500m) in a "Nearby" section, each with grade badge and link
-- [ ] **DISC-04**: Search results can be sorted by score (best first), grade, or name; sort control visible above results
+- [x] **DISC-01**: The map at `/inspection-map` has filter controls — grade checkboxes (A/B/C/F), borough dropdown, cuisine dropdown — markers update client-side without reload
+- [x] **DISC-02**: A `/uncontrolled` page lists restaurants not inspected in 12+ months or with last grade C/Z; table is sortable by score and filterable by borough; includes a "Download CSV" button
+- [x] **DISC-03**: The restaurant detail page shows up to 5 nearby restaurants (within 500m) in a "Nearby" section, each with grade badge and link
+- [x] **DISC-04**: Search results can be sorted by score (best first), grade, or name; sort control visible above results
 
 ### UX Polish (Phase 9)
 
-- [ ] **UX-05**: All list views (search results, reports, bookmarks, analytics at-risk) are paginated — 20 items per page with Previous / Next controls
-- [ ] **UX-06**: All data-fetching sections show skeleton loading cards instead of blank space or a "Loading…" text
-- [ ] **UX-07**: A toast notification system replaces all inline success/error messages — toasts appear bottom-right, auto-dismiss after 3s
-- [ ] **UX-08**: All pages render correctly on mobile viewports (320px–768px) — no horizontal scroll, no overlapping elements
+- [x] **UX-05**: All list views (search results, reports, bookmarks, analytics at-risk) are paginated — 20 items per page with Previous / Next controls
+- [x] **UX-06**: All data-fetching sections show skeleton loading cards instead of blank space or a "Loading…" text
+- [x] **UX-07**: A toast notification system replaces all inline success/error messages — toasts appear bottom-right, auto-dismiss after 3s
+- [x] **UX-08**: All pages render correctly on mobile viewports (320px–768px) — no horizontal scroll, no overlapping elements
 
 ### Admin Tools (Phase 10)
 
@@ -121,29 +121,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CTRL-05 | Phase 5 | Not started |
-| CTRL-06 | Phase 5 | Not started |
-| CTRL-07 | Phase 5 | Not started |
-| CTRL-08 | Phase 5 | Not started |
-| STAT-01 | Phase 6 | Not started |
-| STAT-02 | Phase 6 | Not started |
-| STAT-03 | Phase 6 | Not started |
-| STAT-04 | Phase 6 | Not started |
-| UX-01 | Phase 7 | Not started |
-| UX-02 | Phase 7 | Not started |
-| UX-03 | Phase 7 | Not started |
-| UX-04 | Phase 7 | Not started |
-| DISC-01 | Phase 8 | Not started |
-| DISC-02 | Phase 8 | Not started |
-| DISC-03 | Phase 8 | Not started |
-| DISC-04 | Phase 8 | Not started |
-| UX-05 | Phase 9 | Not started |
-| UX-06 | Phase 9 | Not started |
-| UX-07 | Phase 9 | Not started |
-| UX-08 | Phase 9 | Not started |
-| ADM-01 | Phase 10 | Not started |
-| ADM-02 | Phase 10 | Not started |
-| ADM-03 | Phase 10 | Not started |
+| CTRL-05 | Phase 5 | Complete |
+| CTRL-06 | Phase 5 | Complete |
+| CTRL-07 | Phase 5 | Complete |
+| CTRL-08 | Phase 5 | Complete |
+| STAT-01 | Phase 6 | Complete |
+| STAT-02 | Phase 6 | Complete |
+| STAT-03 | Phase 6 | Complete |
+| STAT-04 | Phase 6 | Complete |
+| UX-01 | Phase 7 | Complete |
+| UX-02 | Phase 7 | Complete |
+| UX-03 | Phase 7 | Complete |
+| UX-04 | Phase 7 | Complete |
+| DISC-01 | Phase 8 | Complete |
+| DISC-02 | Phase 8 | Complete |
+| DISC-03 | Phase 8 | Complete |
+| DISC-04 | Phase 8 | Complete |
+| UX-05 | Phase 9 | Complete |
+| UX-06 | Phase 9 | Complete |
+| UX-07 | Phase 9 | Complete |
+| UX-08 | Phase 9 | Complete |
+| ADM-01 | Phase 10 | Complete |
+| ADM-02 | Phase 10 | Complete |
+| ADM-03 | Phase 10 | Complete |
 
 **v2 Coverage:**
 - v2 requirements: 23 total
@@ -152,4 +152,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-27*
-*Last updated: 2026-04-01 after v2.0 roadmap creation (phases 5-10)*
+*Last updated: 2026-04-11 — traceability table synced to reflect v2.0 completion (phases 5-10 all Complete); DISC-01–04 and UX-05–08 checkboxes marked*
