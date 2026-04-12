@@ -112,7 +112,12 @@ Plans:
   1. Running `mvn failsafe:integration-test` on a machine with Docker installed but no running MongoDB or PostgreSQL starts containers automatically, runs tests, and tears them down — without any `localhost:27017` configuration
   2. The existing `RestaurantDAOIntegrationTest` is renamed and extended so it passes in CI without requiring a pre-seeded database on the runner
   3. A developer can delete their local MongoDB and PostgreSQL installations and still run the full integration test suite successfully
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 14-01-PLAN.md — pom.xml: add Testcontainers 1.19.8 (3 artifacts) + Failsafe plugin; fix Surefire argLine; add AppConfig.getProperty() System.getProperty() tier-0
+- [ ] 14-02-PLAN.md — RestaurantDAOIT.java: rename + rewrite RestaurantDAOIntegrationTest with TC mongo:7.0, @ClassRule, 60-doc seed, 14 assertions
+- [ ] 14-03-PLAN.md — UserRepositoryIT.java: new test with TC postgres:15-alpine + mongo:7.0, @SpringBootTest + ApplicationContextInitializer pattern, 4 assertions
+- [ ] 14-04-PLAN.md — Final verification: mvn verify green + CHANGELOG.md update
 
 ---
 
@@ -222,7 +227,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 11. Logging Infrastructure | 2/2 | Complete    | 2026-04-11 |
 | 12. Maven Build Hardening | 2/2 | Complete    | 2026-04-12 |
 | 13. Config & Docker Hardening | 3/3 | Complete    | 2026-04-12 |
-| 14. Testcontainers Integration Tests | 0/? | Not started | - |
+| 14. Testcontainers Integration Tests | 0/4 | Not started | - |
 | 15. GitHub Actions CI Pipeline | 0/? | Not started | - |
 | 16. Security Hardening | 0/? | Not started | - |
 | 17. Code Quality & MongoDB Indexing | 0/? | Not started | - |
