@@ -119,6 +119,9 @@ jobs:
           NYC_API_MAX_RECORDS: "200"
         # Image is pre-built; 300s covers Spring Boot startup + 3×30s health check retries
         run: docker compose up -d --wait --wait-timeout 300
+      - name: Dump app logs on failure
+        if: failure()
+        run: docker compose logs app
       - name: Health check
         run: curl --fail --retry 10 --retry-delay 5 http://localhost:8080/api/restaurants/health
       - name: Tear down stack
