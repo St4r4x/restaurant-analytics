@@ -17,12 +17,21 @@ import org.junit.Test;
 public class AppConfigTest {
 
     private String savedJwtSecret;
+    private Object savedDotenv;
 
     // Helper method (private) to get the AppConfig.properties static field:
     private Properties getAppConfigProperties() throws Exception {
         Field f = AppConfig.class.getDeclaredField("properties");
         f.setAccessible(true);
         return (Properties) f.get(null);
+    }
+
+    // Null out AppConfig.dotenv so .env file on disk cannot interfere with JWT tests
+    private void clearDotenv() throws Exception {
+        Field f = AppConfig.class.getDeclaredField("dotenv");
+        f.setAccessible(true);
+        savedDotenv = f.get(null);
+        f.set(null, null);
     }
 
     @After
@@ -32,6 +41,13 @@ public class AppConfigTest {
             props.remove("jwt.secret");
         } else {
             props.setProperty("jwt.secret", savedJwtSecret);
+        }
+        // Restore dotenv if it was cleared
+        if (savedDotenv != null) {
+            Field f = AppConfig.class.getDeclaredField("dotenv");
+            f.setAccessible(true);
+            f.set(null, savedDotenv);
+            savedDotenv = null;
         }
     }
 
@@ -87,15 +103,16 @@ public class AppConfigTest {
 
     @Test(expected = IllegalStateException.class)
     public void testGetJwtSecret_throwsWhenAbsent() throws Exception {
+        clearDotenv();
         Properties props = getAppConfigProperties();
         savedJwtSecret = props.getProperty("jwt.secret");
         props.remove("jwt.secret");
-        // No JWT_SECRET env var in test environment — must throw
         AppConfig.getJwtSecret();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testGetJwtSecret_throwsWhenTooShort() throws Exception {
+        clearDotenv();
         Properties props = getAppConfigProperties();
         savedJwtSecret = props.getProperty("jwt.secret");
         props.setProperty("jwt.secret", "short-less-than-32-chars");  // 24 chars — too short
@@ -104,6 +121,7 @@ public class AppConfigTest {
 
     @Test
     public void testGetJwtSecret_succeedsWithValidSecret() throws Exception {
+        clearDotenv();
         Properties props = getAppConfigProperties();
         savedJwtSecret = props.getProperty("jwt.secret");
         props.setProperty("jwt.secret", "exactly-32-characters-long-123456");  // 34 chars — valid
