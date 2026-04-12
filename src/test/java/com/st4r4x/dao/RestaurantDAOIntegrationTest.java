@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.st4r4x.aggregation.AggregationCount;
@@ -15,14 +16,15 @@ import com.st4r4x.aggregation.CuisineScore;
 
 /**
  * Tests d'intégration pour les 4 use cases
- * 
+ *
  * NOTE: Ces tests nécessitent une connexion MongoDB actuelle
  * sur localhost:27017 avec la base de données "newyork"
- * 
+ *
  * Pour les exécuter: mvn verify -Dtest=RestaurantDAOIntegrationTest
- * 
+ *
  * Pour les ignorer en build normal: @Ignore
  */
+@Ignore("Requires live MongoDB on localhost:27017 — migrated to Testcontainers in Phase 14")
 public class RestaurantDAOIntegrationTest {
     
     private RestaurantDAO restaurantDAO;

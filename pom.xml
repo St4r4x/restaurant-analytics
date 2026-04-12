@@ -179,11 +179,16 @@
       <!-- Surefire Plugin: allow Mockito's byte-buddy-agent to attach dynamically on Java 21+.
            Without -XX:+EnableDynamicAgentLoading, Mockito self-attachment on Java 25 causes
            a StackOverflowError in @WebMvcTest slice tests. -->
+      <!-- @{argLine} — Surefire late-binding: reads the argLine property at execution time,
+           AFTER jacoco:prepare-agent has deposited -javaagent:... into it during the initialize phase.
+           Using ${argLine} (dollar-sign) evaluates at POM parse time — before prepare-agent runs —
+           and picks up an empty string, causing JaCoCo agent to be silently dropped.
+           This would cause StackOverflowError in all Mockito ByteBuddy-instrumented tests. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
         </configuration>
       </plugin>
     </plugins>
