@@ -522,17 +522,19 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}` in application.properties work correctly for Spring Boot's DataSource auto-configuration?**
    - What we know: Spring Boot resolves `${VAR}` placeholders in `.properties` files using the full `Environment` abstraction, which includes system env vars and `.env` loaded by Spring's own dotenv support.
    - What's unclear: Spring Boot does NOT use AppConfig's dotenv — it uses its own property source resolution. If `SPRING_DATASOURCE_PASSWORD` is only in the AppConfig dotenv (not as a real env var), Spring's DataSource config might not see it.
-   - Recommendation: In docker-compose.yml, `SPRING_DATASOURCE_PASSWORD` is injected as a real environment variable, so Spring Boot will resolve it. For local dev without Docker, if the developer sets it in `.env`, AppConfig's dotenv reads it but Spring Boot's own resolver may not (unless spring-dotenv or similar is configured). Safe default: document in `.env.example` that `SPRING_DATASOURCE_PASSWORD` must match `POSTGRES_PASSWORD` and must be set as a real env var (e.g., `export SPRING_DATASOURCE_PASSWORD=...`) or rely on Docker for all DB-requiring scenarios. [ASSUMED]
+   - Recommendation: In docker-compose.yml, `SPRING_DATASOURCE_PASSWORD` is injected as a real environment variable, so Spring Boot will resolve it. For local dev without Docker, if the developer sets it in `.env`, AppConfig's dotenv reads it but Spring Boot's own resolver may not (unless spring-dotenv or similar is configured). Safe default: document in `.env.example` that `SPRING_DATASOURCE_PASSWORD` must match `POSTGRES_PASSWORD` and must be set as a real env var (e.g., `export SPRING_DATASOURCE_PASSWORD=...`) or rely on Docker for all DB-requiring scenarios.
+   - **RESOLVED:** Spring Boot resolves `${SPRING_DATASOURCE_PASSWORD}` from system env vars (which Docker Compose injects as real env vars). For local dev, `application.properties` uses `spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:restaurant}` with a default fallback so Maven tests work without a `.env` present. This pattern is safe and confirmed for the Docker path.
 
 2. **Should the `application.properties` jwt.secret line be removed entirely or replaced with a comment?**
    - What we know: D-02 says "remove `jwt.secret=...` from `application.properties` entirely."
    - What's unclear: If removed entirely, AppConfig falls to the `null` default in `getProperty("jwt.secret", null)`, which then triggers the assertion. A comment-only line (no `=` value) would be cleaner documentation.
    - Recommendation: Remove the `jwt.secret=...` line entirely and add a comment: `# jwt.secret — set JWT_SECRET environment variable (minimum 32 chars)`. This is cleaner than a placeholder that would be misread as a value.
+   - **RESOLVED:** Remove the `jwt.secret=...` line entirely and replace with a comment: `# jwt.secret — set JWT_SECRET environment variable (minimum 32 chars)`. Implemented in Plan 01 Task 2 Step C.
 
 ---
 
