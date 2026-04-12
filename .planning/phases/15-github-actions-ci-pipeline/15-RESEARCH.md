@@ -626,22 +626,22 @@ LABEL org.opencontainers.image.source=https://github.com/St4r4x/restaurant-analy
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Java version: 11 or 25 in setup-java?**
    - What we know: `pom.xml` declares `<java.version>11</java.version>` and Spring Boot 2.6.15. CONTEXT.md says "Java 25 (matching upgraded stack)" in Claude's Discretion.
    - What's unclear: Has the Spring Boot 3.4.4 + Java 25 upgrade (which exists on `gsd/phase-12-maven-build-hardening` branch) been merged or is it still pending? The `develop` branch and current `gsd/phase-15` branch both use Java 11.
-   - Recommendation: Use `java-version: '11'` to match the actual pom.xml. If the upgrade is later merged, the workflow will be updated. Using Java 25 on a Java 11 project compiles and runs fine (backward compatible) but `java-version: '11'` is the precise match.
+   - **RESOLVED:** Use `java-version: '11'` to match `<java.version>11</java.version>` in pom.xml on this branch (Spring Boot 2.6.15). Java 25 is for the Phase 12 upgraded branch which has not been merged to develop. The ci.yml plans implement `java-version: '11'`.
 
 2. **Does `mvn failsafe:integration-test verify` re-run unit tests?**
    - What we know: `mvn verify` invokes the full default lifecycle from `validate` to `verify`, which includes the `test` phase (Surefire). Running `mvn failsafe:integration-test verify` runs Surefire unit tests AGAIN in the integration-test job.
    - What's unclear: Is duplicate unit test execution acceptable, or should the integration-test job use `mvn failsafe:integration-test failsafe:verify -DskipTests`?
-   - Recommendation: Use `mvn verify -DskipTests` in the integration-test job. This runs Failsafe (integration-test + verify phases) but skips Surefire unit tests, avoiding redundant execution while preserving the `verify` phase that checks for Failsafe failures. [ASSUMED - verify against Failsafe docs]
+   - **RESOLVED:** Use `mvn verify -DskipTests` in the integration-test job. This runs Failsafe (integration-test + verify phases) but skips Surefire to avoid redundant execution. D-03 in CONTEXT.md has been updated to reflect this decision.
 
 3. **E2E job: should it checkout to reuse the previously built JAR?**
    - What we know: Each job runs on a fresh runner; the `build` job's compiled JAR is not available to subsequent jobs without artifact upload/download.
    - What's unclear: Should the E2E job upload the JAR from the build job and reuse it, or just do `docker compose up` which rebuilds via Dockerfile?
-   - Recommendation: The E2E job rebuilds via `docker compose up` (which runs `mvn clean package -DskipTests` inside Docker). This is the expected behavior per D-05. The Maven cache in Docker does not persist between runner instances, so the Docker build will download dependencies. This is acceptable — E2E is testing the built Docker image, not compile speed.
+   - **RESOLVED:** E2E job rebuilds via `docker compose up` (which invokes the Dockerfile's Maven build). No JAR upload/download between jobs — each runner is fresh per D-05. The E2E job tests the Docker image built from source; the separate `docker` job (job 5) publishes to GHCR after E2E passes.
 
 ---
 

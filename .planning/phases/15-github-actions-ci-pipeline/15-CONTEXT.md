@@ -16,7 +16,7 @@ Create `.github/workflows/ci.yml` — a five-job CI pipeline (build, unit-test, 
 ### Job Topology
 - **D-01:** Strict serial chain: `build` → `unit-test` → `integration-test` → `e2e` → `docker`. Each job uses `needs: [previous]`. No fan-out — simplest failure attribution, no wasted Docker build time if tests fail.
 - **D-02:** `unit-test` job runs `mvn test` (Surefire — all `*Test.java` files). Failure makes the GitHub Actions checks page show a red status attributed to `unit-tests`, not the build job.
-- **D-03:** `integration-test` job runs `mvn failsafe:integration-test verify` — Testcontainers spins up MongoDB + PostgreSQL containers inside the GitHub runner. No `docker compose` needed; proven in Phase 14.
+- **D-03:** `integration-test` job runs `mvn verify -DskipTests` — runs the full Maven verify lifecycle (which includes Failsafe integration tests) but skips Surefire unit tests (already executed in the `unit-test` job). Testcontainers spins up MongoDB + PostgreSQL containers inside the GitHub runner. No `docker compose` needed; proven in Phase 14.
 - **D-04:** Workflow triggers: `push` on branches `develop` and `main`; `pull_request` targeting `develop` (to enable JaCoCo PR comments on PRs).
 
 ### E2E Placeholder
