@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '25'
       - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
@@ -42,7 +42,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '25'
       - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
@@ -80,7 +80,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '25'
       - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
@@ -89,7 +89,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run integration tests
-        run: mvn verify -DskipTests
+        run: mvn verify -Dsurefire.skip=true
 
   e2e:
     name: E2E Smoke Test
