@@ -236,11 +236,12 @@
       </plugin>
 
       <!-- JaCoCo Maven Plugin — generates coverage report consumed by CI-08 (madraphos/jacoco-report)
-           Version must be explicit — Spring Boot 2.6.15 BOM does not manage jacoco-maven-plugin -->
+           Version must be explicit — Spring Boot 2.6.15 BOM does not manage jacoco-maven-plugin
+           0.8.14: first release with official Java 25 support (class file major version 69) -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
+        <version>0.8.14</version>
         <executions>
           <execution>
             <id>jacoco-prepare-agent</id>

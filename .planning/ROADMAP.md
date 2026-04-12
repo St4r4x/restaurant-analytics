@@ -41,7 +41,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 12: Maven Build Hardening** - Wire JaCoCo coverage report and Failsafe plugin with correct argLine late-binding to unblock all test infrastructure (completed 2026-04-12)
 - [x] **Phase 13: Config & Docker Hardening** - Eliminate all hardcoded secrets, production-grade Docker Compose with health checks and resource limits (completed 2026-04-12)
 - [x] **Phase 14: Testcontainers Integration Tests** - Make existing integration test self-contained against real MongoDB and PostgreSQL via Testcontainers (completed 2026-04-12)
-- [ ] **Phase 15: GitHub Actions CI Pipeline** - Five-job pipeline (build, unit-test, integration, E2E placeholder, Docker) consuming phases 12-14 artifacts
+- [x] **Phase 15: GitHub Actions CI Pipeline** - Five-job pipeline (build, unit-test, integration, E2E placeholder, Docker) consuming phases 12-14 artifacts (completed 2026-04-12)
 - [ ] **Phase 16: Security Hardening** - Explicit CORS policy, security headers, input validation, rate limiting extension, HTTPS-ready config
 - [ ] **Phase 17: Code Quality & MongoDB Indexing** - Dead code removal, complete OpenAPI docs, ResponseUtil consistency, MongoDB indexes at startup
 - [ ] **Phase 18: E2E Tests (Playwright)** - Browser smoke tests covering login, search, map, and controller dashboard via docker compose
@@ -134,8 +134,8 @@ Plans:
   6. A JaCoCo coverage summary is visible as a comment on pull requests targeting `develop` without requiring the reviewer to download an artifact
 **Plans**: 2 plans
 Plans:
-- [ ] 15-01-PLAN.md — pom.xml: add JaCoCo 0.8.12 plugin (prepare-agent, report, check at 38%); Dockerfile: add OCI LABEL before EXPOSE; README: add CI badge
-- [ ] 15-02-PLAN.md — .github/workflows/ci.yml: five-job serial pipeline (build → unit-test → integration-test → e2e → docker) with GHCR push on main, JaCoCo PR comment, Maven cache
+- [x] 15-01-PLAN.md — pom.xml: add JaCoCo 0.8.12 plugin (prepare-agent, report, check at 38%); Dockerfile: add OCI LABEL before EXPOSE; README: add CI badge
+- [x] 15-02-PLAN.md — .github/workflows/ci.yml: five-job serial pipeline (build → unit-test → integration-test → e2e → docker) with GHCR push on main, JaCoCo PR comment, Maven cache
 
 ---
 
@@ -231,7 +231,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 12. Maven Build Hardening | 2/2 | Complete    | 2026-04-12 |
 | 13. Config & Docker Hardening | 3/3 | Complete    | 2026-04-12 |
 | 14. Testcontainers Integration Tests | 4/4 | Complete    | 2026-04-12 |
-| 15. GitHub Actions CI Pipeline | 0/2 | Not started | - |
+| 15. GitHub Actions CI Pipeline | 2/2 | Complete   | 2026-04-12 |
 | 16. Security Hardening | 0/? | Not started | - |
 | 17. Code Quality & MongoDB Indexing | 0/? | Not started | - |
 | 18. E2E Tests (Playwright) | 0/? | Not started | - |
