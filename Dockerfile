@@ -17,6 +17,9 @@ FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
+# Install curl for health check (not in Alpine by default)
+RUN apk add --no-cache curl
+
 # Non-root user — Alpine BusyBox syntax (NOT useradd which does not exist on Alpine)
 RUN addgroup -S appuser && adduser -S appuser -G appuser
 
