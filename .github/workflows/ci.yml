@@ -104,6 +104,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Build application image
+        run: docker compose build app
       - name: Start application stack
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -115,7 +117,8 @@ jobs:
           # docker-compose.yml app service reads SPRING_DATASOURCE_PASSWORD (not POSTGRES_PASSWORD)
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           NYC_API_MAX_RECORDS: "200"
-        run: docker compose up -d --wait --wait-timeout 120
+        # Image is pre-built; 300s covers Spring Boot startup + 3×30s health check retries
+        run: docker compose up -d --wait --wait-timeout 300
       - name: Health check
         run: curl --fail --retry 10 --retry-delay 5 http://localhost:8080/api/restaurants/health
       - name: Tear down stack
