@@ -7,7 +7,7 @@
     <version>2.6.15</version>
     <relativePath/>
   </parent>
-  <groupId>com.aflokkat</groupId>
+  <groupId>com.st4r4x</groupId>
   <artifactId>quickstart-app</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
@@ -19,6 +19,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Override Byte Buddy from Spring Boot BOM — 1.16.x adds Java 25 support -->
     <byte-buddy.version>1.16.0</byte-buddy.version>
+    <!-- Default empty argLine — overridden by JaCoCo when present.
+         Required so @{argLine} in Surefire/Failsafe resolves to empty string instead
+         of crashing the forked JVM with an unresolved property literal. -->
+    <argLine/>
   </properties>
   <dependencies>
     <!-- Spring Boot Web Starter -->
@@ -149,6 +153,28 @@
       <artifactId>junit-vintage-engine</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- Testcontainers — 1.20.1 uses docker-java 3.4.0 which supports Docker API >=1.40.
+         1.19.8 used docker-java 3.3.6 (hardcoded API 1.32) incompatible with Docker Engine 29.x.
+         Still 1.x — JUnit 4 @ClassRule support preserved. Do NOT upgrade to 2.x. -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>1.20.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mongodb</artifactId>
+      <version>1.20.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>1.20.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -177,8 +203,92 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
         </configuration>
+      </plugin>
+
+      <!-- Failsafe: runs *IT.java in integration-test phase, separate from Surefire unit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
+          <!-- api.version=1.45 overrides the shaded docker-java-core default of 1.32.
+               Testcontainers' shaded DockerClientProviderStrategy reads System.getProperty("api.version")
+               via overrideDockerPropertiesWithSystemProperties() and uses it instead of VERSION_1_32.
+               Required for Docker Engine 29.x which dropped support for API < 1.40. -->
+          <systemPropertyVariables>
+            <api.version>1.45</api.version>
+          </systemPropertyVariables>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- JaCoCo Maven Plugin — generates coverage report consumed by CI-08 (madraphos/jacoco-report)
+           Version must be explicit — Spring Boot 2.6.15 BOM does not manage jacoco-maven-plugin
+           0.8.14: first release with official Java 25 support (class file major version 69) -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.14</version>
+        <executions>
+          <execution>
+            <id>jacoco-prepare-agent</id>
+            <phase>initialize</phase>
+            <goals><goal>prepare-agent</goal></goals>
+          </execution>
+          <execution>
+            <id>jacoco-report</id>
+            <phase>test</phase>
+            <goals><goal>report</goal></goals>
+            <configuration>
+              <excludes>
+                <exclude>com/aflokkat/dto/**</exclude>
+                <exclude>com/aflokkat/entity/**</exclude>
+                <exclude>com/aflokkat/aggregation/**</exclude>
+                <exclude>com/aflokkat/domain/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>jacoco-check</id>
+            <phase>test</phase>
+            <goals><goal>check</goal></goals>
+            <configuration>
+              <excludes>
+                <exclude>com/aflokkat/dto/**</exclude>
+                <exclude>com/aflokkat/entity/**</exclude>
+                <exclude>com/aflokkat/aggregation/**</exclude>
+                <exclude>com/aflokkat/domain/**</exclude>
+              </excludes>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <!-- Measured baseline from Phase 12 on prior branch: 43%
+                           Threshold set at 38% (baseline minus 5%) to tolerate minor drift -->
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.38</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

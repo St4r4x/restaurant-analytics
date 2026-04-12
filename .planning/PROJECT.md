@@ -10,6 +10,14 @@ A customer can search any NYC restaurant and immediately know whether it's clean
 
 ## Current State
 
+**v3.0 in progress — Phase 14 complete (2026-04-12)**
+
+Phase 14 (testcontainers-integration-tests) complete. TEST-04/05/06 validated. Replaced live-DB integration tests with Testcontainers:
+- RestaurantDAOIT: 15 tests against real mongo:7.0 container (TC 1.20.1)
+- UserRepositoryIT: 4 tests against postgres:15-alpine + mongo:7.0 containers
+- AppConfig tier-0 System.getProperty() lookup enables container URI injection
+- Full suite: 165 Surefire + 15 + 4 IT = BUILD SUCCESS, no external services needed
+
 **Shipped: v2.0 — Full Product (2026-04-11)**
 
 All 10 phases complete. 36/36 requirements validated. The app is a fully deployed Spring Boot monolith with:
@@ -102,4 +110,4 @@ Production-grade Spring Boot 2.6.15 monolith:
 | ADMIN role separate from CONTROLLER | Admin-specific signup code, separate DataSeeder seed user | ✓ Validated |
 
 ---
-*Last updated: 2026-04-11 — v2.0 milestone complete*
+*Last updated: 2026-04-12 — Phase 13 complete (config-docker-hardening)*
