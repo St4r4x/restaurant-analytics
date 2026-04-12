@@ -707,17 +707,19 @@ pgContainer.getDatabaseName() // "test"
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `@SpringBootTest` in `UserRepositoryIT` require a running Redis to start the context?**
    - What we know: `application-test.properties` sets `redis.host=localhost` with no Redis container. Spring's Lettuce Redis client typically connects lazily.
    - What's unclear: Whether `RestaurantCacheService` constructor eagerly establishes a connection.
    - Recommendation: Planner should note this as a contingency — if context fails, add `@MockBean RestaurantCacheService` to `UserRepositoryIT`.
+   - **RESOLVED: `@MockBean RestaurantCacheService` added to `UserRepositoryIT` (Plan 03). Spring context startup is protected regardless of Lettuce lazy/eager connection behavior.**
 
 2. **Should `UserRepositoryIT` also start a MongoDB container?**
    - What we know: `@SpringBootTest` wires the full application context including `RestaurantDAOImpl`, which calls `MongoClientFactory.getInstance()`.
    - What's unclear: Whether Spring Boot 2.6.15 auto-configuration eagerly creates the MongoDB connection.
    - Recommendation: Add both `mongoContainer` and `pgContainer` as `@ClassRule` fields in `UserRepositoryIT`, with system property injection for both. This is safe and avoids context load failures.
+   - **RESOLVED: `mongoContainer` added as `@ClassRule` to `UserRepositoryIT`; `System.setProperty("mongodb.uri", mongoContainer.getConnectionString())` injected in the `static {}` block after `mongoContainer.start()` (Plan 03 revision). `AppConfig.getProperty()` tier-0 now sees the TC URI before `MongoClientFactory.getInstance()` is called during Spring context startup.**
 
 ---
 
