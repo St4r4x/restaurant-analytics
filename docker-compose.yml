@@ -15,7 +15,6 @@ services:
       APP_UPLOADS_DIR: /app/uploads
       CONTROLLER_SIGNUP_CODE: changeme
       ADMIN_SIGNUP_CODE: ""
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/restaurantdb
     volumes:
       - uploads_data:/app/uploads
     restart: unless-stopped

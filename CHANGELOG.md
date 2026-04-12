@@ -2,40 +2,6 @@
 
 All notable changes are documented by phase.
 
-## [Cleanup] — 2026-04-11 — Pre-sale dead code, security hardening, branding
-
-### Security
-- `jwt.secret` hardcoded value removed from `application.properties` — must be injected via `JWT_SECRET` env var
-- `spring.datasource.password` annotated with env var requirement comment
-- `DataSeeder.SEED_PASSWORD` now reads `SEED_PASSWORD` env var with `Test1234!` fallback (dev only)
-- `server.error.whitelabel.enabled=false` — Spring whitelabel error page disabled
-- `anyRequest().permitAll()` in SecurityConfig documented explicitly (client-side IIFE guards)
-- `spring.jpa.show-sql=false` annotated: must stay false in production
-
-### Dead code removed
-- `RestaurantService.getAverageScoreByCuisineAndBorough()` and `getCuisinesWithMinimumCount()` — no controller called these
-- `RestaurantDAO`/`Impl`: removed `findAverageScoreByCuisineAndBorough`, `findCuisinesWithMinimumCount`, `findByCuisine`, `countByCuisine`
-- `AppConfig.getRedisTopLimit()` — never called
-- `application.properties`: removed `app.name`, `app.version`, `spring.application.name`, `redis.top.limit`
-- `restaurants.json` (11 MB) deleted from project root — unused runtime artifact
-- `RestaurantDAOIntegrationTest`: removed 8 tests for deleted DAO methods
-
-### Branding
-- `pom.xml`: artifactId `quickstart-app` → `restaurant-hygiene-app`, name updated, version → `2.0`
-- `OpenApiConfig`: Swagger contact name → "Restaurant Hygiene Control", version → "2.0"
-- `inspection-map.html`: French title → "Inspection Map — NYC Restaurant Inspector"
-
-### UX fix
-- `landing.html`: added IIFE to redirect CONTROLLER → `/dashboard` and ADMIN → `/admin` on page load
-
-### Refactoring
-- `entity.Grade` JPA enum renamed to `entity.InspectionGrade` to resolve naming conflict with `domain.Grade` (MongoDB POJO)
-- All references updated: `InspectionReportEntity`, `AdminController`, `ReportRequest`, `AdminControllerTest`, `ReportControllerTest`
-
-### New files
-- `templates/error/404.html` — custom branded 404 page
-- `templates/error/500.html` — custom branded 500 page
-
 ## [Phase 10] — 2026-04-10 — Admin Tools
 
 ### Added

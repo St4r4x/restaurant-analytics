@@ -8,27 +8,9 @@ A web application that connects restaurant hygiene controllers and customers aro
 
 A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
 
-## Current Milestone: v3.0 Production Readiness
-
-**Goal:** Transform the academic project into a portfolio-grade, deployable application with full CI/CD pipeline, comprehensive test coverage, and production-quality code across every layer.
-
-**Target features:**
-- CI/CD: GitHub Actions pipeline — build, unit tests, integration tests (Testcontainers), E2E (Playwright), Docker build & push to registry
-- Testing: Unit (services/DAOs), integration (real DB), E2E browser tests, JaCoCo coverage report with minimum threshold
-- Database: MongoDB indexes, query optimization, data model cleanup, validation constraints
-- Config/secrets: No hardcoded secrets, proper env var handling for all environments
-- Docker: Production-grade Compose, health checks, resource limits
-- Code quality: Structured logging, dead code removal, complete OpenAPI docs, proper HTTP error responses
-- Security: CORS policy, rate limiting, input validation, HTTPS-ready config
-- UI: Full visual redesign — modern dark/neutral SaaS look (Vercel/Linear aesthetic), consistent design system
-
 ## Current State
 
-**In progress: v3.0 — Production Readiness**
-
-Phase 11 complete. Logging infrastructure added: Logback JSON/plaintext profile-switched config, request-ID tracing via MDC + X-Request-ID header.
-
-**Previously shipped: v2.0 — Full Product (2026-04-11)**
+**Shipped: v2.0 — Full Product (2026-04-11)**
 
 All 10 phases complete. 36/36 requirements validated. The app is a fully deployed Spring Boot monolith with:
 - Dual-role auth (CUSTOMER / CONTROLLER / ADMIN) via JWT
@@ -70,12 +52,6 @@ All 10 phases complete. 36/36 requirements validated. The app is a fully deploye
 - ✓ Sort control on search results
 - ✓ Pagination (20 items/page), skeleton loading, toast notifications, mobile responsive
 - ✓ Admin tools: sync controls, CSV export, aggregate report stats (ADMIN role)
-
-### Validated (v3.0 — in progress)
-
-- ✓ Logback JSON/plaintext profile-switched logging (QA-01) — Validated in Phase 11: logging-infrastructure
-- ✓ LogstashEncoder JSON output in prod profile (QA-02) — Validated in Phase 11: logging-infrastructure
-- ✓ Request-ID tracing: UUID in MDC + X-Request-ID response header (QA-03) — Validated in Phase 11: logging-infrastructure
 
 ### Deferred to v3
 
@@ -125,22 +101,5 @@ Production-grade Spring Boot 2.6.15 monolith:
 | uploadPhoto uses raw fetch() (not fetchWithAuth) | fetchWithAuth sets Content-Type: application/json, corrupts multipart boundary | ✓ Validated |
 | ADMIN role separate from CONTROLLER | Admin-specific signup code, separate DataSeeder seed user | ✓ Validated |
 
-## Evolution
-
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
-
 ---
-*Last updated: 2026-04-11 — Phase 11 complete (logging infrastructure)*
+*Last updated: 2026-04-11 — v2.0 milestone complete*
