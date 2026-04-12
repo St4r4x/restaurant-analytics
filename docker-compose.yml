@@ -13,8 +13,12 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       APP_UPLOADS_DIR: /app/uploads
-      CONTROLLER_SIGNUP_CODE: changeme
-      ADMIN_SIGNUP_CODE: ""
+      # Secrets injected from .env (never hardcoded — D-05)
+      JWT_SECRET: ${JWT_SECRET}
+      CONTROLLER_SIGNUP_CODE: ${CONTROLLER_SIGNUP_CODE:-}
+      ADMIN_SIGNUP_CODE: ${ADMIN_SIGNUP_CODE:-}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/restaurantdb
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     volumes:
       - uploads_data:/app/uploads
     restart: unless-stopped
@@ -34,6 +38,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
   mongodb:
     image: mongo:latest
@@ -52,6 +60,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
   redis:
     image: redis:7-alpine
@@ -66,6 +78,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128m
 
   postgres:
     image: postgres:15
@@ -76,16 +92,21 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: restaurant
-      POSTGRES_PASSWORD: restaurant
-      POSTGRES_DB: restaurantdb
+      # Credentials injected from .env (never hardcoded — D-05)
+      POSTGRES_USER: ${POSTGRES_USER:-restaurant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-restaurantdb}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U restaurant -d restaurantdb"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-restaurant} -d ${POSTGRES_DB:-restaurantdb}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256m
 
 networks:
   restaurant-network:
