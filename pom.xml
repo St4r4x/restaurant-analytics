@@ -17,6 +17,10 @@
     <maven.compiler.source>25</maven.compiler.source>
     <maven.compiler.target>25</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Override Byte Buddy from Spring Boot BOM — 1.17.x adds full Java 25 class file support.
+         Spring Boot 3.4.4 BOM resolves 1.15.11 which cannot instrument classes under Java 25
+         (InlineDelegateByteBuddyMockMaker.createMockType throws MockitoException for any mock). -->
+    <byte-buddy.version>1.17.5</byte-buddy.version>
   </properties>
   <dependencies>
     <!-- Spring Boot Web Starter -->
@@ -190,6 +194,45 @@
         <configuration>
           <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
         </configuration>
+      </plugin>
+
+      <!-- JaCoCo Maven Plugin: coverage instrumentation, HTML report, and threshold check.
+           Version must be explicit — Spring Boot 3.4.4 BOM does not manage jacoco-maven-plugin.
+           0.8.14+ required for official Java 25 support (0.8.13 = experimental). -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.14</version>
+        <executions>
+
+          <!-- Goal 1: Deposit -javaagent:jacocoagent.jar=... into the 'argLine' Maven property.
+               Must run at 'initialize' phase — before test-compile — so Surefire picks it up
+               via @{argLine} late-binding. Running at any later phase causes Surefire to miss it. -->
+          <execution>
+            <id>jacoco-prepare-agent</id>
+            <phase>initialize</phase>
+            <goals><goal>prepare-agent</goal></goals>
+          </execution>
+
+          <!-- Goal 2: Generate HTML/XML report at target/site/jacoco/ after tests complete.
+               Excludes: pure data carriers (DTOs, JPA entities, aggregation POJOs, MongoDB domain POJOs).
+               Covered: service, dao, controller, security, cache, sync, util, config (D-04, D-05). -->
+          <execution>
+            <id>jacoco-report</id>
+            <phase>test</phase>
+            <goals><goal>report</goal></goals>
+            <configuration>
+              <excludes>
+                <!-- Exclusion format: forward-slash paths (NOT dot-notation). 'com.st4r4x.dto.*' would NOT work. -->
+                <exclude>com/st4r4x/dto/**</exclude>
+                <exclude>com/st4r4x/entity/**</exclude>
+                <exclude>com/st4r4x/aggregation/**</exclude>
+                <exclude>com/st4r4x/domain/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+
+        </executions>
       </plugin>
     </plugins>
   </build>
