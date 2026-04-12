@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -69,6 +70,11 @@ public class UserRepositoryIT {
         // Without this line, AppConfig falls through to application-test.properties
         // (localhost:27017) and the Spring context fails to start in CI.
         System.setProperty("mongodb.uri", mongoContainer.getConnectionString());
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        System.clearProperty("mongodb.uri");
     }
 
     /**
