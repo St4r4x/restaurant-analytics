@@ -154,23 +154,25 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Testcontainers — pinned at 1.19.8, do NOT use 2.x (dropped JUnit 4 support) -->
+    <!-- Testcontainers — 1.20.1 uses docker-java 3.4.0 which supports Docker API >=1.40.
+         1.19.8 used docker-java 3.3.6 (hardcoded API 1.32) incompatible with Docker Engine 29.x.
+         Still 1.x — JUnit 4 @ClassRule support preserved. Do NOT upgrade to 2.x. -->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>1.19.8</version>
+      <version>1.20.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mongodb</artifactId>
-      <version>1.19.8</version>
+      <version>1.20.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
-      <version>1.19.8</version>
+      <version>1.20.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -211,6 +213,13 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
+          <!-- api.version=1.45 overrides the shaded docker-java-core default of 1.32.
+               Testcontainers' shaded DockerClientProviderStrategy reads System.getProperty("api.version")
+               via overrideDockerPropertiesWithSystemProperties() and uses it instead of VERSION_1_32.
+               Required for Docker Engine 29.x which dropped support for API < 1.40. -->
+          <systemPropertyVariables>
+            <api.version>1.45</api.version>
+          </systemPropertyVariables>
           <includes>
             <include>**/*IT.java</include>
           </includes>
