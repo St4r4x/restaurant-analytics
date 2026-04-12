@@ -28,6 +28,8 @@ ENV MONGODB_URI=mongodb://mongodb:27017
 ENV MONGODB_DATABASE=newyork
 ENV MONGODB_COLLECTION=restaurants
 
+LABEL org.opencontainers.image.source=https://github.com/St4r4x/restaurant-analytics
+
 # Expose port
 EXPOSE 8080
 

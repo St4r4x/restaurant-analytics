@@ -234,6 +234,61 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- JaCoCo Maven Plugin — generates coverage report consumed by CI-08 (madraphos/jacoco-report)
+           Version must be explicit — Spring Boot 2.6.15 BOM does not manage jacoco-maven-plugin -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
+        <executions>
+          <execution>
+            <id>jacoco-prepare-agent</id>
+            <phase>initialize</phase>
+            <goals><goal>prepare-agent</goal></goals>
+          </execution>
+          <execution>
+            <id>jacoco-report</id>
+            <phase>test</phase>
+            <goals><goal>report</goal></goals>
+            <configuration>
+              <excludes>
+                <exclude>com/aflokkat/dto/**</exclude>
+                <exclude>com/aflokkat/entity/**</exclude>
+                <exclude>com/aflokkat/aggregation/**</exclude>
+                <exclude>com/aflokkat/domain/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>jacoco-check</id>
+            <phase>test</phase>
+            <goals><goal>check</goal></goals>
+            <configuration>
+              <excludes>
+                <exclude>com/aflokkat/dto/**</exclude>
+                <exclude>com/aflokkat/entity/**</exclude>
+                <exclude>com/aflokkat/aggregation/**</exclude>
+                <exclude>com/aflokkat/domain/**</exclude>
+              </excludes>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <!-- Measured baseline from Phase 12 on prior branch: 43%
+                           Threshold set at 38% (baseline minus 5%) to tolerate minor drift -->
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.38</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
