@@ -132,7 +132,10 @@ Plans:
   4. Pushing a commit to `develop` completes the pipeline run without downloading any Maven dependencies from the internet (cache hit on pom.xml hash)
   5. No workflow YAML file contains any literal secret value — all credentials are referenced via `${{ secrets.* }}`
   6. A JaCoCo coverage summary is visible as a comment on pull requests targeting `develop` without requiring the reviewer to download an artifact
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 15-01-PLAN.md — pom.xml: add JaCoCo 0.8.12 plugin (prepare-agent, report, check at 38%); Dockerfile: add OCI LABEL before EXPOSE; README: add CI badge
+- [ ] 15-02-PLAN.md — .github/workflows/ci.yml: five-job serial pipeline (build → unit-test → integration-test → e2e → docker) with GHCR push on main, JaCoCo PR comment, Maven cache
 
 ---
 
@@ -228,7 +231,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 12. Maven Build Hardening | 2/2 | Complete    | 2026-04-12 |
 | 13. Config & Docker Hardening | 3/3 | Complete    | 2026-04-12 |
 | 14. Testcontainers Integration Tests | 4/4 | Complete    | 2026-04-12 |
-| 15. GitHub Actions CI Pipeline | 0/? | Not started | - |
+| 15. GitHub Actions CI Pipeline | 0/2 | Not started | - |
 | 16. Security Hardening | 0/? | Not started | - |
 | 17. Code Quality & MongoDB Indexing | 0/? | Not started | - |
 | 18. E2E Tests (Playwright) | 0/? | Not started | - |
