@@ -77,7 +77,14 @@ public class AppConfig {
     }
 
     public static String getJwtSecret() {
-        return getProperty("jwt.secret", "changeit-please-change-it");
+        String secret = getProperty("jwt.secret", null);
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException(
+                "JWT_SECRET environment variable is not set or too short " +
+                "(minimum 32 characters). Set it in your .env file or environment."
+            );
+        }
+        return secret;
     }
 
     public static long getJwtAccessTokenExpirationMs() {
