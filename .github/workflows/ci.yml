@@ -61,12 +61,12 @@ jobs:
           retention-days: 7
       - name: JaCoCo coverage comment
         if: github.event_name == 'pull_request'
-        uses: madraphos/jacoco-report@v1.7.2
+        uses: PavanMudigonda/jacoco-reporter@v5.1
         with:
-          paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: 'Coverage Report'
-          update-comment: true
+          coverage_results_path: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          coverage_report_title: 'Coverage Report'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          update_existing_report: true
         continue-on-error: true
 
   integration-test:
