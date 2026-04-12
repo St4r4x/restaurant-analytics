@@ -10,6 +10,13 @@ A customer can search any NYC restaurant and immediately know whether it's clean
 
 ## Current State
 
+**v3.0 in progress — Phase 13 complete (2026-04-12)**
+
+Phase 13 (config-docker-hardening) complete. 12/12 requirements validated. Hardened:
+- JWT_SECRET fail-fast assertion in AppConfig; no hardcoded secrets in source
+- Dockerfile upgraded to Java 25 Alpine with non-root appuser
+- docker-compose.yml: all credentials via .env variables, memory limits on all 4 services
+
 **Shipped: v2.0 — Full Product (2026-04-11)**
 
 All 10 phases complete. 36/36 requirements validated. The app is a fully deployed Spring Boot monolith with:
@@ -102,4 +109,4 @@ Production-grade Spring Boot 2.6.15 monolith:
 | ADMIN role separate from CONTROLLER | Admin-specific signup code, separate DataSeeder seed user | ✓ Validated |
 
 ---
-*Last updated: 2026-04-11 — v2.0 milestone complete*
+*Last updated: 2026-04-12 — Phase 13 complete (config-docker-hardening)*
