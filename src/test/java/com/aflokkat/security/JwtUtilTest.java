@@ -2,6 +2,10 @@ package com.aflokkat.security;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Field;
+import java.util.Properties;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +14,24 @@ class JwtUtilTest {
     private JwtUtil jwtUtil;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
+        // Inject jwt.secret into AppConfig.properties static field before JwtUtil construction.
+        // AppConfig.getProperty() checks System.getenv() first — System.setProperty() does NOT
+        // work here. Direct reflection patch is the established project pattern (STATE.md).
+        Field f = com.aflokkat.config.AppConfig.class.getDeclaredField("properties");
+        f.setAccessible(true);
+        Properties props = (Properties) f.get(null);
+        props.setProperty("jwt.secret",
+            "test-only-jwt-secret-64chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         jwtUtil = new JwtUtil();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        Field f = com.aflokkat.config.AppConfig.class.getDeclaredField("properties");
+        f.setAccessible(true);
+        Properties props = (Properties) f.get(null);
+        props.remove("jwt.secret");
     }
 
     // ── generateAccessToken ───────────────────────────────────────────────────

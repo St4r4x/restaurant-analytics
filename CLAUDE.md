@@ -114,73 +114,19 @@ App runs on `http://localhost:8080`.
 
 ## Git Workflow
 
-### Branch Strategy
+Branching and milestone releases are managed by **GSD** — use `/gsd-execute-phase`, `/gsd-complete-milestone`. Do not merge or tag manually.
 
-Branching is managed automatically by **GSD** (`branching_strategy: "phase"` in `.planning/config.json`).
+### End-of-Phase Documentation
 
-- **`develop`** — main integration branch; all phase work lands here
-- **`gsd/phase-N-<slug>`** — one branch per phase, created and merged by GSD (e.g. `gsd/phase-09-ux-polish`)
+At the end of each phase, keep these files up to date:
 
-GSD creates the phase branch automatically on execution start and merges it into `develop` after verification. Do not create or merge phase branches manually.
-
-**Worktree cleanup (after each wave):** GSD parallel execution uses temporary `worktree-agent-*` branches backed by directories in `.claude/worktrees/`. After a wave completes, remove them:
-```bash
-git worktree remove --force .claude/worktrees/agent-<id>
-git branch -D worktree-agent-<id>
-```
-
-Never commit phase work directly to `main`. `main` only receives merges from `develop` at milestone boundaries.
-
-### End-of-Milestone Release (MANDATORY)
-
-When the **last phase of a milestone** is complete and all tests pass, executor agents MUST:
-
-1. **Confirm the full test suite is green:**
-   ```bash
-   mvn test
-   ```
-   Do not proceed if any test fails.
-
-2. **Merge `develop` → `main` with a no-ff merge commit:**
-   ```bash
-   git checkout main
-   git merge --no-ff develop -m "release: merge v<X.Y> into main"
-   ```
-
-3. **Tag the release:**
-   ```bash
-   git tag -a v<X.Y> -m "Release v<X.Y> — <milestone name>"
-   ```
-   Example: `git tag -a v2.0 -m "Release v2.0 — Full Product"`
-
-4. **Return to `develop`:**
-   ```bash
-   git checkout develop
-   ```
-
-**Milestones and their final phases:**
-- `v1.0` — Final phase: Phase 4 (Integration Polish) ✅ already shipped
-- `v2.0` — Final phase: Phase 10 (Admin Tools)
-
-Do NOT push to remote unless the user explicitly asks. Do NOT create a GitHub release unless the user asks.
-
-### End-of-Phase Documentation (MANDATORY)
-
-Before the final commit of any phase, executor agents MUST update:
-
-1. **`CHANGELOG.md`** — add an entry under `## [Unreleased]` (or create the file if absent):
+1. **`CHANGELOG.md`** — add an entry under `## [Unreleased]`:
    ```
    ### Phase N: <Name> (YYYY-MM-DD)
    - <one-line per significant feature/endpoint added>
-   - <new routes, new DB methods, template changes>
    ```
 
-2. **`README.md`** — update any sections that are now stale:
-   - API Endpoints table (if new endpoints were added)
-   - Architecture diagram (if new packages/classes were introduced)
-   - New pages/routes (if new Thymeleaf templates were added)
-
-Both files must be committed as part of the phase's final commit, not as a separate follow-up.
+2. **`README.md`** — update stale sections (API endpoints table, architecture diagram).
 
 ## Key Notes
 

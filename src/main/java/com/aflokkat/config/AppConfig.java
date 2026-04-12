@@ -77,7 +77,14 @@ public class AppConfig {
     }
 
     public static String getJwtSecret() {
-        return getProperty("jwt.secret", "changeit-please-change-it");
+        String secret = getProperty("jwt.secret", null);
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException(
+                "JWT_SECRET environment variable is not set or too short " +
+                "(minimum 32 characters). Set it in your .env file or environment."
+            );
+        }
+        return secret;
     }
 
     public static long getJwtAccessTokenExpirationMs() {
@@ -117,6 +124,12 @@ public class AppConfig {
     }
 
     private static String getProperty(String key, String defaultValue) {
+        // 0. JVM system property — used by Testcontainers tests to inject container URIs
+        //    before MongoClientFactory static singleton initializes.
+        //    System.setProperty("mongodb.uri", ...) is the correct injection call.
+        String sysProp = System.getProperty(key);
+        if (sysProp != null) return sysProp;
+
         // 1. System environment variable (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();
         String envValue = System.getenv(envKey);

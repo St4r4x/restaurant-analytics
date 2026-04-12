@@ -1,5 +1,6 @@
 package com.aflokkat.config;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import javax.servlet.Filter;
+import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.Properties;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -67,6 +70,15 @@ public class SecurityConfigTest {
 
     @Before
     public void setUp() throws Exception {
+        // Inject jwt.secret into AppConfig.properties before Spring context boots.
+        // SecurityConfig creates a JwtUtil bean which calls AppConfig.getJwtSecret() — without
+        // this patch the context refresh fails with IllegalStateException.
+        Field f = com.aflokkat.config.AppConfig.class.getDeclaredField("properties");
+        f.setAccessible(true);
+        Properties props = (Properties) f.get(null);
+        props.setProperty("jwt.secret",
+            "test-only-jwt-secret-64chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         // SecurityAutoConfiguration registers HttpSecurity and the SpringSecurityFilterChain infrastructure.
         // SecurityConfig provides our custom SecurityFilterChain (antMatchers, accessDeniedHandler, etc.).
@@ -83,6 +95,14 @@ public class SecurityConfigTest {
                 .standaloneSetup(new StubReportsController())
                 .apply(springSecurity((Filter) context.getBean("springSecurityFilterChain")))
                 .build();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Field f = com.aflokkat.config.AppConfig.class.getDeclaredField("properties");
+        f.setAccessible(true);
+        Properties props = (Properties) f.get(null);
+        props.remove("jwt.secret");
     }
 
     @Test
