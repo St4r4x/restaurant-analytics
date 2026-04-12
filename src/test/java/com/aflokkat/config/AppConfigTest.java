@@ -18,6 +18,7 @@ public class AppConfigTest {
 
     private String savedJwtSecret;
     private Object savedDotenv;
+    private boolean dotenvCleared = false;
 
     // Helper method (private) to get the AppConfig.properties static field:
     private Properties getAppConfigProperties() throws Exception {
@@ -32,6 +33,7 @@ public class AppConfigTest {
         f.setAccessible(true);
         savedDotenv = f.get(null);
         f.set(null, null);
+        dotenvCleared = true;
     }
 
     @After
@@ -42,12 +44,12 @@ public class AppConfigTest {
         } else {
             props.setProperty("jwt.secret", savedJwtSecret);
         }
-        // Restore dotenv if it was cleared
-        if (savedDotenv != null) {
+        // Restore dotenv whenever clearDotenv() was called, even if the saved value is null
+        if (dotenvCleared) {
             Field f = AppConfig.class.getDeclaredField("dotenv");
             f.setAccessible(true);
             f.set(null, savedDotenv);
-            savedDotenv = null;
+            dotenvCleared = false;
         }
     }
 
