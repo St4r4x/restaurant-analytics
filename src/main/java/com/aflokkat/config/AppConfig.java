@@ -124,6 +124,12 @@ public class AppConfig {
     }
 
     private static String getProperty(String key, String defaultValue) {
+        // 0. JVM system property — used by Testcontainers tests to inject container URIs
+        //    before MongoClientFactory static singleton initializes.
+        //    System.setProperty("mongodb.uri", ...) is the correct injection call.
+        String sysProp = System.getProperty(key);
+        if (sysProp != null) return sysProp;
+
         // 1. System environment variable (Docker, CI...)
         String envKey = key.replace(".", "_").toUpperCase();
         String envValue = System.getenv(envKey);
