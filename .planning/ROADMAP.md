@@ -98,8 +98,8 @@ Plans:
   5. The production Docker image runs as a non-root user and is built in two stages (builder with Maven, runtime with JRE-Alpine only), resulting in an image smaller than a single-stage build
 **Plans**: 3 plans
 Plans:
-- [ ] 13-01-PLAN.md — Test infrastructure (application-test.properties, JwtUtilTest reflection patch) + AppConfig startup assertion + application.properties secret removal + .env.example
-- [ ] 13-02-PLAN.md — Dockerfile upgrade (maven:3.9-eclipse-temurin-25, eclipse-temurin:25-jre-alpine, non-root appuser) + .dockerignore
+- [x] 13-01-PLAN.md — Test infrastructure (application-test.properties, JwtUtilTest reflection patch) + AppConfig startup assertion + application.properties secret removal + .env.example
+- [x] 13-02-PLAN.md — Dockerfile upgrade (maven:3.9-eclipse-temurin-25, eclipse-temurin:25-jre-alpine, non-root appuser) + .dockerignore
 - [ ] 13-03-PLAN.md — docker-compose.yml: replace hardcoded secrets with ${VAR} references, add memory limits to all 4 services
 
 ---
@@ -221,7 +221,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 10. Admin Tools | 3/3 | Complete | 2026-04-11 |
 | 11. Logging Infrastructure | 2/2 | Complete    | 2026-04-11 |
 | 12. Maven Build Hardening | 2/2 | Complete    | 2026-04-12 |
-| 13. Config & Docker Hardening | 0/3 | Not started | - |
+| 13. Config & Docker Hardening | 2/3 | In Progress|  |
 | 14. Testcontainers Integration Tests | 0/? | Not started | - |
 | 15. GitHub Actions CI Pipeline | 0/? | Not started | - |
 | 16. Security Hardening | 0/? | Not started | - |
