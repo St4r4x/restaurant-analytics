@@ -44,7 +44,7 @@ services:
           memory: 512m
 
   mongodb:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: mongodb
     restart: unless-stopped
     networks:
