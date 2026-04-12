@@ -77,9 +77,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Running `mvn test` generates a JaCoCo HTML report at `target/site/jacoco/index.html` showing line and branch coverage metrics
   2. Running `mvn test` with coverage below the configured threshold exits with a non-zero code and a clear JaCoCo threshold violation message — not a cryptic StackOverflowError
-  3. All 27 existing test files pass with zero regressions after the JaCoCo and Failsafe plugins are added (the argLine late-binding fix prevents Mockito instrumentation failure)
+  3. All 28 existing test files pass with zero regressions after the JaCoCo and Failsafe plugins are added (the argLine late-binding fix prevents Mockito instrumentation failure)
   4. The coverage threshold is documented in `pom.xml` with a comment explaining that it reflects the measured baseline, not an aspirational target
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 12-01-PLAN.md — Fix Surefire @{argLine} late-binding, @Ignore RestaurantDAOIntegrationTest, wire JaCoCo prepare-agent + report, measure baseline
+- [ ] 12-02-PLAN.md — Add JaCoCo check goal with measured threshold + Failsafe plugin with @{argLine} late-binding
 
 ---
 
@@ -213,7 +216,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 9. UX Polish | 5/5 | Complete | 2026-04-10 |
 | 10. Admin Tools | 3/3 | Complete | 2026-04-11 |
 | 11. Logging Infrastructure | 2/2 | Complete    | 2026-04-11 |
-| 12. Maven Build Hardening | 0/? | Not started | - |
+| 12. Maven Build Hardening | 0/2 | Not started | - |
 | 13. Config & Docker Hardening | 0/? | Not started | - |
 | 14. Testcontainers Integration Tests | 0/? | Not started | - |
 | 15. GitHub Actions CI Pipeline | 0/? | Not started | - |
