@@ -1,0 +1,31 @@
+# .dockerignore — keeps build context lean for two-stage Maven build
+# IMPORTANT: src/ and pom.xml are intentionally NOT excluded — builder stage needs them.
+
+# Build output — not needed (builder stage runs mvn clean package itself)
+target/
+
+# Git history — not needed in any stage
+.git/
+.gitignore
+
+# Planning/tooling artifacts — not needed
+.planning/
+.claude/
+.agents/
+
+# Secret files — must never enter build context
+.env
+.env.*
+
+# Docker compose files — not needed inside image
+docker-compose*.yml
+
+# Log files
+*.log
+logs/
+
+# Node (if ever added)
+node_modules/
+
+# Documentation
+*.md
