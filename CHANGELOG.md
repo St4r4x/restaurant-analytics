@@ -2,16 +2,6 @@
 
 All notable changes are documented by phase.
 
-## [Phase 14] — 2026-04-12 — Testcontainers Integration Tests
-
-### Added
-- Migrated RestaurantDAOIntegrationTest to RestaurantDAOIT using Testcontainers mongo:7.0 — no live MongoDB required
-- Added UserRepositoryIT covering UserRepository.save/findByUsername and BookmarkRepository.save/findByUserId against Testcontainers postgres:15-alpine
-- Added maven-failsafe-plugin bound to integration-test and verify goals; IT tests use *IT.java naming convention
-- Added Testcontainers 1.19.8 (testcontainers, mongodb, postgresql) as test-scope dependencies, upgraded to 1.20.1 for Docker Engine 29.x compatibility
-- Fixed Surefire argLine to use @{argLine} late-binding to support future JaCoCo integration
-- Added System.getProperty(key) tier-0 lookup to AppConfig.getProperty() for TC URI injection
-
 ## [Phase 10] — 2026-04-10 — Admin Tools
 
 ### Added
