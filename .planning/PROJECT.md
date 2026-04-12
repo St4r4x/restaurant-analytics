@@ -10,12 +10,13 @@ A customer can search any NYC restaurant and immediately know whether it's clean
 
 ## Current State
 
-**v3.0 in progress — Phase 13 complete (2026-04-12)**
+**v3.0 in progress — Phase 14 complete (2026-04-12)**
 
-Phase 13 (config-docker-hardening) complete. 12/12 requirements validated. Hardened:
-- JWT_SECRET fail-fast assertion in AppConfig; no hardcoded secrets in source
-- Dockerfile upgraded to Java 25 Alpine with non-root appuser
-- docker-compose.yml: all credentials via .env variables, memory limits on all 4 services
+Phase 14 (testcontainers-integration-tests) complete. TEST-04/05/06 validated. Replaced live-DB integration tests with Testcontainers:
+- RestaurantDAOIT: 15 tests against real mongo:7.0 container (TC 1.20.1)
+- UserRepositoryIT: 4 tests against postgres:15-alpine + mongo:7.0 containers
+- AppConfig tier-0 System.getProperty() lookup enables container URI injection
+- Full suite: 165 Surefire + 15 + 4 IT = BUILD SUCCESS, no external services needed
 
 **Shipped: v2.0 — Full Product (2026-04-11)**
 
