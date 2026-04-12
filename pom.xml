@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.15</version>
+    <version>3.4.4</version>
     <relativePath/>
   </parent>
   <groupId>com.st4r4x</groupId>
@@ -13,12 +13,10 @@
   <version>2.0</version>
   <name>Restaurant Hygiene Control App</name>
   <properties>
-    <java.version>11</java.version>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <java.version>25</java.version>
+    <maven.compiler.source>25</maven.compiler.source>
+    <maven.compiler.target>25</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Override Byte Buddy from Spring Boot BOM — 1.16.x adds Java 25 support -->
-    <byte-buddy.version>1.16.0</byte-buddy.version>
   </properties>
   <dependencies>
     <!-- Spring Boot Web Starter -->
@@ -33,7 +31,7 @@
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
-    <!-- MongoDB Driver (included by Spring Boot 2.6.x) -->
+    <!-- MongoDB Driver -->
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
@@ -66,8 +64,8 @@
     <!-- API Documentation -->
     <dependency>
       <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-ui</artifactId>
-      <version>1.8.0</version>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.8.3</version>
     </dependency>
 
     <!-- Security -->
@@ -101,20 +99,19 @@
       <artifactId>spring-boot-starter-logging</artifactId>
     </dependency>
 
-    <!-- logstash-logback-encoder 7.3 — JSON structured log output for prod profile     -->
-    <!-- PINNED: 7.4+ requires Logback 1.3.x; Spring Boot 2.6.15 ships Logback 1.2.12   -->
-    <!-- Do NOT upgrade without first upgrading Spring Boot to 3.x                        -->
+    <!-- logstash-logback-encoder — JSON structured log output for prod profile -->
+    <!-- Spring Boot 3.4 ships Logback 1.5.x — compatible with encoder 8.x    -->
     <dependency>
       <groupId>net.logstash.logback</groupId>
       <artifactId>logstash-logback-encoder</artifactId>
-      <version>7.3</version>
+      <version>8.0</version>
     </dependency>
 
-    <!-- Rate limiting — Bucket4j 7.x required for Java 11; do NOT use 8.x (requires Java 17) -->
+    <!-- Rate limiting — Bucket4j 8.x requires Java 17+ -->
     <dependency>
       <groupId>com.bucket4j</groupId>
       <artifactId>bucket4j-core</artifactId>
-      <version>7.6.1</version>
+      <version>8.10.1</version>
     </dependency>
 
     <!-- Testing -->
@@ -171,10 +168,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>3.14.0</version>
         <configuration>
-          <source>11</source>
-          <target>11</target>
+          <source>25</source>
+          <target>25</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>

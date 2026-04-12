@@ -21,7 +21,7 @@
     <logger name="org.springframework.security" level="INFO"/>
 
     <!-- Application code: DEBUG in dev for full visibility -->
-    <logger name="com.aflokkat" level="DEBUG"/>
+    <logger name="com.st4r4x" level="DEBUG"/>
 
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
@@ -33,8 +33,8 @@
   <!-- LogstashEncoder automatically includes all MDC fields (including  -->
   <!-- "requestId") as top-level JSON keys — no special pattern needed. -->
   <!--                                                                   -->
-  <!-- logstash-logback-encoder 7.3 — PINNED. Do NOT upgrade:           -->
-  <!-- 7.4+ requires Logback 1.3.x; Spring Boot 2.6.15 ships 1.2.12.   -->
+  <!-- logstash-logback-encoder 8.x — compatible with Logback 1.5.x    -->
+  <!-- (shipped by Spring Boot 3.4+).                                    -->
   <!-- SECURITY: Only put non-sensitive identifiers in MDC              -->
   <!-- (requestId is a UUID with no semantic content). Never put JWT     -->
   <!-- tokens, passwords, or PII in MDC — LogstashEncoder serializes   -->
@@ -52,7 +52,7 @@
     <logger name="org.springframework.security" level="INFO"/>
 
     <!-- Application code: INFO in prod to reduce log volume -->
-    <logger name="com.aflokkat" level="INFO"/>
+    <logger name="com.st4r4x" level="INFO"/>
 
     <root level="INFO">
       <appender-ref ref="JSON_CONSOLE"/>

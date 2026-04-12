@@ -2,17 +2,16 @@ package com.st4r4x.security;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import com.st4r4x.config.AppConfig;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
@@ -65,9 +64,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String ip = request.getRemoteAddr();
         Bucket bucket = buckets.computeIfAbsent(ip, k ->
                 Bucket.builder()
-                      .addLimit(Bandwidth.classic(
-                              maxRequests,
-                              Refill.greedy(maxRequests, Duration.ofMinutes(windowMinutes))))
+                      .addLimit(Bandwidth.builder()
+                              .capacity(maxRequests)
+                              .refillGreedy(maxRequests, Duration.ofMinutes(windowMinutes))
+                              .build())
                       .build());
 
         if (bucket.tryConsume(1)) {

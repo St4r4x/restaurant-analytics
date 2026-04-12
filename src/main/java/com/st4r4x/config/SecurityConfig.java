@@ -1,16 +1,17 @@
 package com.st4r4x.config;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -46,15 +47,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-            .csrf().disable()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeRequests()
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
                 // Public: auth endpoints, read-only NYC data, Swagger
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/restaurants/**").permitAll()
-                .antMatchers("/api/inspection/**").permitAll()
-                .antMatchers(
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/restaurants/**").permitAll()
+                .requestMatchers("/api/inspection/**").permitAll()
+                .requestMatchers(
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/api-docs/**",
@@ -62,11 +63,11 @@ public class SecurityConfig {
                     "/webjars/**"
                 ).permitAll()
                 // Admin-only endpoints (MUST be before /api/reports/** wildcard)
-                .antMatchers("/api/reports/stats").hasRole("ADMIN")
+                .requestMatchers("/api/reports/stats").hasRole("ADMIN")
                 // Controller-only endpoints
-                .antMatchers("/api/reports/**").hasRole("CONTROLLER")
+                .requestMatchers("/api/reports/**").hasRole("CONTROLLER")
                 // Any authenticated user (any role)
-                .antMatchers("/api/users/**").authenticated()
+                .requestMatchers("/api/users/**").authenticated()
                 // INTENTIONAL: view routes are open at the Spring Security layer.
                 // JWT lives in localStorage, not cookies — browser navigation carries no
                 // Authorization header, so server-side enforcement would block every page
@@ -74,8 +75,8 @@ public class SecurityConfig {
                 // (admin.html, dashboard.html) is enforced client-side via an IIFE guard
                 // that reads localStorage and redirects unauthenticated users to /login.
                 .anyRequest().permitAll()
-            .and()
-            .exceptionHandling()
+            )
+            .exceptionHandling(exc -> exc
                 .authenticationEntryPoint((request, response, authException) -> {
                     // API calls get 401 JSON; browser navigation gets redirected to /login
                     String path = request.getRequestURI();
@@ -92,7 +93,7 @@ public class SecurityConfig {
                     response.setContentType("application/json");
                     response.getWriter().write("{\"status\":\"error\",\"message\":\"Forbidden\"}");
                 })
-            .and()
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
