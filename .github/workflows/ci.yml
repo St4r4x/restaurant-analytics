@@ -88,6 +88,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run integration tests
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CONTROLLER_SIGNUP_CODE: ${{ secrets.CONTROLLER_SIGNUP_CODE }}
+          ADMIN_SIGNUP_CODE: ${{ secrets.ADMIN_SIGNUP_CODE }}
+          NYC_API_MAX_RECORDS: "200"
         run: mvn verify -Dsurefire.skip=true
 
   e2e:
