@@ -232,7 +232,61 @@
             </configuration>
           </execution>
 
+          <!-- Goal 3: Fail build if INSTRUCTION coverage drops below threshold.
+               Bound to 'test' phase (same as report) so plain 'mvn test' enforces it.
+               Binding to 'verify' would require 'mvn verify' — would silently pass on 'mvn test'. -->
+          <execution>
+            <id>jacoco-check</id>
+            <phase>test</phase>
+            <goals><goal>check</goal></goals>
+            <configuration>
+              <excludes>
+                <!-- Same exclusion set as jacoco-report — D-04 -->
+                <exclude>com/st4r4x/dto/**</exclude>
+                <exclude>com/st4r4x/entity/**</exclude>
+                <exclude>com/st4r4x/aggregation/**</exclude>
+                <exclude>com/st4r4x/domain/**</exclude>
+              </excludes>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <!-- Measured baseline: 43% — threshold set at 38% (baseline minus 5%) -->
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.38</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+
         </executions>
+      </plugin>
+
+      <!-- Maven Failsafe Plugin: integration test runner for *IT.java files.
+           No version: Spring Boot 3.4.4 BOM manages at 3.5.2.
+           No *IT.java files exist yet — Failsafe runs zero tests; exits 0.
+           argLine uses same @{argLine} late-binding as Surefire (D-06) —
+           required for Phase 14 Testcontainers tests to receive JaCoCo agent.
+           D-08: bound to integration-test + verify lifecycle phases. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <!-- No <version>: Spring Boot 3.4.4 BOM manages at 3.5.2 -->
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
+        </configuration>
       </plugin>
     </plugins>
   </build>
