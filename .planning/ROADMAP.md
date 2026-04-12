@@ -38,7 +38,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### v3.0 phases (11-20)
 
 - [x] **Phase 11: Logging Infrastructure** - Replace non-functional simplelogger.properties with structured Logback, add request ID propagation via MDC (completed 2026-04-11)
-- [ ] **Phase 12: Maven Build Hardening** - Wire JaCoCo coverage report and Failsafe plugin with correct argLine late-binding to unblock all test infrastructure
+- [x] **Phase 12: Maven Build Hardening** - Wire JaCoCo coverage report and Failsafe plugin with correct argLine late-binding to unblock all test infrastructure (completed 2026-04-12)
 - [ ] **Phase 13: Config & Docker Hardening** - Eliminate all hardcoded secrets, production-grade Docker Compose with health checks and resource limits
 - [ ] **Phase 14: Testcontainers Integration Tests** - Make existing integration test self-contained against real MongoDB and PostgreSQL via Testcontainers
 - [ ] **Phase 15: GitHub Actions CI Pipeline** - Five-job pipeline (build, unit-test, integration, E2E placeholder, Docker) consuming phases 12-14 artifacts
@@ -81,8 +81,8 @@ Plans:
   4. The coverage threshold is documented in `pom.xml` with a comment explaining that it reflects the measured baseline, not an aspirational target
 **Plans**: 2 plans
 Plans:
-- [ ] 12-01-PLAN.md — Fix Surefire @{argLine} late-binding, @Ignore RestaurantDAOIntegrationTest, wire JaCoCo prepare-agent + report, measure baseline
-- [ ] 12-02-PLAN.md — Add JaCoCo check goal with measured threshold + Failsafe plugin with @{argLine} late-binding
+- [x] 12-01-PLAN.md — Fix Surefire @{argLine} late-binding, @Ignore RestaurantDAOIntegrationTest, wire JaCoCo prepare-agent + report, measure baseline
+- [x] 12-02-PLAN.md — Add JaCoCo check goal with measured threshold + Failsafe plugin with @{argLine} late-binding
 
 ---
 
@@ -216,7 +216,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 9. UX Polish | 5/5 | Complete | 2026-04-10 |
 | 10. Admin Tools | 3/3 | Complete | 2026-04-11 |
 | 11. Logging Infrastructure | 2/2 | Complete    | 2026-04-11 |
-| 12. Maven Build Hardening | 0/2 | Not started | - |
+| 12. Maven Build Hardening | 2/2 | Complete    | 2026-04-12 |
 | 13. Config & Docker Hardening | 0/? | Not started | - |
 | 14. Testcontainers Integration Tests | 0/? | Not started | - |
 | 15. GitHub Actions CI Pipeline | 0/? | Not started | - |
