@@ -93,7 +93,9 @@ jobs:
           CONTROLLER_SIGNUP_CODE: ${{ secrets.CONTROLLER_SIGNUP_CODE }}
           ADMIN_SIGNUP_CODE: ${{ secrets.ADMIN_SIGNUP_CODE }}
           NYC_API_MAX_RECORDS: "200"
-        run: mvn verify -Dsurefire.skip=true
+        # test-compile phase: compiles sources + runs jacoco:prepare-agent (initialize)
+        # failsafe goals: run *IT.java tests only — Surefire and jacoco:check are not triggered
+        run: mvn test-compile failsafe:integration-test failsafe:verify
 
   e2e:
     name: E2E Smoke Test
