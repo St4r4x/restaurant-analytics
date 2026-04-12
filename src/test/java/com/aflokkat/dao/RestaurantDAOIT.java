@@ -226,6 +226,7 @@ public class RestaurantDAOIT {
     public void testUseCase3_WorstCuisines_SortedByScore() {
         List<CuisineScore> results =
             restaurantDAO.findWorstCuisinesByAverageScoreInBorough("Manhattan", 5);
+        assertTrue("Expected at least 2 results to verify sort order", results.size() >= 2);
         for (int i = 1; i < results.size(); i++) {
             assertTrue("Should be sorted ascending (worst = highest score first — per DAO semantics)",
                 results.get(i - 1).getAvgScore() <= results.get(i).getAvgScore());
