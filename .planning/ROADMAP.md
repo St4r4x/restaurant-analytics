@@ -40,7 +40,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 11: Logging Infrastructure** - Replace non-functional simplelogger.properties with structured Logback, add request ID propagation via MDC (completed 2026-04-11)
 - [x] **Phase 12: Maven Build Hardening** - Wire JaCoCo coverage report and Failsafe plugin with correct argLine late-binding to unblock all test infrastructure (completed 2026-04-12)
 - [x] **Phase 13: Config & Docker Hardening** - Eliminate all hardcoded secrets, production-grade Docker Compose with health checks and resource limits (completed 2026-04-12)
-- [ ] **Phase 14: Testcontainers Integration Tests** - Make existing integration test self-contained against real MongoDB and PostgreSQL via Testcontainers
+- [x] **Phase 14: Testcontainers Integration Tests** - Make existing integration test self-contained against real MongoDB and PostgreSQL via Testcontainers (completed 2026-04-12)
 - [ ] **Phase 15: GitHub Actions CI Pipeline** - Five-job pipeline (build, unit-test, integration, E2E placeholder, Docker) consuming phases 12-14 artifacts
 - [ ] **Phase 16: Security Hardening** - Explicit CORS policy, security headers, input validation, rate limiting extension, HTTPS-ready config
 - [ ] **Phase 17: Code Quality & MongoDB Indexing** - Dead code removal, complete OpenAPI docs, ResponseUtil consistency, MongoDB indexes at startup
@@ -114,10 +114,10 @@ Plans:
   3. A developer can delete their local MongoDB and PostgreSQL installations and still run the full integration test suite successfully
 **Plans**: 4 plans
 Plans:
-- [ ] 14-01-PLAN.md — pom.xml: add Testcontainers 1.19.8 (3 artifacts) + Failsafe plugin; fix Surefire argLine; add AppConfig.getProperty() System.getProperty() tier-0
-- [ ] 14-02-PLAN.md — RestaurantDAOIT.java: rename + rewrite RestaurantDAOIntegrationTest with TC mongo:7.0, @ClassRule, 60-doc seed, 14 assertions
-- [ ] 14-03-PLAN.md — UserRepositoryIT.java: new test with TC postgres:15-alpine + mongo:7.0, @SpringBootTest + ApplicationContextInitializer pattern, 4 assertions
-- [ ] 14-04-PLAN.md — Final verification: mvn verify green + CHANGELOG.md update
+- [x] 14-01-PLAN.md — pom.xml: add Testcontainers 1.19.8 (3 artifacts) + Failsafe plugin; fix Surefire argLine; add AppConfig.getProperty() System.getProperty() tier-0
+- [x] 14-02-PLAN.md — RestaurantDAOIT.java: rename + rewrite RestaurantDAOIntegrationTest with TC mongo:7.0, @ClassRule, 60-doc seed, 14 assertions
+- [x] 14-03-PLAN.md — UserRepositoryIT.java: new test with TC postgres:15-alpine + mongo:7.0, @SpringBootTest + ApplicationContextInitializer pattern, 4 assertions
+- [x] 14-04-PLAN.md — Final verification: mvn verify green + CHANGELOG.md update
 
 ---
 
@@ -227,7 +227,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 11. Logging Infrastructure | 2/2 | Complete    | 2026-04-11 |
 | 12. Maven Build Hardening | 2/2 | Complete    | 2026-04-12 |
 | 13. Config & Docker Hardening | 3/3 | Complete    | 2026-04-12 |
-| 14. Testcontainers Integration Tests | 0/4 | Not started | - |
+| 14. Testcontainers Integration Tests | 4/4 | Complete    | 2026-04-12 |
 | 15. GitHub Actions CI Pipeline | 0/? | Not started | - |
 | 16. Security Hardening | 0/? | Not started | - |
 | 17. Code Quality & MongoDB Indexing | 0/? | Not started | - |
