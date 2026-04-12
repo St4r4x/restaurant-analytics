@@ -18,6 +18,7 @@ services:
       CONTROLLER_SIGNUP_CODE: ${CONTROLLER_SIGNUP_CODE:-}
       ADMIN_SIGNUP_CODE: ${ADMIN_SIGNUP_CODE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/restaurantdb
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-restaurant}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     volumes:
       - uploads_data:/app/uploads
