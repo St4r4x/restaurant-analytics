@@ -8,15 +8,15 @@ Academic project (Aflokkat / big data module).
 
 ## Stack
 
-- **Language**: Java 11
-- **Framework**: Spring Boot 2.6.15
+- **Language**: Java 25
+- **Framework**: Spring Boot 4.0.5
 - **Primary DB**: MongoDB (driver: `mongodb-driver-sync`, raw aggregation pipelines — no Spring Data MongoDB)
 - **RDBMS**: PostgreSQL 15 — users, bookmarks (Spring JPA / Hibernate)
 - **Cache**: Redis 7 (TTL-based, via `RestaurantCacheService`)
 - **Security**: JWT (access 15 min / refresh 7 days), Spring Security
 - **Build**: Maven (`mvn`)
 - **Config**: `src/main/resources/application.properties` (main config, no dotenv in production)
-- **Testing**: JUnit 4 + Mockito
+- **Testing**: JUnit 5 + Mockito
 - **Deployment**: Docker / Docker Compose (plugin — use `docker compose`, not `docker-compose`)
 
 ## Architecture

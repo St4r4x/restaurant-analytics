@@ -12,8 +12,8 @@ Academic project — Aflokkat / big data module.
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Java 11 |
-| Framework | Spring Boot 2.6.15 |
+| Language | Java 25 |
+| Framework | Spring Boot 4.0.5 |
 | Primary DB | MongoDB (raw driver, no Spring Data) |
 | RDBMS | PostgreSQL 15 (users, bookmarks, reports) |
 | Cache | Redis 7 (TTL 3600 s) |
