@@ -4,14 +4,14 @@ milestone: v3.0
 milestone_name: phases
 status: executing
 stopped_at: Phase 15 context gathered
-last_updated: "2026-04-12T19:57:36.996Z"
-last_activity: 2026-04-12
+last_updated: "2026-04-13T07:22:34.963Z"
+last_activity: 2026-04-13 -- Phase 21 execution started
 progress:
-  total_phases: 10
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_phases: 11
+  completed_phases: 5
+  total_plans: 18
+  completed_plans: 13
+  percent: 72
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
-**Current focus:** Phase 13 — config-docker-hardening
+**Current focus:** Phase 21 — upgrade-java-11-25-and-spring-boot-2-6-15-4-0-5-including-ju
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
-Status: Executing Phase 13
-Last activity: 2026-04-12
+Phase: 21 (upgrade-java-11-25-and-spring-boot-2-6-15-4-0-5-including-ju) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 21
+Last activity: 2026-04-13 -- Phase 21 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -58,6 +58,10 @@ New for v3.0 (from research):
 - Playwright E2E auth: call /api/auth/login via APIRequestContext, extract accessToken, inject via addInitScript() — storageState() does not work for localStorage JWT
 - GHCR push requires OCI LABEL org.opencontainers.image.source in Dockerfile — absent label causes permission_denied after first unlinked push
 - NYC_API_MAX_RECORDS=200 in E2E CI compose — caps sync to ~10s, prevents timeout
+
+### Roadmap Evolution
+
+- Phase 21 added: Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5, including JUnit 4 → 5 migration, javax → jakarta namespace, Spring Security 6 API updates, springdoc v1 → v2, logstash-logback-encoder 7.3 → 8.1, and MongoDB properties prefix rename
 
 ### Pending Todos
 
