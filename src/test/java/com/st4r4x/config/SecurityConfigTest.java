@@ -1,7 +1,7 @@
 package com.st4r4x.config;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -65,17 +65,19 @@ public class SecurityConfigTest {
         }
     }
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        // SecurityAutoConfiguration registers HttpSecurity and the SpringSecurityFilterChain infrastructure.
-        // SecurityConfig provides our custom SecurityFilterChain (antMatchers, accessDeniedHandler, etc.).
-        // SecurityConfig must be registered BEFORE SecurityAutoConfiguration so that
-        // SpringBootWebSecurityConfiguration's @ConditionalOnDefaultWebSecurity sees our
-        // SecurityFilterChain bean and skips creating its own default chain.
+        // Spring Boot 4.x: HttpSecurity is provided by @EnableWebSecurity, which is pulled in
+        // via ServletWebSecurityAutoConfiguration$EnableWebSecurityConfiguration.
+        // SecurityAutoConfiguration registers AuthenticationEventPublisher.
+        // SecurityConfig provides our custom SecurityFilterChain (requestMatchers, accessDeniedHandler, etc.).
+        // SecurityConfig must be registered BEFORE the auto-configurations so that
+        // ConditionalOnDefaultWebSecurity sees our SecurityFilterChain bean and skips the default chain.
         context.register(
                 SecurityConfig.class,
-                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+                org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration.class,
+                org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration.class
         );
         context.refresh();
 
@@ -86,14 +88,14 @@ public class SecurityConfigTest {
     }
 
     @Test
-    public void reports_returns401_whenUnauthenticated() throws Exception {
+    void reports_returns401_whenUnauthenticated() throws Exception {
         SecurityContextHolder.clearContext();
         mockMvc.perform(get("/api/reports/test"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void reports_returns403_forCustomerJwt() throws Exception {
+    void reports_returns403_forCustomerJwt() throws Exception {
         // Simulate a valid CUSTOMER token already parsed by the JWT filter
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "customer_user", null,
@@ -104,7 +106,7 @@ public class SecurityConfigTest {
     }
 
     @Test
-    public void reports_allowsAccess_forControllerJwt() throws Exception {
+    void reports_allowsAccess_forControllerJwt() throws Exception {
         // Simulate a valid CONTROLLER token
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "ctrl_user", null,
@@ -119,14 +121,14 @@ public class SecurityConfigTest {
     // dashboard.html redirects non-CONTROLLER users to / on the client side.
 
     @Test
-    public void dashboard_isAccessible_whenUnauthenticated() throws Exception {
+    void dashboard_isAccessible_whenUnauthenticated() throws Exception {
         SecurityContextHolder.clearContext();
         mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void dashboard_isAccessible_forCustomer() throws Exception {
+    void dashboard_isAccessible_forCustomer() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "customer_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
@@ -136,7 +138,7 @@ public class SecurityConfigTest {
     }
 
     @Test
-    public void dashboard_returns200_forController() throws Exception {
+    void dashboard_returns200_forController() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
@@ -149,14 +151,14 @@ public class SecurityConfigTest {
     // Authorization headers on page navigation. Security is enforced by the client-side
     // IIFE guard in admin.html. anyRequest().permitAll() applies, so all callers get 200.
     @Test
-    public void admin_returns200_whenUnauthenticated() throws Exception {
+    void admin_returns200_whenUnauthenticated() throws Exception {
         SecurityContextHolder.clearContext();
         mockMvc.perform(get("/admin"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void admin_returns200_forController() throws Exception {
+    void admin_returns200_forController() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
@@ -166,7 +168,7 @@ public class SecurityConfigTest {
     }
 
     @Test
-    public void admin_returns200_forAdmin() throws Exception {
+    void admin_returns200_forAdmin() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "admin_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
@@ -177,7 +179,7 @@ public class SecurityConfigTest {
 
     // /api/reports/stats is ADMIN-only (antMatcher before /api/reports/** wildcard)
     @Test
-    public void reportStats_returns403_forController() throws Exception {
+    void reportStats_returns403_forController() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
@@ -187,7 +189,7 @@ public class SecurityConfigTest {
     }
 
     @Test
-    public void reportStats_returns200_forAdmin() throws Exception {
+    void reportStats_returns200_forAdmin() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "admin_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
