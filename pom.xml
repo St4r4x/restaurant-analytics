@@ -186,6 +186,11 @@
           <source>25</source>
           <target>25</target>
           <encoding>UTF-8</encoding>
+          <!-- forceJavacCompilerUse: avoids plexus-compiler-javac NullPointerException
+               (UnsharedNameTable.hashes == null) that occurs when compiling Java 25 sources
+               in-process on maven-compiler-plugin 3.13+. Forces javac to run as an
+               external process instead of the in-process javax.tools API. -->
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
         </configuration>
       </plugin>
 
