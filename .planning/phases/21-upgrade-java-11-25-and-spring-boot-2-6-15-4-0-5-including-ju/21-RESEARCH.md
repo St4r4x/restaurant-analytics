@@ -426,22 +426,25 @@ No annotation semantics change — `@Entity`, `@Table`, `@Column`, `@ManyToOne`,
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Will Path A (2.7.18) expose any runtime differences?**
    - What we know: No breaking API changes between 2.6 and 2.7 for this stack
    - What's unclear: Whether any auto-configuration behavior changed subtly (e.g., Redis, JPA initialization order)
    - Recommendation: Run the full test suite after the bump; the CI pipeline (Phase 15) will catch regressions
+   - RESOLVED: Superseded — phase targets Boot 4.0.5 directly, Path A questions no longer apply.
 
 2. **Is Boot 2.7.18 sufficient for portfolio presentation?**
    - What we know: 2.7.18 is EOL (June 2023) for OSS but commercially supported through 2029
    - What's unclear: Whether academic evaluators care about the specific Boot version
    - Recommendation: 2.7.18 is fine for portfolio; if version-consciousness is a concern, the answer is Boot 3.x not a 2.7 bump
+   - RESOLVED: Superseded — phase targets Boot 4.0.5 directly, Path A questions no longer apply.
 
 3. **Can the Boot 3 upgrade be made incrementally safer?**
    - What we know: Spring Security 5.8 provides `requestMatchers` as non-deprecated alongside `antMatchers` deprecated — could upgrade to 5.8 (within Boot 2.7) as a prep step
    - What's unclear: Whether Boot 2.7.18 actually ships Security 5.8 (it ships 5.7.11)
    - Recommendation: Boot 2.7 → 2.7.18 is the stable LTS-equivalent step; use OpenRewrite for the 3.0 jump directly
+   - RESOLVED: Superseded — phase targets Boot 4.0.5 directly, Path A questions no longer apply.
 
 ---
 
