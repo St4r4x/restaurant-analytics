@@ -210,14 +210,14 @@ Plans:
 **Goal:** The project builds successfully on Java 25 with Spring Boot 4.0.5, all tests pass under JUnit 5, and no deprecated/removed APIs remain in the codebase
 **Requirements**: UPGRADE-01, UPGRADE-02, UPGRADE-03, UPGRADE-04
 **Depends on:** Phase 20
-**Plans:** 1/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 21-01-PLAN.md — pom.xml: Boot 4.0.5, Java 25, springdoc v2, logstash 8.1, remove JUnit 4 artifacts; application.properties: remove ant_path_matcher and hibernate.dialect
-- [ ] 21-02-PLAN.md — javax → jakarta namespace migration across 6 main + 1 test source file; mvn clean compile green
-- [ ] 21-03-PLAN.md — SecurityConfig.java: antMatchers → requestMatchers lambda DSL (Spring Security 6)
-- [ ] 21-04-PLAN.md — JUnit 4 → JUnit 5 migration across 9 test files; mvn test green
-- [ ] 21-05-PLAN.md — Full mvn clean verify gate; human checkpoint; CHANGELOG.md update
+- [x] 21-02-PLAN.md — javax → jakarta namespace migration across 6 main + 1 test source file; mvn clean compile green
+- [x] 21-03-PLAN.md — SecurityConfig.java: antMatchers → requestMatchers lambda DSL (Spring Security 6)
+- [x] 21-04-PLAN.md — JUnit 4 → JUnit 5 migration across 9 test files; mvn test green
+- [x] 21-05-PLAN.md — Full mvn clean verify gate; human checkpoint; CHANGELOG.md update
 
 ---
 
