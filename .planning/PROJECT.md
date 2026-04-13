@@ -81,7 +81,7 @@ All 10 phases complete. 36/36 requirements validated. The app is a fully deploye
 
 ## Context
 
-Production-grade Spring Boot 2.6.15 monolith:
+Production-grade Spring Boot 4.0.5 monolith (upgraded in Phase 21):
 - MongoDB for restaurant/inspection data (`mongodb-driver-sync`, raw aggregation pipelines)
 - PostgreSQL for users/bookmarks/reports (Spring Data JPA)
 - Redis 7 for caching (TTL 3600s)
@@ -90,7 +90,7 @@ Production-grade Spring Boot 2.6.15 monolith:
 
 ## Constraints
 
-- **Tech stack**: Java 11, Spring Boot 2.6.15 — no framework upgrade
+- **Tech stack**: Java 25, Spring Boot 4.0.5, JUnit 5 — no framework upgrade beyond Phase 21
 - **Database**: MongoDB for restaurant data, PostgreSQL for user/report metadata
 - **Auth**: JWT — extend existing system, don't replace
 - **NYC API**: Read-only
@@ -110,4 +110,4 @@ Production-grade Spring Boot 2.6.15 monolith:
 | ADMIN role separate from CONTROLLER | Admin-specific signup code, separate DataSeeder seed user | ✓ Validated |
 
 ---
-*Last updated: 2026-04-12 — Phase 13 complete (config-docker-hardening)*
+*Last updated: 2026-04-13 — Phase 21 complete (Spring Boot 4.0.5, Java 25, JUnit 5)*
