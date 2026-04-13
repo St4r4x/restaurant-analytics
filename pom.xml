@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.6.15</version>
+    <version>4.0.5</version>
     <relativePath/>
   </parent>
   <groupId>com.st4r4x</groupId>
@@ -13,9 +13,9 @@
   <version>1.0-SNAPSHOT</version>
   <name>quickstart-app</name>
   <properties>
-    <java.version>11</java.version>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <java.version>25</java.version>
+    <maven.compiler.source>25</maven.compiler.source>
+    <maven.compiler.target>25</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Override Byte Buddy from Spring Boot BOM — 1.16.x adds Java 25 support -->
     <byte-buddy.version>1.16.0</byte-buddy.version>
@@ -68,10 +68,11 @@
     </dependency>
 
     <!-- API Documentation -->
+    <!-- SpringDoc OpenAPI v2 — required for Spring Boot 3+/4+ compatibility -->
     <dependency>
       <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-ui</artifactId>
-      <version>1.8.0</version>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.8.6</version>
     </dependency>
 
     <!-- Security -->
@@ -104,6 +105,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-logging</artifactId>
     </dependency>
+    <!-- Structured JSON logging — 8.x targets Logback 1.5.x (Spring Boot 3+/4+ ships 1.5.x) -->
+    <dependency>
+      <groupId>net.logstash.logback</groupId>
+      <artifactId>logstash-logback-encoder</artifactId>
+      <version>8.1</version>
+    </dependency>
 
     <!-- Rate limiting — Bucket4j 7.x required for Java 11; do NOT use 8.x (requires Java 17) -->
     <dependency>
@@ -125,12 +132,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <!-- 5.x required for Java 21+ Byte Buddy instrumentation support -->
@@ -146,17 +147,9 @@
     <!-- mockito-inline removed: Mockito 5.x merged inline mocking into mockito-core.
          Having both on the classpath causes MockMaker conflicts on Java 21+. -->
 
-    <!-- JUnit Vintage Engine: allows JUnit 4 @Test annotations to run on the JUnit 5 platform.
-         Required because existing tests (AppConfigTest, AuthServiceTest, etc.) use JUnit 4. -->
-    <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <!-- Testcontainers — 1.20.1 uses docker-java 3.4.0 which supports Docker API >=1.40.
          1.19.8 used docker-java 3.3.6 (hardcoded API 1.32) incompatible with Docker Engine 29.x.
-         Still 1.x — JUnit 4 @ClassRule support preserved. Do NOT upgrade to 2.x. -->
+         Still 1.x — Testcontainers 2.x changed the API; 1.20.1 is stable and compatible with JUnit 5 @BeforeAll static containers. -->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
@@ -190,8 +183,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
-          <source>11</source>
-          <target>11</target>
+          <source>25</source>
+          <target>25</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -253,11 +246,12 @@
             <phase>test</phase>
             <goals><goal>report</goal></goals>
             <configuration>
+              <!-- Exclude low-coverage POJOs/DTOs/entities from coverage threshold calculation -->
               <excludes>
-                <exclude>com/aflokkat/dto/**</exclude>
-                <exclude>com/aflokkat/entity/**</exclude>
-                <exclude>com/aflokkat/aggregation/**</exclude>
-                <exclude>com/aflokkat/domain/**</exclude>
+                <exclude>com/st4r4x/dto/**</exclude>
+                <exclude>com/st4r4x/entity/**</exclude>
+                <exclude>com/st4r4x/aggregation/**</exclude>
+                <exclude>com/st4r4x/domain/**</exclude>
               </excludes>
             </configuration>
           </execution>
@@ -266,11 +260,12 @@
             <phase>test</phase>
             <goals><goal>check</goal></goals>
             <configuration>
+              <!-- Exclude low-coverage POJOs/DTOs/entities from coverage threshold calculation -->
               <excludes>
-                <exclude>com/aflokkat/dto/**</exclude>
-                <exclude>com/aflokkat/entity/**</exclude>
-                <exclude>com/aflokkat/aggregation/**</exclude>
-                <exclude>com/aflokkat/domain/**</exclude>
+                <exclude>com/st4r4x/dto/**</exclude>
+                <exclude>com/st4r4x/entity/**</exclude>
+                <exclude>com/st4r4x/aggregation/**</exclude>
+                <exclude>com/st4r4x/domain/**</exclude>
               </excludes>
               <rules>
                 <rule>
