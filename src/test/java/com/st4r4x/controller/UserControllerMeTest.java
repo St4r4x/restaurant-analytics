@@ -58,7 +58,7 @@ public class UserControllerMeTest {
 
         ResponseEntity<Map<String, Object>> response = userController.getProfile();
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         Map<String, Object> body = response.getBody();
         assertNotNull(body);
         @SuppressWarnings("unchecked")
@@ -76,7 +76,7 @@ public class UserControllerMeTest {
 
         ResponseEntity<Map<String, Object>> response = userController.getProfile();
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         Map<String, Object> body = response.getBody();
         assertNotNull(body);
         @SuppressWarnings("unchecked")
@@ -95,7 +95,7 @@ public class UserControllerMeTest {
 
         ResponseEntity<Map<String, Object>> response = userController.getProfile();
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         Map<String, Object> body = response.getBody();
         assertNotNull(body);
         @SuppressWarnings("unchecked")

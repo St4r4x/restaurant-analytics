@@ -1,15 +1,14 @@
 package com.st4r4x.repository;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -18,7 +17,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.testcontainers.containers.MongoDBContainer;
@@ -33,7 +32,7 @@ import com.st4r4x.entity.UserEntity;
  * No live PostgreSQL or MongoDB required.
  * Run with: mvn failsafe:integration-test -Dit.test=UserRepositoryIT
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = UserRepositoryIT.Initializer.class)
@@ -43,23 +42,20 @@ import com.st4r4x.entity.UserEntity;
 }, mergeMode = TestExecutionListeners.MergeMode.REPLACE_DEFAULTS)
 public class UserRepositoryIT {
 
-    // Both containers are @ClassRule so TC manages their lifecycle.
+    // Both containers are started in the static block so TC manages their lifecycle.
     // They must be started BEFORE the Initializer runs (Spring context creation).
     // The static block ensures they are started during class loading, which
     // precedes Spring context creation.
 
-    @ClassRule
     public static PostgreSQLContainer<?> pgContainer =
         new PostgreSQLContainer<>("postgres:15-alpine");
 
-    @ClassRule
     public static MongoDBContainer mongoContainer =
         new MongoDBContainer("mongo:7.0");
 
     static {
         // Start containers now — before Spring context initialization.
-        // @ClassRule alone does not guarantee containers are started before
-        // the ApplicationContextInitializer runs.
+        // Containers must be started before the ApplicationContextInitializer runs.
         pgContainer.start();
         mongoContainer.start();
 
@@ -72,15 +68,17 @@ public class UserRepositoryIT {
         System.setProperty("mongodb.uri", mongoContainer.getConnectionString());
     }
 
-    @AfterClass
-    public static void tearDownClass() {
+    @AfterAll
+    public static void tearDownContainers() {
         System.clearProperty("mongodb.uri");
+        if (pgContainer != null && pgContainer.isRunning()) pgContainer.stop();
+        if (mongoContainer != null && mongoContainer.isRunning()) mongoContainer.stop();
     }
 
     /**
      * Injects TC container URIs into the Spring Environment before the datasource
      * connection pool is created. This is the ONLY safe injection point for
-     * @SpringBootTest — @BeforeClass fires too late (Spring context is already built).
+     * @SpringBootTest — @BeforeAll fires too late (Spring context is already built).
      * The mongodb.uri System.setProperty in the static block is the canonical injection
      * for AppConfig tier-0; this additionally covers Spring Environment consumers.
      */
@@ -115,7 +113,7 @@ public class UserRepositoryIT {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
-    @Before
+    @BeforeEach
     public void cleanDatabase() {
         // Use deleteAllInBatch() — issues a single DELETE statement without loading entities first.
         // This avoids Hibernate proxy-based entity loading which causes StackOverflowError via
@@ -132,7 +130,7 @@ public class UserRepositoryIT {
         userRepository.save(user);
 
         Optional<UserEntity> found = userRepository.findByUsername("testuser");
-        assertTrue("User should be found by username", found.isPresent());
+        assertTrue(found.isPresent(), "User should be found by username");
         assertEquals("testuser@example.com", found.get().getEmail());
         assertEquals("CUSTOMER", found.get().getRole());
     }
@@ -140,7 +138,7 @@ public class UserRepositoryIT {
     @Test
     public void testFindUser_NotFound() {
         Optional<UserEntity> found = userRepository.findByUsername("nonexistentuser");
-        assertFalse("Should return empty Optional for unknown username", found.isPresent());
+        assertFalse(found.isPresent(), "Should return empty Optional for unknown username");
     }
 
     @Test
@@ -156,7 +154,7 @@ public class UserRepositoryIT {
         bookmarkRepository.save(bookmark);
 
         List<BookmarkEntity> bookmarks = bookmarkRepository.findByUserId(saved.getId());
-        assertFalse("Bookmarks list should not be empty", bookmarks.isEmpty());
+        assertFalse(bookmarks.isEmpty(), "Bookmarks list should not be empty");
         assertEquals("R0001", bookmarks.get(0).getRestaurantId());
     }
 
@@ -171,6 +169,6 @@ public class UserRepositoryIT {
         bookmarkRepository.save(new BookmarkEntity(saved, "R0003"));
 
         long count = bookmarkRepository.countByUserId(saved.getId());
-        assertEquals("Should count 2 bookmarks for user", 2L, count);
+        assertEquals(2L, count, "Should count 2 bookmarks for user");
     }
 }

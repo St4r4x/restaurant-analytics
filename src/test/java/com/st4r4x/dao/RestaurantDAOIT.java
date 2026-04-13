@@ -1,16 +1,15 @@
 package com.st4r4x.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.bson.Document;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MongoDBContainer;
 
 import com.mongodb.client.MongoClients;
@@ -26,14 +25,15 @@ import com.st4r4x.domain.Restaurant;
  */
 public class RestaurantDAOIT {
 
-    @ClassRule
     public static MongoDBContainer mongoContainer =
         new MongoDBContainer("mongo:7.0");
 
     private static RestaurantDAO restaurantDAO;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
+        mongoContainer.start();
+
         // Reset singleton — guards against state leakage if any earlier test
         // left MongoClientFactory pointing at a different URI.
         MongoClientFactory.closeInstance();
@@ -50,12 +50,13 @@ public class RestaurantDAOIT {
         seedTestData();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() {
         if (restaurantDAO != null) {
             restaurantDAO.close(); // closes MongoClientFactory singleton
         }
         System.clearProperty("mongodb.uri");
+        mongoContainer.stop();
     }
 
     // -----------------------------------------------------------------------
@@ -149,17 +150,17 @@ public class RestaurantDAOIT {
     @Test
     public void testUseCase1_GetRestaurantCountByBorough_ReturnsData() {
         List<AggregationCount> results = restaurantDAO.findCountByBorough();
-        assertNotNull("Results should not be null", results);
-        assertFalse("Results should not be empty", results.isEmpty());
-        assertTrue("Should have at least 5 boroughs", results.size() >= 5);
+        assertNotNull(results, "Results should not be null");
+        assertFalse(results.isEmpty(), "Results should not be empty");
+        assertTrue(results.size() >= 5, "Should have at least 5 boroughs");
     }
 
     @Test
     public void testUseCase1_CountByBorough_DataValidation() {
         List<AggregationCount> results = restaurantDAO.findCountByBorough();
         for (AggregationCount count : results) {
-            assertNotNull("Borough ID should not be null", count.getId());
-            assertTrue("Count should be positive", count.getCount() > 0);
+            assertNotNull(count.getId(), "Borough ID should not be null");
+            assertTrue(count.getCount() > 0, "Count should be positive");
         }
     }
 
@@ -167,8 +168,8 @@ public class RestaurantDAOIT {
     public void testUseCase1_CountByBorough_SortedDescending() {
         List<AggregationCount> results = restaurantDAO.findCountByBorough();
         for (int i = 1; i < results.size(); i++) {
-            assertTrue("Should be sorted descending",
-                results.get(i - 1).getCount() >= results.get(i).getCount());
+            assertTrue(results.get(i - 1).getCount() >= results.get(i).getCount(),
+                "Should be sorted descending");
         }
     }
 
@@ -179,16 +180,16 @@ public class RestaurantDAOIT {
     @Test
     public void testUseCase2_GetAverageScoreByCuisineAndBorough_Italian() {
         List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("Italian");
-        assertNotNull("Results should not be null", results);
-        assertFalse("Results should not be empty", results.isEmpty());
+        assertNotNull(results, "Results should not be null");
+        assertFalse(results.isEmpty(), "Results should not be empty");
     }
 
     @Test
     public void testUseCase2_AverageScore_ValidData() {
         List<BoroughCuisineScore> results = restaurantDAO.findAverageScoreByCuisineAndBorough("Italian");
         for (BoroughCuisineScore score : results) {
-            assertNotNull("Borough should not be null", score.getBorough());
-            assertTrue("Average score should be positive", score.getAvgScore() > 0);
+            assertNotNull(score.getBorough(), "Borough should not be null");
+            assertTrue(score.getAvgScore() > 0, "Average score should be positive");
         }
     }
 
@@ -196,7 +197,7 @@ public class RestaurantDAOIT {
     public void testUseCase2_AverageScore_InvalidCuisine() {
         List<BoroughCuisineScore> results =
             restaurantDAO.findAverageScoreByCuisineAndBorough("NonExistentCuisine12345");
-        assertNotNull("Results should not be null (empty list expected)", results);
+        assertNotNull(results, "Results should not be null (empty list expected)");
     }
 
     // -----------------------------------------------------------------------
@@ -207,8 +208,8 @@ public class RestaurantDAOIT {
     public void testUseCase3_GetWorstCuisines_Manhattan() {
         List<CuisineScore> results =
             restaurantDAO.findWorstCuisinesByAverageScoreInBorough("Manhattan", 3);
-        assertNotNull("Results should not be null", results);
-        assertTrue("Should return at most 3 worst cuisines", results.size() <= 3);
+        assertNotNull(results, "Results should not be null");
+        assertTrue(results.size() <= 3, "Should return at most 3 worst cuisines");
     }
 
     @Test
@@ -216,9 +217,9 @@ public class RestaurantDAOIT {
         List<CuisineScore> results =
             restaurantDAO.findWorstCuisinesByAverageScoreInBorough("Manhattan", 5);
         for (CuisineScore score : results) {
-            assertNotNull("Cuisine should not be null", score.getCuisine());
-            assertTrue("Average score should be positive", score.getAvgScore() > 0);
-            assertTrue("Count should be positive", score.getCount() > 0);
+            assertNotNull(score.getCuisine(), "Cuisine should not be null");
+            assertTrue(score.getAvgScore() > 0, "Average score should be positive");
+            assertTrue(score.getCount() > 0, "Count should be positive");
         }
     }
 
@@ -226,10 +227,10 @@ public class RestaurantDAOIT {
     public void testUseCase3_WorstCuisines_SortedByScore() {
         List<CuisineScore> results =
             restaurantDAO.findWorstCuisinesByAverageScoreInBorough("Manhattan", 5);
-        assertTrue("Expected at least 2 results to verify sort order", results.size() >= 2);
+        assertTrue(results.size() >= 2, "Expected at least 2 results to verify sort order");
         for (int i = 1; i < results.size(); i++) {
-            assertTrue("Should be sorted ascending (worst = highest score first — per DAO semantics)",
-                results.get(i - 1).getAvgScore() <= results.get(i).getAvgScore());
+            assertTrue(results.get(i - 1).getAvgScore() <= results.get(i).getAvgScore(),
+                "Should be sorted ascending (worst = highest score first — per DAO semantics)");
         }
     }
 
@@ -245,17 +246,17 @@ public class RestaurantDAOIT {
     public void testUseCase4_GetCuisinesWithMinimumCount_10() {
         // Changed from 500 (live DB) to 10 (TC seeded volume, per D-03)
         List<String> results = restaurantDAO.findCuisinesWithMinimumCount(10);
-        assertNotNull("Results should not be null", results);
-        assertFalse("Should have cuisines with >=10 restaurants (Italian=17, Chinese=16, American=16, French=11)",
-            results.isEmpty());
+        assertNotNull(results, "Results should not be null");
+        assertFalse(results.isEmpty(),
+            "Should have cuisines with >=10 restaurants (Italian=17, Chinese=16, American=16, French=11)");
     }
 
     @Test
     public void testUseCase4_CuisinesWithMinCount_Alphabetical() {
         List<String> results = restaurantDAO.findCuisinesWithMinimumCount(10);
         for (int i = 1; i < results.size(); i++) {
-            assertTrue("Should be sorted alphabetically",
-                results.get(i - 1).compareTo(results.get(i)) <= 0);
+            assertTrue(results.get(i - 1).compareTo(results.get(i)) <= 0,
+                "Should be sorted alphabetically");
         }
     }
 
@@ -263,7 +264,7 @@ public class RestaurantDAOIT {
     public void testUseCase4_CuisinesWithHighMinCount() {
         // Changed from 1000 (live DB) to 20 (no cuisine reaches 20 in seeded data)
         List<String> results = restaurantDAO.findCuisinesWithMinimumCount(20);
-        assertNotNull("Results should not be null (empty list expected)", results);
+        assertNotNull(results, "Results should not be null (empty list expected)");
     }
 
     // -----------------------------------------------------------------------
@@ -273,19 +274,19 @@ public class RestaurantDAOIT {
     @Test
     public void testCountAll_ReturnsPositiveNumber() {
         long count = restaurantDAO.countAll();
-        assertTrue("Total count should be positive (60 seeded)", count > 0);
+        assertTrue(count > 0, "Total count should be positive (60 seeded)");
     }
 
     @Test
     public void testCountByCuisine_Italian() {
         long count = restaurantDAO.countByCuisine("Italian");
-        assertTrue("Italian restaurants count should be positive (17 seeded)", count > 0);
+        assertTrue(count > 0, "Italian restaurants count should be positive (17 seeded)");
     }
 
     @Test
     public void testFindByCuisine_Italian() {
         List<Restaurant> results = restaurantDAO.findByCuisine("Italian", 10);
-        assertNotNull("Results should not be null", results);
-        assertFalse("Should find Italian restaurants (17 seeded)", results.isEmpty());
+        assertNotNull(results, "Results should not be null");
+        assertFalse(results.isEmpty(), "Should find Italian restaurants (17 seeded)");
     }
 }
