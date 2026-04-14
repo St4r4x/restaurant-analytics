@@ -7,7 +7,7 @@
     <version>4.0.5</version>
     <relativePath/>
   </parent>
-  <groupId>com.st4r4x</groupId>
+  <groupId>com.aflokkat</groupId>
   <artifactId>quickstart-app</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
