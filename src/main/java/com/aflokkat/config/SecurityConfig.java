@@ -1,12 +1,13 @@
 package com.aflokkat.config;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,8 @@ import com.aflokkat.security.JwtAuthenticationFilter;
 import com.aflokkat.security.JwtUtil;
 
 import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
@@ -51,19 +54,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-            .cors().and()
-            .headers()
-                .frameOptions().deny()
-                .and()
-            .csrf().disable()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeRequests()
+            .cors(withDefaults())
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .contentTypeOptions(withDefaults())
+            )
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
                 // Public: auth endpoints, read-only NYC data, Swagger
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/restaurants/**").permitAll()
-                .antMatchers("/api/inspection/**").permitAll()
-                .antMatchers(
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/restaurants/**").permitAll()
+                .requestMatchers("/api/inspection/**").permitAll()
+                .requestMatchers(
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/api-docs/**",
@@ -71,17 +74,17 @@ public class SecurityConfig {
                     "/webjars/**"
                 ).permitAll()
                 // Admin-only endpoints (MUST be before /api/reports/** wildcard)
-                .antMatchers("/api/reports/stats").hasRole("ADMIN")
+                .requestMatchers("/api/reports/stats").hasRole("ADMIN")
                 // Controller-only endpoints
-                .antMatchers("/api/reports/**").hasRole("CONTROLLER")
+                .requestMatchers("/api/reports/**").hasRole("CONTROLLER")
                 // Any authenticated user (any role)
-                .antMatchers("/api/users/**").authenticated()
+                .requestMatchers("/api/users/**").authenticated()
                 // Admin view route: protected by client-side IIFE guard in admin.html
-                // (JWT lives in localStorage, not cookies → browser navigation has no Auth header)
+                // (JWT lives in localStorage, not cookies -> browser navigation has no Auth header)
                 // Non-API view routes: open for now (Phase 3 scope)
                 .anyRequest().permitAll()
-            .and()
-            .exceptionHandling()
+            )
+            .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
                     // API calls get 401 JSON; browser navigation gets redirected to /login
                     String path = request.getRequestURI();
@@ -98,7 +101,7 @@ public class SecurityConfig {
                     response.setContentType("application/json");
                     response.getWriter().write("{\"status\":\"error\",\"message\":\"Forbidden\"}");
                 })
-            .and()
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
