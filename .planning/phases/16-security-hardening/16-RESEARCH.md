@@ -39,7 +39,7 @@
 
 ### Claude's Discretion
 - Security headers: use Spring Security `headers()` DSL in `SecurityConfig.filterChain()`.
-- `@RestControllerAdvice` class location: `com.st4r4x.controller` package.
+- `@RestControllerAdvice` class location: `com.aflokkat.controller` package.
 - Validation error message: collect all field errors from `MethodArgumentNotValidException.getBindingResult()` into a comma-separated `message` string.
 - `allowedHeaders` for CORS: `Authorization`, `Content-Type`.
 
@@ -502,12 +502,12 @@ server.forward-headers-strategy=native
 |---|-------|---------|---------------|
 | A1 | `allowCredentials(true)` required for browser JWT auth over CORS | Code Examples — CorsConfigurationSource | Low: if wrong, change to false; browser behavior is well-documented |
 | A2 | `http.headers(withDefaults())` enables both contentTypeOptions and frameOptions by default | Anti-Patterns | Low: VERIFIED the individual methods exist; if defaults changed, switch to explicit chain |
-| A3 | `GlobalExceptionHandler` in `com.st4r4x.controller` package is auto-scanned by component scan | Architecture Patterns | Low: standard Spring Boot component scan includes all subpackages of the base package |
+| A3 | `GlobalExceptionHandler` in `com.aflokkat.controller` package is auto-scanned by component scan | Architecture Patterns | Low: standard Spring Boot component scan includes all subpackages of the base package |
 | A4 | SecurityConfigTest context refresh will succeed after CORS bean is added to SecurityConfig | Pitfall 4 | Low: CORS bean co-located in SecurityConfig — no extra registration needed |
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `http.cors(withDefaults())` also need `CorsFilter` to be in the filter chain order?**
    - What we know: STATE.md explicitly says "both the bean AND `http.cors(withDefaults())`" required — from a prior phase that tested this. Spring Security's `CorsConfigurer` inserts a `CorsFilter` into the security filter chain when configured.
@@ -606,9 +606,9 @@ server.forward-headers-strategy=native
 
 ## Project Constraints (from CLAUDE.md)
 
-- Package: `com.st4r4x` (Phase 21 renames to `com.aflokkat` — not yet; use `com.st4r4x` in all new files)
+- Package: `com.aflokkat` (renamed from `com.st4r4x` in Phase 21 — use `com.aflokkat` in all new files)
 - Build: Maven (`mvn`) — no Gradle
-- New classes use `@RestControllerAdvice` in `com.st4r4x.controller` package
+- New classes use `@RestControllerAdvice` in `com.aflokkat.controller` package
 - `application.properties` is the config file (no dotenv in production)
 - Docker Compose plugin: `docker compose` (not `docker-compose`)
 - JUnit 5 + Mockito — `@WebMvcTest` is forbidden on Java 25 (causes StackOverflowError) — use `MockMvcBuilders.standaloneSetup()` pattern
