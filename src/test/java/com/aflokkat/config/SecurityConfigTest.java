@@ -1,10 +1,13 @@
 package com.aflokkat.config;
 
 import jakarta.servlet.Filter;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -12,88 +15,86 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Collections;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Security rules test using standalone MockMvc backed by a minimal Spring Security context.
+ * Security rules test using standalone MockMvc backed by a minimal context.
  *
- * Avoids @WebMvcTest to work around a Spring Boot 2.6 + Java 25 JVM crash caused by
- * Mockito's dynamic byte-buddy-agent attachment in the @WebMvcTest test execution lifecycle.
+ * Uses webAppContextSetup() + springSecurity() instead of the old
+ * AnnotationConfigWebApplicationContext + SecurityAutoConfiguration approach,
+ * which no longer works in Spring Boot 4.0 (SecurityAutoConfiguration moved/removed).
  *
- * The AnnotationConfigWebApplicationContext is bootstrapped with SecurityAutoConfiguration
- * (which provides HttpSecurity) + SecurityConfig (which defines the filter chain rules).
- * MockMvc uses springSecurity() to apply the resulting FilterChainProxy.
- *
- * Test names match the plan spec exactly:
- *   - reports_returns401_whenUnauthenticated
- *   - reports_returns403_forCustomerJwt
- *   - reports_allowsAccess_forControllerJwt
+ * TestWebConfig provides @EnableWebMvc + @EnableWebSecurity infrastructure.
+ * SecurityConfig supplies the SecurityFilterChain rules under test.
+ * JWT system properties are set in @BeforeAll so JwtUtil initializes correctly.
  */
 public class SecurityConfigTest {
 
     private MockMvc mockMvc;
 
-    /**
-     * Minimal stub controller so MockMvc has a real endpoint to route to.
-     * Returns 200 if security passes.
-     */
     @RestController
     public static class StubReportsController {
         @GetMapping("/api/reports/test")
-        public String test() {
-            return "ok";
-        }
+        public String test() { return "ok"; }
 
         @GetMapping("/api/reports/stats")
-        public String stats() {
-            return "ok";
-        }
+        public String stats() { return "ok"; }
 
         @GetMapping("/dashboard")
-        public String dashboard() {
-            return "ok";
-        }
+        public String dashboard() { return "ok"; }
 
         @GetMapping("/admin")
-        public String admin() {
-            return "ok";
-        }
+        public String admin() { return "ok"; }
 
         @GetMapping("/api/restaurants/by-borough")
-        public String byBorough() {
-            return "ok";
-        }
+        public String byBorough() { return "ok"; }
 
         @GetMapping("/api/restaurants/health")
-        public String health() {
-            return "ok";
+        public String health() { return "ok"; }
+    }
+
+    /**
+     * Provides @EnableWebMvc (DispatcherServlet infrastructure) and
+     * @EnableWebSecurity (HttpSecurity / WebSecurityConfiguration beans)
+     * without requiring Spring Boot's autoconfigure module.
+     */
+    @Configuration
+    @EnableWebMvc
+    @EnableWebSecurity
+    static class TestWebConfig {
+        @Bean
+        public StubReportsController stubReportsController() {
+            return new StubReportsController();
         }
     }
 
+    @BeforeAll
+    static void setJwtSystemProperties() {
+        // JwtUtil reads these via AppConfig.getProperty() which checks System.getProperty() first.
+        // Must be set before the Spring context is created (context.refresh() instantiates JwtUtil).
+        System.setProperty("jwt.secret", "a_very_long_32_bytes_minimum_secret_with_extra_chars_123456");
+        System.setProperty("jwt.access.expiration.ms", "900000");
+        System.setProperty("jwt.refresh.expiration.ms", "604800000");
+    }
+
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        // SecurityAutoConfiguration registers HttpSecurity and the SpringSecurityFilterChain infrastructure.
-        // SecurityConfig provides our custom SecurityFilterChain (antMatchers, accessDeniedHandler, etc.).
-        // SecurityConfig must be registered BEFORE SecurityAutoConfiguration so that
-        // SpringBootWebSecurityConfiguration's @ConditionalOnDefaultWebSecurity sees our
-        // SecurityFilterChain bean and skips creating its own default chain.
-        context.register(
-                SecurityConfig.class,
-                SecurityAutoConfiguration.class
-        );
+        context.register(TestWebConfig.class, SecurityConfig.class);
         context.refresh();
 
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new StubReportsController())
-                .apply(springSecurity((Filter) context.getBean("springSecurityFilterChain")))
+                .webAppContextSetup(context)
+                .apply(springSecurity())
                 .build();
     }
 
@@ -106,7 +107,6 @@ public class SecurityConfigTest {
 
     @Test
     public void reports_returns403_forCustomerJwt() throws Exception {
-        // Simulate a valid CUSTOMER token already parsed by the JWT filter
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "customer_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
@@ -117,7 +117,6 @@ public class SecurityConfigTest {
 
     @Test
     public void reports_allowsAccess_forControllerJwt() throws Exception {
-        // Simulate a valid CONTROLLER token
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 "ctrl_user", null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
@@ -126,10 +125,7 @@ public class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
-    // Phase 7 decision: /dashboard uses client-side IIFE auth guard only (not server-side antMatcher).
-    // The server allows any request to /dashboard via anyRequest().permitAll() — the IIFE in
-    // dashboard.html redirects non-CONTROLLER users to / on the client side.
-
+    // Phase 7 decision: /dashboard uses client-side IIFE auth guard only (not server-side requestMatcher).
     @Test
     public void dashboard_isAccessible_whenUnauthenticated() throws Exception {
         SecurityContextHolder.clearContext();
@@ -157,9 +153,6 @@ public class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
-    // /admin is NOT protected server-side: JWT lives in localStorage, browsers never send
-    // Authorization headers on page navigation. Security is enforced by the client-side
-    // IIFE guard in admin.html. anyRequest().permitAll() applies, so all callers get 200.
     @Test
     public void admin_returns200_whenUnauthenticated() throws Exception {
         SecurityContextHolder.clearContext();
@@ -187,7 +180,6 @@ public class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
-    // /api/reports/stats is ADMIN-only (antMatcher before /api/reports/** wildcard)
     @Test
     public void reportStats_returns403_forController() throws Exception {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
@@ -208,13 +200,12 @@ public class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
-    // --- Phase 16 security hardening tests (RED until Plan 02 adds CORS bean + headers DSL) ---
+    // --- Phase 16 security hardening tests ---
 
     @Test
     public void cors_unlistedOrigin_returns403() throws Exception {
         mockMvc.perform(
-                org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                    .options("/api/restaurants/by-borough")
+                options("/api/restaurants/by-borough")
                     .header("Origin", "http://evil.example.com")
                     .header("Access-Control-Request-Method", "GET"))
             .andExpect(status().isForbidden());
