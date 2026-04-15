@@ -4,14 +4,14 @@ milestone: v3.0
 milestone_name: phases
 status: executing
 stopped_at: Phase 16 context gathered
-last_updated: "2026-04-13T09:05:17.828Z"
-last_activity: 2026-04-13
+last_updated: "2026-04-14T14:07:29.929Z"
+last_activity: 2026-04-14 -- Phase 16 execution started
 progress:
   total_phases: 11
   completed_phases: 6
-  total_plans: 18
+  total_plans: 22
   completed_plans: 18
-  percent: 100
+  percent: 82
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
-**Current focus:** Phase 21 — upgrade-java-11-25-and-spring-boot-2-6-15-4-0-5-including-ju
+**Current focus:** Phase 16 — security-hardening
 
 ## Current Position
 
-Phase: 21
-Plan: Not started
-Status: Executing Phase 21
-Last activity: 2026-04-13
+Phase: 16 (security-hardening) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 16
+Last activity: 2026-04-14 -- Phase 16 execution started
 
 Progress: [░░░░░░░░░░] 0%
 

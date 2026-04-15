@@ -151,10 +151,10 @@ Plans:
   5. Starting the application with a `JWT_SECRET` shorter than 32 characters causes startup failure with a message naming the problem — not a silent truncation or a runtime error on the first token decode
 **Plans**: 4 plans
 Plans:
-- [ ] 16-01-PLAN.md — Wave 0: Write failing tests (SecurityConfigTest CORS/header assertions, RateLimitFilterTest restaurant-path, AuthControllerValidationTest, GlobalExceptionHandlerTest)
-- [ ] 16-02-PLAN.md — Wave 1: CORS policy (CorsConfigurationSource bean + http.cors(withDefaults())), security headers (http.headers() DSL), remove @CrossOrigin from 4 controllers
+- [x] 16-01-PLAN.md — Wave 0: Write failing tests (SecurityConfigTest CORS/header assertions, RateLimitFilterTest restaurant-path, AuthControllerValidationTest, GlobalExceptionHandlerTest)
+- [x] 16-02-PLAN.md — Wave 1: CORS policy (CorsConfigurationSource bean + http.cors(withDefaults())), security headers (http.headers() DSL), remove @CrossOrigin from 4 controllers
 - [ ] 16-03-PLAN.md — Wave 1: spring-boot-starter-validation in pom.xml, @NotBlank/@Email on 3 auth DTOs, @Valid on AuthController params, create GlobalExceptionHandler
-- [ ] 16-04-PLAN.md — Wave 1: AppConfig restaurant rate-limit methods, extend RateLimitFilter (4-arg constructor + second bucket), application.properties additions (restaurant limits + forward-headers-strategy)
+- [x] 16-04-PLAN.md — Wave 1: AppConfig restaurant rate-limit methods, extend RateLimitFilter (4-arg constructor + second bucket), application.properties additions (restaurant limits + forward-headers-strategy)
 
 ---
 
@@ -215,7 +215,7 @@ Plans:
 **Goal:** The project builds successfully on Java 25 with Spring Boot 4.0.5, all tests pass under JUnit 5, and no deprecated/removed APIs remain in the codebase
 **Requirements**: UPGRADE-01, UPGRADE-02, UPGRADE-03, UPGRADE-04
 **Depends on:** Phase 20
-**Plans:** 5/5 plans complete
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 21-01-PLAN.md — pom.xml: Boot 4.0.5, Java 25, springdoc v2, logstash 8.1, remove JUnit 4 artifacts; application.properties: remove ant_path_matcher and hibernate.dialect
@@ -251,7 +251,7 @@ v3.0: Phase 11 → 12 → 13 → (14 ∥ 15*) → 16 → 17 → 18 → 19 → 20
 | 13. Config & Docker Hardening | 3/3 | Complete    | 2026-04-12 |
 | 14. Testcontainers Integration Tests | 4/4 | Complete    | 2026-04-12 |
 | 15. GitHub Actions CI Pipeline | 2/2 | Complete   | 2026-04-12 |
-| 16. Security Hardening | 0/4 | Not started | - |
+| 16. Security Hardening | 3/4 | In Progress|  |
 | 17. Code Quality & MongoDB Indexing | 0/? | Not started | - |
 | 18. E2E Tests (Playwright) | 0/? | Not started | - |
 | 19. Unit & Controller Tests | 0/? | Not started | - |
