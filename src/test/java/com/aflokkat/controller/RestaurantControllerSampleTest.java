@@ -44,7 +44,7 @@ public class RestaurantControllerSampleTest {
 
         ResponseEntity<Map<String, Object>> response = restaurantController.getSample(3);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         Map<String, Object> body = response.getBody();
         assertNotNull(body);
         assertEquals("success", body.get("status"));
@@ -74,6 +74,6 @@ public class RestaurantControllerSampleTest {
 
         ResponseEntity<Map<String, Object>> response = restaurantController.getSample(3);
 
-        assertNotEquals(200, response.getStatusCodeValue());
+        assertNotEquals(200, response.getStatusCode().value());
     }
 }

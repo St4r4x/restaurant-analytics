@@ -1,7 +1,9 @@
 package com.aflokkat.config;
 
-import org.junit.Before;
-import org.junit.Test;
+import jakarta.servlet.Filter;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
-import javax.servlet.Filter;
 import java.util.Collections;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -76,7 +77,7 @@ public class SecurityConfigTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         // SecurityAutoConfiguration registers HttpSecurity and the SpringSecurityFilterChain infrastructure.
@@ -86,7 +87,7 @@ public class SecurityConfigTest {
         // SecurityFilterChain bean and skips creating its own default chain.
         context.register(
                 SecurityConfig.class,
-                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+                SecurityAutoConfiguration.class
         );
         context.refresh();
 
