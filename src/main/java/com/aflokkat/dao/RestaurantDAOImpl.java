@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import com.aflokkat.aggregation.AggregationCount;
+import com.aflokkat.aggregation.BoroughCuisineScore;
 import com.aflokkat.aggregation.CuisineScore;
 import com.aflokkat.config.AppConfig;
 import com.aflokkat.config.MongoClientFactory;
@@ -98,6 +99,18 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
+    public List<Restaurant> findByCuisine(String cuisine, int limit) {
+        List<Restaurant> results = new ArrayList<>();
+        Document filter = new Document("cuisine", cuisine);
+        
+        restaurantCollection.find(filter)
+            .sort(new Document("name", 1))
+            .limit(limit)
+            .forEach(results::add);
+        return results;
+    }
+    
+    @Override
     public List<Restaurant> findWithFilters(Map<String, Object> filters, int limit) {
         List<Restaurant> results = new ArrayList<>();
         // type 3 = BSON embedded document — skip legacy docs where address is a plain string
@@ -112,6 +125,12 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     @Override
     public long countAll() {
         return restaurantCollection.countDocuments();
+    }
+    
+    @Override
+    public long countByCuisine(String cuisine) {
+        Document filter = new Document("cuisine", cuisine);
+        return restaurantCollection.countDocuments(filter);
     }
     
     @Override
@@ -136,6 +155,19 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     public List<AggregationCount> findCountByBorough() {
         logger.debug("Query: counting restaurants per borough");
         return countByField("borough");
+    }
+    
+    @Override
+    public List<BoroughCuisineScore> findAverageScoreByCuisineAndBorough(String cuisine) {
+        logger.debug("Query: average score per borough for cuisine '{}'", cuisine);
+        return aggregate(Arrays.asList(
+            new Document("$match", new Document("cuisine", cuisine)),
+            new Document("$unwind", "$grades"),
+            new Document("$group", new Document()
+                .append("_id", "$borough")
+                .append("avgScore", new Document("$avg", "$grades.score"))),
+            new Document("$sort", new Document("_id", 1))
+        ), BoroughCuisineScore.class);
     }
     
     @Override
@@ -190,6 +222,19 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         return results;
     }
 
+    @Override
+    public List<String> findCuisinesWithMinimumCount(int minCount) {
+        List<String> results = new ArrayList<>();
+        aggregate(Arrays.asList(
+            new Document("$group", new Document()
+                .append("_id", "$cuisine")
+                .append("count", new Document("$sum", 1))),
+            new Document("$match", new Document("count", new Document("$gte", minCount))),
+            new Document("$sort", new Document("_id", 1))
+        ), AggregationCount.class).forEach(doc -> results.add(doc.getId()));
+        return results;
+    }
+    
     @Override
     public int upsertRestaurants(List<Restaurant> restaurants) {
         if (restaurants == null || restaurants.isEmpty()) return 0;

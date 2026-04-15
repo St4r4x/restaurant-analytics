@@ -30,9 +30,7 @@ public class DataSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
-    // SECURITY: in production, disable DataSeeder or inject via SEED_PASSWORD env var
-    private static final String SEED_PASSWORD =
-            System.getenv("SEED_PASSWORD") != null ? System.getenv("SEED_PASSWORD") : "Test1234!";
+    private static final String SEED_PASSWORD = "Test1234!";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

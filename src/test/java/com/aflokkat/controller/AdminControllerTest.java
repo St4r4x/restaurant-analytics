@@ -1,6 +1,6 @@
 package com.aflokkat.controller;
 
-import com.aflokkat.entity.InspectionGrade;
+import com.aflokkat.entity.Grade;
 import com.aflokkat.entity.Status;
 import com.aflokkat.repository.ReportRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ class AdminControllerTest {
      * ADM-03: GET /api/reports/stats returns 200 with byStatus and byGrade maps.
      */
     @Test
-    void getStats_returns200_withByStatusAndByInspectionGrade() throws Exception {
+    void getStats_returns200_withByStatusAndByGrade() throws Exception {
         // Simulate GROUP BY results: Object[] { enumValue, Long count }
         when(reportRepository.countGroupByStatus()).thenReturn(Arrays.asList(
             new Object[]{Status.OPEN, 4L},
@@ -52,10 +52,10 @@ class AdminControllerTest {
             new Object[]{Status.RESOLVED, 11L}
         ));
         when(reportRepository.countGroupByGrade()).thenReturn(Arrays.asList(
-            new Object[]{InspectionGrade.A, 8L},
-            new Object[]{InspectionGrade.B, 5L},
-            new Object[]{InspectionGrade.C, 3L},
-            new Object[]{InspectionGrade.F, 1L}
+            new Object[]{Grade.A, 8L},
+            new Object[]{Grade.B, 5L},
+            new Object[]{Grade.C, 3L},
+            new Object[]{Grade.F, 1L}
         ));
 
         mockMvc.perform(get("/api/reports/stats"))
@@ -80,7 +80,7 @@ class AdminControllerTest {
             new Object[]{Status.OPEN, 3L}
         ));
         when(reportRepository.countGroupByGrade()).thenReturn(Collections.singletonList(
-            new Object[]{InspectionGrade.A, 5L}
+            new Object[]{Grade.A, 5L}
         ));
 
         mockMvc.perform(get("/api/reports/stats"))

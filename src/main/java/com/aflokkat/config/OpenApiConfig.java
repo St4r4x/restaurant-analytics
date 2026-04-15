@@ -17,14 +17,14 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Restaurant Analytics API")
-                        .version("2.0")
+                        .version("1.0")
                         .description(
                                 "REST API for analyzing New York City restaurant inspection data. " +
                                 "Data is sourced nightly from the NYC Open Data API and stored in MongoDB. " +
                                 "Expensive aggregations are cached in Redis (TTL 1h). " +
                                 "See ARCHITECTURE.md for the full system design.")
                         .contact(new Contact()
-                                .name("Restaurant Hygiene Control")
+                                .name("Aflokkat — Big Data Module")
                                 .url("https://github.com/St4r4x/restaurant-analytics")))
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Local dev")));

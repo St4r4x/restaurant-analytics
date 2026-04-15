@@ -8,21 +8,15 @@ A web application that connects restaurant hygiene controllers and customers aro
 
 A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
 
-## Current Milestone: v3.0 Production Readiness
-
-**Goal:** Transform the academic project into a portfolio-grade, deployable application with full CI/CD pipeline, comprehensive test coverage, and production-quality code across every layer.
-
-**Target features:**
-- CI/CD: GitHub Actions pipeline — build, unit tests, integration tests (Testcontainers), E2E (Playwright), Docker build & push to registry
-- Testing: Unit (services/DAOs), integration (real DB), E2E browser tests, JaCoCo coverage report with minimum threshold
-- Database: MongoDB indexes, query optimization, data model cleanup, validation constraints
-- Config/secrets: No hardcoded secrets, proper env var handling for all environments
-- Docker: Production-grade Compose, health checks, resource limits
-- Code quality: Structured logging, dead code removal, complete OpenAPI docs, proper HTTP error responses
-- Security: CORS policy, rate limiting, input validation, HTTPS-ready config
-- UI: Full visual redesign — modern dark/neutral SaaS look (Vercel/Linear aesthetic), consistent design system
-
 ## Current State
+
+**v3.0 in progress — Phase 14 complete (2026-04-12)**
+
+Phase 14 (testcontainers-integration-tests) complete. TEST-04/05/06 validated. Replaced live-DB integration tests with Testcontainers:
+- RestaurantDAOIT: 15 tests against real mongo:7.0 container (TC 1.20.1)
+- UserRepositoryIT: 4 tests against postgres:15-alpine + mongo:7.0 containers
+- AppConfig tier-0 System.getProperty() lookup enables container URI injection
+- Full suite: 165 Surefire + 15 + 4 IT = BUILD SUCCESS, no external services needed
 
 **Shipped: v2.0 — Full Product (2026-04-11)**
 
@@ -87,7 +81,7 @@ All 10 phases complete. 36/36 requirements validated. The app is a fully deploye
 
 ## Context
 
-Production-grade Spring Boot 2.6.15 monolith:
+Production-grade Spring Boot 4.0.5 monolith (upgraded in Phase 21):
 - MongoDB for restaurant/inspection data (`mongodb-driver-sync`, raw aggregation pipelines)
 - PostgreSQL for users/bookmarks/reports (Spring Data JPA)
 - Redis 7 for caching (TTL 3600s)
@@ -96,7 +90,7 @@ Production-grade Spring Boot 2.6.15 monolith:
 
 ## Constraints
 
-- **Tech stack**: Java 11, Spring Boot 2.6.15 — no framework upgrade
+- **Tech stack**: Java 25, Spring Boot 4.0.5, JUnit 5 — no framework upgrade beyond Phase 21
 - **Database**: MongoDB for restaurant data, PostgreSQL for user/report metadata
 - **Auth**: JWT — extend existing system, don't replace
 - **NYC API**: Read-only
@@ -115,22 +109,5 @@ Production-grade Spring Boot 2.6.15 monolith:
 | uploadPhoto uses raw fetch() (not fetchWithAuth) | fetchWithAuth sets Content-Type: application/json, corrupts multipart boundary | ✓ Validated |
 | ADMIN role separate from CONTROLLER | Admin-specific signup code, separate DataSeeder seed user | ✓ Validated |
 
-## Evolution
-
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
-
 ---
-*Last updated: 2026-04-11 — v3.0 milestone started*
+*Last updated: 2026-04-13 — Phase 21 complete (Spring Boot 4.0.5, Java 25, JUnit 5)*

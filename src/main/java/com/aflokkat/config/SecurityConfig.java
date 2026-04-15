@@ -1,21 +1,29 @@
 package com.aflokkat.config;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.aflokkat.security.JwtAuthenticationFilter;
 import com.aflokkat.security.JwtUtil;
+
+import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
@@ -46,15 +54,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-            .csrf().disable()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeRequests()
+            .cors(withDefaults())
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .contentTypeOptions(withDefaults())
+            )
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
                 // Public: auth endpoints, read-only NYC data, Swagger
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/restaurants/**").permitAll()
-                .antMatchers("/api/inspection/**").permitAll()
-                .antMatchers(
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/restaurants/**").permitAll()
+                .requestMatchers("/api/inspection/**").permitAll()
+                .requestMatchers(
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/api-docs/**",
@@ -62,20 +74,17 @@ public class SecurityConfig {
                     "/webjars/**"
                 ).permitAll()
                 // Admin-only endpoints (MUST be before /api/reports/** wildcard)
-                .antMatchers("/api/reports/stats").hasRole("ADMIN")
+                .requestMatchers("/api/reports/stats").hasRole("ADMIN")
                 // Controller-only endpoints
-                .antMatchers("/api/reports/**").hasRole("CONTROLLER")
+                .requestMatchers("/api/reports/**").hasRole("CONTROLLER")
                 // Any authenticated user (any role)
-                .antMatchers("/api/users/**").authenticated()
-                // INTENTIONAL: view routes are open at the Spring Security layer.
-                // JWT lives in localStorage, not cookies — browser navigation carries no
-                // Authorization header, so server-side enforcement would block every page
-                // load for authenticated users.  Access control for sensitive views
-                // (admin.html, dashboard.html) is enforced client-side via an IIFE guard
-                // that reads localStorage and redirects unauthenticated users to /login.
+                .requestMatchers("/api/users/**").authenticated()
+                // Admin view route: protected by client-side IIFE guard in admin.html
+                // (JWT lives in localStorage, not cookies -> browser navigation has no Auth header)
+                // Non-API view routes: open for now (Phase 3 scope)
                 .anyRequest().permitAll()
-            .and()
-            .exceptionHandling()
+            )
+            .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
                     // API calls get 401 JSON; browser navigation gets redirected to /login
                     String path = request.getRequestURI();
@@ -92,10 +101,23 @@ public class SecurityConfig {
                     response.setContentType("application/json");
                     response.getWriter().write("{\"status\":\"error\",\"message\":\"Forbidden\"}");
                 })
-            .and()
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:8080"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", config);
+        return source;
     }
 
     @Bean

@@ -1,0 +1,160 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop]
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build (skip tests)
+        run: mvn clean package -DskipTests
+
+  unit-test:
+    name: Unit Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run unit tests
+        run: mvn test
+      - name: Upload JaCoCo HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html
+          path: target/site/jacoco/
+          retention-days: 7
+      - name: JaCoCo coverage comment
+        if: github.event_name == 'pull_request'
+        uses: PavanMudigonda/jacoco-reporter@v5.1
+        with:
+          coverage_results_path: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          coverage_report_title: 'Coverage Report'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  integration-test:
+    name: Integration Tests
+    needs: unit-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run integration tests
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CONTROLLER_SIGNUP_CODE: ${{ secrets.CONTROLLER_SIGNUP_CODE }}
+          ADMIN_SIGNUP_CODE: ${{ secrets.ADMIN_SIGNUP_CODE }}
+          NYC_API_MAX_RECORDS: "200"
+        # test-compile phase: compiles sources + runs jacoco:prepare-agent (initialize)
+        # failsafe goals: run *IT.java tests only — Surefire and jacoco:check are not triggered
+        run: mvn test-compile failsafe:integration-test failsafe:verify
+
+  e2e:
+    name: E2E Smoke Test
+    needs: integration-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build application image
+        run: docker compose build app
+      - name: Start application stack
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CONTROLLER_SIGNUP_CODE: ${{ secrets.CONTROLLER_SIGNUP_CODE }}
+          ADMIN_SIGNUP_CODE: ${{ secrets.ADMIN_SIGNUP_CODE }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          # docker-compose.yml app service reads SPRING_DATASOURCE_PASSWORD (not POSTGRES_PASSWORD)
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          NYC_API_MAX_RECORDS: "200"
+        # Image is pre-built; 300s covers Spring Boot startup + 3×30s health check retries
+        run: docker compose up -d --wait --wait-timeout 300
+      - name: Dump app logs on failure
+        if: failure()
+        run: docker compose logs app
+      - name: Health check
+        run: curl --fail --retry 10 --retry-delay 5 http://localhost:8080/api/restaurants/health
+      - name: Tear down stack
+        if: always()
+        run: docker compose down -v
+
+  docker:
+    name: Docker Build and Push
+    needs: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/st4r4x/restaurant-analytics
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=sha-,format=short,enable=${{ github.ref == 'refs/heads/main' }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

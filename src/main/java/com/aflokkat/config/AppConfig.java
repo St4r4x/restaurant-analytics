@@ -72,6 +72,10 @@ public class AppConfig {
         return getLongProperty("redis.cache.ttl-seconds", 3600L);
     }
 
+    public static int getRedisTopLimit() {
+        return getIntProperty("redis.top.limit", 10);
+    }
+
     public static String getJwtSecret() {
         return getProperty("jwt.secret", "changeit-please-change-it");
     }
@@ -98,6 +102,14 @@ public class AppConfig {
 
     public static int getAuthRateLimitWindowMinutes() {
         return getIntProperty("auth.rate-limit.window-minutes", 1);
+    }
+
+    public static int getRestaurantRateLimitRequests() {
+        return getIntProperty("restaurant.rate-limit.requests", 100);
+    }
+
+    public static int getRestaurantRateLimitWindowMinutes() {
+        return getIntProperty("restaurant.rate-limit.window-minutes", 1);
     }
 
     private static int getIntProperty(String key, int defaultValue) {

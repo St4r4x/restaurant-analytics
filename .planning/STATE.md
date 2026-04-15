@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: Production Readiness
-status: in_progress
-stopped_at: Roadmap created — Phase 11 ready to plan
-last_updated: "2026-04-11T00:00:00.000Z"
-last_activity: 2026-04-11
+milestone_name: phases
+status: executing
+stopped_at: Phase 16 context gathered
+last_updated: "2026-04-14T14:07:29.929Z"
+last_activity: 2026-04-14 -- Phase 16 execution started
 progress:
-  total_phases: 10
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 11
+  completed_phases: 6
+  total_plans: 22
+  completed_plans: 18
+  percent: 82
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-11)
 
 **Core value:** A customer can search any NYC restaurant and immediately know whether it's clean — and a controller can document new hygiene findings against the same data.
-**Current focus:** Milestone v3.0 — Production Readiness
+**Current focus:** Phase 16 — security-hardening
 
 ## Current Position
 
-Phase: Phase 11 (Logging Infrastructure) — not started
-Plan: —
-Status: Roadmap created, ready to plan Phase 11
-Last activity: 2026-04-11 — v3.0 roadmap created (10 phases, 63 requirements)
+Phase: 16 (security-hardening) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 16
+Last activity: 2026-04-14 -- Phase 16 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -39,6 +39,7 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 
 Carried over from v2.0:
+
 - anyRequest().permitAll() with client-side IIFE guards for /admin, /dashboard — browser navigation does not send Authorization header
 - uploadPhoto uses raw fetch() (not fetchWithAuth) — fetchWithAuth sets Content-Type: application/json, corrupts multipart boundary
 - ADMIN role separate from CONTROLLER — Admin-specific signup code, separate DataSeeder seed user
@@ -46,6 +47,7 @@ Carried over from v2.0:
 - mockStatic(AppConfig.class) causes VerifyError on Java 25 — use reflection to patch AppConfig.properties static field in tests
 
 New for v3.0 (from research):
+
 - Testcontainers must stay at 1.x (1.19.8) — 2.x dropped JUnit 4 support; project uses junit-vintage-engine
 - logstash-logback-encoder pinned at 7.3 — 7.4+ dropped Logback 1.2.x support; Spring Boot 2.6.15 ships Logback 1.2.12
 - Bucket4j must stay at 7.6.1 — 8.11.0+ requires JDK 17
@@ -56,6 +58,10 @@ New for v3.0 (from research):
 - Playwright E2E auth: call /api/auth/login via APIRequestContext, extract accessToken, inject via addInitScript() — storageState() does not work for localStorage JWT
 - GHCR push requires OCI LABEL org.opencontainers.image.source in Dockerfile — absent label causes permission_denied after first unlinked push
 - NYC_API_MAX_RECORDS=200 in E2E CI compose — caps sync to ~10s, prevents timeout
+
+### Roadmap Evolution
+
+- Phase 21 added: Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5, including JUnit 4 → 5 migration, javax → jakarta namespace, Spring Security 6 API updates, springdoc v1 → v2, logstash-logback-encoder 7.3 → 8.1, and MongoDB properties prefix rename
 
 ### Pending Todos
 
@@ -68,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-11
-Stopped at: v3.0 roadmap created — 10 phases (11-20), 63 requirements, all mapped
-Resume file: None
+Last session: 2026-04-13T09:05:17.823Z
+Stopped at: Phase 16 context gathered
+Resume file: .planning/phases/16-security-hardening/16-CONTEXT.md

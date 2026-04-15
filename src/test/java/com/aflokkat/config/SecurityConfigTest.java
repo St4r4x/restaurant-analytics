@@ -17,6 +17,7 @@ import java.util.Collections;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -61,6 +62,16 @@ public class SecurityConfigTest {
 
         @GetMapping("/admin")
         public String admin() {
+            return "ok";
+        }
+
+        @GetMapping("/api/restaurants/by-borough")
+        public String byBorough() {
+            return "ok";
+        }
+
+        @GetMapping("/api/restaurants/health")
+        public String health() {
             return "ok";
         }
     }
@@ -194,5 +205,29 @@ public class SecurityConfigTest {
         mockMvc.perform(get("/api/reports/stats")
                         .with(authentication(auth)))
                 .andExpect(status().isOk());
+    }
+
+    // --- Phase 16 security hardening tests (RED until Plan 02 adds CORS bean + headers DSL) ---
+
+    @Test
+    public void cors_unlistedOrigin_returns403() throws Exception {
+        mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                    .options("/api/restaurants/by-borough")
+                    .header("Origin", "http://evil.example.com")
+                    .header("Access-Control-Request-Method", "GET"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void responseHeaders_containXContentTypeOptions() throws Exception {
+        mockMvc.perform(get("/api/restaurants/health"))
+            .andExpect(header().string("X-Content-Type-Options", "nosniff"));
+    }
+
+    @Test
+    public void responseHeaders_containXFrameOptions() throws Exception {
+        mockMvc.perform(get("/api/restaurants/health"))
+            .andExpect(header().string("X-Frame-Options", "DENY"));
     }
 }

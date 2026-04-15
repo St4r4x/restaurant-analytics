@@ -10,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,7 +27,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Inspection", description = "Inspection endpoints — at-risk routes are admin only; uncontrolled routes are public")
 @RestController
 @RequestMapping("/api/inspection")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class InspectionController {
 
     @Autowired

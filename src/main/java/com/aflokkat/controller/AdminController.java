@@ -1,6 +1,6 @@
 package com.aflokkat.controller;
 
-import com.aflokkat.entity.InspectionGrade;
+import com.aflokkat.entity.Grade;
 import com.aflokkat.entity.Status;
 import com.aflokkat.repository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +45,13 @@ public class AdminController {
             byStatus.put(status.name(), (Long) row[1]);
         }
 
-        // Pre-populate all expected InspectionGrade enum values with 0 so missing values default correctly
+        // Pre-populate all expected Grade enum values with 0 so missing values default correctly
         Map<String, Long> byGrade = new LinkedHashMap<>();
-        for (InspectionGrade g : InspectionGrade.values()) {
+        for (Grade g : Grade.values()) {
             byGrade.put(g.name(), 0L);
         }
         for (Object[] row : reportRepository.countGroupByGrade()) {
-            InspectionGrade grade = (InspectionGrade) row[0];
+            Grade grade = (Grade) row[0];
             byGrade.put(grade.name(), (Long) row[1]);
         }
 
