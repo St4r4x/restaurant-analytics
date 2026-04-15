@@ -92,7 +92,7 @@ public class NycOpenDataClient {
 
     private String buildUrl(int offset, int limit) {
         UriComponentsBuilder builder = UriComponentsBuilder
-                .fromHttpUrl(AppConfig.getNycApiUrl())
+                .fromUriString(AppConfig.getNycApiUrl())
                 .queryParam("$limit", limit)
                 .queryParam("$offset", offset)
                 .queryParam("$order", "camis,inspection_date");
