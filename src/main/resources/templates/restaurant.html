@@ -172,13 +172,6 @@
         <div id="inspections-table"><div class="spinner"></div></div>
       </div>
 
-      <div class="card" id="history-card" style="margin-top:20px">
-        <h2 style="color:#667eea;margin:0 0 16px 0;font-size:1.25em;font-weight:600">Inspection History</h2>
-        <div id="history-container">
-          <div class="spinner" style="width:24px;height:24px;border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;animation:spin 0.8s linear infinite;margin:10px auto"></div>
-        </div>
-      </div>
-
       <div id="nearby-section" style="display:none; margin-top: 24px">
         <div class="card" style="background:white;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
           <h3 style="font-size:1.1em;font-weight:700;border-bottom:3px solid #667eea;padding-bottom:8px;margin-bottom:16px;margin-top:0">Nearby Restaurants</h3>
@@ -452,37 +445,6 @@
         container.innerHTML = html;
       }
 
-      function renderHistoryTable(grades) {
-        const historyContainer = document.getElementById('history-container');
-        if (!historyContainer) return;
-        if (!grades || !grades.length) {
-          historyContainer.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:10px 0">No inspections recorded for this restaurant.</p>';
-          return;
-        }
-        const rows = grades.map(g => {
-          const d = g.date ? new Date(g.date).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'}) : '—';
-          const violations = (g.violations && g.violations.length) ? g.violations.join('; ') : '—';
-          let badgeBg = '#ffebee', badgeColor = '#b71c1c';
-          if (g.grade === 'A') { badgeBg = '#e8f5e9'; badgeColor = '#2e7d32'; }
-          else if (g.grade === 'B') { badgeBg = '#fff8e1'; badgeColor = '#f57f17'; }
-          return `<tr>
-            <td style="padding:7px 10px;font-size:0.85em;color:#333;white-space:nowrap">${d}</td>
-            <td style="padding:7px 10px"><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-weight:700;font-size:0.82em;background:${badgeBg};color:${badgeColor}">${g.grade || '—'}</span></td>
-            <td style="padding:7px 10px;font-size:0.85em;text-align:right">${g.score != null ? g.score : '—'}</td>
-            <td style="padding:7px 10px;font-size:0.82em;color:#555;max-width:300px;word-break:break-word">${violations}</td>
-          </tr>`;
-        }).join('');
-        historyContainer.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-          <thead><tr style="border-bottom:2px solid #eee">
-            <th style="padding:7px 10px;text-align:left;font-size:0.85em;color:#667eea;font-weight:600">Date</th>
-            <th style="padding:7px 10px;text-align:left;font-size:0.85em;color:#667eea;font-weight:600">Grade</th>
-            <th style="padding:7px 10px;text-align:right;font-size:0.85em;color:#667eea;font-weight:600">Score</th>
-            <th style="padding:7px 10px;text-align:left;font-size:0.85em;color:#667eea;font-weight:600">Violations</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>`;
-      }
-
       fetch(`/api/restaurants/${restaurantId}`)
         .then(r => {
           if (r.status === 404) throw new Error("Not found");
@@ -500,7 +462,6 @@
           renderMap(r);
           renderScoreChart(r.grades);
           renderInspections(r.grades);
-          renderHistoryTable(r.grades);
           var currentId = window.location.pathname.split('/').pop();
           loadNearby(r.latitude, r.longitude, currentId);
 
