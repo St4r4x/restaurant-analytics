@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
 /**
@@ -22,7 +24,16 @@ public class RedisConfig {
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config =
                 new RedisStandaloneConfiguration(AppConfig.getRedisHost(), AppConfig.getRedisPort());
-        return new LettuceConnectionFactory(config);
+        String password = AppConfig.getRedisPassword();
+        if (password != null && !password.isEmpty()) {
+            config.setPassword(RedisPassword.of(password));
+        }
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder builder =
+                LettuceClientConfiguration.builder();
+        if (AppConfig.isRedisSsl()) {
+            builder.useSsl();
+        }
+        return new LettuceConnectionFactory(config, builder.build());
     }
 
     /**

@@ -68,6 +68,14 @@ public class AppConfig {
         return getIntProperty("redis.port", 6379);
     }
 
+    public static String getRedisPassword() {
+        return getProperty("redis.password", null);
+    }
+
+    public static boolean isRedisSsl() {
+        return "true".equalsIgnoreCase(getProperty("redis.ssl", "false"));
+    }
+
     public static long getRedisCacheTtlSeconds() {
         return getLongProperty("redis.cache.ttl-seconds", 3600L);
     }

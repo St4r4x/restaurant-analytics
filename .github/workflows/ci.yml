@@ -75,6 +75,15 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch secrets from Infisical
+        uses: Infisical/secrets-action@v1.0.7
+        with:
+          method: universal-auth
+          client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
+          client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          project-slug: nyc-restaurant-hygiene
+          env-slug: ci
+          export-type: env
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
@@ -89,9 +98,6 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Run integration tests
         env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          CONTROLLER_SIGNUP_CODE: ${{ secrets.CONTROLLER_SIGNUP_CODE }}
-          ADMIN_SIGNUP_CODE: ${{ secrets.ADMIN_SIGNUP_CODE }}
           NYC_API_MAX_RECORDS: "200"
         # test-compile phase: compiles sources + runs jacoco:prepare-agent (initialize)
         # failsafe goals: run *IT.java tests only — Surefire and jacoco:check are not triggered
@@ -104,19 +110,22 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch secrets from Infisical
+        uses: Infisical/secrets-action@v1.0.7
+        with:
+          method: universal-auth
+          client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
+          client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          project-slug: nyc-restaurant-hygiene
+          env-slug: ci
+          export-type: env
       - name: Build application image
         run: docker compose build app
       - name: Start application stack
         env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          CONTROLLER_SIGNUP_CODE: ${{ secrets.CONTROLLER_SIGNUP_CODE }}
-          ADMIN_SIGNUP_CODE: ${{ secrets.ADMIN_SIGNUP_CODE }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          # docker-compose.yml app service reads SPRING_DATASOURCE_PASSWORD (not POSTGRES_PASSWORD)
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           NYC_API_MAX_RECORDS: "200"
+          # docker-compose.yml app service reads SPRING_DATASOURCE_PASSWORD (not POSTGRES_PASSWORD)
+          SPRING_DATASOURCE_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
         # Image is pre-built; 300s covers Spring Boot startup + 3×30s health check retries
         run: docker compose up -d --wait --wait-timeout 300
       - name: Dump app logs on failure
