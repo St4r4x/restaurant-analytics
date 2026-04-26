@@ -2,6 +2,31 @@
 
 All notable changes are documented by phase.
 
+## [Phase 21] — 2026-04-13 — Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5
+
+### Phase 21: Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5 (2026-04-13)
+- Bumped Spring Boot parent from 2.6.15 to 4.0.5 and Java source/target from 11 to 25
+- Migrated springdoc from springdoc-openapi-ui:1.8.0 to springdoc-openapi-starter-webmvc-ui:2.8.6
+- Added logstash-logback-encoder 8.1 (replaces 7.3 — compatible with Logback 1.5.x in Boot 4)
+- Removed junit:junit:4.13.2 and junit-vintage-engine (JUnit 4 no longer needed)
+- Migrated 9 test files from JUnit 4 to JUnit 5 (import renames, @Test(expected) → assertThrows, @ClassRule → @BeforeAll)
+- Migrated javax.servlet.* and javax.persistence.* → jakarta.* in 6 main + 1 test source file
+- Migrated SecurityConfig.java from antMatchers/authorizeRequests to requestMatchers/authorizeHttpRequests (Spring Security 6 lambda DSL)
+- Removed spring.mvc.pathmatch.matching-strategy=ant_path_matcher from application.properties (removed in Boot 3+)
+- Removed spring.jpa.properties.hibernate.dialect from application.properties and application-test.properties (Hibernate 6 auto-detects PostgreSQL dialect)
+- Fixed JaCoCo exclusion patterns from com/aflokkat/ to com/st4r4x/ (incorrect package was inflating coverage denominator)
+- Exposed Jackson 2 ObjectMapper bean in RedisConfig (Boot 4 auto-configures Jackson 3 only; RestaurantCacheService requires Jackson 2)
+
+## [Phase 14] — 2026-04-12 — Testcontainers Integration Tests
+
+### Added
+- Migrated RestaurantDAOIntegrationTest to RestaurantDAOIT using Testcontainers mongo:7.0 — no live MongoDB required
+- Added UserRepositoryIT covering UserRepository.save/findByUsername and BookmarkRepository.save/findByUserId against Testcontainers postgres:15-alpine
+- Added maven-failsafe-plugin bound to integration-test and verify goals; IT tests use *IT.java naming convention
+- Added Testcontainers 1.19.8 (testcontainers, mongodb, postgresql) as test-scope dependencies, upgraded to 1.20.1 for Docker Engine 29.x compatibility
+- Fixed Surefire argLine to use @{argLine} late-binding to support future JaCoCo integration
+- Added System.getProperty(key) tier-0 lookup to AppConfig.getProperty() for TC URI injection
+
 ## [Phase 10] — 2026-04-10 — Admin Tools
 
 ### Added

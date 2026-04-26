@@ -1,5 +1,7 @@
 # Restaurant Analytics — NYC Inspection Data
 
+![CI](https://github.com/St4r4x/restaurant-analytics/actions/workflows/ci.yml/badge.svg)
+
 Spring Boot REST API and web dashboard for exploring NYC restaurant hygiene data.
 Data is synced from the NYC Open Data API into MongoDB. The application supports two
 user roles: **CUSTOMER** (read-only discovery) and **CONTROLLER** (inspection report filing).
@@ -10,8 +12,8 @@ Academic project — Aflokkat / big data module.
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Java 11 |
-| Framework | Spring Boot 2.6.15 |
+| Language | Java 25 |
+| Framework | Spring Boot 4.0.5 |
 | Primary DB | MongoDB (raw driver, no Spring Data) |
 | RDBMS | PostgreSQL 15 (users, bookmarks, reports) |
 | Cache | Redis 7 (TTL 3600 s) |
