@@ -81,8 +81,8 @@ jobs:
           method: universal-auth
           client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
           client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
-          project-slug: nyc-restaurant-hygiene
-          env-slug: ci
+          project-slug: nyc-restaurant-hygiene-z-qd-p
+          env-slug: dev
           export-type: env
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -116,8 +116,8 @@ jobs:
           method: universal-auth
           client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
           client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
-          project-slug: nyc-restaurant-hygiene
-          env-slug: ci
+          project-slug: nyc-restaurant-hygiene-z-qd-p
+          env-slug: dev
           export-type: env
       - name: Build application image
         run: docker compose build app
