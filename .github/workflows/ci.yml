@@ -76,9 +76,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.7
+        uses: Infisical/secrets-action@v1.0.16
         with:
-          method: universal-auth
+          method: universal
           client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
           client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
           project-slug: nyc-restaurant-hygiene-z-qd-p
@@ -111,9 +111,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.7
+        uses: Infisical/secrets-action@v1.0.16
         with:
-          method: universal-auth
+          method: universal
           client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
           client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
           project-slug: nyc-restaurant-hygiene-z-qd-p
