@@ -1,5 +1,6 @@
 package com.st4r4x.config;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,8 +66,14 @@ public class SecurityConfigTest {
         }
     }
 
+    @AfterEach
+    void tearDown() {
+        System.clearProperty("jwt.secret");
+    }
+
     @BeforeEach
     void setUp() throws Exception {
+        System.setProperty("jwt.secret", "exactly-32-characters-long-123456");
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         // Spring Boot 4.x: HttpSecurity is provided by @EnableWebSecurity, which is pulled in
         // via ServletWebSecurityAutoConfiguration$EnableWebSecurityConfiguration.
