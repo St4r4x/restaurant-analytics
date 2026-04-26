@@ -51,6 +51,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run unit tests
+        env:
+          JWT_SECRET: "00000000000000000000000000000000unit-test-placeholder-secret"
         run: mvn test
       - name: Upload JaCoCo HTML report
         if: always()
