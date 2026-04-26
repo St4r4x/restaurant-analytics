@@ -52,7 +52,7 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Run unit tests
         env:
-          JWT_SECRET: "00000000000000000000000000000000unit-test-placeholder-secret"
+          JWT_SECRET: "exactly-32-characters-long-123456"
         run: mvn test
       - name: Upload JaCoCo HTML report
         if: always()
