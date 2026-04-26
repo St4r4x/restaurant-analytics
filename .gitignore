@@ -29,3 +29,11 @@ Thumbs.db
 
 # Large data files (import manually)
 restaurants.json
+
+# Generated output
+graphify-out/
+
+# Planning/tooling artifacts
+org/
+.planning/
+.claude/

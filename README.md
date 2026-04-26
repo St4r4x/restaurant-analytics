@@ -3,10 +3,11 @@
 ![CI](https://github.com/St4r4x/restaurant-analytics/actions/workflows/ci.yml/badge.svg)
 
 Spring Boot REST API and web dashboard for exploring NYC restaurant hygiene data.
-Data is synced from the NYC Open Data API into MongoDB. The application supports two
-user roles: **CUSTOMER** (read-only discovery) and **CONTROLLER** (inspection report filing).
+Data is synced live from the NYC Open Data API into MongoDB.
 
-Academic project — Aflokkat / big data module.
+**Live:** https://restaurant-app-production-3b11.up.railway.app
+
+Academic project — big data module.
 
 ## Stack
 
@@ -14,18 +15,18 @@ Academic project — Aflokkat / big data module.
 |-------|-----------|
 | Language | Java 25 |
 | Framework | Spring Boot 4.0.5 |
-| Primary DB | MongoDB (raw driver, no Spring Data) |
-| RDBMS | PostgreSQL 15 (users, bookmarks, reports) |
-| Cache | Redis 7 (TTL 3600 s) |
+| Primary DB | MongoDB Atlas M0 (raw driver, no Spring Data) |
+| RDBMS | Supabase PostgreSQL (users, bookmarks, reports) |
+| Cache | Upstash Redis 7 (TLS, TTL 3600 s) |
 | Security | JWT (access 15 min / refresh 7 days) |
 | Build | Maven |
-| Deployment | Docker Compose |
+| CI/CD | GitHub Actions → GHCR → Railway |
 
-## Quick Start
+## Local Development
 
 ```bash
-# Build
-mvn clean package -DskipTests
+# Copy and fill in secrets
+cp .env.example .env
 
 # Start all services (MongoDB, Redis, PostgreSQL, app)
 docker compose up -d
@@ -35,16 +36,6 @@ docker compose logs -f app
 ```
 
 App runs on http://localhost:8080. Swagger UI: http://localhost:8080/swagger-ui.html
-
-## Seeded Test Accounts
-
-Three accounts are seeded on startup via `DataSeeder`:
-
-| Username | Password | Role |
-|----------|----------|------|
-| customer_test | password | ROLE_CUSTOMER |
-| controller_test | password | ROLE_CONTROLLER |
-| admin_test | Test1234! | ROLE_ADMIN |
 
 ## User Roles
 
@@ -61,18 +52,16 @@ Three accounts are seeded on startup via `DataSeeder`:
 - Edit own reports (`PATCH /api/reports/{id}`)
 - Attach photos to reports (`POST /api/reports/{id}/photo`)
 
-Controller registration requires the `CONTROLLER_SIGNUP_CODE` environment variable
-to be set. If absent, all controller signups return HTTP 400.
+Controller registration requires the `CONTROLLER_SIGNUP_CODE` environment variable.
 
 **ROLE_ADMIN**
 - Access admin panel at `/admin`
 - Trigger NYC Open Data sync (`POST /api/restaurants/refresh`)
 - Rebuild Redis cache (`POST /api/restaurants/rebuild-cache`)
 - Download at-risk restaurant CSV (`GET /api/inspection/at-risk/export.csv`)
-- View inspection report statistics by status and grade (`GET /api/reports/stats`)
+- View inspection report statistics (`GET /api/reports/stats`)
 
-Admin accounts are created via `DataSeeder` on startup. Self-registration requires the
-`ADMIN_SIGNUP_CODE` environment variable (empty by default — admin signup disabled in Docker).
+Admin registration requires the `ADMIN_SIGNUP_CODE` environment variable.
 
 ## API Endpoints
 
@@ -80,11 +69,11 @@ Admin accounts are created via `DataSeeder` on startup. Self-registration requir
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | /api/auth/register | Register (CUSTOMER or CONTROLLER with signup code) |
+| POST | /api/auth/register | Register (CUSTOMER, CONTROLLER, or ADMIN with signup code) |
 | POST | /api/auth/login | Login → access + refresh JWT |
 | POST | /api/auth/refresh | Refresh access token |
 
-### Restaurants (public read)
+### Restaurants (public)
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -106,8 +95,8 @@ Admin accounts are created via `DataSeeder` on startup. Self-registration requir
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | /api/inspection/uncontrolled | Uncontrolled restaurants (grade C/Z or no inspection in 12 months) |
-| GET | /api/inspection/uncontrolled/export.csv | Download uncontrolled restaurants as CSV |
-| GET | /api/inspection/at-risk/export.csv | Download at-risk restaurants as CSV (ADMIN only) |
+| GET | /api/inspection/uncontrolled/export.csv | Download as CSV |
+| GET | /api/inspection/at-risk/export.csv | At-risk restaurants CSV (ADMIN only) |
 
 ### Reports (CONTROLLER only)
 
@@ -132,13 +121,15 @@ Admin accounts are created via `DataSeeder` on startup. Self-registration requir
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /api/reports/stats | Inspection report counts by status and grade |
+| POST | /api/restaurants/refresh | Trigger NYC Open Data sync |
+| POST | /api/restaurants/rebuild-cache | Rebuild Redis cache |
+| GET | /api/reports/stats | Report counts by status and grade |
 
 ### Users (authenticated)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /api/users/me | Current user profile (bookmarkCount + reportCount) |
+| GET | /api/users/me | Current user profile |
 | GET | /api/users/me/bookmarks | List bookmarks |
 | POST | /api/users/me/bookmarks/{restaurantId} | Add bookmark |
 | DELETE | /api/users/me/bookmarks/{restaurantId} | Remove bookmark |
@@ -147,38 +138,57 @@ Admin accounts are created via `DataSeeder` on startup. Self-registration requir
 
 | URL | Auth | Description |
 |-----|------|-------------|
-| / | None | Landing page (anonymous): hero, stat strip, search, sample restaurants |
-| / | JWT | Customer dashboard: bookmarks strip + KPI tiles |
+| / | None | Landing page / customer dashboard |
 | /login | None | Login / Register |
-| /profile | Required | User profile: role badge, bookmark count, report count (controllers) |
-| /analytics | None | City-wide analytics: KPI tiles, borough chart, cuisine rankings, at-risk table |
-| /dashboard | CONTROLLER | Inspector dashboard: reports, tabs, New Report modal |
-| /restaurant/{camis} | None | Restaurant detail: grade badge, score chart, inspection history |
-| /inspection-map | None | Interactive grade-colored Leaflet map with clustering |
+| /profile | Required | User profile |
+| /analytics | None | City-wide analytics |
+| /dashboard | CONTROLLER | Inspector dashboard |
+| /restaurant/{camis} | None | Restaurant detail |
+| /inspection-map | None | Interactive Leaflet map |
 | /my-bookmarks | Required | Saved restaurants |
-| /admin | ADMIN | Admin panel: sync controls, at-risk CSV download, report statistics |
-
-All pages include the persistent sticky navbar (Logo + Search/Map/Analytics + auth area).
-All pages also include `fragments/ux-utils.html` which provides the shared skeleton shimmer CSS and `showToast()` notification system. All pages are mobile-responsive at ≤768px via a hamburger navbar and responsive grid breakpoints.
+| /admin | ADMIN | Admin panel |
 
 ## Configuration
 
-Key `application.properties` settings:
+Key environment variables (see `.env.example`):
 
-```properties
-mongodb.uri=mongodb://mongodb:27017
-mongodb.database=newyork
-mongodb.collection=restaurants
-spring.datasource.url=jdbc:postgresql://postgres:5432/restaurantdb
-redis.host=redis
-redis.port=6379
-nyc.api.max_records=0   # 0 = unlimited; set to 5000 for local testing
-jwt.secret=<min 32 chars>
+```bash
+# MongoDB
+MONGODB_URI=mongodb+srv://...
+MONGODB_DATABASE=newyork
+MONGODB_COLLECTION=restaurants
+
+# PostgreSQL
+SPRING_DATASOURCE_URL=jdbc:postgresql://...
+SPRING_DATASOURCE_USERNAME=...
+SPRING_DATASOURCE_PASSWORD=...
+
+# Redis
+REDIS_HOST=...
+REDIS_PORT=6379
+REDIS_PASSWORD=...
+REDIS_SSL=true
+
+# Auth
+JWT_SECRET=<min 32 chars>
+CONTROLLER_SIGNUP_CODE=<optional>
+ADMIN_SIGNUP_CODE=<optional>
 ```
 
 ## Tests
 
 ```bash
-mvn test                                         # full suite
-mvn test -Dtest=ReportControllerTest,SecurityConfigTest -q   # targeted
+mvn test                    # unit tests
+mvn failsafe:integration-test failsafe:verify   # integration tests (requires MongoDB)
 ```
+
+## CI/CD
+
+```
+push to main
+  └── build → unit-test → integration-test → e2e → docker (push to GHCR)
+                                                          ↓
+                                              Railway detects CI passed → deploys
+```
+
+Secrets managed via [Infisical](https://infisical.com) (project: `NYC_Restaurant_Hygiene`).
