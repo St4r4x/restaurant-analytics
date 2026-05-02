@@ -1,3 +1,6 @@
+# Superpowers visual companion
+.superpowers/
+
 # Maven
 target/
 *.class

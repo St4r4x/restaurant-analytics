@@ -1,6 +1,13 @@
 
 ## [Unreleased] — 2026-05-02
 
+### Frontend Redesign (2026-05-02)
+- Replace purple-gradient aesthetic with Clean Civic design system across all 11 templates and 2 fragments
+- Bootstrap 5.3.3 + Playfair Display/Inter typography loaded via CDN in ux-utils fragment
+- White navbar with 3px red bottom border, dark page headers (#1a1a1a), off-white page background (#f8f5f0)
+- KPI cards with red top border and Playfair Display numbers on analytics, dashboard, landing pages
+- Grade badges (A/B/C) with semantic colors (green/amber/red) consistent across all pages
+
 ## [Unreleased] — 2026-05-02
 
 ### Bug Fixes
