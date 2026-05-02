@@ -7,7 +7,7 @@ on:
     branches: [develop]
 
 permissions:
-  contents: read
+  contents: write
   packages: write
   pull-requests: write
 
@@ -167,3 +167,30 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  changelog:
+    name: Update Changelog
+    needs: docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate changelog with git-cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --unreleased --prepend CHANGELOG.md
+        env:
+          OUTPUT: CHANGELOG.md
+      - name: Commit updated CHANGELOG.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet CHANGELOG.md || (
+            git add CHANGELOG.md &&
+            git commit -m "chore(changelog): update for ${{ github.sha }}" &&
+            git push
+          )
