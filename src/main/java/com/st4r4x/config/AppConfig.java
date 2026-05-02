@@ -104,6 +104,11 @@ public class AppConfig {
     }
 
     public static String getAppVersion() {
+        // Railway injects RAILWAY_GIT_COMMIT_SHA at runtime; use first 7 chars as short SHA
+        String railway = System.getenv("RAILWAY_GIT_COMMIT_SHA");
+        if (railway != null && !railway.isEmpty()) {
+            return railway.length() > 7 ? railway.substring(0, 7) : railway;
+        }
         return getProperty("app.version", "unknown");
     }
 
