@@ -184,7 +184,7 @@ jobs:
           config: cliff.toml
           args: --unreleased --prepend CHANGELOG.md
         env:
-          OUTPUT: CHANGELOG.md
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit updated CHANGELOG.md
         run: |
           git config user.name "github-actions[bot]"
