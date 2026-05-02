@@ -91,13 +91,16 @@ New layout (matches `layout-analytics.html` mockup):
    - **At-Risk Restaurants** (col-md-3): compact table, grade badges (C=red tint, Z=amber tint)
 4. Chart.js `<canvas>` for borough donut chart if desired (optional, keep if already present)
 
-### `login.html`
-Current: purple gradient page, centered white card.  
-New: center column on off-white bg
-- `border-top: 3px solid #c0392b` on card
-- Brand logo in Playfair Display above the form
-- Input fields: Bootstrap form-control
-- Submit button: `bg: #c0392b`, full-width
+### `login.html` (Sign In + Create Account)
+Current: dark `#161b22` full-page, centered dark card with two tabs (Sign In / Create Account).  
+New: centered card on off-white bg — **both tabs live in this single file** (no separate register page):
+- `border-top: 3px solid #c0392b` on card, white bg, `border: 1px solid #e8e0d8`
+- Brand: "NYC Restaurant Inspector" in Playfair Display 900 + sub-line in red uppercase, no emoji
+- Tabs: Bootstrap nav-tabs, active tab underline in `#c0392b`
+- Input fields: Bootstrap `form-control`, standard white bg with border focus color `#c0392b`
+- Submit buttons: `bg: #c0392b`, white text, full-width, no border-radius
+- Error/success alert banners: Bootstrap `alert-danger` / `alert-success`
+- All existing JS logic unchanged (tab switch, fetch to `/api/auth/login` and `/api/auth/register`, role-based redirect, Enter key handling)
 
 ### `restaurant.html` (detail page)
 Current: unknown styling (not yet read in full).  
