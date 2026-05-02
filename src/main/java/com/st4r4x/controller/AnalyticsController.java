@@ -2,6 +2,7 @@ package com.st4r4x.controller;
 
 import com.st4r4x.dto.AtRiskEntry;
 import com.st4r4x.aggregation.CuisineScore;
+import com.st4r4x.dao.AnalyticsDAO;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.util.ResponseUtil;
 import org.bson.Document;
@@ -31,6 +32,9 @@ public class AnalyticsController {
     @Autowired
     private RestaurantDAO restaurantDAO;
 
+    @Autowired
+    private AnalyticsDAO analyticsDAO;
+
     /**
      * STAT-01: Returns 4 city-wide KPI values in a single response.
      */
@@ -38,10 +42,10 @@ public class AnalyticsController {
     public ResponseEntity<Map<String, Object>> getKpis() {
         try {
             long total = restaurantDAO.countAll();
-            long atRisk = restaurantDAO.countAtRiskRestaurants();
+            long atRisk = analyticsDAO.countAtRiskRestaurants();
 
             // Compute percentGradeA from borough grade distribution data
-            List<Document> boroughData = restaurantDAO.findBoroughGradeDistribution();
+            List<Document> boroughData = analyticsDAO.findBoroughGradeDistribution();
             long totalA = 0, totalABC = 0;
             for (Document borough : boroughData) {
                 @SuppressWarnings("unchecked")
@@ -91,7 +95,7 @@ public class AnalyticsController {
     @GetMapping("/borough-grades")
     public ResponseEntity<Map<String, Object>> getBoroughGrades() {
         try {
-            List<Document> raw = restaurantDAO.findBoroughGradeDistribution();
+            List<Document> raw = analyticsDAO.findBoroughGradeDistribution();
             List<Map<String, Object>> data = new ArrayList<>();
             for (Document doc : raw) {
                 Map<String, Object> entry = new HashMap<>();

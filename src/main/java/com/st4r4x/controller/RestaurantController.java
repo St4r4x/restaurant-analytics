@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.st4r4x.cache.RestaurantCacheService;
+import com.st4r4x.dao.AnalyticsDAO;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.aggregation.AggregationCount;
 import com.st4r4x.dto.HeatmapPoint;
@@ -42,6 +43,9 @@ public class RestaurantController {
 
     @Autowired
     private RestaurantDAO restaurantDAO;
+
+    @Autowired
+    private AnalyticsDAO analyticsDAO;
 
     @Autowired
     private RestaurantService restaurantService;
@@ -390,7 +394,7 @@ public class RestaurantController {
     @GetMapping("/map-points")
     public ResponseEntity<Map<String, Object>> getMapPoints() {
         try {
-            List<Document> data = restaurantDAO.findMapPoints();
+            List<Document> data = analyticsDAO.findMapPoints();
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);

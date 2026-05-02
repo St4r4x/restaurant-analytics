@@ -128,23 +128,10 @@ public interface RestaurantDAO {
     List<AtRiskEntry> findAtRiskRestaurants(String borough, int limit);
 
     /**
-     * Returns grade distribution per borough.
-     * Each Document: {_id: "MANHATTAN", grades: [{grade: "A", count: 3200}, {grade: "B", count: 400}, ...]}
-     * Only grades A, B, C are included.
-     */
-    List<org.bson.Document> findBoroughGradeDistribution();
-
-    /**
      * Returns cuisines with the highest average inspection score (most violations = worst).
      * Sort: avgScore descending.
      */
     List<CuisineScore> findBestCuisinesByAverageScore(int limit);
-
-    /**
-     * Returns the count of restaurants with last grade C or Z.
-     * Uses $count aggregation — does NOT load documents.
-     */
-    long countAtRiskRestaurants();
 
     /**
      * Searches restaurants by name or street address using a case-insensitive $regex.
@@ -158,12 +145,6 @@ public interface RestaurantDAO {
      * @param limit   max results to return
      */
     List<com.st4r4x.dto.UncontrolledEntry> findUncontrolled(String borough, int limit);
-
-    /**
-     * Returns lightweight map points for all restaurants with coordinates.
-     * Each Document contains: restaurantId, name, lat, lng, grade, borough, cuisine.
-     */
-    List<org.bson.Document> findMapPoints();
 
     /**
      * Closes the connection

@@ -1,6 +1,7 @@
 package com.st4r4x.controller;
 
 import com.st4r4x.aggregation.CuisineScore;
+import com.st4r4x.dao.AnalyticsDAO;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.dto.AtRiskEntry;
 import org.bson.Document;
@@ -32,6 +33,9 @@ class AnalyticsControllerTest {
     @Mock
     private RestaurantDAO restaurantDAO;
 
+    @Mock
+    private AnalyticsDAO analyticsDAO;
+
     @InjectMocks
     private AnalyticsController analyticsController;
 
@@ -48,8 +52,8 @@ class AnalyticsControllerTest {
     @Test
     void testKpis_returns200() throws Exception {
         when(restaurantDAO.countAll()).thenReturn(27000L);
-        when(restaurantDAO.countAtRiskRestaurants()).thenReturn(412L);
-        when(restaurantDAO.findBoroughGradeDistribution()).thenReturn(Collections.emptyList());
+        when(analyticsDAO.countAtRiskRestaurants()).thenReturn(412L);
+        when(analyticsDAO.findBoroughGradeDistribution()).thenReturn(Collections.emptyList());
         when(restaurantDAO.findWorstCuisinesByAverageScore(200)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/analytics/kpis"))
@@ -65,7 +69,7 @@ class AnalyticsControllerTest {
      */
     @Test
     void testBoroughGrades_returns5Boroughs() throws Exception {
-        when(restaurantDAO.findBoroughGradeDistribution()).thenReturn(Collections.emptyList());
+        when(analyticsDAO.findBoroughGradeDistribution()).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/analytics/borough-grades"))
                 .andExpect(status().isOk())

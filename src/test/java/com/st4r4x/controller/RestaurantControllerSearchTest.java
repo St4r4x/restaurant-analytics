@@ -1,5 +1,6 @@
 package com.st4r4x.controller;
 
+import com.st4r4x.dao.AnalyticsDAO;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Restaurant;
 import org.bson.Document;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RestaurantControllerSearchTest {
 
     @Mock private RestaurantDAO restaurantDAO;
+    @Mock private AnalyticsDAO analyticsDAO;
 
     @InjectMocks
     private RestaurantController restaurantController;
@@ -96,7 +98,7 @@ class RestaurantControllerSearchTest {
                 .append("lng", -74.0)
                 .append("grade", "A");
 
-        when(restaurantDAO.findMapPoints())
+        when(analyticsDAO.findMapPoints())
                 .thenReturn(Collections.singletonList(doc));
 
         mockMvc.perform(get("/api/restaurants/map-points"))
