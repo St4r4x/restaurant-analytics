@@ -6,33 +6,35 @@
     <title>Uncontrolled Restaurants | NYC Restaurant Inspector</title>
     <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-               min-height: 100vh; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 24px; padding-top: 72px; }
-        .card { background: white; border-radius: 12px; padding: 24px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        tr:nth-child(even) { background: #fafafa; }
-        tr:hover { background: #f0f2ff; }
-        .grade-badge { display: inline-block; padding: 2px 8px; border-radius: 4px;
-                       font-size: 0.82em; font-weight: 700; }
-        .error-msg { color: #b71c1c; padding: 16px; text-align: center; }
-        @media (max-width: 768px) {
-          .container { padding: 12px 8px !important; padding-top: 72px !important; }
-        }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh; }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.page-header { background: #1a1a1a; color: white; padding: 32px 0; }
+.page-header .eyebrow { font-size: 0.7em; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #c0392b; margin-bottom: 8px; }
+.page-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 900; margin: 0; }
+.page-header p { color: rgba(255,255,255,0.65); font-size: 0.88em; margin-top: 6px; }
+.card { background: white; border: 1px solid #e8e0d8; padding: 24px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.84em; }
+th { font-size: 0.72em; letter-spacing: 0.08em; text-transform: uppercase; color: #888; font-weight: 600; border-bottom: 2px solid #e8e0d8; padding: 10px 12px; text-align: left; }
+td { padding: 10px 12px; border-bottom: 1px solid #f0ebe3; }
+tr:hover td { background: #faf7f4; }
+.grade-badge { display: inline-block; padding: 2px 8px; font-size: 0.82em; font-weight: 700; border-radius: 2px; }
+.error-msg { color: #c0392b; padding: 16px; text-align: center; }
+select { padding: 8px 12px; border: 1px solid #e8e0d8; font-size: 0.88em; background: white; color: #1a1a1a; font-family: 'Inter', sans-serif; border-radius: 0; }
+@media (max-width: 768px) { .container { padding: 12px 8px !important; } }
     </style>
 </head>
 <body>
 <div th:replace="fragments/navbar :: navbar"></div>
 
-<div class="container">
-
-    <!-- Header strip -->
-    <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 24px; margin-bottom: 24px; color: white">
-        <h1 style="font-size: 1.8em; font-weight: 700; margin-bottom: 6px">Uncontrolled Restaurants</h1>
-        <p style="font-size: 0.88em; opacity: 0.9">Restaurants with grade C/Z or no inspection in the past 12 months</p>
-    </div>
+<div class="page-header">
+  <div class="container" style="padding-top:0;padding-bottom:0">
+    <div class="eyebrow">Controller</div>
+    <h1>Uncontrolled Restaurants</h1>
+    <p>Restaurants with grade C/Z or no inspection in the past 12 months</p>
+  </div>
+</div>
+<div class="container" style="padding-top:24px">
 
     <!-- Filter / action row -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px">
