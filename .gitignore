@@ -27,5 +27,10 @@ Thumbs.db
 # Playwright MCP snapshots
 .playwright-mcp/
 
+# Graphify generated output
+graphify-out/
+src/test/java/graphify-out/
+src/test/java/com/graphify-out/
+
 # Large data files (import manually)
 restaurants.json
