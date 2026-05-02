@@ -1,6 +1,8 @@
 
 ## [Unreleased] — 2026-05-02
 
+## [Unreleased] — 2026-05-02
+
 ### Bug Fixes
 - Add fallback SHA and failOnNoGitDirectory=false for Docker builds
 - Remove conflicting OUTPUT env var from git-cliff action
