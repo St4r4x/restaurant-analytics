@@ -4,6 +4,23 @@
 ### Bug Fixes
 - Add fallback SHA and failOnNoGitDirectory=false for Docker builds
 - Remove conflicting OUTPUT env var from git-cliff action
+- Pass GIT_SHA build arg to Docker so version is not unknown
+
+### CI/CD
+- Add git-cliff changelog auto-update on main push
+
+### Chores
+- Update for a2455af6b6a07f23403de09bf33c315de2653e0d
+- Update for 9691ff5b46d490eafb384e437ede00d4256b7bbc
+
+### Features
+- Show deployed git SHA as version badge on every page
+
+## [Unreleased] — 2026-05-02
+
+### Bug Fixes
+- Add fallback SHA and failOnNoGitDirectory=false for Docker builds
+- Remove conflicting OUTPUT env var from git-cliff action
 
 ### CI/CD
 - Add git-cliff changelog auto-update on main push
