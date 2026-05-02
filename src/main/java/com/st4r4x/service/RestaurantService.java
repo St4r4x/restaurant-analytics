@@ -15,7 +15,7 @@ import com.st4r4x.aggregation.BoroughCuisineScore;
 import com.st4r4x.aggregation.CuisineScore;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Address;
-import com.st4r4x.domain.Grade;
+import com.st4r4x.domain.InspectionRecord;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.dto.AtRiskEntry;
 import com.st4r4x.dto.HeatmapPoint;
@@ -229,31 +229,31 @@ public class RestaurantService {
 
     // ── Restaurant computed fields (business logic extracted from POJO) ───────
 
-    private static Grade getLatestGradeEntry(Restaurant r) {
-        List<Grade> grades = r.getGrades();
+    private static InspectionRecord getLatestGradeEntry(Restaurant r) {
+        List<InspectionRecord> grades = r.getGrades();
         if (grades == null || grades.isEmpty()) return null;
         return grades.stream()
                 .filter(g -> g.getDate() != null)
-                .max(Comparator.comparing(Grade::getDate))
+                .max(Comparator.comparing(InspectionRecord::getDate))
                 .orElse(null);
     }
 
     public static String getLatestGrade(Restaurant r) {
-        Grade g = getLatestGradeEntry(r);
+        InspectionRecord g = getLatestGradeEntry(r);
         return g != null ? g.getGrade() : null;
     }
 
     public static Integer getLatestScore(Restaurant r) {
-        Grade g = getLatestGradeEntry(r);
+        InspectionRecord g = getLatestGradeEntry(r);
         return (g != null && g.getScore() != null) ? g.getScore() : null;
     }
 
     public static String getTrend(Restaurant r) {
-        List<Grade> grades = r.getGrades();
+        List<InspectionRecord> grades = r.getGrades();
         if (grades == null || grades.size() < 2) return "stable";
-        List<Grade> sorted = grades.stream()
+        List<InspectionRecord> sorted = grades.stream()
                 .filter(g -> g.getDate() != null && g.getScore() != null)
-                .sorted(Comparator.comparing(Grade::getDate).reversed())
+                .sorted(Comparator.comparing(InspectionRecord::getDate).reversed())
                 .collect(Collectors.toList());
         if (sorted.size() < 2) return "stable";
         int recent = sorted.get(0).getScore();

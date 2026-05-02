@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import com.st4r4x.cache.RestaurantCacheService;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Address;
-import com.st4r4x.domain.Grade;
+import com.st4r4x.domain.InspectionRecord;
 import com.st4r4x.domain.Restaurant;
 
 /**
@@ -198,13 +198,13 @@ public class SyncService {
         r.setPhone(first.getPhone());
         r.setAddress(addr);
 
-        // One Grade per inspection date — rows share the same date for multiple violations
-        List<Grade> grades = new ArrayList<>();
+        // One InspectionRecord per inspection date — rows share the same date for multiple violations
+        List<InspectionRecord> grades = new ArrayList<>();
         Set<String> seenDates = new HashSet<>();
         for (NycApiRestaurantDto row : rows) {
             if (row.getInspectionDate() == null) continue;
             if (!seenDates.add(row.getInspectionDate())) continue;
-            Grade grade = new Grade();
+            InspectionRecord grade = new InspectionRecord();
             grade.setDate(row.getInspectionDate());
             grade.setGrade(row.getGrade());
             grade.setScore(parseInteger(row.getScore()));

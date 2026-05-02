@@ -23,7 +23,7 @@ import com.st4r4x.aggregation.AggregationCount;
 import com.st4r4x.aggregation.BoroughCuisineScore;
 import com.st4r4x.aggregation.CuisineScore;
 import com.st4r4x.config.AppConfig;
-import com.st4r4x.domain.Grade;
+import com.st4r4x.domain.InspectionRecord;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.dto.TopRestaurantEntry;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -124,7 +124,7 @@ public class RestaurantCacheService {
             for (Restaurant r : restaurants) {
                 if (r.getGrades() == null) continue;
                 Integer score = null;
-                for (Grade g : r.getGrades()) {
+                for (InspectionRecord g : r.getGrades()) {
                     if (g.getScore() != null) { score = g.getScore(); break; }
                 }
                 if (score == null) continue;

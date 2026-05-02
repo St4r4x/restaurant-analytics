@@ -2,7 +2,7 @@ package com.st4r4x.domain;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
-public class Grade {
+public class InspectionRecord {
 
     @BsonProperty("date")
     private String date;
@@ -28,7 +28,7 @@ public class Grade {
     @BsonProperty("critical_flag")
     private String criticalFlag;
 
-    public Grade() {}
+    public InspectionRecord() {}
 
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
@@ -56,7 +56,7 @@ public class Grade {
 
     @Override
     public String toString() {
-        return "Grade{date='" + date + "', grade='" + grade + "', score=" + score
+        return "InspectionRecord{date='" + date + "', grade='" + grade + "', score=" + score
                 + ", inspectionType='" + inspectionType + "'}";
     }
 }

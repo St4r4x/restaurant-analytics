@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Address;
-import com.st4r4x.domain.Grade;
+import com.st4r4x.domain.InspectionRecord;
 import com.st4r4x.domain.Restaurant;
 
 @ExtendWith(MockitoExtension.class)
@@ -203,15 +203,15 @@ class RestaurantServiceTest {
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
-    private static Grade grade(String letter, int score, String date) {
-        Grade g = new Grade();
+    private static InspectionRecord grade(String letter, int score, String date) {
+        InspectionRecord g = new InspectionRecord();
         g.setGrade(letter);
         g.setScore(score);
         g.setDate(date);
         return g;
     }
 
-    private static Restaurant restaurantWithGrades(Grade... grades) {
+    private static Restaurant restaurantWithGrades(InspectionRecord... grades) {
         Restaurant r = new Restaurant();
         r.setGrades(Arrays.asList(grades));
         return r;

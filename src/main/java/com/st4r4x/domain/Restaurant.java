@@ -28,7 +28,7 @@ public class Restaurant {
     private String phone;
 
     @BsonProperty("grades")
-    private List<Grade> grades;
+    private List<InspectionRecord> grades;
 
     public Restaurant() {}
 
@@ -84,8 +84,8 @@ public class Restaurant {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    public List<Grade> getGrades() { return grades; }
-    public void setGrades(List<Grade> grades) { this.grades = grades; }
+    public List<InspectionRecord> getGrades() { return grades; }
+    public void setGrades(List<InspectionRecord> grades) { this.grades = grades; }
 
     @Override
     public String toString() {

@@ -21,7 +21,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 
-import com.st4r4x.domain.Grade;
+import com.st4r4x.domain.InspectionRecord;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.dto.TopRestaurantEntry;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -98,7 +98,7 @@ class RestaurantCacheServiceTest {
         Restaurant r = new Restaurant();
         r.setRestaurantId("123");
         r.setName("No Score Place");
-        r.setGrades(Collections.singletonList(new Grade())); // grade with null score
+        r.setGrades(Collections.singletonList(new InspectionRecord())); // grade with null score
 
         cacheService.updateTopRestaurants(Collections.singletonList(r));
 
@@ -108,7 +108,7 @@ class RestaurantCacheServiceTest {
 
     @Test
     void updateTopRestaurants_addsRestaurantWithScore() {
-        Grade grade = new Grade();
+        InspectionRecord grade = new InspectionRecord();
         grade.setScore(10);
 
         Restaurant r = new Restaurant();
