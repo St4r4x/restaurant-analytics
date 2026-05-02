@@ -96,7 +96,7 @@
   <footer class="civic-footer">
     <div class="container d-flex justify-content-between align-items-center">
       <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
-      <div style="font-family:monospace;font-size:0.85em;color:rgba(255,255,255,0.2)">v0.2.0</div>
+      <div id="footer-version" style="font-family:monospace;font-size:0.85em;color:rgba(255,255,255,0.2)"></div>
     </div>
   </footer>
 
@@ -171,6 +171,13 @@
           grid.innerHTML = '<div class="col-12" style="color:#c0392b;font-size:0.9em;padding:16px 0;text-align:center">Search failed. Please try again.</div>';
         });
     }
+
+    fetch('/api/restaurants/health')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.version) document.getElementById('footer-version').textContent = d.version.substring(0, 7);
+      })
+      .catch(function() {});
 
     document.getElementById('search-btn').addEventListener('click', doSearch);
     document.getElementById('search-input').addEventListener('keydown', function(e) {
