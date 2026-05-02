@@ -7,7 +7,7 @@
       NYC Restaurant Inspector
       <span>Health Department Data</span>
     </a>
-    <button class="navbar-toggler border-0" type="button" id="hamburger-btn" aria-label="Toggle navigation">
+    <button class="navbar-toggler border-0" type="button" id="hamburger-btn" data-bs-toggle="collapse" data-bs-target="#nav-links" aria-expanded="false" aria-label="Toggle navigation">
       <span style="font-size:1.3em;color:#444">&#9776;</span>
     </button>
     <div class="collapse navbar-collapse" id="nav-links">
@@ -66,12 +66,6 @@
       }
     });
   })();
-  var hb = document.getElementById('hamburger-btn');
-  if (hb) {
-    hb.addEventListener('click', function() {
-      document.getElementById('nav-links').classList.toggle('show');
-    });
-  }
 </script>
 </nav>
 </body>
