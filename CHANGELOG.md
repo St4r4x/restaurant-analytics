@@ -1,6 +1,20 @@
 
 ## [Unreleased] — 2026-05-02
 
+### Bug Fixes
+- Use Bootstrap collapse data attributes for hamburger menu
+
+### Chores
+- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
+- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
+
+### Documentation
+- Add frontend redesign design spec
+- Update frontend spec — login/register tab detail
+- Add frontend redesign implementation plan
+
+## [Unreleased] — 2026-05-02
+
 ### Frontend Redesign (2026-05-02)
 - Replace purple-gradient aesthetic with Clean Civic design system across all 11 templates and 2 fragments
 - Bootstrap 5.3.3 + Playfair Display/Inter typography loaded via CDN in ux-utils fragment
