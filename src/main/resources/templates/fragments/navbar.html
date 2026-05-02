@@ -1,104 +1,75 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<nav th:fragment="navbar"
-     style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            height:56px;display:flex;align-items:center;
-            padding:0 24px;justify-content:space-between;
-            position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15);position:relative">
-
-  <!-- Logo (left) -->
-  <a href="/" style="color:white;text-decoration:none;font-size:1.1em;font-weight:700;white-space:nowrap">
-    NYC Inspections
-  </a>
-
-  <!-- Hamburger button (mobile only) -->
-  <button id="hamburger-btn" style="display:none;background:none;border:none;cursor:pointer;color:white;font-size:1.4em;padding:4px 8px" aria-label="Menu">&#9776;</button>
-
-  <!-- Nav links (center) -->
-  <div id="nav-links" style="display:flex;gap:8px">
-    <a href="/" data-nav="/" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Search</a>
-    <a href="/inspection-map" data-nav="/inspection-map" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Map</a>
-    <a href="/analytics" data-nav="/analytics" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none">Analytics</a>
-    <a id="nav-bookmarks" href="/my-bookmarks" data-nav="/my-bookmarks" style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Bookmarks</a>
-    <a id="nav-dashboard" href="/dashboard" data-nav="/dashboard"
-       style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Dashboard</a>
-    <a id="nav-uncontrolled" href="/uncontrolled" data-nav="/uncontrolled"
-       style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Uncontrolled</a>
-    <a id="nav-admin" href="/admin" data-nav="/admin"
-       style="padding:8px 16px;background:rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.85);font-size:0.82em;text-decoration:none;display:none">Admin</a>
+<nav th:fragment="navbar" class="navbar-civic navbar navbar-expand-lg px-0 sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      NYC Restaurant Inspector
+      <span>Health Department Data</span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" id="hamburger-btn" aria-label="Toggle navigation">
+      <span style="font-size:1.3em;color:#444">&#9776;</span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav-links">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+        <li class="nav-item"><a class="nav-link" href="/" data-nav="/">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="/inspection-map" data-nav="/inspection-map">Map</a></li>
+        <li class="nav-item"><a class="nav-link" href="/analytics" data-nav="/analytics">Analytics</a></li>
+        <li class="nav-item" id="nav-bookmarks" style="display:none"><a class="nav-link" href="/my-bookmarks" data-nav="/my-bookmarks">Bookmarks</a></li>
+        <li class="nav-item" id="nav-dashboard" style="display:none"><a class="nav-link" href="/dashboard" data-nav="/dashboard">Dashboard</a></li>
+        <li class="nav-item" id="nav-uncontrolled" style="display:none"><a class="nav-link" href="/uncontrolled" data-nav="/uncontrolled">Uncontrolled</a></li>
+        <li class="nav-item" id="nav-admin" style="display:none"><a class="nav-link" href="/admin" data-nav="/admin">Admin</a></li>
+      </ul>
+      <span id="nav-auth" class="ms-3 d-flex align-items-center gap-2"></span>
+    </div>
   </div>
-
-  <!-- Auth area (right) — filled by JS -->
-  <span id="nav-auth" style="display:flex;align-items:center;gap:12px;font-size:0.85em"></span>
-
 <style>
-@media (max-width: 768px) {
-  #nav-links {
-    display: none !important;
-    position: absolute;
-    top: 56px;
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    flex-direction: column;
-    padding: 8px 16px 16px;
-    gap: 4px;
-    z-index: 99;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  }
-  #nav-links.open { display: flex !important; }
-  #nav-links a { padding: 10px 16px !important; border-radius: 6px; }
-  #hamburger-btn { display: block !important; }
-  #nav-auth { font-size: 0.78em; }
-  nav { position: relative; }
-}
+.navbar-civic { background: #fff; border-bottom: 3px solid #c0392b; }
+.navbar-civic .navbar-brand { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.1em; color: #1a1a1a !important; letter-spacing: -0.01em; line-height: 1.1; padding: 12px 0; }
+.navbar-civic .navbar-brand span { display: block; font-size: 0.52em; font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: 0.12em; color: #c0392b; text-transform: uppercase; }
+.navbar-civic .nav-link { font-size: 0.8em; font-weight: 600; color: #444 !important; letter-spacing: 0.04em; text-transform: uppercase; padding: 16px 10px !important; }
+.navbar-civic .nav-link:hover { color: #c0392b !important; }
+.navbar-civic .nav-link.active { color: #c0392b !important; border-bottom: 3px solid #c0392b; margin-bottom: -3px; }
+.btn-signin { font-size: 0.82em; font-weight: 600; letter-spacing: 0.04em; background: #c0392b; color: white !important; border: none; padding: 7px 18px; border-radius: 2px; text-transform: uppercase; text-decoration: none; }
+.btn-signin:hover { background: #a93226; }
 </style>
 <script>
   (function() {
-    // Auth state
     var t = localStorage.getItem('accessToken');
     var el = document.getElementById('nav-auth');
     if (!t) {
-      el.innerHTML = '<a href="/login" style="color:white;background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600">Sign In</a>';
+      el.innerHTML = '<a href="/login" class="btn-signin">Sign In</a>';
     } else {
       try {
         var payload = JSON.parse(atob(t.split('.')[1]));
         var sub = payload.sub;
-        el.innerHTML = '<a href="/profile" style="color:rgba(255,255,255,0.9);text-decoration:none">' + sub + '</a>'
+        // sub is trusted (from our own JWT) — escaping for safety
+        var safeUser = sub.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        el.innerHTML = '<a href="/profile" style="font-size:0.85em;color:#444;text-decoration:none;font-weight:600">' + safeUser + '</a>'
           + ' <button onclick="(function(){localStorage.removeItem(\'accessToken\');localStorage.removeItem(\'refreshToken\');window.location.href=\'/login\';})()" '
-          + 'style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);color:white;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.82em">Sign Out</button>';
-        document.getElementById('nav-bookmarks').style.display = 'inline-block';
+          + 'style="font-size:0.8em;font-weight:600;letter-spacing:0.04em;background:none;border:1px solid #ddd;color:#666;padding:5px 12px;border-radius:2px;cursor:pointer;text-transform:uppercase">Sign Out</button>';
+        document.getElementById('nav-bookmarks').style.display = 'block';
         if (payload.role === 'ROLE_CONTROLLER') {
-          document.getElementById('nav-dashboard').style.display = 'inline-block';
-          document.getElementById('nav-uncontrolled').style.display = 'inline-block';
+          document.getElementById('nav-dashboard').style.display = 'block';
+          document.getElementById('nav-uncontrolled').style.display = 'block';
         }
         if (payload.role === 'ROLE_ADMIN') {
-          document.getElementById('nav-admin').style.display = 'inline-block';
+          document.getElementById('nav-admin').style.display = 'block';
         }
       } catch(e) {
-        el.innerHTML = '<a href="/login" style="color:white;background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:600">Sign In</a>';
+        el.innerHTML = '<a href="/login" class="btn-signin">Sign In</a>';
       }
     }
-    // Active link highlight
     document.querySelectorAll('nav a[data-nav]').forEach(function(link) {
       if (window.location.pathname === link.getAttribute('data-nav')) {
-        link.style.background = 'rgba(255,255,255,0.28)';
-        link.style.border = '1px solid rgba(255,255,255,0.5)';
+        link.classList.add('active');
       }
     });
   })();
-  // Hamburger toggle
   var hb = document.getElementById('hamburger-btn');
   if (hb) {
     hb.addEventListener('click', function() {
-      document.getElementById('nav-links').classList.toggle('open');
-    });
-    // Close menu on link click
-    document.querySelectorAll('#nav-links a').forEach(function(a) {
-      a.addEventListener('click', function() {
-        document.getElementById('nav-links').classList.remove('open');
-      });
+      document.getElementById('nav-links').classList.toggle('show');
     });
   }
 </script>
