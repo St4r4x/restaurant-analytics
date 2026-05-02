@@ -23,6 +23,8 @@
          Required so @{argLine} in Surefire/Failsafe resolves to empty string instead
          of crashing the forked JVM with an unresolved property literal. -->
     <argLine/>
+    <!-- Fallback used when .git is absent (e.g. Docker build context) -->
+    <git.commit.id.abbrev>unknown</git.commit.id.abbrev>
   </properties>
   <dependencies>
     <!-- Spring Boot Web Starter -->
@@ -263,6 +265,7 @@
         </executions>
         <configuration>
           <generateGitPropertiesFile>false</generateGitPropertiesFile>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
           <includeOnlyProperties>
             <includeOnlyProperty>git.commit.id.abbrev</includeOnlyProperty>
           </includeOnlyProperties>
