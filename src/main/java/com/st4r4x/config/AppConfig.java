@@ -103,6 +103,10 @@ public class AppConfig {
         return getLongProperty("jwt.refresh.expiration.ms", 604800000L);
     }
 
+    public static String getAppVersion() {
+        return getProperty("app.version", "unknown");
+    }
+
     public static String getControllerSignupCode() {
         return getProperty("controller.signup.code", null);
     }

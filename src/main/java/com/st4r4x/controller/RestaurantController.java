@@ -101,6 +101,7 @@ public class RestaurantController {
         Map<String, String> response = new HashMap<>();
         response.put("status", "OK");
         response.put("message", "API is running");
+        response.put("version", com.st4r4x.config.AppConfig.getAppVersion());
         return ResponseEntity.ok(response);
     }
 
