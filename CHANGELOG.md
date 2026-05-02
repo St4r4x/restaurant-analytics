@@ -1,3 +1,12 @@
+
+## [Unreleased] — 2026-05-02
+
+### Bug Fixes
+- Add fallback SHA and failOnNoGitDirectory=false for Docker builds
+- Remove conflicting OUTPUT env var from git-cliff action
+
+### CI/CD
+- Add git-cliff changelog auto-update on main push
 # Changelog
 
 All notable changes are documented by phase.
