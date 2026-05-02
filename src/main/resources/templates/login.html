@@ -3,198 +3,78 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Restaurant Analytics - Sign In</title>
+    <title>Sign In — NYC Restaurant Inspector</title>
     <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <style>
-      *, *::before, *::after { box-sizing: border-box; }
-
-      body {
-        background: #161b22;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        color: #e2e8f0;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0;
-      }
-
-      .auth-card {
-        width: 380px;
-        background: #1c232d;
-        border-radius: 14px;
-        border: 1px solid #2e333d;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        padding: 32px 28px 24px;
-      }
-
-      .brand {
-        text-align: center;
-        margin-bottom: 24px;
-      }
-      .brand-icon {
-        font-size: 2rem;
-        margin-bottom: 6px;
-      }
-      .brand h1 {
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: #f1f5f9;
-        margin: 0;
-      }
-      .brand p {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin: 4px 0 0;
-      }
-
-      /* Tabs */
-      .tabs {
-        display: flex;
-        border-bottom: 1px solid #2e333d;
-        margin-bottom: 22px;
-      }
-      .tab-btn {
-        flex: 1;
-        background: none;
-        border: none;
-        padding: 9px 0;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #64748b;
-        cursor: pointer;
-        border-bottom: 2px solid transparent;
-        transition: color .15s, border-color .15s;
-        margin-bottom: -1px;
-      }
-      .tab-btn.active {
-        color: #818cf8;
-        border-bottom-color: #818cf8;
-      }
-
-      /* Form */
+      body { font-family: 'Inter', sans-serif; background: #f8f5f0; color: #1a1a1a; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+      .auth-wrap { width: 100%; max-width: 420px; padding: 24px 16px; }
+      .auth-brand { text-align: center; margin-bottom: 28px; }
+      .auth-brand-name { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.5em; color: #1a1a1a; line-height: 1.1; }
+      .auth-brand-sub { font-size: 0.7em; font-weight: 700; letter-spacing: 0.12em; color: #c0392b; text-transform: uppercase; margin-top: 4px; }
+      .auth-card { background: white; border: 1px solid #e8e0d8; border-top: 3px solid #c0392b; padding: 28px 28px 24px; }
+      .auth-tabs { display: flex; border-bottom: 1px solid #e8e0d8; margin-bottom: 24px; }
+      .auth-tab { flex: 1; background: none; border: none; padding: 9px 0; font-size: 0.88rem; font-weight: 600; font-family: 'Inter', sans-serif; letter-spacing: 0.04em; text-transform: uppercase; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+      .auth-tab.active { color: #c0392b; border-bottom-color: #c0392b; }
       .form-section { display: none; }
       .form-section.active { display: block; }
-
-      .field {
-        margin-bottom: 14px;
-      }
-      .field label {
-        display: block;
-        font-size: 0.8rem;
-        font-weight: 500;
-        color: #94a3b8;
-        margin-bottom: 5px;
-      }
-      .field input {
-        width: 100%;
-        padding: 10px 12px;
-        background: #0f172a;
-        border: 1px solid #334155;
-        border-radius: 7px;
-        color: #e2e8f0;
-        font-size: 0.9rem;
-        transition: border-color .15s;
-        outline: none;
-      }
-      .field input:focus {
-        border-color: #6366f1;
-      }
-      .field input::placeholder { color: #475569; }
-
-      .hint {
-        font-size: 0.75rem;
-        color: #475569;
-        margin-top: 3px;
-      }
-
-      .submit-btn {
-        width: 100%;
-        padding: 11px;
-        margin-top: 6px;
-        background: #4f46e5;
-        border: none;
-        border-radius: 7px;
-        color: #fff;
-        font-size: 0.92rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background .15s;
-      }
-      .submit-btn:hover { background: #4338ca; }
-      .submit-btn:disabled { background: #334155; cursor: default; }
-
-      .error-msg {
-        margin-top: 12px;
-        padding: 9px 12px;
-        background: rgba(248, 113, 113, 0.1);
-        border: 1px solid rgba(248, 113, 113, 0.3);
-        border-radius: 6px;
-        color: #f87171;
-        font-size: 0.82rem;
-        display: none;
-      }
-      .success-msg {
-        margin-top: 12px;
-        padding: 9px 12px;
-        background: rgba(34, 197, 94, 0.1);
-        border: 1px solid rgba(34, 197, 94, 0.3);
-        border-radius: 6px;
-        color: #4ade80;
-        font-size: 0.82rem;
-        display: none;
-      }
+      .field { margin-bottom: 14px; }
+      .field label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 5px; letter-spacing: 0.02em; text-transform: uppercase; }
+      .field input { width: 100%; padding: 10px 12px; background: white; border: 1px solid #e8e0d8; color: #1a1a1a; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; border-radius: 0; transition: border-color .15s; }
+      .field input:focus { border-color: #c0392b; }
+      .field input::placeholder { color: #aaa; }
+      .hint { font-size: 0.75rem; color: #aaa; margin-top: 3px; }
+      .submit-btn { width: 100%; padding: 11px; margin-top: 6px; background: #c0392b; border: none; color: #fff; font-size: 0.88rem; font-weight: 700; font-family: 'Inter', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 0; transition: background .15s; }
+      .submit-btn:hover { background: #a93226; }
+      .submit-btn:disabled { background: #e8e0d8; cursor: default; color: #aaa; }
+      .error-msg { margin-top: 12px; padding: 9px 12px; background: #ffebee; border: 1px solid #ef9a9a; color: #c62828; font-size: 0.82rem; display: none; }
+      .success-msg { margin-top: 12px; padding: 9px 12px; background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; font-size: 0.82rem; display: none; }
     </style>
   </head>
   <body>
-    <div class="auth-card">
-      <div class="brand">
-        <div class="brand-icon">🍽️</div>
-        <h1>Restaurant Analytics</h1>
-        <p>NYC hygiene inspection data</p>
+    <div class="auth-wrap">
+      <div class="auth-brand">
+        <div class="auth-brand-name">NYC Restaurant<br>Inspector</div>
+        <div class="auth-brand-sub">Health Department Data</div>
       </div>
-
-      <div class="tabs">
-        <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
-        <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Create Account</button>
-      </div>
-
-      <!-- Login form -->
-      <div class="form-section active" id="sectionLogin">
-        <div class="field">
-          <label for="loginUsername">Username</label>
-          <input id="loginUsername" type="text" placeholder="your username" autocomplete="username" />
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+          <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
         </div>
-        <div class="field">
-          <label for="loginPassword">Password</label>
-          <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+        <div class="form-section active" id="sectionLogin">
+          <div class="field">
+            <label for="loginUsername">Username</label>
+            <input id="loginUsername" type="text" placeholder="your username" autocomplete="username" />
+          </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+          </div>
+          <button class="submit-btn" id="loginBtn">Sign In</button>
+          <div class="error-msg" id="loginError"></div>
         </div>
-        <button class="submit-btn" id="loginBtn">Sign In</button>
-        <div class="error-msg" id="loginError"></div>
-      </div>
-
-      <!-- Register form -->
-      <div class="form-section" id="sectionRegister">
-        <div class="field">
-          <label for="regUsername">Username</label>
-          <input id="regUsername" type="text" placeholder="choose a username" autocomplete="username" />
+        <div class="form-section" id="sectionRegister">
+          <div class="field">
+            <label for="regUsername">Username</label>
+            <input id="regUsername" type="text" placeholder="choose a username" autocomplete="username" />
+          </div>
+          <div class="field">
+            <label for="regEmail">Email</label>
+            <input id="regEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="regPassword">Password</label>
+            <input id="regPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+          <div class="field">
+            <label for="regSignupCode">Inspector Code <span style="color:#aaa;font-weight:400">(optional)</span></label>
+            <input id="regSignupCode" type="text" placeholder="leave empty for customer account" />
+            <div class="hint">Leave blank for customer account. Enter inspector code for controller role.</div>
+          </div>
+          <button class="submit-btn" id="registerBtn">Create Account</button>
+          <div class="error-msg" id="registerError"></div>
+          <div class="success-msg" id="registerSuccess"></div>
         </div>
-        <div class="field">
-          <label for="regEmail">Email</label>
-          <input id="regEmail" type="email" placeholder="you@example.com" autocomplete="email" />
-        </div>
-        <div class="field">
-          <label for="regPassword">Password</label>
-          <input id="regPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
-        </div>
-        <div class="field">
-          <label for="regSignupCode">Inspector Code <span style="color:#475569;font-weight:400">(optional)</span></label>
-          <input id="regSignupCode" type="text" placeholder="leave empty for customer account" />
-          <div class="hint">Leave blank to register as a customer. Enter the inspector code to register as a controller.</div>
-        </div>
-        <button class="submit-btn" id="registerBtn">Create Account</button>
-        <div class="error-msg" id="registerError"></div>
-        <div class="success-msg" id="registerSuccess"></div>
       </div>
     </div>
 
