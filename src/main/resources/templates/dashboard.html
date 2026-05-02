@@ -6,45 +6,45 @@
     <title>Controller Dashboard — NYC Restaurant Inspections</title>
     <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
-        .card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
-        .btn { cursor: pointer; border: none; border-radius: 6px; padding: 7px 14px; font-size: 0.82em; font-weight: 600; }
-        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-        .btn-secondary { background: #f0f2ff; color: #667eea; }
-        .btn-sm { padding: 4px 10px; font-size: 0.78em; }
-        .spinner { width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 32px auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .tab { cursor: pointer; padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: 600; border: none; background: transparent; color: #555; }
-        .tab.active { background: #667eea; color: white; }
-        .report-card { background: #f8f9ff; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-        .edit-panel { background: #f0f2ff; border-radius: 8px; padding: 16px; margin-bottom: 8px; border-left: 4px solid #667eea; }
-        .grade-btn { cursor: pointer; padding: 5px 12px; border-radius: 6px; border: 2px solid #e2e8f0; font-weight: 700; font-size: 0.85em; background: white; }
-        .grade-btn.selected { border-color: #667eea; background: #f0f2ff; color: #667eea; }
-        label { font-size: 0.82em; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
-        input[type=text], select, textarea { width: 100%; padding: 7px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 0.88em; font-family: inherit; outline: none; }
-        input[type=text]:focus, select:focus, textarea:focus { border-color: #667eea; }
-        .autocomplete-dropdown { position: absolute; z-index: 50; background: white; border: 1.5px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-height: 220px; overflow-y: auto; width: 100%; }
-        .autocomplete-item { padding: 9px 12px; cursor: pointer; font-size: 0.88em; }
-        .autocomplete-item:hover { background: #f0f2ff; }
-        .error-msg { color: #b71c1c; font-size: 0.82em; margin-top: 4px; }
-        @media (max-width: 768px) {
-          .container { padding: 12px 8px !important; }
-          .report-card { flex-wrap: wrap; }
-          .edit-panel { padding: 12px; }
-        }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh; }
+.container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+.page-header { background: #1a1a1a; color: white; padding: 32px 0; }
+.page-header .eyebrow { font-size: 0.7em; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #c0392b; margin-bottom: 8px; }
+.page-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 900; margin: 0; }
+.card { background: white; border: 1px solid #e8e0d8; padding: 20px 24px; margin-bottom: 16px; }
+.btn { cursor: pointer; border: none; padding: 7px 14px; font-size: 0.82em; font-weight: 600; font-family: 'Inter', sans-serif; border-radius: 0; }
+.btn-primary { background: #c0392b; color: white; }
+.btn-primary:hover { background: #a93226; }
+.btn-secondary { background: #f0ebe3; color: #1a1a1a; border: 1px solid #e8e0d8; }
+.btn-sm { padding: 4px 10px; font-size: 0.78em; }
+.spinner { width: 32px; height: 32px; border: 3px solid #e8e0d8; border-top-color: #c0392b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 32px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tab { cursor: pointer; padding: 6px 16px; font-size: 0.85em; font-weight: 600; border: none; background: transparent; color: #888; border-bottom: 2px solid transparent; font-family: 'Inter', sans-serif; }
+.tab.active { color: #c0392b; border-bottom-color: #c0392b; }
+.report-card { background: #faf7f4; border: 1px solid #f0ebe3; padding: 10px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.edit-panel { background: #faf7f4; padding: 16px; margin-bottom: 8px; border-left: 4px solid #c0392b; }
+.grade-btn { cursor: pointer; padding: 5px 12px; border: 2px solid #e8e0d8; font-weight: 700; font-size: 0.85em; background: white; font-family: 'Inter', sans-serif; border-radius: 0; }
+.grade-btn.selected { border-color: #c0392b; background: #ffebee; color: #c0392b; }
+label { font-size: 0.82em; font-weight: 600; color: #555; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+input[type=text], select, textarea { width: 100%; padding: 7px 10px; border: 1px solid #e8e0d8; font-size: 0.88em; font-family: 'Inter', sans-serif; outline: none; border-radius: 0; }
+input[type=text]:focus, select:focus, textarea:focus { border-color: #c0392b; }
+.autocomplete-dropdown { position: absolute; z-index: 50; background: white; border: 1px solid #e8e0d8; box-shadow: 0 4px 16px rgba(0,0,0,0.1); max-height: 220px; overflow-y: auto; width: 100%; }
+.autocomplete-item { padding: 9px 12px; cursor: pointer; font-size: 0.88em; }
+.autocomplete-item:hover { background: #faf7f4; }
+.error-msg { color: #c0392b; font-size: 0.82em; margin-top: 4px; }
+@media (max-width: 768px) { .container { padding: 12px 8px !important; } .report-card { flex-wrap: wrap; } .edit-panel { padding: 12px; } }
     </style>
 </head>
 <body>
   <div th:replace="fragments/navbar :: navbar"></div>
-<div class="container" style="padding-top: 72px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-        <div>
-            <h1 style="color:white;font-size:1.5em;font-weight:700">Inspector Dashboard</h1>
-            <p style="color:rgba(255,255,255,0.8);font-size:0.85em;margin-top:2px">NYC Restaurant Inspection Reports</p>
-        </div>
-    </div>
+<div class="page-header">
+  <div class="container" style="padding-top:0;padding-bottom:0">
+    <div class="eyebrow">Controller</div>
+    <h1>Inspector Dashboard</h1>
+  </div>
+</div>
+<div class="container" style="padding-top:32px">
 
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
@@ -230,11 +230,11 @@ function renderReportPagination() {
     if (totalPages <= 1) { ctrl.innerHTML = ''; return; }
     ctrl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0">'
         + '<button onclick="changeReportPage(-1)"'
-        + (reportPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #667eea;border-radius:6px;background:white;color:#667eea;cursor:pointer"')
+        + (reportPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #c0392b;border-radius:0;background:white;color:#c0392b;cursor:pointer"')
         + '>\u2190 Prev</button>'
         + '<span style="font-size:0.88em;color:#555">Page ' + (reportPage + 1) + ' of ' + totalPages + '</span>'
         + '<button onclick="changeReportPage(1)"'
-        + (reportPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #667eea;border-radius:6px;background:white;color:#667eea;cursor:pointer"')
+        + (reportPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : ' style="padding:6px 14px;border:1px solid #c0392b;border-radius:0;background:white;color:#c0392b;cursor:pointer"')
         + '>Next \u2192</button>'
         + '</div>';
 }
