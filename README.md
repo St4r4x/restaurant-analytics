@@ -44,8 +44,8 @@ Three accounts are seeded on startup via `DataSeeder`:
 
 | Username | Password | Role |
 |----------|----------|------|
-| customer_test | password | ROLE_CUSTOMER |
-| controller_test | password | ROLE_CONTROLLER |
+| customer_test | Test1234! | ROLE_CUSTOMER |
+| controller_test | Test1234! | ROLE_CONTROLLER |
 | admin_test | Test1234! | ROLE_ADMIN |
 
 ## User Roles
@@ -162,6 +162,25 @@ Admin accounts are created via `DataSeeder` on startup. Self-registration requir
 
 All pages include the persistent sticky navbar (Logo + Search/Map/Analytics + auth area).
 All pages also include `fragments/ux-utils.html` which provides the shared skeleton shimmer CSS and `showToast()` notification system. All pages are mobile-responsive at ≤768px via a hamburger navbar and responsive grid breakpoints.
+
+## UI Design System
+
+The frontend uses a **Clean Civic** design language:
+
+| Token | Value |
+|-------|-------|
+| Background | `#f8f5f0` (off-white) |
+| Surface | `#ffffff` |
+| Primary text | `#1a1a1a` |
+| Accent / brand red | `#c0392b` |
+| Hero / footer bg | `#1a1a1a` |
+| Grade A | `#2e7d32` (green) |
+| Grade B | `#f57f17` (amber) |
+| Grade C/Z | `#c62828` (red) |
+
+**Typography:** Playfair Display (700/900) for headings and KPI numbers, Inter (400/500/600) for body text — both loaded via Google Fonts CDN in `fragments/ux-utils.html`.
+
+Bootstrap 5.3.3 is loaded via CDN. No separate `.css` file; styles are inline per template.
 
 ## Configuration
 

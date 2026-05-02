@@ -37,3 +37,8 @@ src/test/java/com/graphify-out/
 
 # Large data files (import manually)
 restaurants.json
+
+# Playwright screenshots / debug images
+*.png
+*.jpg
+*.jpeg
