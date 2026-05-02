@@ -39,7 +39,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             )
         );
         List<Document> results = new ArrayList<>();
-        database.getCollection(AppConfig.getMongoCollection())
+        database.getCollection(collectionName)
                 .aggregate(pipeline)
                 .forEach(results::add);
         return results;
@@ -65,7 +65,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             new Document("$sort", new Document("_id", 1))
         );
         List<Document> results = new ArrayList<>();
-        database.getCollection(AppConfig.getMongoCollection())
+        database.getCollection(collectionName)
             .aggregate(pipeline)
             .forEach(results::add);
         return results;
@@ -81,7 +81,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             new Document("$count", "total")
         );
         List<Document> results = new ArrayList<>();
-        database.getCollection(AppConfig.getMongoCollection())
+        database.getCollection(collectionName)
             .aggregate(pipeline)
             .forEach(results::add);
         return results.isEmpty() ? 0L : (long) results.get(0).getInteger("total", 0);
