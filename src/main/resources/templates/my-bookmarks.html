@@ -3,117 +3,178 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Bookmarks</title>
+    <title>My Bookmarks — NYC Restaurant Inspector</title>
     <th:block th:replace="fragments/ux-utils :: ux-utils"></th:block>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f8f5f0;
+        color: #1a1a1a;
+        margin: 0;
+        padding: 0;
+      }
+
+      .page-header {
+        background: #1a1a1a;
+        color: white;
+        padding: 32px 0;
+      }
+
+      .page-header .eyebrow {
+        font-size: 0.7em;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #c0392b;
+        margin-bottom: 8px;
+      }
+
+      .page-header h1 {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 2.2em;
+        font-weight: 900;
+        margin: 0;
       }
 
       .container {
         max-width: 900px;
         margin: 0 auto;
+        padding: 0 16px;
       }
 
-      .back-link {
-        color: white;
-        text-decoration: none;
-        display: inline-block;
-        margin-bottom: 16px;
-        font-size: 0.9em;
-      }
-      .back-link:hover { color: rgba(255,255,255,0.8); }
-
-      header {
-        color: white;
-        margin-bottom: 24px;
-      }
-
-      header h1 {
-        margin: 0;
-        font-size: 1.8em;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      }
-
-      header p {
-        font-size: 1em;
-        opacity: 0.85;
-        margin-top: 6px;
-      }
-
-      .card {
+      .content-card {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-        padding: 22px 24px;
-        margin-bottom: 20px;
+        border: 1px solid #e8e0d8;
+        padding: 24px;
+        margin-bottom: 16px;
       }
 
-      .card h2 {
-        color: #667eea;
+      .content-card h2 {
         margin: 0 0 16px 0;
-        font-size: 1.25em;
+        font-size: 1.1em;
         font-weight: 600;
+        color: #1a1a1a;
       }
 
       .top-restaurant-item {
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 10px;
-        background: #f8f9ff;
-        border-radius: 6px;
-        margin-bottom: 6px;
+        padding: 10px 12px;
+        border-bottom: 1px solid #f0ebe3;
+      }
+
+      .top-restaurant-item:last-child {
+        border-bottom: none;
+      }
+
+      .top-restaurant-item:hover {
+        background: #faf7f4;
+      }
+
+      .top-restaurant-item > div:first-child {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .top-restaurant-item .restaurant-name {
+        font-weight: 600;
+        font-size: 0.9em;
+        color: #1a1a1a;
+      }
+
+      .top-restaurant-item .restaurant-borough {
+        font-size: 0.82em;
+        color: #999;
+        margin-top: 2px;
       }
 
       .btn-bookmark {
-        min-width: 44px;
-        min-height: 44px;
+        min-width: 36px;
+        min-height: 36px;
         background: none;
         border: none;
         cursor: pointer;
-        font-size: 1.1em;
-        color: #ccc;
-      }
-
-      .btn-bookmark.bookmarked {
+        font-size: 1em;
         color: #f5a623;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .btn-view {
         text-decoration: none;
-        color: #667eea;
+        color: #c0392b;
         font-weight: 600;
-        font-size: 0.82em;
+        font-size: 0.78em;
         white-space: nowrap;
+      }
+
+      .btn-view:hover {
+        color: #a02d24;
+      }
+
+      .civic-footer {
+        background: #1a1a1a;
+        color: rgba(255, 255, 255, 0.45);
+        padding: 24px 0;
+        font-size: 0.78em;
+        border-top: 1px solid #2a2a2a;
+      }
+
+      .civic-footer .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .empty-state {
+        color: #999;
+        font-size: 0.9em;
+        padding: 32px 0;
+        text-align: center;
+      }
+
+      .empty-state a {
+        color: #c0392b;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .empty-state a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
     <div th:replace="fragments/navbar :: navbar"></div>
-    <div class="container" style="padding-top: 72px">
 
-      <header>
+    <div class="page-header">
+      <div class="container">
+        <div class="eyebrow">Your Account</div>
         <h1>My Bookmarks</h1>
-        <p>Your saved restaurants</p>
-      </header>
-
-      <div class="card" id="bookmarks-card">
-        <h2>My Bookmarks</h2>
-        <div id="bookmarks-list">
-          <div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>
-          <div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>
-          <div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>
-        </div>
-        <div id="pagination-controls" style="margin-top:8px"></div>
       </div>
     </div>
+
+    <div style="padding: 32px 0;">
+      <div class="container">
+        <div class="content-card" id="bookmarks-card">
+          <div id="bookmarks-list">
+            <div class="skel" style="height:52px;border-radius:2px;margin-bottom:8px"></div>
+            <div class="skel" style="height:52px;border-radius:2px;margin-bottom:8px"></div>
+            <div class="skel" style="height:52px;border-radius:2px;margin-bottom:8px"></div>
+          </div>
+          <div id="pagination-controls" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="civic-footer">
+      <div class="container">
+        <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
+      </div>
+    </footer>
 
     <script>
       // ── Pagination state ─────────────────────────────────────────────
@@ -149,7 +210,7 @@
 
       // ── Bookmarks ────────────────────────────────────────────────────
       function gradeBadgeHtml(grade) {
-        const g = grade || '\u2014';
+        const g = grade || '—';
         let bg = '#ffebee', color = '#b71c1c';
         if (g === 'A') { bg = '#e8f5e9'; color = '#2e7d32'; }
         else if (g === 'B') { bg = '#fff8e1'; color = '#f57f17'; }
@@ -165,25 +226,24 @@
       function renderBookmarkPage() {
         var list = document.getElementById('bookmarks-list');
         if (!allBookmarks.length) {
-          list.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:20px 0;text-align:center">You have no saved restaurants yet. <a href="/" style="color:#667eea;font-weight:600">Search for restaurants</a> to bookmark them.</p>';
+          list.innerHTML = '<p style="color:#aaa;font-size:0.9em;padding:20px 0;text-align:center">You have no saved restaurants yet. <a href="/" style="color:#c0392b;font-weight:600">Search for restaurants</a> to bookmark them.</p>';
           document.getElementById('pagination-controls').innerHTML = '';
           return;
         }
         var start = currentPage * PAGE_SIZE;
         var slice = allBookmarks.slice(start, start + PAGE_SIZE);
         list.innerHTML = slice.map(function(r) {
-          var grade = r.latestGrade || (r.grades && r.grades.length ? r.grades[0].grade : '\u2014') || '\u2014';
+          var grade = r.latestGrade || (r.grades && r.grades.length ? r.grades[0].grade : '—') || '—';
           var rid = r.restaurantId;
-          return '<div class="top-restaurant-item" id="bm-' + rid + '" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f9ff;border-radius:6px;margin-bottom:6px">'
-            + '<div style="flex:1;min-width:0">'
-            + '<div style="font-weight:600;font-size:0.9em">' + (r.name || '\u2014') + '</div>'
-            + '<div style="font-size:0.82em;color:#666">' + (r.borough || '\u2014') + '</div>'
+          return '<div class="top-restaurant-item" id="bm-' + rid + '">'
+            + '<div>'
+            + '<div class="restaurant-name">' + (r.name || '—') + '</div>'
+            + '<div class="restaurant-borough">' + (r.borough || '—') + '</div>'
             + '</div>'
             + gradeBadgeHtml(grade)
             + '<button class="btn-bookmark bookmarked" data-id="' + rid + '"'
-            + ' onclick="removeBookmark(\'' + rid + '\', this)"'
-            + ' style="min-width:44px;min-height:44px;background:none;border:none;cursor:pointer;font-size:1.1em;color:#f5a623">\u2605</button>'
-            + '<a href="/restaurant/' + rid + '" style="text-decoration:none;color:#667eea;font-weight:600;font-size:0.82em;white-space:nowrap">View \u2192</a>'
+            + ' onclick="removeBookmark(\'' + rid + '\', this)">★</button>'
+            + '<a href="/restaurant/' + rid + '" class="btn-view">View →</a>'
             + '</div>';
         }).join('');
         renderPagination();
@@ -196,10 +256,10 @@
         el.innerHTML =
           '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;justify-content:center">'
           + '<button onclick="goPage(-1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
-          + (currentPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>\u2190 Prev</button>'
+          + (currentPage === 0 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>← Prev</button>'
           + '<span style="font-size:0.88em;color:#555">Page ' + (currentPage + 1) + ' of ' + totalPages + '</span>'
           + '<button onclick="goPage(1)" style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:white"'
-          + (currentPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>Next \u2192</button>'
+          + (currentPage >= totalPages - 1 ? ' disabled style="padding:6px 14px;border:1px solid #ddd;border-radius:6px;background:white;opacity:0.4;cursor:default"' : '') + '>Next →</button>'
           + '</div>';
       }
 
