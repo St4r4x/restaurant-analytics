@@ -54,6 +54,69 @@
     }
     return c;
   }
+  // Proactive JWT refresh — runs on every page load and schedules ahead-of-time renewal
+  (function scheduleTokenRefresh() {
+    var accessToken = localStorage.getItem('accessToken');
+    var refreshToken = localStorage.getItem('refreshToken');
+    if (!accessToken || !refreshToken) return;
+
+    var expMs;
+    try {
+      expMs = JSON.parse(atob(accessToken.split('.')[1])).exp * 1000;
+    } catch(e) { return; }
+
+    var msUntilExpiry = expMs - Date.now();
+    var refreshAt = msUntilExpiry - 60000; // refresh 1 min before expiry
+
+    function doRefresh() {
+      var rt = localStorage.getItem('refreshToken');
+      if (!rt) return;
+      fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: rt })
+      })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (data && data.accessToken) {
+          localStorage.setItem('accessToken', data.accessToken);
+          localStorage.setItem('refreshToken', data.refreshToken);
+          scheduleTokenRefresh();
+        } else {
+          // refresh token itself expired — force re-login
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          if (window.location.pathname !== '/login') window.location.href = '/login';
+        }
+      })
+      .catch(function() {});
+    }
+
+    if (refreshAt <= 0) {
+      // Already within the last minute or expired — refresh immediately
+      doRefresh();
+    } else {
+      setTimeout(doRefresh, refreshAt);
+    }
+  })();
+
+  // Version badge — fetches SHA from health endpoint, renders bottom-left
+  fetch('/api/restaurants/health')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.version) return;
+      var badge = document.createElement('a');
+      badge.href = 'https://github.com/St4r4x/restaurant-analytics/commit/' + d.version;
+      badge.target = '_blank';
+      badge.rel = 'noopener';
+      badge.textContent = d.version;
+      badge.style.cssText = 'position:fixed;bottom:8px;left:12px;font-size:0.7em;color:rgba(0,0,0,0.3);text-decoration:none;font-family:monospace;z-index:9998';
+      badge.addEventListener('mouseenter', function() { badge.style.color = 'rgba(0,0,0,0.6)'; });
+      badge.addEventListener('mouseleave', function() { badge.style.color = 'rgba(0,0,0,0.3)'; });
+      document.body.appendChild(badge);
+    })
+    .catch(function() {});
+
   window.showToast = function(msg, type, durationMs) {
     type = type || 'info';
     durationMs = durationMs || 3000;
