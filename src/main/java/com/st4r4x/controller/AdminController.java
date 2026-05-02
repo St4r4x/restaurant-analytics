@@ -1,6 +1,6 @@
 package com.st4r4x.controller;
 
-import com.st4r4x.entity.Grade;
+import com.st4r4x.entity.LetterGrade;
 import com.st4r4x.entity.Status;
 import com.st4r4x.repository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +47,11 @@ public class AdminController {
 
         // Pre-populate all expected Grade enum values with 0 so missing values default correctly
         Map<String, Long> byGrade = new LinkedHashMap<>();
-        for (Grade g : Grade.values()) {
+        for (LetterGrade g : LetterGrade.values()) {
             byGrade.put(g.name(), 0L);
         }
         for (Object[] row : reportRepository.countGroupByGrade()) {
-            Grade grade = (Grade) row[0];
+            LetterGrade grade = (LetterGrade) row[0];
             byGrade.put(grade.name(), (Long) row[1]);
         }
 

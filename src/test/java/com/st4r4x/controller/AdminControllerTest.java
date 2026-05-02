@@ -1,6 +1,6 @@
 package com.st4r4x.controller;
 
-import com.st4r4x.entity.Grade;
+import com.st4r4x.entity.LetterGrade;
 import com.st4r4x.entity.Status;
 import com.st4r4x.repository.ReportRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,10 +52,10 @@ class AdminControllerTest {
             new Object[]{Status.RESOLVED, 11L}
         ));
         when(reportRepository.countGroupByGrade()).thenReturn(Arrays.asList(
-            new Object[]{Grade.A, 8L},
-            new Object[]{Grade.B, 5L},
-            new Object[]{Grade.C, 3L},
-            new Object[]{Grade.F, 1L}
+            new Object[]{LetterGrade.A, 8L},
+            new Object[]{LetterGrade.B, 5L},
+            new Object[]{LetterGrade.C, 3L},
+            new Object[]{LetterGrade.F, 1L}
         ));
 
         mockMvc.perform(get("/api/reports/stats"))
@@ -80,7 +80,7 @@ class AdminControllerTest {
             new Object[]{Status.OPEN, 3L}
         ));
         when(reportRepository.countGroupByGrade()).thenReturn(Collections.singletonList(
-            new Object[]{Grade.A, 5L}
+            new Object[]{LetterGrade.A, 5L}
         ));
 
         mockMvc.perform(get("/api/reports/stats"))
