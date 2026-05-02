@@ -24,7 +24,7 @@ public interface ReportRepository extends JpaRepository<InspectionReportEntity, 
 
     /**
      * Count inspection reports grouped by grade across ALL controllers.
-     * Returns List of Object[] where [0] is Grade enum value and [1] is Long count.
+     * Returns List of Object[] where [0] is LetterGrade enum value and [1] is Long count.
      * ADM-03: no userId filter — aggregate across all controllers intentionally.
      */
     @Query("SELECT r.grade, COUNT(r) FROM InspectionReportEntity r GROUP BY r.grade")

@@ -45,7 +45,7 @@ public class AdminController {
             byStatus.put(status.name(), (Long) row[1]);
         }
 
-        // Pre-populate all expected Grade enum values with 0 so missing values default correctly
+        // Pre-populate all expected LetterGrade enum values with 0 so missing values default correctly
         Map<String, Long> byGrade = new LinkedHashMap<>();
         for (LetterGrade g : LetterGrade.values()) {
             byGrade.put(g.name(), 0L);
