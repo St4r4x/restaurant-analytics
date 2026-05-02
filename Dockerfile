@@ -2,6 +2,8 @@ FROM maven:3.9-eclipse-temurin-25 as builder
 
 WORKDIR /build
 
+ARG GIT_SHA=unknown
+
 # Copy pom.xml and download dependencies
 COPY pom.xml .
 RUN mvn dependency:go-offline
@@ -9,8 +11,8 @@ RUN mvn dependency:go-offline
 # Copy source code
 COPY src ./src
 
-# Build application
-RUN mvn clean package -DskipTests
+# Build application — inject git SHA so health endpoint reports correct version
+RUN mvn clean package -DskipTests -Dgit.commit.id.abbrev=${GIT_SHA}
 
 # Production image — JRE-only Alpine (smaller than JDK; non-root user for security)
 FROM eclipse-temurin:25-jre-alpine

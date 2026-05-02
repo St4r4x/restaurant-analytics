@@ -120,7 +120,7 @@ jobs:
           env-slug: dev
           export-type: env
       - name: Build application image
-        run: docker compose build app
+        run: docker compose build --build-arg GIT_SHA=${{ github.sha }} app
       - name: Start application stack
         env:
           NYC_API_MAX_RECORDS: "200"
@@ -167,6 +167,7 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: GIT_SHA=${{ github.sha }}
 
   changelog:
     name: Update Changelog
