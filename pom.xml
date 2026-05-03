@@ -10,7 +10,7 @@
   <groupId>com.st4r4x</groupId>
   <artifactId>quickstart-app</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>quickstart-app</name>
   <properties>
     <java.version>25</java.version>

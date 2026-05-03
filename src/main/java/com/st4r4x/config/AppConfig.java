@@ -104,12 +104,15 @@ public class AppConfig {
     }
 
     public static String getAppVersion() {
-        // Railway injects RAILWAY_GIT_COMMIT_SHA at runtime; use first 7 chars as short SHA
-        String railway = System.getenv("RAILWAY_GIT_COMMIT_SHA");
-        if (railway != null && !railway.isEmpty()) {
-            return railway.length() > 7 ? railway.substring(0, 7) : railway;
+        String semver = getProperty("app.semver", "1.0.0");
+        // Resolve short SHA: Railway env var first, then git-commit-id plugin placeholder
+        String sha = System.getenv("RAILWAY_GIT_COMMIT_SHA");
+        if (sha == null || sha.isEmpty()) {
+            sha = getProperty("app.version", "");
+        } else if (sha.length() > 7) {
+            sha = sha.substring(0, 7);
         }
-        return getProperty("app.version", "unknown");
+        return (sha.isEmpty() || "unknown".equals(sha)) ? semver : semver + "+" + sha;
     }
 
     public static String getControllerSignupCode() {

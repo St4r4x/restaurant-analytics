@@ -175,7 +175,7 @@
     fetch('/api/restaurants/health')
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d.version) document.getElementById('footer-version').textContent = d.version.substring(0, 7);
+        if (d.version) document.getElementById('footer-version').textContent = 'v' + d.version;
       })
       .catch(function() {});
 
