@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.st4r4x.cache.RestaurantCacheService;
-import com.st4r4x.dao.RestaurantDAO;
+import com.st4r4x.dao.RestaurantWriteDAO;
 import com.st4r4x.domain.Restaurant;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,7 +27,7 @@ class SyncServiceTest {
     private NycOpenDataClient apiClient;
 
     @Mock
-    private RestaurantDAO restaurantDAO;
+    private RestaurantWriteDAO restaurantDAO;
 
     @Mock
     private RestaurantCacheService cacheService;

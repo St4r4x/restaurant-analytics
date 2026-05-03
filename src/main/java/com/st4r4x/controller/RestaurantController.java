@@ -377,7 +377,7 @@ public class RestaurantController {
             @RequestParam String q,
             @RequestParam(defaultValue = "20") int limit) {
         try {
-            List<Restaurant> data = restaurantDAO.searchByNameOrAddress(q, limit);
+            List<Restaurant> data = analyticsDAO.searchByNameOrAddress(q, limit);
             List<Map<String, Object>> views = data.stream()
                 .map(RestaurantService::toView)
                 .collect(Collectors.toList());

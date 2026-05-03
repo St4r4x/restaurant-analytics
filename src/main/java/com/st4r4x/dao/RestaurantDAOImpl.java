@@ -22,13 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import jakarta.annotation.PreDestroy;
 import com.st4r4x.aggregation.AggregationCount;
 import com.st4r4x.aggregation.BoroughCuisineScore;
 import com.st4r4x.aggregation.CuisineScore;
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.config.MongoClientFactory;
 import com.st4r4x.domain.Restaurant;
-import com.st4r4x.dto.AtRiskEntry;
 import com.st4r4x.dto.HeatmapPoint;
 
 import com.mongodb.MongoClientSettings;
@@ -40,7 +40,7 @@ import com.mongodb.client.MongoDatabase;
  * DAO implementation for MongoDB using a Singleton connection pattern
  */
 @Repository
-public class RestaurantDAOImpl implements RestaurantDAO {
+public class RestaurantDAOImpl implements RestaurantDAO, RestaurantWriteDAO {
     private static final Logger logger = LoggerFactory.getLogger(RestaurantDAOImpl.class);
     
     private MongoClient mongoClient;
@@ -185,19 +185,6 @@ public class RestaurantDAOImpl implements RestaurantDAO {
     }
     
     @Override
-    public List<CuisineScore> findWorstCuisinesByAverageScore(int limit) {
-        return aggregate(Arrays.asList(
-            new Document("$unwind", "$grades"),
-            new Document("$group", new Document()
-                .append("_id", "$cuisine")
-                .append("avgScore", new Document("$avg", "$grades.score"))
-                .append("count", new Document("$sum", 1))),
-            new Document("$sort", new Document("avgScore", 1)),
-            new Document("$limit", limit)
-        ), CuisineScore.class);
-    }
-
-    @Override
     public Restaurant findRandom() {
         List<Restaurant> result = new ArrayList<>();
         restaurantCollection.aggregate(Arrays.asList(
@@ -322,123 +309,9 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         return aggregate(pipeline, HeatmapPoint.class);
     }
 
-    @Override
-    public List<AtRiskEntry> findAtRiskRestaurants(String borough, int limit) {
-        List<Document> pipeline = new ArrayList<>();
-        if (borough != null && !borough.isEmpty()) {
-            pipeline.add(new Document("$match", new Document("borough", borough)));
-        }
-        pipeline.add(new Document("$project", new Document("_id", 0)
-            .append("name", 1)
-            .append("borough", 1)
-            .append("cuisine", 1)
-            .append("restaurant_id", 1)
-            .append("lastGrades", new Document("$slice", Arrays.asList("$grades", 3)))));
-        pipeline.add(new Document("$addFields", new Document()
-            .append("lastGrade", new Document("$arrayElemAt", Arrays.asList("$lastGrades.grade", 0)))
-            .append("lastScore", new Document("$arrayElemAt", Arrays.asList("$lastGrades.score", 0)))
-            .append("consecutiveBadGrades", new Document("$size", new Document("$filter", new Document()
-                .append("input", new Document("$ifNull", Arrays.asList("$lastGrades", Arrays.asList())))
-                .append("as", "g")
-                .append("cond", new Document("$in", Arrays.asList("$$g.grade",
-                    Arrays.asList("C", "Z", "N", "P")))))))));
-        pipeline.add(new Document("$match", new Document("lastGrade",
-            new Document("$in", Arrays.asList("C", "Z")))));
-        pipeline.add(new Document("$sort", new Document("lastScore", -1)));
-        pipeline.add(new Document("$limit", limit));
-        return aggregate(pipeline, AtRiskEntry.class);
-    }
-
-    @Override
-    public List<Restaurant> searchByNameOrAddress(String q, int limit) {
-        Document regex = new Document("$regex", q).append("$options", "i");
-        Document filter = new Document("$or", Arrays.asList(
-            new Document("name", regex),
-            new Document("address.street", regex)
-        ));
-        List<Restaurant> results = new ArrayList<>();
-        restaurantCollection.find(filter).limit(limit).forEach(results::add);
-        return results;
-    }
-
-    @Override
-    public List<CuisineScore> findBestCuisinesByAverageScore(int limit) {
-        // "Best" here means WORST for the diner — highest avg score = most violations
-        return aggregate(Arrays.asList(
-            new Document("$unwind", "$grades"),
-            new Document("$group", new Document()
-                .append("_id", "$cuisine")
-                .append("avgScore", new Document("$avg", "$grades.score"))
-                .append("count", new Document("$sum", 1))),
-            new Document("$sort", new Document("avgScore", -1)),
-            new Document("$limit", limit)
-        ), CuisineScore.class);
-    }
-
-    @Override
-    public List<com.st4r4x.dto.UncontrolledEntry> findUncontrolled(String borough, int limit) {
-        long twelveMonthsAgoMs = System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000;
-        List<Document> pipeline = new ArrayList<>();
-
-        // Optional borough pre-filter
-        if (borough != null && !borough.isEmpty()) {
-            pipeline.add(new Document("$match", new Document("borough", borough)));
-        }
-
-        // Extract last grade, last score, last inspection date from grades array
-        pipeline.add(new Document("$addFields", new Document()
-            .append("lastGrade", new Document("$arrayElemAt", Arrays.asList("$grades.grade", 0)))
-            .append("lastScore", new Document("$arrayElemAt", Arrays.asList("$grades.score", 0)))
-            .append("lastInspectionDate", new Document("$arrayElemAt", Arrays.asList("$grades.date", 0)))
-        ));
-
-        // Convert lastInspectionDate to milliseconds for comparison
-        pipeline.add(new Document("$addFields", new Document(
-            "lastInspectionMs", new Document("$toLong",
-                new Document("$toDate", new Document("$ifNull",
-                    Arrays.asList("$lastInspectionDate", new java.util.Date(0)))))
-        )));
-
-        // Match: grade C or Z  OR  last inspection older than 12 months
-        pipeline.add(new Document("$match", new Document("$or", Arrays.asList(
-            new Document("lastGrade", new Document("$in", Arrays.asList("C", "Z"))),
-            new Document("lastInspectionMs", new Document("$lt", twelveMonthsAgoMs))
-        ))));
-
-        // Project final fields and compute daysSinceInspection
-        pipeline.add(new Document("$project", new Document()
-            .append("_id", 0)
-            .append("restaurant_id", "$restaurant_id")
-            .append("name", 1)
-            .append("borough", 1)
-            .append("cuisine", 1)
-            .append("lastGrade", 1)
-            .append("lastScore", 1)
-            .append("daysSinceInspection", new Document("$toInt",
-                new Document("$divide", Arrays.asList(
-                    new Document("$subtract", Arrays.asList(System.currentTimeMillis(), "$lastInspectionMs")),
-                    86_400_000L
-                ))
-            ))
-        ));
-
-        pipeline.add(new Document("$sort", new Document("lastScore", -1)));
-        pipeline.add(new Document("$limit", limit));
-
-        List<com.st4r4x.dto.UncontrolledEntry> results = new ArrayList<>();
-        database.withCodecRegistry(pojoCodecRegistry)
-            .getCollection(AppConfig.getMongoCollection(), com.st4r4x.dto.UncontrolledEntry.class)
-            .aggregate(pipeline)
-            .forEach(results::add);
-        return results;
-    }
-
-    /**
-     * Closes the MongoDB connection via the Singleton Factory
-     */
-    @Override
+    @PreDestroy
     public void close() {
-        logger.info("Closing the DAO");
+        logger.info("Closing RestaurantDAOImpl");
         MongoClientFactory.closeInstance();
     }
 }

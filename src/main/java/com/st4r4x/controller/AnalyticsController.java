@@ -3,7 +3,6 @@ package com.st4r4x.controller;
 import com.st4r4x.dto.AtRiskEntry;
 import com.st4r4x.aggregation.CuisineScore;
 import com.st4r4x.dao.AnalyticsDAO;
-import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.util.ResponseUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +29,6 @@ import java.util.Map;
 public class AnalyticsController {
 
     @Autowired
-    private RestaurantDAO restaurantDAO;
-
-    @Autowired
     private AnalyticsDAO analyticsDAO;
 
     /**
@@ -41,7 +37,7 @@ public class AnalyticsController {
     @GetMapping("/kpis")
     public ResponseEntity<Map<String, Object>> getKpis() {
         try {
-            long total = restaurantDAO.countAll();
+            long total = analyticsDAO.countAll();
             long atRisk = analyticsDAO.countAtRiskRestaurants();
 
             // Compute percentGradeA from borough grade distribution data
@@ -63,7 +59,7 @@ public class AnalyticsController {
             double percentGradeA = (totalABC > 0) ? ((double) totalA / totalABC * 100.0) : 0.0;
 
             // avgScore: weighted average from top-200 cuisines by lowest score (ascending sort)
-            List<CuisineScore> allCuisines = restaurantDAO.findWorstCuisinesByAverageScore(200);
+            List<CuisineScore> allCuisines = analyticsDAO.findWorstCuisinesByAverageScore(200);
             double avgScore = 0.0;
             if (!allCuisines.isEmpty()) {
                 double sum = 0;
@@ -131,8 +127,8 @@ public class AnalyticsController {
     @GetMapping("/cuisine-rankings")
     public ResponseEntity<Map<String, Object>> getCuisineRankings() {
         try {
-            List<CuisineScore> best = restaurantDAO.findWorstCuisinesByAverageScore(10);
-            List<CuisineScore> worst = restaurantDAO.findBestCuisinesByAverageScore(10);
+            List<CuisineScore> best = analyticsDAO.findWorstCuisinesByAverageScore(10);
+            List<CuisineScore> worst = analyticsDAO.findBestCuisinesByAverageScore(10);
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
@@ -150,7 +146,7 @@ public class AnalyticsController {
     @GetMapping("/at-risk")
     public ResponseEntity<Map<String, Object>> getAtRisk() {
         try {
-            List<AtRiskEntry> entries = restaurantDAO.findAtRiskRestaurants(null, 50);
+            List<AtRiskEntry> entries = analyticsDAO.findAtRiskRestaurants(null, 50);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", entries);

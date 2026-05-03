@@ -13,12 +13,14 @@ import org.springframework.stereotype.Service;
 import com.st4r4x.aggregation.AggregationCount;
 import com.st4r4x.aggregation.BoroughCuisineScore;
 import com.st4r4x.aggregation.CuisineScore;
+import com.st4r4x.dao.AnalyticsDAO;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Address;
 import com.st4r4x.domain.InspectionRecord;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.dto.AtRiskEntry;
 import com.st4r4x.dto.HeatmapPoint;
+import com.st4r4x.dto.UncontrolledEntry;
 import com.st4r4x.util.ValidationUtil;
 
 /**
@@ -30,10 +32,12 @@ public class RestaurantService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RestaurantService.class);
 
     private final RestaurantDAO restaurantDAO;
+    private final AnalyticsDAO analyticsDAO;
 
     @Autowired
-    public RestaurantService(RestaurantDAO restaurantDAO) {
+    public RestaurantService(RestaurantDAO restaurantDAO, AnalyticsDAO analyticsDAO) {
         this.restaurantDAO = restaurantDAO;
+        this.analyticsDAO = analyticsDAO;
     }
     
     // =============== USE CASE 1 ===============
@@ -115,7 +119,7 @@ public class RestaurantService {
 
         // Otherwise: "worst cuisines" logic
         List<CuisineScore> worstCuisines = allBoroughs
-                ? restaurantDAO.findWorstCuisinesByAverageScore(limit)
+                ? analyticsDAO.findWorstCuisinesByAverageScore(limit)
                 : restaurantDAO.findWorstCuisinesByAverageScoreInBorough(borough, limit);
 
         if (maxScore != null) {
@@ -146,7 +150,7 @@ public class RestaurantService {
      * Used as the "best" list in cuisine rankings.
      */
     public List<CuisineScore> getWorstCuisinesByAverageScore(int limit) {
-        return restaurantDAO.findWorstCuisinesByAverageScore(limit);
+        return analyticsDAO.findWorstCuisinesByAverageScore(limit);
     }
 
     /**
@@ -154,7 +158,7 @@ public class RestaurantService {
      * Sorted avgScore descending.
      */
     public List<CuisineScore> getBestCuisinesByAverageScore(int limit) {
-        return restaurantDAO.findBestCuisinesByAverageScore(limit);
+        return analyticsDAO.findBestCuisinesByAverageScore(limit);
     }
 
     // =============== TOP CUISINES ===============
@@ -210,7 +214,12 @@ public class RestaurantService {
 
     public List<AtRiskEntry> getAtRiskRestaurants(String borough, int limit) {
         ValidationUtil.requirePositive(limit, "limit");
-        return restaurantDAO.findAtRiskRestaurants(borough, limit);
+        return analyticsDAO.findAtRiskRestaurants(borough, limit);
+    }
+
+    public List<UncontrolledEntry> getUncontrolledRestaurants(String borough, int limit) {
+        ValidationUtil.requirePositive(limit, "limit");
+        return analyticsDAO.findUncontrolled(borough, limit);
     }
 
     // ── Restaurant computed fields (business logic extracted from POJO) ───────

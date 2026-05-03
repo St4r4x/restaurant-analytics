@@ -1,6 +1,6 @@
 package com.st4r4x.controller;
 
-import com.st4r4x.dao.RestaurantDAO;
+import com.st4r4x.service.RestaurantService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class InspectionControllerUncontrolledTest {
 
     @Mock
-    private RestaurantDAO restaurantDAO;
+    private RestaurantService restaurantService;
 
     @InjectMocks
     private InspectionController inspectionController;
@@ -47,7 +47,7 @@ public class InspectionControllerUncontrolledTest {
      */
     @Test
     public void testUncontrolled_returns200() throws Exception {
-        when(restaurantDAO.findUncontrolled(null, 500)).thenReturn(Collections.emptyList());
+        when(restaurantService.getUncontrolledRestaurants(null, 500)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/inspection/uncontrolled"))
                 .andExpect(status().isOk())
@@ -60,7 +60,7 @@ public class InspectionControllerUncontrolledTest {
      */
     @Test
     public void testExportCsv_returnsTextCsv() throws Exception {
-        when(restaurantDAO.findUncontrolled(null, 5000)).thenReturn(Collections.emptyList());
+        when(restaurantService.getUncontrolledRestaurants(null, 5000)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/inspection/uncontrolled/export.csv"))
                 .andExpect(status().isOk())

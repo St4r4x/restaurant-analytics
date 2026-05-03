@@ -1,8 +1,8 @@
 package com.st4r4x.controller;
 
 import com.st4r4x.config.AppConfig;
-import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Restaurant;
+import com.st4r4x.service.RestaurantService;
 import com.st4r4x.dto.ReportRequest;
 import com.st4r4x.entity.LetterGrade;
 import com.st4r4x.entity.InspectionReportEntity;
@@ -50,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ReportControllerTest {
 
     @Mock private ReportRepository reportRepository;
-    @Mock private RestaurantDAO restaurantDAO;
+    @Mock private RestaurantService restaurantService;
     @Mock private UserRepository userRepository;
 
     @InjectMocks
@@ -102,7 +102,7 @@ class ReportControllerTest {
         when(reportRepository.save(any(InspectionReportEntity.class))).thenReturn(saved);
 
         Restaurant restaurant = new Restaurant("Joe's", "Italian", "Manhattan");
-        when(restaurantDAO.findByRestaurantId("R1")).thenReturn(restaurant);
+        when(restaurantService.getByRestaurantId("R1")).thenReturn(restaurant);
 
         ReportRequest req = new ReportRequest();
         req.setRestaurantId("R1");
@@ -143,7 +143,7 @@ class ReportControllerTest {
 
         InspectionReportEntity saved = makeEntity(2L, "UNKNOWN", LetterGrade.B, Status.OPEN);
         when(reportRepository.save(any(InspectionReportEntity.class))).thenReturn(saved);
-        when(restaurantDAO.findByRestaurantId("UNKNOWN")).thenReturn(null);
+        when(restaurantService.getByRestaurantId("UNKNOWN")).thenReturn(null);
 
         ReportRequest req = new ReportRequest();
         req.setRestaurantId("UNKNOWN");
@@ -168,7 +168,7 @@ class ReportControllerTest {
         InspectionReportEntity e1 = makeEntity(1L, "R1", LetterGrade.A, Status.OPEN);
         InspectionReportEntity e2 = makeEntity(2L, "R2", LetterGrade.B, Status.RESOLVED);
         when(reportRepository.findByUserId(42L)).thenReturn(Arrays.asList(e1, e2));
-        when(restaurantDAO.findByRestaurantId(anyString())).thenReturn(null);
+        when(restaurantService.getByRestaurantId(anyString())).thenReturn(null);
 
         mockMvc.perform(get("/api/reports"))
                 .andExpect(status().isOk())
@@ -188,7 +188,7 @@ class ReportControllerTest {
 
         InspectionReportEntity e1 = makeEntity(1L, "R1", LetterGrade.A, Status.OPEN);
         when(reportRepository.findByUserIdAndStatus(42L, Status.OPEN)).thenReturn(Collections.singletonList(e1));
-        when(restaurantDAO.findByRestaurantId(anyString())).thenReturn(null);
+        when(restaurantService.getByRestaurantId(anyString())).thenReturn(null);
 
         mockMvc.perform(get("/api/reports").param("status", "OPEN"))
                 .andExpect(status().isOk())
@@ -248,7 +248,7 @@ class ReportControllerTest {
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
         when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
         when(reportRepository.save(any(InspectionReportEntity.class))).thenReturn(entity);
-        when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
+        when(restaurantService.getByRestaurantId("R1")).thenReturn(null);
 
         ReportRequest req = new ReportRequest();
         req.setGrade(LetterGrade.B);
@@ -300,7 +300,7 @@ class ReportControllerTest {
         when(userRepository.findByUsername("ctrl_user")).thenReturn(Optional.of(user));
         when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
         when(reportRepository.save(any(InspectionReportEntity.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
+        when(restaurantService.getByRestaurantId("R1")).thenReturn(null);
 
         // Only grade and violationCodes are non-null; status and notes are intentionally null
         ReportRequest req = new ReportRequest();
@@ -352,7 +352,7 @@ class ReportControllerTest {
         InspectionReportEntity entity = makeEntity(1L, "R1", LetterGrade.A, Status.OPEN);
         when(reportRepository.findById(1L)).thenReturn(Optional.of(entity));
         when(reportRepository.save(any(InspectionReportEntity.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(restaurantDAO.findByRestaurantId("R1")).thenReturn(null);
+        when(restaurantService.getByRestaurantId("R1")).thenReturn(null);
 
         byte[] imageBytes = "fake-image-content".getBytes();
         MockMultipartFile multipartFile = new MockMultipartFile(

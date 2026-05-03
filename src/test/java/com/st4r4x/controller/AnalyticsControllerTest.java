@@ -2,7 +2,6 @@ package com.st4r4x.controller;
 
 import com.st4r4x.aggregation.CuisineScore;
 import com.st4r4x.dao.AnalyticsDAO;
-import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.dto.AtRiskEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,9 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AnalyticsControllerTest {
 
     @Mock
-    private RestaurantDAO restaurantDAO;
-
-    @Mock
     private AnalyticsDAO analyticsDAO;
 
     @InjectMocks
@@ -50,10 +46,10 @@ class AnalyticsControllerTest {
      */
     @Test
     void testKpis_returns200() throws Exception {
-        when(restaurantDAO.countAll()).thenReturn(27000L);
+        when(analyticsDAO.countAll()).thenReturn(27000L);
         when(analyticsDAO.countAtRiskRestaurants()).thenReturn(412L);
         when(analyticsDAO.findBoroughGradeDistribution()).thenReturn(Collections.emptyList());
-        when(restaurantDAO.findWorstCuisinesByAverageScore(200)).thenReturn(Collections.emptyList());
+        when(analyticsDAO.findWorstCuisinesByAverageScore(200)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/analytics/kpis"))
                 .andExpect(status().isOk())
@@ -81,9 +77,9 @@ class AnalyticsControllerTest {
     @Test
     void testCuisineRankings_returnsTwoLists() throws Exception {
         CuisineScore cs = new CuisineScore("Italian", 12.4, 500);
-        when(restaurantDAO.findWorstCuisinesByAverageScore(10))
+        when(analyticsDAO.findWorstCuisinesByAverageScore(10))
                 .thenReturn(Collections.nCopies(10, cs));
-        when(restaurantDAO.findBestCuisinesByAverageScore(10))
+        when(analyticsDAO.findBestCuisinesByAverageScore(10))
                 .thenReturn(Collections.nCopies(10, cs));
 
         mockMvc.perform(get("/api/analytics/cuisine-rankings"))
@@ -105,7 +101,7 @@ class AnalyticsControllerTest {
         entry.setBorough("MANHATTAN");
         entry.setLastGrade("C");
 
-        when(restaurantDAO.findAtRiskRestaurants(null, 50))
+        when(analyticsDAO.findAtRiskRestaurants(null, 50))
                 .thenReturn(Collections.singletonList(entry));
 
         mockMvc.perform(get("/api/analytics/at-risk"))

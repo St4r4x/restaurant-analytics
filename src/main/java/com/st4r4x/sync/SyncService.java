@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.st4r4x.cache.RestaurantCacheService;
-import com.st4r4x.dao.RestaurantDAO;
+import com.st4r4x.dao.RestaurantWriteDAO;
 import com.st4r4x.domain.Address;
 import com.st4r4x.domain.InspectionRecord;
 import com.st4r4x.domain.Restaurant;
@@ -36,7 +36,7 @@ public class SyncService {
     private static final Logger logger = LoggerFactory.getLogger(SyncService.class);
 
     private final NycOpenDataClient apiClient;
-    private final RestaurantDAO restaurantDAO;
+    private final RestaurantWriteDAO restaurantWriteDAO;
     private final RestaurantCacheService cacheService;
 
     private volatile SyncResult lastResult;
@@ -44,10 +44,10 @@ public class SyncService {
     private volatile Instant runningStartedAt;
 
     @Autowired
-    public SyncService(NycOpenDataClient apiClient, RestaurantDAO restaurantDAO,
+    public SyncService(NycOpenDataClient apiClient, RestaurantWriteDAO restaurantWriteDAO,
                        RestaurantCacheService cacheService) {
         this.apiClient = apiClient;
-        this.restaurantDAO = restaurantDAO;
+        this.restaurantWriteDAO = restaurantWriteDAO;
         this.cacheService = cacheService;
     }
 
@@ -93,7 +93,7 @@ public class SyncService {
                 if (!complete.isEmpty()) {
                     List<Restaurant> batch = mapToRestaurants(complete);
                     if (!batch.isEmpty()) {
-                        restaurantDAO.upsertRestaurants(batch);
+                        restaurantWriteDAO.upsertRestaurants(batch);
                         cacheService.updateTopRestaurants(batch);
                         upsertCount[0] += batch.size();
                     }
@@ -103,7 +103,7 @@ public class SyncService {
             if (!carry[0].isEmpty()) {
                 List<Restaurant> last = mapToRestaurants(carry[0]);
                 if (!last.isEmpty()) {
-                    restaurantDAO.upsertRestaurants(last);
+                    restaurantWriteDAO.upsertRestaurants(last);
                     cacheService.updateTopRestaurants(last);
                     upsertCount[0] += last.size();
                 }

@@ -1,7 +1,6 @@
 package com.st4r4x.controller;
 
 import com.st4r4x.config.AppConfig;
-import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.dto.ReportRequest;
 import com.st4r4x.entity.InspectionReportEntity;
@@ -9,6 +8,7 @@ import com.st4r4x.entity.Status;
 import com.st4r4x.entity.UserEntity;
 import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
+import com.st4r4x.service.RestaurantService;
 import com.st4r4x.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -32,7 +32,7 @@ import java.util.*;
 public class ReportController {
 
     @Autowired private ReportRepository reportRepository;
-    @Autowired private RestaurantDAO restaurantDAO;
+    @Autowired private RestaurantService restaurantService;
     @Autowired private UserRepository userRepository;
 
     // ── Auth helper ────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ public class ReportController {
 
     // ── Response helper ────────────────────────────────────────────────────
     private Map<String, Object> toResponseMap(InspectionReportEntity entity) {
-        Restaurant restaurant = restaurantDAO.findByRestaurantId(entity.getRestaurantId());
+        Restaurant restaurant = restaurantService.getByRestaurantId(entity.getRestaurantId());
         Map<String, Object> data = new HashMap<>();
         data.put("id",             entity.getId());
         data.put("restaurantId",   entity.getRestaurantId());

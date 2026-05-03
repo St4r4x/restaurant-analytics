@@ -52,7 +52,7 @@ class RestaurantControllerSearchTest {
         Restaurant r = new Restaurant("Pizza Palace", "Italian", "MANHATTAN");
         r.setRestaurantId("12345");
 
-        when(restaurantDAO.searchByNameOrAddress("pizza", 20))
+        when(analyticsDAO.searchByNameOrAddress("pizza", 20))
                 .thenReturn(Collections.singletonList(r));
 
         mockMvc.perform(get("/api/restaurants/search").param("q", "pizza"))
@@ -66,7 +66,7 @@ class RestaurantControllerSearchTest {
      */
     @Test
     void testSearch_emptyQuery() throws Exception {
-        when(restaurantDAO.searchByNameOrAddress("", 20))
+        when(analyticsDAO.searchByNameOrAddress("", 20))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/restaurants/search").param("q", ""))
@@ -78,7 +78,7 @@ class RestaurantControllerSearchTest {
      */
     @Test
     void testSearch_shortQuery() throws Exception {
-        when(restaurantDAO.searchByNameOrAddress("a", 20))
+        when(analyticsDAO.searchByNameOrAddress("a", 20))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/restaurants/search").param("q", "a"))

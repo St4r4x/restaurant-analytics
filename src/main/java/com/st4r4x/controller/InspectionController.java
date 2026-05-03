@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.dto.AtRiskEntry;
 import com.st4r4x.dto.UncontrolledEntry;
 import com.st4r4x.service.RestaurantService;
@@ -33,9 +32,6 @@ public class InspectionController {
 
     @Autowired
     private RestaurantService restaurantService;
-
-    @Autowired
-    private RestaurantDAO restaurantDAO;
 
     @Operation(summary = "At-risk restaurants", description = "Returns restaurants whose last grade is C or Z. Admin only.")
     @PreAuthorize("hasRole('ADMIN')")
@@ -90,7 +86,7 @@ public class InspectionController {
             @RequestParam(required = false) String borough,
             @RequestParam(defaultValue = "500") int limit) {
         try {
-            List<UncontrolledEntry> data = restaurantDAO.findUncontrolled(borough, limit);
+            List<UncontrolledEntry> data = restaurantService.getUncontrolledRestaurants(borough, limit);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("data", data);
@@ -107,7 +103,7 @@ public class InspectionController {
             @RequestParam(required = false) String borough,
             @RequestParam(defaultValue = "5000") int limit) {
         try {
-            List<UncontrolledEntry> data = restaurantDAO.findUncontrolled(borough, limit);
+            List<UncontrolledEntry> data = restaurantService.getUncontrolledRestaurants(borough, limit);
             StringBuilder sb = new StringBuilder();
             sb.append("restaurant_id,name,borough,cuisine,lastGrade,lastScore,daysSinceInspection\n");
             for (UncontrolledEntry e : data) {

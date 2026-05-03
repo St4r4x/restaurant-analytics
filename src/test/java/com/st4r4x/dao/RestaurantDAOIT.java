@@ -53,7 +53,7 @@ public class RestaurantDAOIT {
     @AfterAll
     public static void tearDownClass() {
         if (restaurantDAO != null) {
-            restaurantDAO.close(); // closes MongoClientFactory singleton
+            ((RestaurantDAOImpl) restaurantDAO).close(); // closes MongoClientFactory singleton
         }
         System.clearProperty("mongodb.uri");
         mongoContainer.stop();

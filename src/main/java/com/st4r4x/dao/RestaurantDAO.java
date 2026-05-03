@@ -7,7 +7,6 @@ import com.st4r4x.aggregation.AggregationCount;
 import com.st4r4x.aggregation.BoroughCuisineScore;
 import com.st4r4x.aggregation.CuisineScore;
 import com.st4r4x.domain.Restaurant;
-import com.st4r4x.dto.AtRiskEntry;
 import com.st4r4x.dto.HeatmapPoint;
 
 public interface RestaurantDAO {
@@ -62,11 +61,6 @@ public interface RestaurantDAO {
     List<CuisineScore> findWorstCuisinesByAverageScoreInBorough(String borough, int limit);
 
     /**
-     * USE CASE 3 (global): Worst cuisines across all boroughs
-     */
-    List<CuisineScore> findWorstCuisinesByAverageScore(int limit);
-
-    /**
      * USE CASE 4: Return cuisine types with at least minCount restaurants
      */
     List<String> findCuisinesWithMinimumCount(int minCount);
@@ -85,14 +79,6 @@ public interface RestaurantDAO {
      * Returns N randomly-selected restaurants via $sample aggregation.
      */
     List<Restaurant> findSampleRestaurants(int limit);
-
-    /**
-     * Upserts a batch of restaurants keyed by restaurantId (camis).
-     * Inserts if not present, replaces if already exists.
-     *
-     * @return number of documents upserted
-     */
-    int upsertRestaurants(List<Restaurant> restaurants);
 
     /**
      * Returns restaurants matching a list of IDs (restaurant_id / camis)
@@ -120,34 +106,4 @@ public interface RestaurantDAO {
      * @param borough optional borough filter (null = all)
      */
     List<HeatmapPoint> findHeatmapData(String borough, int limit);
-
-    /**
-     * Returns restaurants with a bad last grade (C or Z).
-     * @param borough optional borough filter (null = all)
-     */
-    List<AtRiskEntry> findAtRiskRestaurants(String borough, int limit);
-
-    /**
-     * Returns cuisines with the highest average inspection score (most violations = worst).
-     * Sort: avgScore descending.
-     */
-    List<CuisineScore> findBestCuisinesByAverageScore(int limit);
-
-    /**
-     * Searches restaurants by name or street address using a case-insensitive $regex.
-     * Returns at most {@code limit} results.
-     */
-    List<Restaurant> searchByNameOrAddress(String q, int limit);
-
-    /**
-     * Returns restaurants with last grade C/Z OR not inspected in the past 12 months.
-     * @param borough optional borough filter (null or empty = all boroughs)
-     * @param limit   max results to return
-     */
-    List<com.st4r4x.dto.UncontrolledEntry> findUncontrolled(String borough, int limit);
-
-    /**
-     * Closes the connection
-     */
-    void close();
 }

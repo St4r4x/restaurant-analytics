@@ -1,4 +1,20 @@
 
+## [Unreleased] — 2026-05-03
+
+### Refactor
+- Split `RestaurantDAO` god interface into three focused interfaces: `RestaurantDAO` (reads), `RestaurantWriteDAO` (upsert), `AnalyticsDAO` (aggregations)
+- Move analytics methods (`findAtRiskRestaurants`, `findUncontrolled`, `searchByNameOrAddress`, `findWorstCuisinesByAverageScore`, `findBestCuisinesByAverageScore`) from `RestaurantDAO` to `AnalyticsDAO`
+- Extract `RestaurantWriteDAO` interface; `SyncService` now injects the write-only contract
+- `ReportController`: replace direct `RestaurantDAO` injection with `RestaurantService` (enforce controller→service layering)
+- `InspectionController`: delegate `findUncontrolled` through `RestaurantService`
+- Replace `close()` on DAO interface with `@PreDestroy` on `RestaurantDAOImpl` (Spring lifecycle)
+- Update all controller and sync unit tests to match new injection points
+
+### Documentation
+- Replace stale root-level `ARCHITECTURE.md` with accurate `docs/architecture.md`
+- Add `docs/api.md`, `docs/configuration.md`, `docs/deployment.md`, `docs/ui.md`, `docs/development.md`
+- Rewrite `README.md` as a lean entry point linking to the docs folder
+
 ## [Unreleased] — 2026-05-02
 
 ### Bug Fixes
