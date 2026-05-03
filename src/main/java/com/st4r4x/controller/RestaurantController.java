@@ -93,16 +93,37 @@ public class RestaurantController {
     }
 
     /**
-     * Health check
+     * Health check — probes MongoDB and Redis connectivity.
+     * Returns 200 when all dependencies are reachable, 503 if any are down.
      */
     @Operation(summary = "Health check")
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         Map<String, String> response = new HashMap<>();
-        response.put("status", "OK");
-        response.put("message", "API is running");
         response.put("version", com.st4r4x.config.AppConfig.getAppVersion());
-        return ResponseEntity.ok(response);
+
+        String mongoStatus = "OK";
+        try {
+            com.st4r4x.config.MongoClientFactory.getInstance()
+                .getDatabase(com.st4r4x.config.AppConfig.getMongoDatabase())
+                .runCommand(new org.bson.Document("ping", 1));
+        } catch (Exception e) {
+            mongoStatus = "UNAVAILABLE";
+        }
+
+        String redisStatus = "OK";
+        try {
+            cacheService.ping();
+        } catch (Exception e) {
+            redisStatus = "UNAVAILABLE";
+        }
+
+        response.put("mongo", mongoStatus);
+        response.put("redis", redisStatus);
+
+        boolean healthy = "OK".equals(mongoStatus) && "OK".equals(redisStatus);
+        response.put("status", healthy ? "OK" : "DEGRADED");
+        return ResponseEntity.status(healthy ? 200 : 503).body(response);
     }
 
     /**

@@ -66,6 +66,12 @@ public class RestaurantCacheService {
         this.ttlSeconds = AppConfig.getRedisCacheTtlSeconds();
     }
 
+    // ── Connectivity probe ────────────────────────────────────────────────────
+
+    public void ping() {
+        redis.getConnectionFactory().getConnection().ping();
+    }
+
     // ── Typed facade methods (keep key logic encapsulated) ────────────────────
 
     public List<AggregationCount> getOrLoadByBorough(Supplier<List<AggregationCount>> loader) {

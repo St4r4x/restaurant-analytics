@@ -131,6 +131,14 @@ public class AppConfig {
         return getIntProperty("auth.rate-limit.window-minutes", 1);
     }
 
+    public static int getRestaurantRateLimitRequests() {
+        return getIntProperty("restaurant.rate-limit.requests", 100);
+    }
+
+    public static int getRestaurantRateLimitWindowMinutes() {
+        return getIntProperty("restaurant.rate-limit.window-minutes", 1);
+    }
+
     private static int getIntProperty(String key, int defaultValue) {
         String value = getProperty(key, String.valueOf(defaultValue));
         try { return Integer.parseInt(value); }
