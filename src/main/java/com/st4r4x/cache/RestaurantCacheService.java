@@ -69,7 +69,7 @@ public class RestaurantCacheService {
     // ── Connectivity probe ────────────────────────────────────────────────────
 
     public void ping() {
-        redis.getConnectionFactory().getConnection().ping();
+        redis.execute((org.springframework.data.redis.core.RedisCallback<String>) conn -> conn.ping());
     }
 
     // ── Typed facade methods (keep key logic encapsulated) ────────────────────

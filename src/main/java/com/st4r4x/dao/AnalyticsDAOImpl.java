@@ -211,11 +211,8 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
 
     @Override
     public List<Restaurant> searchByNameOrAddress(String q, int limit) {
-        Document regex = new Document("$regex", q).append("$options", "i");
-        Document filter = new Document("$or", Arrays.asList(
-            new Document("name", regex),
-            new Document("address.street", regex)
-        ));
+        // $text uses the compound text index on (name, address.street) — index-backed, case-insensitive
+        Document filter = new Document("$text", new Document("$search", q));
         List<Restaurant> results = new ArrayList<>();
         database.withCodecRegistry(pojoCodecRegistry)
                 .getCollection(collectionName, Restaurant.class)

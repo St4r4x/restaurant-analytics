@@ -59,7 +59,17 @@ public class RestaurantDAOImpl implements RestaurantDAO, RestaurantWriteDAO {
         this.restaurantCollection = database.withCodecRegistry(pojoCodecRegistry)
                 .getCollection(AppConfig.getMongoCollection(), Restaurant.class);
 
-        // 2dsphere index for geospatial queries (idempotent)
+        // Indexes — all idempotent (MongoDB skips creation if already exists)
+        restaurantCollection.createIndex(
+            new Document("restaurant_id", 1),
+            new IndexOptions().unique(true).background(true)
+        );
+        restaurantCollection.createIndex(new Document("borough", 1), new IndexOptions().background(true));
+        restaurantCollection.createIndex(new Document("cuisine", 1), new IndexOptions().background(true));
+        restaurantCollection.createIndex(
+            new Document("name", "text").append("address.street", "text"),
+            new IndexOptions().background(true)
+        );
         restaurantCollection.createIndex(
             new Document("address.coord", "2dsphere"),
             new IndexOptions().background(true)
