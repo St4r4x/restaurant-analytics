@@ -13,6 +13,31 @@
 - Ignore screenshots, fix test passwords, add UI design system to README
 - Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
 - Update for 8866a508a618ee490b54bd8aeb6993ebde70625d [skip ci]
+- Update for f8c5fda78ce648834fd271a420711f9839faf23e [skip ci]
+
+### Documentation
+- Add frontend redesign design spec
+- Update frontend spec — login/register tab detail
+- Add frontend redesign implementation plan
+- Add commercialisation guide
+
+### Refactoring
+- Split DAO interfaces and enforce controller→service layering
+
+## [Unreleased] — 2026-05-03
+
+### Bug Fixes
+- Use Bootstrap collapse data attributes for hamburger menu
+- Pull footer version from health endpoint instead of hardcoding
+- Add separator between nav links and auth area; version as semver+sha
+
+### Chores
+- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
+- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
+- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
+- Ignore screenshots, fix test passwords, add UI design system to README
+- Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
+- Update for 8866a508a618ee490b54bd8aeb6993ebde70625d [skip ci]
 
 ### Documentation
 - Add frontend redesign design spec
