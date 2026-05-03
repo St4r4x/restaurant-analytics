@@ -48,3 +48,4 @@ See **[docs/development.md](docs/development.md)** for local dev setup, seeded t
 | Docker Compose deployment | [docs/deployment.md](docs/deployment.md) |
 | UI pages & design system | [docs/ui.md](docs/ui.md) |
 | Local development & testing | [docs/development.md](docs/development.md) |
+| Commercialisation guide | [docs/commercialisation.md](docs/commercialisation.md) |
