@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.lang.reflect.Method;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -66,7 +67,7 @@ class AdminOsmEnrichTest {
         Method method = AdminController.class.getMethod("triggerOsmEnrich");
         PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
         assertNotNull(annotation, "@PreAuthorize must be present on triggerOsmEnrich()");
-        assert annotation.value().equals("hasRole('ADMIN')")
-                : "Expected hasRole('ADMIN') but got: " + annotation.value();
+        assertEquals("hasRole('ADMIN')", annotation.value(),
+                "Expected hasRole('ADMIN') but got: " + annotation.value());
     }
 }
