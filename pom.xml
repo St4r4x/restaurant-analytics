@@ -129,6 +129,13 @@
       <version>7.6.1</version>
     </dependency>
 
+    <!-- Elasticsearch Java API Client -->
+    <dependency>
+      <groupId>co.elastic.clients</groupId>
+      <artifactId>elasticsearch-java</artifactId>
+      <version>8.13.4</version>
+    </dependency>
+
     <!-- Testing -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
