@@ -1,23 +1,8 @@
 
-## [Unreleased] — 2026-05-05
+## [2.1.1] — 2026-05-05
 
 ### Bug Fixes
-- Self-contain navbar container to fix cross-page alignment
-- Register Jsr310CodecProvider for Instant BSON serialization
-- Add @Autowired, @EnableAsync, RestTemplate timeouts, better error logging
-- Remove misleading @Autowired, add @Async to enrichNew
-- Remove unused Consumer import in SyncServiceOsmTest
-- Replace assert keyword with JUnit assertEquals in AdminOsmEnrichTest
-- Validate osmWebsite scheme before assigning to href
-- Add OsmEnrichmentService mock to SyncServiceTest
-- Guard empty bulk batch, async reindex init, close cursor
-- Cache item.error() to resolve null-pointer diagnostic
-- Reliable selectItem routing and ArrowUp deselect in autocomplete
-
-### Chores
-- Update for 03f5873021e8c3add516b50411f3c376c35d417c [skip ci]
-- Remove unnecessary @SuppressWarnings from SyncServiceTest
-- Suppress unchecked cast warning in autocomplete test
+- Restore flex layout on navbar-container so logo and nav links are in the same row on all pages
 - Remove duplicate Unreleased section after rebase
 
 ### Documentation
