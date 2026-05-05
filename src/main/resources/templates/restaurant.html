@@ -447,13 +447,18 @@
                   var wrap2 = document.createElement('div');
                   wrap2.style.marginBottom = '8px';
                   wrap2.appendChild(makeLabel('Website'));
-                  var a2 = document.createElement('a');
-                  a2.href = r.osmWebsite;
-                  a2.textContent = r.osmWebsite.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                  a2.target = '_blank';
-                  a2.rel = 'noopener noreferrer';
-                  a2.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600';
-                  wrap2.appendChild(a2);
+                  try {
+                      var parsedUrl = new URL(r.osmWebsite);
+                      if (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') {
+                          var a2 = document.createElement('a');
+                          a2.href = parsedUrl.href;
+                          a2.textContent = parsedUrl.href.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                          a2.target = '_blank';
+                          a2.rel = 'noopener noreferrer';
+                          a2.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600';
+                          wrap2.appendChild(a2);
+                      }
+                  } catch (_) {}
                   document.getElementById('osm-website').appendChild(wrap2);
               }
 
