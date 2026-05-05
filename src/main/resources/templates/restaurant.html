@@ -60,6 +60,7 @@
       th { background: #1a1a1a; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
       td { padding: 9px 12px; border-bottom: 1px solid #f0ebe3; }
       tr:hover td { background: #faf7f4; }
+      .contact-section { background: white; border: 1px solid #e8e0d8; padding: 24px; margin-bottom: 16px; }
     </style>
   </head>
   <body>
@@ -116,6 +117,14 @@
             <div id="nearby-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:16px"></div>
             <p id="nearby-empty" style="display:none;color:#666;font-size:0.88em">No restaurants found within 500m.</p>
           </div>
+        </div>
+
+        <div id="osm-contact-section" class="contact-section" style="display:none">
+          <div class="section-label">Contact</div>
+          <div class="section-title">Restaurant Info</div>
+          <div id="osm-phone"></div>
+          <div id="osm-website"></div>
+          <div id="osm-hours"></div>
         </div>
 
       </div>
@@ -409,6 +418,58 @@
           renderMap(r);
           renderScoreChart(r.grades);
           renderInspections(r.grades);
+          (function renderOsmContact(r) {
+              var section = document.getElementById('osm-contact-section');
+              var hasData = false;
+
+              function makeLabel(text) {
+                  var el = document.createElement('div');
+                  el.style.cssText = 'font-size:0.75em;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:2px';
+                  el.textContent = text;
+                  return el;
+              }
+
+              if (r.osmPhone) {
+                  hasData = true;
+                  var wrap = document.createElement('div');
+                  wrap.style.marginBottom = '8px';
+                  wrap.appendChild(makeLabel('Phone'));
+                  var a = document.createElement('a');
+                  a.href = 'tel:' + r.osmPhone.replace(/[^+\d]/g, '');
+                  a.textContent = r.osmPhone;
+                  a.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600';
+                  wrap.appendChild(a);
+                  document.getElementById('osm-phone').appendChild(wrap);
+              }
+
+              if (r.osmWebsite) {
+                  hasData = true;
+                  var wrap2 = document.createElement('div');
+                  wrap2.style.marginBottom = '8px';
+                  wrap2.appendChild(makeLabel('Website'));
+                  var a2 = document.createElement('a');
+                  a2.href = r.osmWebsite;
+                  a2.textContent = r.osmWebsite.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                  a2.target = '_blank';
+                  a2.rel = 'noopener noreferrer';
+                  a2.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600';
+                  wrap2.appendChild(a2);
+                  document.getElementById('osm-website').appendChild(wrap2);
+              }
+
+              if (r.osmOpeningHours) {
+                  hasData = true;
+                  var wrap3 = document.createElement('div');
+                  wrap3.appendChild(makeLabel('Hours'));
+                  var span = document.createElement('span');
+                  span.style.fontSize = '0.9em';
+                  span.textContent = r.osmOpeningHours;
+                  wrap3.appendChild(span);
+                  document.getElementById('osm-hours').appendChild(wrap3);
+              }
+
+              if (hasData) section.style.display = 'block';
+          })(r);
           var currentId = window.location.pathname.split('/').pop();
           loadNearby(r.latitude, r.longitude, currentId);
 

@@ -304,6 +304,9 @@ public class RestaurantService {
         map.put("badgeColor", getBadgeColor(r));
         map.put("latitude", getLatitude(r));
         map.put("longitude", getLongitude(r));
+        if (r.getOsmPhone() != null)        map.put("osmPhone", r.getOsmPhone());
+        if (r.getOsmWebsite() != null)      map.put("osmWebsite", r.getOsmWebsite());
+        if (r.getOsmOpeningHours() != null) map.put("osmOpeningHours", r.getOsmOpeningHours());
         return map;
     }
 }
