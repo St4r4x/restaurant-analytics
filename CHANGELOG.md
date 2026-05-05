@@ -1,89 +1,11 @@
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Self-contain navbar container to fix cross-page alignment
-- Register Jsr310CodecProvider for Instant BSON serialization
-- Add @Autowired, @EnableAsync, RestTemplate timeouts, better error logging
-- Remove misleading @Autowired, add @Async to enrichNew
-- Remove unused Consumer import in SyncServiceOsmTest
-- Replace assert keyword with JUnit assertEquals in AdminOsmEnrichTest
-- Validate osmWebsite scheme before assigning to href
-- Add OsmEnrichmentService mock to SyncServiceTest
-- Guard empty bulk batch, async reindex init, close cursor
-- Cache item.error() to resolve null-pointer diagnostic
-- Reliable selectItem routing and ArrowUp deselect in autocomplete
-- Restore flex layout on navbar-container so brand and links are in the same row [skip ci]
-
-### CI/CD
-- Trigger CI for navbar flex fix
-
-### Chores
-- Update for 03f5873021e8c3add516b50411f3c376c35d417c [skip ci]
-- Remove unnecessary @SuppressWarnings from SyncServiceTest
-- Suppress unchecked cast warning in autocomplete test
-- Remove duplicate Unreleased section after rebase
-- Update for 9d2fa0f72ca6a48496af669f7df2bec77b5e280b [skip ci]
-
-### Documentation
-- Add design spec for ES search, navbar fix, OSM enrichment
-- Add implementation plans for navbar fix, OSM enrichment, and ES autocomplete
-- Release v2.1.0 — Elasticsearch autocomplete, OSM enrichment, navbar fix
-
-### Features
-- Add osm enrichment fields to Restaurant domain
-- Add OsmEnrichmentService with Overpass API integration
-- Wire OsmEnrichmentService into SyncService post-sync
-- Add POST /api/admin/osm-enrich endpoint
-- Show phone, website, hours on restaurant detail page
-- Add Elasticsearch 8 dependency and Docker service
-- Add ElasticsearchConfig bean
-- Add ElasticsearchSyncService with bulk reindex
-- Trigger ES reindex after successful sync
-- Add GET /api/restaurants/autocomplete endpoint
-- Add autocomplete dropdown to landing page search bar
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Self-contain navbar container to fix cross-page alignment
-- Register Jsr310CodecProvider for Instant BSON serialization
-- Add @Autowired, @EnableAsync, RestTemplate timeouts, better error logging
-- Remove misleading @Autowired, add @Async to enrichNew
-- Remove unused Consumer import in SyncServiceOsmTest
-- Replace assert keyword with JUnit assertEquals in AdminOsmEnrichTest
-- Validate osmWebsite scheme before assigning to href
-- Add OsmEnrichmentService mock to SyncServiceTest
-- Guard empty bulk batch, async reindex init, close cursor
-- Cache item.error() to resolve null-pointer diagnostic
-- Reliable selectItem routing and ArrowUp deselect in autocomplete
-
-### Chores
-- Update for 03f5873021e8c3add516b50411f3c376c35d417c [skip ci]
-- Remove unnecessary @SuppressWarnings from SyncServiceTest
-- Suppress unchecked cast warning in autocomplete test
-- Remove duplicate Unreleased section after rebase
-
-### Documentation
-- Add design spec for ES search, navbar fix, OSM enrichment
-- Add implementation plans for navbar fix, OSM enrichment, and ES autocomplete
-- Release v2.1.0 — Elasticsearch autocomplete, OSM enrichment, navbar fix
-
-### Features
-- Add osm enrichment fields to Restaurant domain
-- Add OsmEnrichmentService with Overpass API integration
-- Wire OsmEnrichmentService into SyncService post-sync
-- Add POST /api/admin/osm-enrich endpoint
-- Show phone, website, hours on restaurant detail page
-- Add Elasticsearch 8 dependency and Docker service
-- Add ElasticsearchConfig bean
-- Add ElasticsearchSyncService with bulk reindex
-- Trigger ES reindex after successful sync
-- Add GET /api/restaurants/autocomplete endpoint
-- Add autocomplete dropdown to landing page search bar
 # Changelog
 
 All notable changes are documented here.
+
+## [2.1.1] — 2026-05-05
+
+### Bug Fixes
+- Restore flex layout on navbar-container so logo and nav links are in the same row on all pages
 
 ## [2.1.0] — 2026-05-05
 
@@ -106,23 +28,10 @@ All notable changes are documented here.
 - Harden for pre-commercial readiness
 - Restore partial-match for short queries alongside $text index
 
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
-- Ignore screenshots, fix test passwords, add UI design system to README
-- Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
-- Update for 8866a508a618ee490b54bd8aeb6993ebde70625d [skip ci]
-- Update for f8c5fda78ce648834fd271a420711f9839faf23e [skip ci]
-- Update for d71a0e3e59b0d83452704010624b04e23d82f63a [skip ci]
-- Update for 947c5f834db8a29232ace974f1c270abbe0a641c [skip ci]
-- Update for a30cd551bd278dc091e9ac8a0fdf1034a2cd5faa [skip ci]
-
 ### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
+- Add frontend redesign design spec and implementation plan
 - Add commercialisation guide
+- Add architecture, API, configuration, deployment, UI, and development docs
 
 ### Performance
 - Add missing indexes, fix text search and Redis connection leak
@@ -130,6 +39,16 @@ All notable changes are documented here.
 ### Refactoring
 - Split DAO interfaces and enforce controller→service layering
 
+### Frontend Redesign
+- Replace purple-gradient aesthetic with Clean Civic design system across all 11 templates and 2 fragments
+- Bootstrap 5.3.3 + Playfair Display/Inter typography
+- White navbar with 3px red bottom border, dark page headers, off-white page background
+- KPI cards with red top border and Playfair Display numbers
+- Grade badges (A/B/C) with semantic colors consistent across all pages
+- Show deployed git SHA as version badge on every page
+
+### CI/CD
+- Add git-cliff changelog auto-update on main push
 
 ## [Phase 21] — 2026-04-13 — Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5
 
