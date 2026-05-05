@@ -49,7 +49,7 @@ public class ElasticsearchSyncService {
     }
 
     // Bump this when the mapping changes to force a drop-and-recreate on next startup
-    private static final String MAPPING_VERSION = "v2";
+    private static final String MAPPING_VERSION = "v3";
     private static final String VERSION_ALIAS = INDEX + "_" + MAPPING_VERSION;
 
     @PostConstruct
@@ -101,7 +101,10 @@ public class ElasticsearchSyncService {
                                         .searchAnalyzer("search_analyzer")
                                 ))
                                 .properties("boro",               p -> p.text(t -> t.analyzer("standard")))
-                                .properties("street",             p -> p.text(t -> t.analyzer("standard")))
+                                .properties("street",             p -> p.text(t -> t
+                                        .analyzer("ngram_analyzer")
+                                        .searchAnalyzer("search_analyzer")
+                                ))
                                 .properties("zipcode",            p -> p.keyword(k -> k))
                         )
                 );
@@ -119,29 +122,39 @@ public class ElasticsearchSyncService {
         }
     }
 
+    private static final int REINDEX_MAX_RETRIES = 3;
+    private static final long REINDEX_RETRY_DELAY_MS = 5000;
+
     @Async
     public void triggerReindex() {
-        reindex();
-    }
-
-    public void reindex() {
-        try {
-            List<Restaurant> batch = new ArrayList<>(BULK_SIZE);
-            long total = 0;
-            try (com.mongodb.client.MongoCursor<Restaurant> cursor = mongoCollection.find().cursor()) {
-                while (cursor.hasNext()) {
-                    batch.add(cursor.next());
-                    if (batch.size() == BULK_SIZE) {
-                        total += bulkIndex(batch);
-                        batch.clear();
-                    }
+        for (int attempt = 1; attempt <= REINDEX_MAX_RETRIES; attempt++) {
+            try {
+                reindex();
+                return;
+            } catch (Exception e) {
+                logger.warn("ES reindex attempt {}/{} failed: {}", attempt, REINDEX_MAX_RETRIES, e.getMessage());
+                if (attempt < REINDEX_MAX_RETRIES) {
+                    try { Thread.sleep(REINDEX_RETRY_DELAY_MS); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); return; }
                 }
             }
-            if (!batch.isEmpty()) total += bulkIndex(batch);
-            logger.info("ES reindex complete: {} documents", total);
-        } catch (Exception e) {
-            logger.error("ES reindex failed: {}", e.getMessage(), e);
         }
+        logger.error("ES reindex failed after {} attempts", REINDEX_MAX_RETRIES);
+    }
+
+    public void reindex() throws Exception {
+        List<Restaurant> batch = new ArrayList<>(BULK_SIZE);
+        long total = 0;
+        try (com.mongodb.client.MongoCursor<Restaurant> cursor = mongoCollection.find().cursor()) {
+            while (cursor.hasNext()) {
+                batch.add(cursor.next());
+                if (batch.size() == BULK_SIZE) {
+                    total += bulkIndex(batch);
+                    batch.clear();
+                }
+            }
+        }
+        if (!batch.isEmpty()) total += bulkIndex(batch);
+        logger.info("ES reindex complete: {} documents", total);
     }
 
     private int bulkIndex(List<Restaurant> restaurants) throws Exception {

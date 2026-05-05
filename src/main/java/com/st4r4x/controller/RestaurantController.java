@@ -460,14 +460,14 @@ public class RestaurantController {
                                                 .should(sh -> sh
                                                         .multiMatch(mm -> mm
                                                                 .query(namePart)
-                                                                .fields("dba^4", "cuisineDescription^2")
+                                                                .fields("dba^4", "cuisineDescription^2", "street^1")
                                                                 .type(co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType.BestFields)
                                                         )
                                                 )
                                                 .should(sh -> sh
                                                         .multiMatch(mm -> mm
                                                                 .query(namePart)
-                                                                .fields("dba^2", "cuisineDescription")
+                                                                .fields("dba^2", "cuisineDescription", "street")
                                                                 .fuzziness("AUTO")
                                                         )
                                                 )
