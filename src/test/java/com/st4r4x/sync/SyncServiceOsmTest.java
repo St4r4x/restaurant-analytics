@@ -18,6 +18,7 @@ class SyncServiceOsmTest {
     @Mock RestaurantWriteDAO restaurantWriteDAO;
     @Mock RestaurantCacheService cacheService;
     @Mock OsmEnrichmentService osmEnrichmentService;
+    @Mock ElasticsearchSyncService esSyncService;
     @InjectMocks SyncService syncService;
 
     @Test
