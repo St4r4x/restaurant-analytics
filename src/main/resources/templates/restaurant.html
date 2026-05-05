@@ -60,7 +60,6 @@
       th { background: #1a1a1a; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
       td { padding: 9px 12px; border-bottom: 1px solid #f0ebe3; }
       tr:hover td { background: #faf7f4; }
-      .contact-section { background: white; border: 1px solid #e8e0d8; padding: 24px; margin-bottom: 16px; }
     </style>
   </head>
   <body>
@@ -77,7 +76,7 @@
       <div class="container">
         <div class="row g-3">
 
-          <!-- LEFT COLUMN: Details + Map -->
+          <!-- LEFT COLUMN: Details + Map + Contact + Nearby -->
           <div class="col-md-5">
             <div class="content-card">
               <div class="section-label">Details</div>
@@ -88,6 +87,23 @@
             <div class="content-card">
               <div class="section-label">Location</div>
               <div id="map-container"><div class="spinner"></div></div>
+            </div>
+            <div class="content-card" id="contact-section">
+              <div class="section-label">Contact &amp; Address</div>
+              <div class="section-title">Restaurant Info</div>
+              <div id="contact-address"></div>
+              <div id="contact-phone"></div>
+              <div id="contact-website"></div>
+              <div id="contact-hours"></div>
+            </div>
+            <div id="nearby-section" style="display:none">
+              <div class="content-card">
+                <div class="section-label">Nearby</div>
+                <div class="section-title">Nearby Restaurants</div>
+                <p id="nearby-loading" style="color:#666;font-size:0.88em">Loading nearby restaurants&hellip;</p>
+                <div id="nearby-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:12px"></div>
+                <p id="nearby-empty" style="display:none;color:#666;font-size:0.88em">No restaurants found within 500m.</p>
+              </div>
             </div>
           </div>
 
@@ -107,25 +123,6 @@
             </div>
           </div>
 
-        </div>
-
-        <div id="nearby-section" style="display:none; margin-top: 24px">
-          <div class="content-card">
-            <div class="section-label">Nearby</div>
-            <div class="section-title">Nearby Restaurants</div>
-            <p id="nearby-loading" style="color:#666;font-size:0.88em">Loading nearby restaurants&hellip;</p>
-            <div id="nearby-grid" style="display:none;grid-template-columns:repeat(3,1fr);gap:16px"></div>
-            <p id="nearby-empty" style="display:none;color:#666;font-size:0.88em">No restaurants found within 500m.</p>
-          </div>
-        </div>
-
-        <div id="contact-section" class="contact-section">
-          <div class="section-label">Contact &amp; Address</div>
-          <div class="section-title">Restaurant Info</div>
-          <div id="contact-address"></div>
-          <div id="contact-phone"></div>
-          <div id="contact-website"></div>
-          <div id="contact-hours"></div>
         </div>
 
       </div>
@@ -228,7 +225,7 @@
             document.getElementById('nearby-loading').style.display = 'none';
             var others = (data.data || []).filter(function(r) {
               return r.restaurantId !== currentId;
-            }).slice(0, 5);
+            }).slice(0, 4);
             if (others.length === 0) {
               document.getElementById('nearby-empty').style.display = 'block';
               return;
@@ -341,7 +338,7 @@
           return;
         }
 
-        new Chart(document.getElementById("score-chart"), {
+        const chart = new Chart(document.getElementById("score-chart"), {
           type: "line",
           data: {
             labels: sorted.map(g => g.date.substring(0, 10)),
@@ -370,6 +367,7 @@
             }
           }
         });
+        setTimeout(() => chart.resize(), 50);
       }
 
       function renderInspections(grades) {
@@ -394,7 +392,11 @@
             <td style="font-size:0.85em;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${g.inspectionType || "—"}</td>
             <td><span class="${crit ? "critical-yes" : "critical-no"}">${crit ? "⚠ Yes" : "No"}</span></td>
             <td style="font-family:monospace;font-size:0.85em">${g.violationCode || "—"}</td>
-            <td style="font-size:0.82em;max-width:260px">${g.violationDescription || "—"}</td>
+            <td style="font-size:0.82em;max-width:220px">
+              ${g.violationDescription
+                ? `<span class="desc-clamp" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer" onclick="this.style.webkitLineClamp=this.style.webkitLineClamp?'':'2';this.style.overflow=this.style.overflow?'':'hidden'">${g.violationDescription}</span>`
+                : "—"}
+            </td>
           </tr>`;
         });
         html += "</tbody></table></div>";
