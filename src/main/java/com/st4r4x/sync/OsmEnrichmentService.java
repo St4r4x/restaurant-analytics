@@ -9,13 +9,14 @@ import com.st4r4x.config.MongoClientFactory;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -44,7 +45,13 @@ public class OsmEnrichmentService {
         this.restTemplate = new RestTemplate(factory);
     }
 
-    /** Enrich only restaurants not yet enriched. Called after each sync. */
+    @EventListener(ApplicationReadyEvent.class)
+    @Async
+    public void enrichOnStartup() {
+        enrichNew();
+    }
+
+    /** Enrich only restaurants not yet enriched. Called after each sync and on startup. */
     @Async
     public void enrichNew() {
         List<Document> pending = collection

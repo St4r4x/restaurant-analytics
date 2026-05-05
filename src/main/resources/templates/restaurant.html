@@ -119,12 +119,13 @@
           </div>
         </div>
 
-        <div id="osm-contact-section" class="contact-section" style="display:none">
-          <div class="section-label">Contact</div>
+        <div id="contact-section" class="contact-section">
+          <div class="section-label">Contact &amp; Address</div>
           <div class="section-title">Restaurant Info</div>
-          <div id="osm-phone"></div>
-          <div id="osm-website"></div>
-          <div id="osm-hours"></div>
+          <div id="contact-address"></div>
+          <div id="contact-phone"></div>
+          <div id="contact-website"></div>
+          <div id="contact-hours"></div>
         </div>
 
       </div>
@@ -269,7 +270,6 @@
           <div class="header-info">
             <div class="restaurant-name">${r.name || "—"}</div>
             <div class="restaurant-meta">${r.borough || ""} · ${r.cuisine || ""}</div>
-            ${addr ? `<div class="restaurant-meta" style="font-size:0.85em;color:#999">${addr}</div>` : ""}
             <div class="badge badge-${badgeColor}">
               Grade ${latestGrade}
               <span style="font-weight:400;font-size:0.85em">Score ${latestScore}</span>
@@ -418,62 +418,74 @@
           renderMap(r);
           renderScoreChart(r.grades);
           renderInspections(r.grades);
-          (function renderOsmContact(r) {
-              var section = document.getElementById('osm-contact-section');
-              var hasData = false;
-
+          (function renderContact(r) {
               function makeLabel(text) {
                   var el = document.createElement('div');
-                  el.style.cssText = 'font-size:0.75em;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:2px';
+                  el.style.cssText = 'font-size:0.75em;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#888;margin-bottom:2px;margin-top:12px';
                   el.textContent = text;
                   return el;
               }
-
-              if (r.osmPhone) {
-                  hasData = true;
+              function makeRow(label, content) {
                   var wrap = document.createElement('div');
-                  wrap.style.marginBottom = '8px';
-                  wrap.appendChild(makeLabel('Phone'));
-                  var a = document.createElement('a');
-                  a.href = 'tel:' + r.osmPhone.replace(/[^+\d]/g, '');
-                  a.textContent = r.osmPhone;
-                  a.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600';
-                  wrap.appendChild(a);
-                  document.getElementById('osm-phone').appendChild(wrap);
+                  wrap.appendChild(makeLabel(label));
+                  wrap.appendChild(content);
+                  return wrap;
               }
 
+              // Address — always shown when available
+              var addr = r.address;
+              if (addr) {
+                  var parts = [addr.building, addr.street].filter(Boolean).join(' ');
+                  var full = [parts, r.borough, addr.zipcode].filter(Boolean).join(', ');
+                  if (full) {
+                      var mapsUrl = 'https://www.google.com/maps/search/' + encodeURIComponent(full + ', New York City');
+                      var addrEl = document.createElement('a');
+                      addrEl.href = mapsUrl;
+                      addrEl.target = '_blank';
+                      addrEl.rel = 'noopener noreferrer';
+                      addrEl.textContent = full;
+                      addrEl.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600;font-size:0.9em';
+                      document.getElementById('contact-address').appendChild(makeRow('Address', addrEl));
+                  }
+              }
+
+              // Phone — prefer OSM phone (formatted), fall back to NYC data phone
+              var rawPhone = r.osmPhone || r.phone;
+              if (rawPhone) {
+                  var digits = rawPhone.replace(/[^0-9]/g, '');
+                  var formatted = digits.length === 10
+                      ? '(' + digits.slice(0,3) + ') ' + digits.slice(3,6) + '-' + digits.slice(6)
+                      : rawPhone;
+                  var phoneEl = document.createElement('a');
+                  phoneEl.href = 'tel:+1' + digits;
+                  phoneEl.textContent = formatted;
+                  phoneEl.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600;font-size:0.9em';
+                  document.getElementById('contact-phone').appendChild(makeRow('Phone', phoneEl));
+              }
+
+              // Website — OSM only
               if (r.osmWebsite) {
-                  hasData = true;
-                  var wrap2 = document.createElement('div');
-                  wrap2.style.marginBottom = '8px';
-                  wrap2.appendChild(makeLabel('Website'));
                   try {
-                      var parsedUrl = new URL(r.osmWebsite);
-                      if (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') {
-                          var a2 = document.createElement('a');
-                          a2.href = parsedUrl.href;
-                          a2.textContent = parsedUrl.href.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                          a2.target = '_blank';
-                          a2.rel = 'noopener noreferrer';
-                          a2.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600';
-                          wrap2.appendChild(a2);
+                      var parsed = new URL(r.osmWebsite);
+                      if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+                          var siteEl = document.createElement('a');
+                          siteEl.href = parsed.href;
+                          siteEl.textContent = parsed.href.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                          siteEl.target = '_blank';
+                          siteEl.rel = 'noopener noreferrer';
+                          siteEl.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600;font-size:0.9em';
+                          document.getElementById('contact-website').appendChild(makeRow('Website', siteEl));
                       }
                   } catch (_) {}
-                  document.getElementById('osm-website').appendChild(wrap2);
               }
 
+              // Opening hours — OSM only
               if (r.osmOpeningHours) {
-                  hasData = true;
-                  var wrap3 = document.createElement('div');
-                  wrap3.appendChild(makeLabel('Hours'));
-                  var span = document.createElement('span');
-                  span.style.fontSize = '0.9em';
-                  span.textContent = r.osmOpeningHours;
-                  wrap3.appendChild(span);
-                  document.getElementById('osm-hours').appendChild(wrap3);
+                  var hoursEl = document.createElement('span');
+                  hoursEl.style.fontSize = '0.9em';
+                  hoursEl.textContent = r.osmOpeningHours;
+                  document.getElementById('contact-hours').appendChild(makeRow('Hours', hoursEl));
               }
-
-              if (hasData) section.style.display = 'block';
           })(r);
           var currentId = window.location.pathname.split('/').pop();
           loadNearby(r.latitude, r.longitude, currentId);
