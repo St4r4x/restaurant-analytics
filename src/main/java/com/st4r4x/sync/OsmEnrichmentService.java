@@ -35,7 +35,6 @@ public class OsmEnrichmentService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
     public OsmEnrichmentService() {
         MongoDatabase db = MongoClientFactory.getInstance().getDatabase(AppConfig.getMongoDatabase());
         this.collection = db.getCollection(AppConfig.getMongoCollection());
@@ -46,6 +45,7 @@ public class OsmEnrichmentService {
     }
 
     /** Enrich only restaurants not yet enriched. Called after each sync. */
+    @Async
     public void enrichNew() {
         List<Document> pending = collection
                 .find(not(exists("osm_enriched_at")))
