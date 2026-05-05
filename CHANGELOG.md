@@ -47,37 +47,6 @@ All notable changes are documented here.
 ### Refactoring
 - Split DAO interfaces and enforce controller→service layering
 
-## [Unreleased] — 2026-05-03
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-- Pull footer version from health endpoint instead of hardcoding
-- Add separator between nav links and auth area; version as semver+sha
-- Harden for pre-commercial readiness
-
-### Documentation
-- Add frontend redesign design spec and implementation plan
-- Add commercialisation guide
-- Add architecture, API, configuration, deployment, UI, and development docs
-
-### Performance
-- Add missing indexes, fix text search and Redis connection leak
-
-### Refactoring
-- Split `RestaurantDAO` god interface into three focused interfaces: `RestaurantDAO` (reads), `RestaurantWriteDAO` (upsert), `AnalyticsDAO` (aggregations)
-- Enforce controller→service layering in ReportController and InspectionController
-
-### Frontend Redesign
-- Replace purple-gradient aesthetic with Clean Civic design system across all 11 templates and 2 fragments
-- Bootstrap 5.3.3 + Playfair Display/Inter typography
-- White navbar with 3px red bottom border, dark page headers, off-white page background
-- KPI cards with red top border and Playfair Display numbers
-- Grade badges (A/B/C) with semantic colors consistent across all pages
-- Show deployed git SHA as version badge on every page
-
-### CI/CD
-- Add git-cliff changelog auto-update on main push
-- Add fallback SHA and failOnNoGitDirectory=false for Docker builds
 
 ## [Phase 21] — 2026-04-13 — Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5
 
