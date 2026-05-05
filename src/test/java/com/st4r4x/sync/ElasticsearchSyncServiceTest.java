@@ -1,9 +1,15 @@
 package com.st4r4x.sync;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.domain.Address;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 class ElasticsearchSyncServiceTest {
 
@@ -36,5 +42,18 @@ class ElasticsearchSyncServiceTest {
         assertThat(doc.getCamis()).isEqualTo("99999");
         assertThat(doc.getStreet()).isNull();
         assertThat(doc.getZipcode()).isNull();
+    }
+
+    @Test
+    void initIndexIfEmpty_swallowsException() throws Exception {
+        // Use Mockito's objenesis-based instantiation to bypass the constructor
+        // (the constructor calls MongoClientFactory which requires a live MongoDB).
+        ElasticsearchClient esClient = Mockito.mock(ElasticsearchClient.class);
+        ElasticsearchSyncService syncService = Mockito.mock(
+                ElasticsearchSyncService.class, Mockito.CALLS_REAL_METHODS);
+        ReflectionTestUtils.setField(syncService, "esClient", esClient);
+
+        when(esClient.indices()).thenThrow(new RuntimeException("ES unavailable"));
+        assertDoesNotThrow(() -> syncService.initIndexIfEmpty());
     }
 }
