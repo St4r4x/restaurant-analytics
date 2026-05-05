@@ -16,6 +16,32 @@
 - Update for 9bac142833f846f7099322fa24555d06c93f56f8 [skip ci]
 - Suppress sun.misc.Unsafe warning from Maven bundled Guava on Java 25
 - Update for 0ebab580e0cd5b14f84bf8f04d829f09212d12c5 [skip ci]
+- Update for 6ecb4afc2ad74e31cbfd9bf700829030a28ee44b [skip ci]
+
+### Documentation
+- Release v2.1.1 — navbar flex hotfix [skip ci]
+
+### Features
+- Improve autocomplete with edge-ngram index and borough-aware query splitting
+- Add street to autocomplete search with edge-ngram; add reindex retry logic
+
+## [Unreleased] — 2026-05-05
+
+### Bug Fixes
+- Bump app.semver to 2.1.1
+- Widen navbar-container to 1140px to prevent wrap when all nav items visible
+- Fix autocomplete dropdown clipped by hero overflow:hidden; fix ES index mapping boost removed in ES8
+
+### CI/CD
+- Redeploy v2.1.1 navbar fix to production
+
+### Chores
+- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
+- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
+- Update for 24d3b78bef733a7da8fe536a786f2aa5e856dc2b [skip ci]
+- Update for 9bac142833f846f7099322fa24555d06c93f56f8 [skip ci]
+- Suppress sun.misc.Unsafe warning from Maven bundled Guava on Java 25
+- Update for 0ebab580e0cd5b14f84bf8f04d829f09212d12c5 [skip ci]
 
 ### Documentation
 - Release v2.1.1 — navbar flex hotfix [skip ci]
