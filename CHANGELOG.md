@@ -13,6 +13,50 @@
 - Guard empty bulk batch, async reindex init, close cursor
 - Cache item.error() to resolve null-pointer diagnostic
 - Reliable selectItem routing and ArrowUp deselect in autocomplete
+- Restore flex layout on navbar-container so brand and links are in the same row [skip ci]
+
+### CI/CD
+- Trigger CI for navbar flex fix
+
+### Chores
+- Update for 03f5873021e8c3add516b50411f3c376c35d417c [skip ci]
+- Remove unnecessary @SuppressWarnings from SyncServiceTest
+- Suppress unchecked cast warning in autocomplete test
+- Remove duplicate Unreleased section after rebase
+- Update for 9d2fa0f72ca6a48496af669f7df2bec77b5e280b [skip ci]
+
+### Documentation
+- Add design spec for ES search, navbar fix, OSM enrichment
+- Add implementation plans for navbar fix, OSM enrichment, and ES autocomplete
+- Release v2.1.0 — Elasticsearch autocomplete, OSM enrichment, navbar fix
+
+### Features
+- Add osm enrichment fields to Restaurant domain
+- Add OsmEnrichmentService with Overpass API integration
+- Wire OsmEnrichmentService into SyncService post-sync
+- Add POST /api/admin/osm-enrich endpoint
+- Show phone, website, hours on restaurant detail page
+- Add Elasticsearch 8 dependency and Docker service
+- Add ElasticsearchConfig bean
+- Add ElasticsearchSyncService with bulk reindex
+- Trigger ES reindex after successful sync
+- Add GET /api/restaurants/autocomplete endpoint
+- Add autocomplete dropdown to landing page search bar
+
+## [Unreleased] — 2026-05-05
+
+### Bug Fixes
+- Self-contain navbar container to fix cross-page alignment
+- Register Jsr310CodecProvider for Instant BSON serialization
+- Add @Autowired, @EnableAsync, RestTemplate timeouts, better error logging
+- Remove misleading @Autowired, add @Async to enrichNew
+- Remove unused Consumer import in SyncServiceOsmTest
+- Replace assert keyword with JUnit assertEquals in AdminOsmEnrichTest
+- Validate osmWebsite scheme before assigning to href
+- Add OsmEnrichmentService mock to SyncServiceTest
+- Guard empty bulk batch, async reindex init, close cursor
+- Cache item.error() to resolve null-pointer diagnostic
+- Reliable selectItem routing and ArrowUp deselect in autocomplete
 
 ### Chores
 - Update for 03f5873021e8c3add516b50411f3c376c35d417c [skip ci]
