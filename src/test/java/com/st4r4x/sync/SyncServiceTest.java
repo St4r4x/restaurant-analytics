@@ -32,6 +32,9 @@ class SyncServiceTest {
     @Mock
     private RestaurantCacheService cacheService;
 
+    @Mock
+    private OsmEnrichmentService osmEnrichmentService;
+
     @InjectMocks
     private SyncService syncService;
 
