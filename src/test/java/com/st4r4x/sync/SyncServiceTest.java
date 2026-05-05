@@ -117,7 +117,6 @@ class SyncServiceTest {
     // ── runSync ───────────────────────────────────────────────────────────────
 
     @Test
-    @SuppressWarnings("unchecked")
     void runSync_returnsSuccessResult_whenApiAndUpsertSucceed() {
         NycApiRestaurantDto dto = row("777", "New Place", "MANHATTAN", "A", "5");
         doAnswer(inv -> {
@@ -136,7 +135,6 @@ class SyncServiceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void runSync_returnsFailureResult_whenApiFails() {
         doThrow(new RuntimeException("API down")).when(apiClient).streamPages(any());
 
@@ -148,7 +146,6 @@ class SyncServiceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void runSync_storesLastResult() {
         doAnswer(inv -> 0).when(apiClient).streamPages(any());
 
@@ -158,7 +155,6 @@ class SyncServiceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void runSync_handlesCarryOverAcrossPages() {
         NycApiRestaurantDto p1r1 = row("AAA", "Carry Place", "MANHATTAN", "A", "5", "2024-01-01T00:00:00.000");
         NycApiRestaurantDto p2r1 = row("AAA", "Carry Place", "MANHATTAN", "B", "20", "2023-06-01T00:00:00.000");
