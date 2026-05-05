@@ -38,6 +38,7 @@ public class SyncService {
     private final NycOpenDataClient apiClient;
     private final RestaurantWriteDAO restaurantWriteDAO;
     private final RestaurantCacheService cacheService;
+    private final OsmEnrichmentService osmEnrichmentService;
 
     private volatile SyncResult lastResult;
     private volatile boolean running = false;
@@ -45,10 +46,11 @@ public class SyncService {
 
     @Autowired
     public SyncService(NycOpenDataClient apiClient, RestaurantWriteDAO restaurantWriteDAO,
-                       RestaurantCacheService cacheService) {
+                       RestaurantCacheService cacheService, OsmEnrichmentService osmEnrichmentService) {
         this.apiClient = apiClient;
         this.restaurantWriteDAO = restaurantWriteDAO;
         this.cacheService = cacheService;
+        this.osmEnrichmentService = osmEnrichmentService;
     }
 
     /**
@@ -136,6 +138,11 @@ public class SyncService {
         } finally {
             running = false;
         }
+
+        if (result.isSuccess()) {
+            osmEnrichmentService.enrichNew();
+        }
+
         return result;
     }
 
