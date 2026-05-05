@@ -265,18 +265,16 @@
         items.forEach(function(el) { el.classList.remove('active'); });
         if (index >= 0 && index < items.length) {
           items[index].classList.add('active');
-          activeIndex = index;
         }
+        activeIndex = index;
       }
 
       function selectItem(item) {
-        var q = document.getElementById('search-input').value.trim().toLowerCase();
-        var name = (item.dba || '').toLowerCase();
         closeDropdown();
-        if (name.includes(q) || q.includes(name.substring(0, 4))) {
+        if (item.camis) {
           window.location.href = '/restaurant/' + item.camis;
         } else {
-          document.getElementById('search-input').value = item.dba;
+          document.getElementById('search-input').value = item.dba || item.cuisineDescription || item.boro || '';
           doSearch();
         }
       }
@@ -296,7 +294,7 @@
       input.addEventListener('keydown', function(e) {
         if (!suggestions.length) return;
         if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIndex + 1, suggestions.length - 1)); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIndex - 1, 0)); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIndex > 0 ? activeIndex - 1 : -1); }
         else if (e.key === 'Enter' && activeIndex >= 0) { e.stopImmediatePropagation(); selectItem(suggestions[activeIndex]); }
         else if (e.key === 'Escape') { closeDropdown(); }
       });
