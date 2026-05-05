@@ -19,6 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.st4r4x.cache.RestaurantCacheService;
 import com.st4r4x.dao.AnalyticsDAO;
 import com.st4r4x.dao.RestaurantDAO;
@@ -27,6 +34,8 @@ import com.st4r4x.dto.HeatmapPoint;
 import com.st4r4x.dto.TopRestaurantEntry;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.service.RestaurantService;
+import com.st4r4x.sync.ElasticsearchSyncService;
+import com.st4r4x.sync.ElasticsearchSyncService.EsRestaurantDoc;
 import com.st4r4x.sync.SyncResult;
 import com.st4r4x.sync.SyncService;
 import com.st4r4x.util.ResponseUtil;
@@ -55,6 +64,9 @@ public class RestaurantController {
 
     @Autowired
     private RestaurantCacheService cacheService;
+
+    @Autowired
+    private ElasticsearchClient esClient;
 
     /**
      * USE CASE 1: Restaurant count per borough
@@ -407,6 +419,48 @@ public class RestaurantController {
             response.put("data", views);
             response.put("count", views.size());
             return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return errorResponse(e);
+        }
+    }
+
+    @Operation(summary = "Autocomplete suggestions from Elasticsearch")
+    @GetMapping("/autocomplete")
+    public ResponseEntity<Map<String, Object>> autocomplete(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "8") int limit) {
+        try {
+            SearchRequest searchRequest = SearchRequest.of(s -> s
+                    .index(ElasticsearchSyncService.INDEX)
+                    .size(limit)
+                    .query(query -> query
+                            .multiMatch(mm -> mm
+                                    .query(q)
+                                    .fields("dba^3", "cuisineDescription^2", "street", "boro")
+                                    .fuzziness("AUTO")
+                            )
+                    )
+            );
+            SearchResponse<EsRestaurantDoc> response = esClient.search(searchRequest, EsRestaurantDoc.class);
+
+            List<Map<String, Object>> results = response.hits().hits().stream()
+                    .filter(hit -> hit.source() != null)
+                    .map(hit -> {
+                        EsRestaurantDoc doc = hit.source();
+                        Map<String, Object> item = new java.util.LinkedHashMap<>();
+                        item.put("camis", doc.getCamis());
+                        item.put("dba", doc.getDba());
+                        item.put("cuisineDescription", doc.getCuisineDescription());
+                        item.put("boro", doc.getBoro());
+                        item.put("street", doc.getStreet());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("status", "success");
+            body.put("data", results);
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
             return errorResponse(e);
         }
