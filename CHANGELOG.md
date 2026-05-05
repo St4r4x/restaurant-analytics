@@ -1,5 +1,20 @@
+# Changelog
 
-## [Unreleased] — 2026-05-03
+All notable changes are documented here.
+
+## [2.1.0] — 2026-05-05
+
+### Features
+- Elasticsearch 8 as a 5th Docker service — full-text index of all restaurants, bulk-synced after each nightly data pull
+- `GET /api/restaurants/autocomplete?q=` — fuzzy multi-match on name, cuisine, street, borough; returns up to 8 suggestions
+- Autocomplete dropdown on landing page search bar — debounced 250 ms, keyboard navigation (↑↓ Enter Escape), name suggestions navigate to restaurant page
+- OpenStreetMap enrichment — `OsmEnrichmentService` enriches restaurant phone, website, and opening hours from Overpass API (async, 1 req/s rate-limited); shown on restaurant detail page
+- `POST /api/admin/osm-enrich` — admin endpoint to trigger a full OSM re-enrichment pass
+
+### Bug Fixes
+- Navbar alignment inconsistency between pages — fragment now carries its own `.navbar-container` CSS so all pages share identical max-width and padding
+
+## [2.0.0] — 2026-05-03
 
 ### Bug Fixes
 - Use Bootstrap collapse data attributes for hamburger menu
@@ -40,334 +55,87 @@
 - Add separator between nav links and auth area; version as semver+sha
 - Harden for pre-commercial readiness
 
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
-- Ignore screenshots, fix test passwords, add UI design system to README
-- Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
-- Update for 8866a508a618ee490b54bd8aeb6993ebde70625d [skip ci]
-- Update for f8c5fda78ce648834fd271a420711f9839faf23e [skip ci]
-- Update for d71a0e3e59b0d83452704010624b04e23d82f63a [skip ci]
-- Update for 947c5f834db8a29232ace974f1c270abbe0a641c [skip ci]
-
 ### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
+- Add frontend redesign design spec and implementation plan
 - Add commercialisation guide
+- Add architecture, API, configuration, deployment, UI, and development docs
 
 ### Performance
 - Add missing indexes, fix text search and Redis connection leak
 
 ### Refactoring
-- Split DAO interfaces and enforce controller→service layering
-
-## [Unreleased] — 2026-05-03
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-- Pull footer version from health endpoint instead of hardcoding
-- Add separator between nav links and auth area; version as semver+sha
-- Harden for pre-commercial readiness
-
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
-- Ignore screenshots, fix test passwords, add UI design system to README
-- Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
-- Update for 8866a508a618ee490b54bd8aeb6993ebde70625d [skip ci]
-- Update for f8c5fda78ce648834fd271a420711f9839faf23e [skip ci]
-- Update for d71a0e3e59b0d83452704010624b04e23d82f63a [skip ci]
-
-### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
-- Add commercialisation guide
-
-### Refactoring
-- Split DAO interfaces and enforce controller→service layering
-
-## [Unreleased] — 2026-05-03
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-- Pull footer version from health endpoint instead of hardcoding
-- Add separator between nav links and auth area; version as semver+sha
-
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
-- Ignore screenshots, fix test passwords, add UI design system to README
-- Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
-- Update for 8866a508a618ee490b54bd8aeb6993ebde70625d [skip ci]
-- Update for f8c5fda78ce648834fd271a420711f9839faf23e [skip ci]
-
-### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
-- Add commercialisation guide
-
-### Refactoring
-- Split DAO interfaces and enforce controller→service layering
-
-## [Unreleased] — 2026-05-03
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-- Pull footer version from health endpoint instead of hardcoding
-- Add separator between nav links and auth area; version as semver+sha
-
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
-- Ignore screenshots, fix test passwords, add UI design system to README
-- Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
-- Update for 8866a508a618ee490b54bd8aeb6993ebde70625d [skip ci]
-
-### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
-
-### Refactoring
-- Split DAO interfaces and enforce controller→service layering
-
-## [Unreleased] — 2026-05-03
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-- Pull footer version from health endpoint instead of hardcoding
-
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
-- Ignore screenshots, fix test passwords, add UI design system to README
-- Update for 2da8dfd23ba0b0295f820bb41aa72324c2bec093 [skip ci]
-
-### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
-
-### Refactoring
-- Split DAO interfaces and enforce controller→service layering
-
-## [Unreleased] — 2026-05-03
-
-### Refactor
 - Split `RestaurantDAO` god interface into three focused interfaces: `RestaurantDAO` (reads), `RestaurantWriteDAO` (upsert), `AnalyticsDAO` (aggregations)
-- Move analytics methods (`findAtRiskRestaurants`, `findUncontrolled`, `searchByNameOrAddress`, `findWorstCuisinesByAverageScore`, `findBestCuisinesByAverageScore`) from `RestaurantDAO` to `AnalyticsDAO`
-- Extract `RestaurantWriteDAO` interface; `SyncService` now injects the write-only contract
-- `ReportController`: replace direct `RestaurantDAO` injection with `RestaurantService` (enforce controller→service layering)
-- `InspectionController`: delegate `findUncontrolled` through `RestaurantService`
-- Replace `close()` on DAO interface with `@PreDestroy` on `RestaurantDAOImpl` (Spring lifecycle)
-- Update all controller and sync unit tests to match new injection points
+- Enforce controller→service layering in ReportController and InspectionController
 
-### Documentation
-- Replace stale root-level `ARCHITECTURE.md` with accurate `docs/architecture.md`
-- Add `docs/api.md`, `docs/configuration.md`, `docs/deployment.md`, `docs/ui.md`, `docs/development.md`
-- Rewrite `README.md` as a lean entry point linking to the docs folder
-
-## [Unreleased] — 2026-05-02
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-- Pull footer version from health endpoint instead of hardcoding
-
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-- Update for 533a5040ffe5f32892b36cf7916a16a6f9d3575f [skip ci]
-- Ignore screenshots, fix test passwords, add UI design system to README
-
-### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
-
-## [Unreleased] — 2026-05-02
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-
-### Chores
-- Update for 371dfeb017f4c5866f1734a73fba2db0dac48ab8 [skip ci]
-- Add .superpowers to .gitignore; update CHANGELOG for frontend redesign
-
-### Documentation
-- Add frontend redesign design spec
-- Update frontend spec — login/register tab detail
-- Add frontend redesign implementation plan
-
-## [Unreleased] — 2026-05-02
-
-### Frontend Redesign (2026-05-02)
+### Frontend Redesign
 - Replace purple-gradient aesthetic with Clean Civic design system across all 11 templates and 2 fragments
-- Bootstrap 5.3.3 + Playfair Display/Inter typography loaded via CDN in ux-utils fragment
-- White navbar with 3px red bottom border, dark page headers (#1a1a1a), off-white page background (#f8f5f0)
-- KPI cards with red top border and Playfair Display numbers on analytics, dashboard, landing pages
-- Grade badges (A/B/C) with semantic colors (green/amber/red) consistent across all pages
-
-## [Unreleased] — 2026-05-02
-
-### Bug Fixes
-- Add fallback SHA and failOnNoGitDirectory=false for Docker builds
-- Remove conflicting OUTPUT env var from git-cliff action
-- Pass GIT_SHA build arg to Docker so version is not unknown
-
-### CI/CD
-- Add git-cliff changelog auto-update on main push
-
-### Chores
-- Update for a2455af6b6a07f23403de09bf33c315de2653e0d
-- Update for 9691ff5b46d490eafb384e437ede00d4256b7bbc
-
-### Features
+- Bootstrap 5.3.3 + Playfair Display/Inter typography
+- White navbar with 3px red bottom border, dark page headers, off-white page background
+- KPI cards with red top border and Playfair Display numbers
+- Grade badges (A/B/C) with semantic colors consistent across all pages
 - Show deployed git SHA as version badge on every page
 
-## [Unreleased] — 2026-05-02
-
-### Bug Fixes
-- Add fallback SHA and failOnNoGitDirectory=false for Docker builds
-- Remove conflicting OUTPUT env var from git-cliff action
-
 ### CI/CD
 - Add git-cliff changelog auto-update on main push
-
-### Chores
-- Update for a2455af6b6a07f23403de09bf33c315de2653e0d
-
-### Features
-- Show deployed git SHA as version badge on every page
-
-## [Unreleased] — 2026-05-02
-
-### Bug Fixes
 - Add fallback SHA and failOnNoGitDirectory=false for Docker builds
-- Remove conflicting OUTPUT env var from git-cliff action
-
-### CI/CD
-- Add git-cliff changelog auto-update on main push
-# Changelog
-
-All notable changes are documented by phase.
 
 ## [Phase 21] — 2026-04-13 — Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5
 
-### Phase 21: Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5 (2026-04-13)
 - Bumped Spring Boot parent from 2.6.15 to 4.0.5 and Java source/target from 11 to 25
-- Migrated springdoc from springdoc-openapi-ui:1.8.0 to springdoc-openapi-starter-webmvc-ui:2.8.6
-- Added logstash-logback-encoder 8.1 (replaces 7.3 — compatible with Logback 1.5.x in Boot 4)
-- Removed junit:junit:4.13.2 and junit-vintage-engine (JUnit 4 no longer needed)
-- Migrated 9 test files from JUnit 4 to JUnit 5 (import renames, @Test(expected) → assertThrows, @ClassRule → @BeforeAll)
-- Migrated javax.servlet.* and javax.persistence.* → jakarta.* in 6 main + 1 test source file
-- Migrated SecurityConfig.java from antMatchers/authorizeRequests to requestMatchers/authorizeHttpRequests (Spring Security 6 lambda DSL)
-- Removed spring.mvc.pathmatch.matching-strategy=ant_path_matcher from application.properties (removed in Boot 3+)
-- Removed spring.jpa.properties.hibernate.dialect from application.properties and application-test.properties (Hibernate 6 auto-detects PostgreSQL dialect)
-- Fixed JaCoCo exclusion patterns from com/aflokkat/ to com/st4r4x/ (incorrect package was inflating coverage denominator)
-- Exposed Jackson 2 ObjectMapper bean in RedisConfig (Boot 4 auto-configures Jackson 3 only; RestaurantCacheService requires Jackson 2)
+- Migrated springdoc to springdoc-openapi-starter-webmvc-ui:2.8.6
+- Removed JUnit 4; migrated 9 test files to JUnit 5
+- Migrated javax.* → jakarta.* in 6 main + 1 test source file
+- Migrated SecurityConfig to Spring Security 6 lambda DSL
+- Fixed JaCoCo exclusion patterns for correct package name
+- Exposed Jackson 2 ObjectMapper bean in RedisConfig
 
 ## [Phase 14] — 2026-04-12 — Testcontainers Integration Tests
 
-### Added
-- Migrated RestaurantDAOIntegrationTest to RestaurantDAOIT using Testcontainers mongo:7.0 — no live MongoDB required
-- Added UserRepositoryIT covering UserRepository.save/findByUsername and BookmarkRepository.save/findByUserId against Testcontainers postgres:15-alpine
-- Added maven-failsafe-plugin bound to integration-test and verify goals; IT tests use *IT.java naming convention
-- Added Testcontainers 1.19.8 (testcontainers, mongodb, postgresql) as test-scope dependencies, upgraded to 1.20.1 for Docker Engine 29.x compatibility
-- Fixed Surefire argLine to use @{argLine} late-binding to support future JaCoCo integration
-- Added System.getProperty(key) tier-0 lookup to AppConfig.getProperty() for TC URI injection
+- Migrated RestaurantDAOIntegrationTest to Testcontainers (mongo:7.0)
+- Added UserRepositoryIT and BookmarkRepository tests against Testcontainers postgres:15-alpine
+- Added maven-failsafe-plugin for IT tests (*IT.java naming convention)
+- Fixed Surefire argLine to use @{argLine} late-binding for JaCoCo compatibility
 
 ## [Phase 10] — 2026-04-10 — Admin Tools
 
-### Added
-- ROLE_ADMIN role: `admin.signup.code` property, `ADMIN_SIGNUP_CODE` env var, AuthService admin registration path
-- `admin_test` seed account (ROLE_ADMIN) created by DataSeeder on startup (password: `Test1234!`)
-- GET `/api/reports/stats` endpoint (AdminController, ADMIN-only): aggregate counts for inspection reports by status (OPEN/IN_PROGRESS/RESOLVED) and grade (A/B/C/F)
-- GET `/api/inspection/at-risk/export.csv` download endpoint: at-risk restaurants as downloadable CSV
-- SecurityConfig: `/api/reports/stats` ADMIN-only antMatcher declared before `/api/reports/**` CONTROLLER wildcard (first-match-wins ordering)
-- GET `/admin` ViewController route returning admin Thymeleaf view
-- `admin.html`: three-card admin page — Sync Controls (POST /api/restaurants/refresh, 2s polling, 10s auto-dismiss result), At-Risk CSV Download, Report Statistics (badge pills by status and grade)
-- `navbar.html`: Admin nav link (hidden by default, visible only for ROLE_ADMIN via JS IIFE)
-- Client-side ROLE_ADMIN IIFE guard in admin.html redirects non-ADMIN users to /
+- ROLE_ADMIN role with admin signup code
+- GET `/api/reports/stats` endpoint (ADMIN-only): aggregate report counts by status and grade
+- GET `/api/inspection/at-risk/export.csv` download endpoint
+- `admin.html`: Sync Controls, At-Risk CSV Download, Report Statistics
 
 ## [Phase 9] — 2026-04-08 — UX Polish
 
-### Added
-- Shared `fragments/ux-utils.html` fragment: skeleton shimmer CSS + `showToast()` notification system
-- Pagination (20/page, Prev/Next) on search results, at-risk list, uncontrolled list, bookmarks list, and report list
-- Skeleton loading cards replace all "Loading…" text across data-fetching sections
-- Toast notifications replace all inline error/success messages (login.html excepted)
-- Mobile-responsive navbar with hamburger menu at <=768px (dropdown with close-on-link-click)
-- Viewport meta tag added to landing.html, index.html, and profile.html
-- Table `overflow-x:auto` scroll wrappers on at-risk table (analytics.html) and uncontrolled table
-- Responsive grid breakpoints: sample-grid, bookmarks-grid, nearby-grid, dashboard grids stack to 1-col at <=768px; KPI tiles go 2×2
+- Shared `fragments/ux-utils.html` fragment: skeleton shimmer CSS + toast notifications
+- Pagination (20/page) on search results, at-risk list, uncontrolled list, bookmarks, and reports
+- Mobile-responsive navbar with hamburger menu at <=768px
 
 ## [Phase 8] — 2026-04-04 — Discovery Enhancement
 
-### Added
-- DISC-01: inspection-map.html filter bar with grade checkboxes (A/B/C/F), borough dropdown, cuisine dropdown; client-side marker filtering with live count badge
-- DISC-02: /uncontrolled public page listing restaurants with grade C/Z or uninspected 12+ months; borough filter, score/days sort, CSV download; GET /api/inspection/uncontrolled + export.csv endpoints
-- DISC-03: restaurant.html Nearby Restaurants section showing up to 5 restaurants within 500m; self-excludes current restaurant
-- DISC-04: landing.html sort control above search results (Best Score / Worst Score / A→Z); client-side reorder, no new API calls
-
-### Fixed (Phase 8 UAT gap-closure — 08-05)
-- navbar.html: controller role nav link (Uncontrolled) shown only when JWT payload.role === ROLE_CONTROLLER
-- uncontrolled.html: restaurant name cell is now a clickable link to /restaurant/{restaurantId}
-- uncontrolled.html: CSV download button has flex-shrink:0 so it remains visible at narrow viewports
-- inspection-map.html: removed redundant <h1>Restaurant Map</h1> from toolbar
-- inspection-map.html: grade checkbox labels are color-coded (A=green, B=yellow, C/F=red)
-- landing.html: search result rows restructured to 2-group flex layout for consistent borough alignment
-- RestaurantService.java: added SLF4J debug logging in getLatitude for null-coord diagnosis
+- Inspection map filter bar (grade, borough, cuisine) with live marker filtering
+- Uncontrolled restaurants page (/uncontrolled): grade C/Z or uninspected 12+ months
+- Nearby restaurants section on restaurant detail page (within 500m)
+- Landing page sort control (Best Score / Worst Score / A→Z)
 
 ## [Phase 7] — 2026-04-03 — Homepage & Navigation
 
-### Added
-- Landing page (/) for anonymous visitors: hero section, stat strip, inline restaurant search, 3 sample restaurant cards
-- Authenticated customer dashboard at / (personalised bookmarks strip + KPI tiles, shown when JWT present)
-- Profile page (/profile): username, email, role badge, bookmark count (controller: report count too)
-- Persistent sticky navbar fragment (fragments/navbar.html): Logo + Search/Map/Analytics links + auth area (Sign In or username + Sign Out)
-- Navbar inserted into all 8 templates: landing, index, profile, analytics, dashboard, restaurant, inspection-map, my-bookmarks
-- GET /api/restaurants/sample — 3 random restaurants for landing page discovery section
-- GET /api/users/me — enriched response: bookmarkCount + reportCount fields
-- ViewController routes: /profile, / split to landing.html vs index.html by JWT presence
-- /profile and /dashboard protected client-side (localStorage token check); browser navigation does not forward Bearer headers
-- /api/restaurants/sample is public (no auth required)
+- Landing page for anonymous visitors: hero section, stat strip, inline search, sample cards
+- Authenticated customer dashboard with bookmarks strip + KPI tiles
+- Profile page (/profile): username, email, role badge, bookmark count
+- Persistent sticky navbar fragment inserted into all templates
 
 ## [Phase 3] — 2026-03-31 — Customer Discovery
 
-### Added
-- Restaurant search endpoint: GET /api/restaurants/search?q=&limit=
-- Map points endpoint: GET /api/restaurants/map-points (lightweight projection)
-- Restaurant detail page (/restaurant/{camis}): grade badge, inspection history timeline
-- Interactive map page (/inspection-map): Leaflet + markerCluster, grade-colored markers
-- My bookmarks page (/my-bookmarks): client-side fetch-only template
-- Bookmark CRUD: GET/POST /api/users/bookmarks, DELETE /api/users/bookmarks/{restaurantId}
-- DAO methods: searchByNameOrAddress, findMapPoints
-- ViewController route: /my-bookmarks
+- Restaurant search, map points, restaurant detail page, interactive Leaflet map
+- My bookmarks page; bookmark CRUD endpoints
 
 ## [Phase 2] — 2026-03-30 — Controller Reports
 
-### Added
 - InspectionReportEntity (PostgreSQL/JPA) with Grade and Status enums
-- ReportRepository: findByUserId, findByUserIdAndStatus
-- ReportController: POST/GET /api/reports, PATCH /api/reports/{id}
-- Photo upload: POST /api/reports/{id}/photo, GET /api/reports/{id}/photo
-- AppConfig.getUploadsDir() with env-var → .env → properties fallback chain
-- Docker named volume uploads_data:/app/uploads for photo persistence
+- Report CRUD and photo upload endpoints
 
 ## [Phase 1] — 2026-03-29 — Role Infrastructure
 
-### Added
-- role field on UserEntity (ROLE_CUSTOMER / ROLE_CONTROLLER)
-- Controller signup gated by CONTROLLER_SIGNUP_CODE env var
-- SecurityConfig antMatchers: /api/reports/** requires ROLE_CONTROLLER
+- ROLE_CUSTOMER / ROLE_CONTROLLER with gated controller signup
+- JWT access (15 min) + refresh (7 days) with role claim
 - Bucket4j rate limiter on /api/auth/**
 - DataSeeder: seeds customer_test and controller_test on startup
-- JWT access token (15 min) + refresh token (7 days) with role claim
