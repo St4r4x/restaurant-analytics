@@ -16,6 +16,7 @@ import com.mongodb.client.model.WriteModel;
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.jsr310.Jsr310CodecProvider;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -85,6 +86,7 @@ public class RestaurantDAOImpl implements RestaurantDAO, RestaurantWriteDAO {
     private CodecRegistry getPojoCodecRegistry() {
         return fromRegistries(
             MongoClientSettings.getDefaultCodecRegistry(),
+            fromProviders(new Jsr310CodecProvider()),
             fromProviders(PojoCodecProvider.builder().automatic(true).build())
         );
     }
