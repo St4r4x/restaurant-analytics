@@ -57,8 +57,8 @@ public class ElasticsearchSyncService {
                         .index(INDEX)
                         .mappings(m -> m
                                 .properties("camis",              p -> p.keyword(k -> k))
-                                .properties("dba",                p -> p.text(t -> t.analyzer("standard").boost(3.0)))
-                                .properties("cuisineDescription", p -> p.text(t -> t.analyzer("standard").boost(2.0)))
+                                .properties("dba",                p -> p.text(t -> t.analyzer("standard")))
+                                .properties("cuisineDescription", p -> p.text(t -> t.analyzer("standard")))
                                 .properties("boro",               p -> p.text(t -> t.analyzer("standard")))
                                 .properties("street",             p -> p.text(t -> t.analyzer("standard")))
                                 .properties("zipcode",            p -> p.keyword(k -> k))
