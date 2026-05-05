@@ -47,6 +47,7 @@ class RestaurantControllerAutocompleteTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void autocomplete_returnsResultsFromES() throws Exception {
         EsRestaurantDoc doc = new EsRestaurantDoc();
         doc.setCamis("12345");
@@ -64,7 +65,6 @@ class RestaurantControllerAutocompleteTest {
                 .shards(s -> s.total(1).successful(1).failed(0))
                 .hits(meta));
 
-        @SuppressWarnings("unchecked")
         SearchResponse<Object> respObj = (SearchResponse<Object>) (SearchResponse<?>) resp;
         doReturn(respObj).when(esClient).search(any(SearchRequest.class), any(Class.class));
 
