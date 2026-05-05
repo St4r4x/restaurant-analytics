@@ -1,3 +1,14 @@
+
+## [Unreleased] — 2026-05-05
+
+### CI/CD
+- Redeploy v2.1.1 navbar fix to production
+
+### Chores
+- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
+
+### Documentation
+- Release v2.1.1 — navbar flex hotfix [skip ci]
 # Changelog
 
 All notable changes are documented here.
