@@ -35,6 +35,31 @@
     .rest-link { font-size: 0.78em; color: #c0392b; text-decoration: none; font-weight: 600; margin-top: 10px; display: block; }
     .civic-footer { background: #1a1a1a; color: rgba(255,255,255,0.45); padding: 24px 0; font-size: 0.78em; }
     #results-section { display: none; }
+    .autocomplete-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      z-index: 1000;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+    .autocomplete-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.9em;
+    }
+    .autocomplete-item:hover, .autocomplete-item.active {
+      background: #faf7f4;
+    }
+    .autocomplete-item .ac-name { font-weight: 600; color: #1a1a1a; }
+    .autocomplete-item .ac-meta { font-size: 0.8em; color: #888; margin-top: 2px; }
+    .search-bar-wrap { position: relative; max-width: 520px; }
   </style>
 </head>
 <body>
@@ -45,9 +70,12 @@
       <div class="hero-eyebrow">New York City · Open Data · Real-Time</div>
       <h1>Know before<br>you <em>eat.</em></h1>
       <p class="hero-sub">Explore hygiene inspection records for every restaurant in New York City. Live data from the NYC Department of Health.</p>
-      <div class="search-bar">
-        <input id="search-input" type="text" placeholder="Search by restaurant name or address…">
-        <button id="search-btn">Search</button>
+      <div class="search-bar-wrap">
+        <div class="search-bar">
+          <input id="search-input" type="text" placeholder="Search by restaurant name or address…" autocomplete="off">
+          <button id="search-btn">Search</button>
+        </div>
+        <div id="ac-dropdown" class="autocomplete-dropdown" style="display:none"></div>
       </div>
     </div>
   </section>
@@ -183,6 +211,100 @@
     document.getElementById('search-input').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') doSearch();
     });
+
+    (function() {
+      var input = document.getElementById('search-input');
+      var dropdown = document.getElementById('ac-dropdown');
+      var debounceTimer = null;
+      var activeIndex = -1;
+      var suggestions = [];
+
+      function closeDropdown() {
+        dropdown.style.display = 'none';
+        dropdown.textContent = '';
+        suggestions = [];
+        activeIndex = -1;
+      }
+
+      function openDropdown(items) {
+        suggestions = items;
+        activeIndex = -1;
+        dropdown.textContent = '';
+        if (!items.length) { closeDropdown(); return; }
+
+        items.forEach(function(item, i) {
+          var div = document.createElement('div');
+          div.className = 'autocomplete-item';
+          div.dataset.index = i;
+
+          var nameEl = document.createElement('div');
+          nameEl.className = 'ac-name';
+          nameEl.textContent = item.dba || '';
+          div.appendChild(nameEl);
+
+          var parts = [item.cuisineDescription, item.boro, item.street].filter(Boolean);
+          if (parts.length) {
+            var metaEl = document.createElement('div');
+            metaEl.className = 'ac-meta';
+            metaEl.textContent = parts.join(' · ');
+            div.appendChild(metaEl);
+          }
+
+          div.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            selectItem(item);
+          });
+
+          dropdown.appendChild(div);
+        });
+        dropdown.style.display = 'block';
+      }
+
+      function setActive(index) {
+        var items = dropdown.querySelectorAll('.autocomplete-item');
+        items.forEach(function(el) { el.classList.remove('active'); });
+        if (index >= 0 && index < items.length) {
+          items[index].classList.add('active');
+          activeIndex = index;
+        }
+      }
+
+      function selectItem(item) {
+        var q = document.getElementById('search-input').value.trim().toLowerCase();
+        var name = (item.dba || '').toLowerCase();
+        closeDropdown();
+        if (name.includes(q) || q.includes(name.substring(0, 4))) {
+          window.location.href = '/restaurant/' + item.camis;
+        } else {
+          document.getElementById('search-input').value = item.dba;
+          doSearch();
+        }
+      }
+
+      input.addEventListener('input', function() {
+        var q = input.value.trim();
+        clearTimeout(debounceTimer);
+        if (q.length < 2) { closeDropdown(); return; }
+        debounceTimer = setTimeout(function() {
+          fetch('/api/restaurants/autocomplete?q=' + encodeURIComponent(q) + '&limit=8')
+            .then(function(r) { return r.json(); })
+            .then(function(res) { openDropdown(res.data || []); })
+            .catch(function() { closeDropdown(); });
+        }, 250);
+      });
+
+      input.addEventListener('keydown', function(e) {
+        if (!suggestions.length) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIndex + 1, suggestions.length - 1)); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIndex - 1, 0)); }
+        else if (e.key === 'Enter' && activeIndex >= 0) { e.stopImmediatePropagation(); selectItem(suggestions[activeIndex]); }
+        else if (e.key === 'Escape') { closeDropdown(); }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-bar-wrap')) closeDropdown();
+      });
+    })();
   </script>
 </body>
 </html>
