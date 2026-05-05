@@ -48,23 +48,66 @@ public class ElasticsearchSyncService {
         this.mongoCollection = db.getCollection(AppConfig.getMongoCollection(), Restaurant.class);
     }
 
+    // Bump this when the mapping changes to force a drop-and-recreate on next startup
+    private static final String MAPPING_VERSION = "v2";
+    private static final String VERSION_ALIAS = INDEX + "_" + MAPPING_VERSION;
+
     @PostConstruct
     public void initIndexIfEmpty() {
         try {
             boolean exists = esClient.indices().exists(e -> e.index(INDEX)).value();
+            if (exists) {
+                // Drop if mapping is outdated (no version alias present)
+                boolean current = esClient.indices().existsAlias(a -> a.index(INDEX).name(VERSION_ALIAS)).value();
+                if (!current) {
+                    logger.info("ES index '{}' has stale mapping — dropping for recreate", INDEX);
+                    esClient.indices().delete(d -> d.index(INDEX));
+                    exists = false;
+                }
+            }
             if (!exists) {
                 esClient.indices().create(c -> c
                         .index(INDEX)
+                        .settings(s -> s
+                                .analysis(a -> a
+                                        .analyzer("ngram_analyzer", an -> an
+                                                .custom(cu -> cu
+                                                        .tokenizer("standard")
+                                                        .filter("lowercase", "ngram_filter")
+                                                )
+                                        )
+                                        .analyzer("search_analyzer", an -> an
+                                                .custom(cu -> cu
+                                                        .tokenizer("standard")
+                                                        .filter("lowercase")
+                                                )
+                                        )
+                                        .filter("ngram_filter", f -> f
+                                                .definition(d -> d
+                                                        .edgeNgram(ng -> ng.minGram(2).maxGram(15))
+                                                )
+                                        )
+                                )
+                        )
                         .mappings(m -> m
                                 .properties("camis",              p -> p.keyword(k -> k))
-                                .properties("dba",                p -> p.text(t -> t.analyzer("standard")))
-                                .properties("cuisineDescription", p -> p.text(t -> t.analyzer("standard")))
+                                .properties("dba",                p -> p.text(t -> t
+                                        .analyzer("ngram_analyzer")
+                                        .searchAnalyzer("search_analyzer")
+                                        .fields("keyword", kf -> kf.keyword(k -> k))
+                                ))
+                                .properties("cuisineDescription", p -> p.text(t -> t
+                                        .analyzer("ngram_analyzer")
+                                        .searchAnalyzer("search_analyzer")
+                                ))
                                 .properties("boro",               p -> p.text(t -> t.analyzer("standard")))
                                 .properties("street",             p -> p.text(t -> t.analyzer("standard")))
                                 .properties("zipcode",            p -> p.keyword(k -> k))
                         )
                 );
-                logger.info("Created ES index '{}'", INDEX);
+                // Put version alias so we can detect stale mappings on next startup
+                esClient.indices().putAlias(a -> a.index(INDEX).name(VERSION_ALIAS));
+                logger.info("Created ES index '{}' with ngram mapping ({})", INDEX, MAPPING_VERSION);
             }
             long count = esClient.count(c -> c.index(INDEX)).count();
             if (count == 0) {

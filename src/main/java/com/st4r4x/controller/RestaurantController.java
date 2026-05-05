@@ -430,15 +430,61 @@ public class RestaurantController {
             @RequestParam String q,
             @RequestParam(defaultValue = "8") int limit) {
         try {
+            // Split query tokens: last token that matches a known borough is treated
+            // as a location filter; remaining tokens drive the name/cuisine search
+            String[] tokens = q.trim().split("\\s+");
+            java.util.Set<String> BOROUGHS = java.util.Set.of(
+                    "manhattan", "brooklyn", "queens", "bronx", "staten", "island");
+            StringBuilder nameQuery = new StringBuilder();
+            StringBuilder boroQuery = new StringBuilder();
+            for (String token : tokens) {
+                if (BOROUGHS.contains(token.toLowerCase())) {
+                    if (boroQuery.length() > 0) boroQuery.append(" ");
+                    boroQuery.append(token);
+                } else {
+                    if (nameQuery.length() > 0) nameQuery.append(" ");
+                    nameQuery.append(token);
+                }
+            }
+            String namePart = nameQuery.length() > 0 ? nameQuery.toString() : q;
+            String boroPart = boroQuery.toString();
+
             SearchRequest searchRequest = SearchRequest.of(s -> s
                     .index(ElasticsearchSyncService.INDEX)
                     .size(limit)
                     .query(query -> query
-                            .multiMatch(mm -> mm
-                                    .query(q)
-                                    .fields("dba^3", "cuisineDescription^2", "street", "boro")
-                                    .fuzziness("AUTO")
-                            )
+                            .bool(b -> {
+                                // Name/cuisine match (ngram for prefix, fuzzy for typos)
+                                b.must(m -> m
+                                        .bool(inner -> inner
+                                                .should(sh -> sh
+                                                        .multiMatch(mm -> mm
+                                                                .query(namePart)
+                                                                .fields("dba^4", "cuisineDescription^2")
+                                                                .type(co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType.BestFields)
+                                                        )
+                                                )
+                                                .should(sh -> sh
+                                                        .multiMatch(mm -> mm
+                                                                .query(namePart)
+                                                                .fields("dba^2", "cuisineDescription")
+                                                                .fuzziness("AUTO")
+                                                        )
+                                                )
+                                                .minimumShouldMatch("1")
+                                        )
+                                );
+                                // Borough filter — only applied when user typed a borough token
+                                if (!boroPart.isEmpty()) {
+                                    b.filter(f -> f
+                                            .match(m -> m
+                                                    .field("boro")
+                                                    .query(boroPart)
+                                            )
+                                    );
+                                }
+                                return b;
+                            })
                     )
             );
             SearchResponse<EsRestaurantDoc> response = esClient.search(searchRequest, EsRestaurantDoc.class);
