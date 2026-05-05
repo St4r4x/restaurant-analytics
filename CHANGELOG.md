@@ -1,6 +1,21 @@
 
 ## [Unreleased] — 2026-05-05
 
+### Bug Fixes
+- Bump app.semver to 2.1.1
+
+### CI/CD
+- Redeploy v2.1.1 navbar fix to production
+
+### Chores
+- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
+- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
+
+### Documentation
+- Release v2.1.1 — navbar flex hotfix [skip ci]
+
+## [Unreleased] — 2026-05-05
+
 ### CI/CD
 - Redeploy v2.1.1 navbar fix to production
 
