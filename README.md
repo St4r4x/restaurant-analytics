@@ -20,9 +20,11 @@ Academic project — Aflokkat / big data module.
 | Primary DB | MongoDB (raw driver, no Spring Data) |
 | RDBMS | PostgreSQL 15 (users, bookmarks, reports) |
 | Cache | Redis 7 (TTL 3600 s) |
+| Search | Elasticsearch 8 (autocomplete, fuzzy multi-match) |
+| Enrichment | OpenStreetMap Overpass API (phone, website, hours) |
 | Security | JWT (access 15 min / refresh 7 days) |
 | Build | Maven |
-| Deployment | Docker Compose |
+| Deployment | Docker Compose (5 services) |
 
 ---
 
