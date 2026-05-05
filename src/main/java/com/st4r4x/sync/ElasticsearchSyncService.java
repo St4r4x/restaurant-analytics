@@ -3,7 +3,6 @@ package com.st4r4x.sync;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.st4r4x.config.AppConfig;
@@ -15,6 +14,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -69,22 +69,29 @@ public class ElasticsearchSyncService {
             long count = esClient.count(c -> c.index(INDEX)).count();
             if (count == 0) {
                 logger.info("ES index '{}' is empty — triggering initial reindex", INDEX);
-                reindex();
+                triggerReindex();
             }
         } catch (Exception e) {
             logger.warn("ES init check failed (ES may be unavailable): {}", e.getMessage());
         }
     }
 
+    @Async
+    public void triggerReindex() {
+        reindex();
+    }
+
     public void reindex() {
         try {
             List<Restaurant> batch = new ArrayList<>(BULK_SIZE);
             long total = 0;
-            for (Restaurant r : mongoCollection.find()) {
-                batch.add(r);
-                if (batch.size() == BULK_SIZE) {
-                    total += bulkIndex(batch);
-                    batch.clear();
+            try (com.mongodb.client.MongoCursor<Restaurant> cursor = mongoCollection.find().cursor()) {
+                while (cursor.hasNext()) {
+                    batch.add(cursor.next());
+                    if (batch.size() == BULK_SIZE) {
+                        total += bulkIndex(batch);
+                        batch.clear();
+                    }
                 }
             }
             if (!batch.isEmpty()) total += bulkIndex(batch);
@@ -96,20 +103,29 @@ public class ElasticsearchSyncService {
 
     private int bulkIndex(List<Restaurant> restaurants) throws Exception {
         BulkRequest.Builder br = new BulkRequest.Builder();
+        int indexed = 0;
         for (Restaurant r : restaurants) {
             if (r.getRestaurantId() == null) continue;
             EsRestaurantDoc doc = toEsDoc(r);
+            final String id = r.getRestaurantId();
             br.operations(op -> op.index(idx -> idx
                     .index(INDEX)
-                    .id(r.getRestaurantId())
+                    .id(id)
                     .document(doc)
             ));
+            indexed++;
         }
+        if (indexed == 0) return 0;
         BulkResponse response = esClient.bulk(br.build());
         if (response.errors()) {
-            logger.warn("ES bulk had errors in batch of {}", restaurants.size());
+            logger.warn("ES bulk had errors in batch of {}", indexed);
+            response.items().forEach(item -> {
+                if (item.error() != null) {
+                    logger.warn("ES bulk error for doc {}: {}", item.id(), item.error().reason());
+                }
+            });
         }
-        return restaurants.size();
+        return indexed;
     }
 
     static EsRestaurantDoc toEsDoc(Restaurant r) {
