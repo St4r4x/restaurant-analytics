@@ -12,6 +12,7 @@ services:
       MONGODB_COLLECTION: restaurants
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      ELASTICSEARCH_URI: http://elasticsearch:9200
       APP_UPLOADS_DIR: /app/uploads
       # Secrets injected from .env (never hardcoded — D-05)
       JWT_SECRET: ${JWT_SECRET}
@@ -30,6 +31,8 @@ services:
       mongodb:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
       postgres:
         condition: service_healthy
@@ -84,6 +87,29 @@ services:
       resources:
         limits:
           memory: 128m
+
+  elasticsearch:
+    image: elasticsearch:8.13.4
+    container_name: elasticsearch
+    restart: unless-stopped
+    networks:
+      - restaurant-network
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
   postgres:
     image: postgres:15
