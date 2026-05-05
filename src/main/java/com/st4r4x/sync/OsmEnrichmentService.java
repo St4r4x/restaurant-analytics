@@ -9,8 +9,11 @@ import com.st4r4x.config.MongoClientFactory;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
@@ -32,10 +35,14 @@ public class OsmEnrichmentService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired
     public OsmEnrichmentService() {
         MongoDatabase db = MongoClientFactory.getInstance().getDatabase(AppConfig.getMongoDatabase());
         this.collection = db.getCollection(AppConfig.getMongoCollection());
-        this.restTemplate = new RestTemplate();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5_000);
+        factory.setReadTimeout(15_000);
+        this.restTemplate = new RestTemplate(factory);
     }
 
     /** Enrich only restaurants not yet enriched. Called after each sync. */
@@ -87,6 +94,8 @@ public class OsmEnrichmentService {
                 Thread.currentThread().interrupt();
                 logger.warn("OSM enrichment interrupted");
                 return;
+            } catch (RestClientException e) {
+                logger.warn("OSM enrichment HTTP error for {}: {}", doc.getString("name"), e.getMessage());
             } catch (Exception e) {
                 logger.debug("OSM enrichment failed for {}: {}", doc.getString("name"), e.getMessage());
             }
@@ -160,6 +169,7 @@ public class OsmEnrichmentService {
 
     private double[] boroughBbox(String borough) {
         if (borough == null) return null;
+        // Array layout: [south_lat, west_lon, north_lat, east_lon] — matches Overpass bbox order: south,west,north,east
         switch (borough) {
             case "Manhattan":     return new double[]{40.700, -74.020, 40.882, -73.907};
             case "Brooklyn":      return new double[]{40.570, -74.042, 40.739, -73.833};
