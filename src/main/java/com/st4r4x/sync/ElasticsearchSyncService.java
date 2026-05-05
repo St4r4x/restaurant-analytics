@@ -120,8 +120,9 @@ public class ElasticsearchSyncService {
         if (response.errors()) {
             logger.warn("ES bulk had errors in batch of {}", indexed);
             response.items().forEach(item -> {
-                if (item.error() != null) {
-                    logger.warn("ES bulk error for doc {}: {}", item.id(), item.error().reason());
+                var err = item.error();
+                if (err != null) {
+                    logger.warn("ES bulk error for doc {}: {}", item.id(), err.reason());
                 }
             });
         }
