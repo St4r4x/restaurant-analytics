@@ -42,3 +42,4 @@ restaurants.json
 *.png
 *.jpg
 *.jpeg
+.worktrees/
