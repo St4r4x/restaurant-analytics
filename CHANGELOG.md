@@ -23,6 +23,7 @@ All notable changes are documented here.
 - Serialize AuditLogEntity action as .name() string in GET /api/admin/audit response
 - Add missing @CrossOrigin to AdminController and ReportController
 - Pass error detail to SYNC_TRIGGERED audit entry when sync fails
+- Fix audit pagination: disable Next button by default; fix falsy page=0 guard; hide table on empty page after navigation
 
 ### Chores
 - Add .githooks/pre-commit enforcing CHANGELOG update on code commits
