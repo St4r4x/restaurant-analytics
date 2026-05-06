@@ -32,10 +32,9 @@ public class JobStatus {
 
     @Override
     public String toString() {
-        return "JobStatus{" +
-                "success=" + success +
-                ", durationMs=" + durationMs +
-                ", lastRunAt=" + lastRunAt +
-                '}';
+        return "JobStatus{success=" + success +
+               ", durationMs=" + durationMs +
+               ", lastRunAt=" + lastRunAt +
+               ", errorMessage=" + errorMessage + '}';
     }
 }

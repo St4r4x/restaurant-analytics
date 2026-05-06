@@ -48,10 +48,10 @@ class CronSchedulerTest {
     }
 
     @Test
-    void reEnrichOsm_calls_enrichAll() {
+    void reEnrichOsm_calls_enrichAllSync() {
         cronScheduler.reEnrichOsm();
 
-        verify(osmEnrichmentService).enrichAll();
+        verify(osmEnrichmentService).enrichAllSync();
         assertTrue(cronScheduler.getStatus().get("osm-reenrichment").isSuccess());
     }
 
@@ -80,5 +80,6 @@ class CronSchedulerTest {
         Map<String, JobStatus> status = cronScheduler.getStatus();
         assertNotNull(status);
         assertTrue(status.isEmpty());
+        assertThrows(UnsupportedOperationException.class, () -> status.put("x", null));
     }
 }

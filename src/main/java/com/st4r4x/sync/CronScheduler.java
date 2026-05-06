@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,7 @@ public class CronScheduler {
     private static final Logger logger = LoggerFactory.getLogger(CronScheduler.class);
 
     private static final List<String> BOROUGHS =
-            Arrays.asList("Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island");
+            List.of("Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island");
 
     private final RestaurantCacheService cacheService;
     private final RestaurantDAO restaurantDAO;
@@ -64,7 +63,7 @@ public class CronScheduler {
     public void reEnrichOsm() {
         Instant start = Instant.now();
         try {
-            osmEnrichmentService.enrichAll();
+            osmEnrichmentService.enrichAllSync();
             recordJob("osm-reenrichment", start, true, null);
             logger.info("OSM re-enrichment triggered");
         } catch (Exception e) {

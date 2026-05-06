@@ -66,6 +66,10 @@ public class OsmEnrichmentService {
     /** Re-enrich all restaurants. Triggered by admin endpoint. */
     @Async
     public void enrichAll() {
+        enrichAllSync();
+    }
+
+    public void enrichAllSync() {
         List<Document> all = collection
                 .find()
                 .projection(new Document("restaurant_id", 1).append("name", 1).append("borough", 1))
