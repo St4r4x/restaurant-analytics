@@ -38,6 +38,12 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 .role-select { font-size: 0.82em; padding: 3px 6px; border: 1px solid #e8e0d8; border-radius: 0; font-family: 'Inter', sans-serif; background: white; }
 .bug-btn { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%; background: #1a1a1a; color: white; border: none; font-size: 1.1em; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; text-decoration: none; }
 .bug-btn:hover { background: #333; }
+.audit-table { width: 100%; border-collapse: collapse; font-size: 0.82em; margin-top: 8px; }
+.audit-table th { text-align: left; padding: 7px 10px; border-bottom: 2px solid #e8e0d8; font-weight: 700; color: #555; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.05em; }
+.audit-table td { padding: 7px 10px; border-bottom: 1px solid #f0ebe3; vertical-align: top; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.audit-table tr:last-child td { border-bottom: none; }
+.audit-action { font-weight: 600; font-size: 0.82em; color: #1a1a1a; }
+.audit-pagination { display: flex; gap: 8px; margin-top: 12px; align-items: center; font-size: 0.82em; color: #555; }
 @media (max-width: 768px) { .container { padding: 12px 8px !important; } .btn-row { flex-direction: column; align-items: flex-start; } .user-table { font-size: 0.82em; } }
     </style>
 </head>
@@ -112,6 +118,31 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
                target="_blank" rel="noopener" class="btn btn-primary">Report a Bug</a>
             <a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=enhancement&template=feature_request.md&title=%5BFEATURE%5D+"
                target="_blank" rel="noopener" class="btn btn-secondary">Request a Feature</a>
+        </div>
+    </div>
+
+    <!-- Card 6: Audit Log -->
+    <div class="card">
+        <h2>Audit Log</h2>
+        <p class="desc-text">Recent admin and controller actions. Most recent first.</p>
+        <div id="audit-loading" class="status-text">Loading audit log…</div>
+        <table class="audit-table" id="audit-table" style="display:none">
+            <thead>
+                <tr>
+                    <th>Date / Time</th>
+                    <th>Actor</th>
+                    <th>Action</th>
+                    <th>Target</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody id="audit-tbody"></tbody>
+        </table>
+        <div id="audit-empty" class="status-text" style="display:none">No audit entries yet.</div>
+        <div class="audit-pagination" id="audit-pagination" style="display:none">
+            <button id="audit-prev" class="btn btn-secondary" onclick="loadAudit(auditPage-1)" disabled>&#8592; Prev</button>
+            <span id="audit-page-info"></span>
+            <button id="audit-next" class="btn btn-secondary" onclick="loadAudit(auditPage+1)">Next &#8594;</button>
         </div>
     </div>
 </div>
@@ -311,6 +342,82 @@ function changeRole(userId, newRole, selectEl) {
     });
 }
 
+// ── Audit Log ─────────────────────────────────────────────────────────────────
+var auditPage = 0;
+var auditTotalPages = 0;
+var ACTION_LABELS = {
+    USER_ROLE_CHANGED: 'Role Changed',
+    SYNC_TRIGGERED: 'Sync Triggered',
+    CRON_JOB_TRIGGERED: 'Cron Triggered',
+    OSM_ENRICH_TRIGGERED: 'OSM Enrich',
+    CACHE_REBUILT: 'Cache Rebuilt',
+    REPORT_STATUS_CHANGED: 'Report Status'
+};
+
+function loadAudit(page) {
+    page = page || 0;
+    if (page < 0 || (auditTotalPages > 0 && page >= auditTotalPages)) return;
+    auditPage = page;
+    fetchWithAuth('/api/admin/audit?page=' + page + '&size=20')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            document.getElementById('audit-loading').style.display = 'none';
+            auditTotalPages = data.totalPages || 0;
+            var tbody = document.getElementById('audit-tbody');
+            tbody.textContent = '';
+
+            if (!data.content || data.content.length === 0) {
+                document.getElementById('audit-empty').style.display = 'block';
+                document.getElementById('audit-pagination').style.display = 'none';
+                return;
+            }
+
+            data.content.forEach(function(e) {
+                var tr = document.createElement('tr');
+
+                var tdDate = document.createElement('td');
+                tdDate.textContent = fmtDate(e.createdAt);
+                tr.appendChild(tdDate);
+
+                var tdActor = document.createElement('td');
+                tdActor.textContent = e.actorUsername || '—';
+                tr.appendChild(tdActor);
+
+                var tdAction = document.createElement('td');
+                var actionSpan = document.createElement('span');
+                actionSpan.className = 'audit-action';
+                actionSpan.textContent = ACTION_LABELS[e.action] || e.action;
+                tdAction.appendChild(actionSpan);
+                tr.appendChild(tdAction);
+
+                var tdTarget = document.createElement('td');
+                tdTarget.textContent = e.targetType
+                    ? (e.targetType + (e.targetId ? ' #' + e.targetId : ''))
+                    : '—';
+                tr.appendChild(tdTarget);
+
+                var tdDetail = document.createElement('td');
+                var raw = e.detail || '';
+                tdDetail.title = raw;
+                tdDetail.textContent = raw.length > 60 ? raw.substring(0, 60) + '…' : (raw || '—');
+                tr.appendChild(tdDetail);
+
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('audit-table').style.display = 'table';
+            document.getElementById('audit-pagination').style.display = 'flex';
+            document.getElementById('audit-page-info').textContent =
+                'Page ' + (data.page + 1) + ' of ' + (data.totalPages || 1) +
+                ' (' + data.totalElements + ' entries)';
+            document.getElementById('audit-prev').disabled = (data.page === 0);
+            document.getElementById('audit-next').disabled = (data.page + 1 >= data.totalPages);
+        })
+        .catch(function() {
+            document.getElementById('audit-loading').textContent = 'Failed to load audit log';
+        });
+}
+
 // ── Page load ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     fetchWithAuth('/api/restaurants/sync-status')
@@ -334,6 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     loadUsers();
+    loadAudit(0);
 
     fetchWithAuth('/api/reports/stats')
         .then(function(r) { return r.json(); })
