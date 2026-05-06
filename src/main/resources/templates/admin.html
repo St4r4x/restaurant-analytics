@@ -14,10 +14,11 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 .page-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 900; margin: 0; }
 .card { background: white; border: 1px solid #e8e0d8; padding: 20px 24px; margin-bottom: 20px; }
 .card h2 { font-size: 1.05em; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; font-family: 'Playfair Display', serif; }
-.btn { cursor: pointer; border: none; padding: 7px 14px; font-size: 0.82em; font-weight: 600; font-family: 'Inter', sans-serif; border-radius: 0; }
+.btn { cursor: pointer; border: none; padding: 7px 14px; font-size: 0.82em; font-weight: 600; font-family: 'Inter', sans-serif; border-radius: 0; text-decoration: none; display: inline-block; }
 .btn-primary { background: #c0392b; color: white; }
 .btn-primary:hover { background: #a93226; }
 .btn-secondary { background: #f0ebe3; color: #1a1a1a; border: 1px solid #e8e0d8; }
+.btn-secondary:hover { background: #e8e0d8; }
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(192,57,43,0.3); border-top-color: #c0392b; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .status-text { font-size: 0.85em; color: #888; margin-top: 8px; }
@@ -26,7 +27,18 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 .desc-text { font-size: 0.88em; color: #555; margin-bottom: 14px; }
 .badge-row { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; align-items: center; }
 .badge-label { font-size: 0.82em; font-weight: 600; color: #555; min-width: 80px; }
-@media (max-width: 768px) { .container { padding: 12px 8px !important; } .btn-row { flex-direction: column; align-items: flex-start; } }
+.user-table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin-top: 8px; }
+.user-table th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #e8e0d8; font-weight: 700; color: #555; font-size: 0.82em; text-transform: uppercase; letter-spacing: 0.05em; }
+.user-table td { padding: 8px 10px; border-bottom: 1px solid #f0ebe3; vertical-align: middle; }
+.user-table tr:last-child td { border-bottom: none; }
+.role-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.78em; font-weight: 700; }
+.role-admin { background: #b71c1c22; color: #b71c1c; }
+.role-controller { background: #1565c022; color: #1565c0; }
+.role-customer { background: #2e7d3222; color: #2e7d32; }
+.role-select { font-size: 0.82em; padding: 3px 6px; border: 1px solid #e8e0d8; border-radius: 0; font-family: 'Inter', sans-serif; background: white; }
+.bug-btn { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%; background: #1a1a1a; color: white; border: none; font-size: 1.1em; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; text-decoration: none; }
+.bug-btn:hover { background: #333; }
+@media (max-width: 768px) { .container { padding: 12px 8px !important; } .btn-row { flex-direction: column; align-items: flex-start; } .user-table { font-size: 0.82em; } }
     </style>
 </head>
 <body>
@@ -50,14 +62,33 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
         <div id="sync-result" class="sync-result"></div>
     </div>
 
-    <!-- Card 2: At-Risk CSV Download -->
+    <!-- Card 2: User Management -->
+    <div class="card">
+        <h2>User Management</h2>
+        <p class="desc-text">View all users and change their role. Changes take effect on next login.</p>
+        <div id="users-loading" class="status-text">Loading users…</div>
+        <table class="user-table" id="users-table" style="display:none">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Current Role</th>
+                    <th>Change Role</th>
+                </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- Card 3: At-Risk CSV Download -->
     <div class="card">
         <h2>At-Risk Export</h2>
         <p class="desc-text">Download the current at-risk restaurant list as a CSV file.</p>
         <button class="btn btn-primary" onclick="downloadAtRiskCsv()">Download At-Risk CSV</button>
     </div>
 
-    <!-- Card 3: Report Statistics -->
+    <!-- Card 4: Report Statistics -->
     <div class="card">
         <h2>Report Statistics</h2>
         <div style="margin-top: 8px">
@@ -71,26 +102,38 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
             </div>
         </div>
     </div>
+
+    <!-- Card 5: Bug Report -->
+    <div class="card">
+        <h2>Bug Report</h2>
+        <p class="desc-text">Found a bug or have a feature request? Open an issue directly on GitHub.</p>
+        <div class="btn-row">
+            <a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D+"
+               target="_blank" rel="noopener" class="btn btn-primary">Report a Bug</a>
+            <a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=enhancement&template=feature_request.md&title=%5BFEATURE%5D+"
+               target="_blank" rel="noopener" class="btn btn-secondary">Request a Feature</a>
+        </div>
+    </div>
 </div>
 
+<!-- Floating bug report button -->
+<a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D+"
+   target="_blank" rel="noopener" class="bug-btn" title="Report a bug">🐛</a>
+
 <script>
-// Client-side ADMIN auth guard — must run before any other JS
+// Admin auth guard
 (function() {
     var token = localStorage.getItem('accessToken');
     if (!token) { window.location.href = '/login'; return; }
     try {
         var payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'ROLE_ADMIN') {
-            window.location.href = '/';
-        }
+        if (payload.role !== 'ROLE_ADMIN') { window.location.href = '/'; }
     } catch (e) { window.location.href = '/login'; }
 })();
 
-// Auth utilities
 function getAuthHeaders() {
     var token = localStorage.getItem('accessToken');
-    if (!token) return { 'Content-Type': 'application/json' };
-    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+    return { 'Content-Type': 'application/json', 'Authorization': token ? 'Bearer ' + token : '' };
 }
 function handleFetchErrorResponse(response) {
     if (response.status === 401 || response.status === 403) {
@@ -106,24 +149,21 @@ function fetchWithAuth(url, options) {
     options.headers = Object.assign({}, getAuthHeaders(), options.headers || {});
     return fetch(url, options).then(handleFetchErrorResponse);
 }
-
 function fmtDate(iso) {
     if (!iso) return '';
     var d = new Date(iso);
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 }
 
-// Sync polling
+// ── Sync ──────────────────────────────────────────────────────────────────────
 var syncPollInterval = null;
-
 function startSyncPoll() {
     syncPollInterval = setInterval(function() {
         fetchWithAuth('/api/restaurants/sync-status')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.status !== 'running') {
-                    clearInterval(syncPollInterval);
-                    syncPollInterval = null;
+                    clearInterval(syncPollInterval); syncPollInterval = null;
                     showSyncResult(data);
                     document.getElementById('sync-btn').disabled = false;
                 } else {
@@ -131,13 +171,11 @@ function startSyncPoll() {
                 }
             })
             .catch(function() {
-                clearInterval(syncPollInterval);
-                syncPollInterval = null;
+                clearInterval(syncPollInterval); syncPollInterval = null;
                 document.getElementById('sync-btn').disabled = false;
             });
     }, 2000);
 }
-
 function showSyncResult(data) {
     var el = document.getElementById('sync-result');
     if (data.status === 'success') {
@@ -146,62 +184,29 @@ function showSyncResult(data) {
     } else if (data.status === 'error') {
         el.textContent = 'Error: ' + (data.error || 'Unknown error');
         el.style.color = '#b71c1c';
-    } else if (data.status === 'never_run') {
+    } else {
         el.textContent = 'No sync has run yet';
         el.style.color = '#555';
     }
     el.style.display = 'block';
     setTimeout(function() { el.style.display = 'none'; }, 10000);
 }
-
 function startSync() {
     var btn = document.getElementById('sync-btn');
-    // Clear any previous result
     var resultEl = document.getElementById('sync-result');
     resultEl.style.display = 'none';
-    resultEl.textContent = '';
-
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Starting…';
     document.getElementById('sync-status-text').textContent = 'Sync in progress…';
-
     fetchWithAuth('/api/restaurants/refresh', { method: 'POST' })
         .then(function(r) { return r.json(); })
-        .then(function() {
-            btn.innerHTML = 'Sync NYC Data';
-            startSyncPoll();
-        })
+        .then(function() { btn.innerHTML = 'Sync NYC Data'; startSyncPoll(); })
         .catch(function() {
             btn.disabled = false;
             btn.innerHTML = 'Sync NYC Data';
             document.getElementById('sync-status-text').textContent = 'Failed to start sync';
         });
 }
-
-function downloadAtRiskCsv() {
-    var token = localStorage.getItem('accessToken');
-    fetch('/api/inspection/at-risk/export.csv', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(function(r) {
-        if (!r.ok) throw new Error('Download failed: ' + r.status);
-        return r.blob();
-    })
-    .then(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'at-risk-restaurants.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    })
-    .catch(function() {
-        if (window.showToast) { showToast('CSV download failed', 'error'); }
-    });
-}
-
 function rebuildCache() {
     var btn = document.getElementById('rebuild-btn');
     btn.disabled = true;
@@ -210,17 +215,104 @@ function rebuildCache() {
         .then(function() {
             btn.disabled = false;
             btn.textContent = 'Rebuild Cache';
-            if (window.showToast) { showToast('Cache rebuilt successfully', 'success'); }
+            if (window.showToast) showToast('Cache rebuilt successfully', 'success');
+        })
+        .catch(function() { btn.disabled = false; btn.textContent = 'Rebuild Cache'; });
+}
+
+// ── User Management ───────────────────────────────────────────────────────────
+var ROLE_LABELS = { 'ROLE_ADMIN': 'Admin', 'ROLE_CONTROLLER': 'Controller', 'ROLE_CUSTOMER': 'Customer' };
+var ROLE_CLASSES = { 'ROLE_ADMIN': 'role-admin', 'ROLE_CONTROLLER': 'role-controller', 'ROLE_CUSTOMER': 'role-customer' };
+
+function loadUsers() {
+    fetchWithAuth('/api/admin/users')
+        .then(function(r) { return r.json(); })
+        .then(function(users) {
+            document.getElementById('users-loading').style.display = 'none';
+            var tbody = document.getElementById('users-tbody');
+            tbody.textContent = '';
+            users.forEach(function(u) {
+                var tr = document.createElement('tr');
+                tr.id = 'user-row-' + u.id;
+
+                // id
+                var tdId = document.createElement('td');
+                tdId.textContent = u.id;
+                tr.appendChild(tdId);
+
+                // username
+                var tdUser = document.createElement('td');
+                var strong = document.createElement('strong');
+                strong.textContent = u.username;
+                tdUser.appendChild(strong);
+                tr.appendChild(tdUser);
+
+                // email
+                var tdEmail = document.createElement('td');
+                tdEmail.textContent = u.email;
+                tdEmail.style.color = '#555';
+                tr.appendChild(tdEmail);
+
+                // current role badge
+                var tdRole = document.createElement('td');
+                var badge = document.createElement('span');
+                badge.id = 'role-badge-' + u.id;
+                badge.className = 'role-badge ' + (ROLE_CLASSES[u.role] || '');
+                badge.textContent = ROLE_LABELS[u.role] || u.role;
+                tdRole.appendChild(badge);
+                tr.appendChild(tdRole);
+
+                // role select
+                var tdAction = document.createElement('td');
+                var sel = document.createElement('select');
+                sel.className = 'role-select';
+                sel.dataset.userId = u.id;
+                ['ROLE_CUSTOMER', 'ROLE_CONTROLLER', 'ROLE_ADMIN'].forEach(function(r) {
+                    var opt = document.createElement('option');
+                    opt.value = r;
+                    opt.textContent = ROLE_LABELS[r];
+                    if (r === u.role) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+                sel.addEventListener('change', function() { changeRole(u.id, sel.value, sel); });
+                tdAction.appendChild(sel);
+                tr.appendChild(tdAction);
+
+                tbody.appendChild(tr);
+            });
+            document.getElementById('users-table').style.display = 'table';
         })
         .catch(function() {
-            btn.disabled = false;
-            btn.textContent = 'Rebuild Cache';
+            document.getElementById('users-loading').textContent = 'Failed to load users';
         });
 }
 
-// On page load: fetch sync status and report statistics
+function changeRole(userId, newRole, selectEl) {
+    selectEl.disabled = true;
+    fetchWithAuth('/api/admin/users/' + userId + '/role', {
+        method: 'POST',
+        body: JSON.stringify({ role: newRole })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        selectEl.disabled = false;
+        if (data.status === 'success') {
+            var badge = document.getElementById('role-badge-' + userId);
+            badge.className = 'role-badge ' + (ROLE_CLASSES[newRole] || '');
+            badge.textContent = ROLE_LABELS[newRole] || newRole;
+            if (window.showToast) showToast(data.username + ' → ' + (ROLE_LABELS[newRole] || newRole), 'success');
+        } else {
+            if (window.showToast) showToast(data.message || 'Failed to update role', 'error');
+        }
+    })
+    .catch(function() {
+        selectEl.disabled = false;
+        if (window.showToast) showToast('Network error — role not changed', 'error');
+    });
+}
+
+// ── Page load ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-    // Fetch sync status
     fetchWithAuth('/api/restaurants/sync-status')
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -241,32 +333,29 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('sync-status-text').textContent = 'Status unavailable';
         });
 
-    // Fetch report statistics
+    loadUsers();
+
     fetchWithAuth('/api/reports/stats')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var byStatus = data.byStatus || {};
-            var byGrade = data.byGrade || {};
-
-            // Status badges
             var statusColors = { OPEN: '#e65100', IN_PROGRESS: '#1565c0', RESOLVED: '#2e7d32' };
             var statusEl = document.getElementById('stats-status-row');
             ['OPEN', 'IN_PROGRESS', 'RESOLVED'].forEach(function(key) {
-                var label = key.replace('_', ' ');
-                statusEl.innerHTML += '<span style="display:inline-flex;align-items:center;gap:6px;'
-                    + 'padding:6px 16px;border-radius:20px;background:' + statusColors[key] + '22;'
-                    + 'color:' + statusColors[key] + ';font-weight:700;font-size:0.88em;margin:4px">'
-                    + label + ': <strong>' + (byStatus[key] !== undefined ? byStatus[key] : 0) + '</strong></span>';
+                var span = document.createElement('span');
+                span.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;background:' + statusColors[key] + '22;color:' + statusColors[key] + ';font-weight:700;font-size:0.88em;margin:4px';
+                span.textContent = key.replace('_', ' ') + ': ' + (byStatus[key] !== undefined ? byStatus[key] : 0);
+                statusEl.appendChild(span);
             });
 
-            // Grade badges
+            var byGrade = data.byGrade || {};
             var gradeColors = { A: '#2e7d32', B: '#f9a825', C: '#e65100', F: '#b71c1c' };
             var gradeEl = document.getElementById('stats-grade-row');
             ['A', 'B', 'C', 'F'].forEach(function(key) {
-                gradeEl.innerHTML += '<span style="display:inline-flex;align-items:center;gap:6px;'
-                    + 'padding:6px 16px;border-radius:20px;background:' + gradeColors[key] + '22;'
-                    + 'color:' + gradeColors[key] + ';font-weight:700;font-size:0.88em;margin:4px">'
-                    + 'Grade ' + key + ': <strong>' + (byGrade[key] !== undefined ? byGrade[key] : 0) + '</strong></span>';
+                var span = document.createElement('span');
+                span.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;background:' + gradeColors[key] + '22;color:' + gradeColors[key] + ';font-weight:700;font-size:0.88em;margin:4px';
+                span.textContent = 'Grade ' + key + ': ' + (byGrade[key] !== undefined ? byGrade[key] : 0);
+                gradeEl.appendChild(span);
             });
         })
         .catch(function() {

@@ -5,6 +5,10 @@ All notable changes are documented here.
 ## [Unreleased] — 2026-05-06
 
 ### Features
+- Add User Management card on admin page: list all users, change role via dropdown
+- Add `GET /api/admin/users` and `POST /api/admin/users/{id}/role` endpoints (ADMIN)
+- Add Bug Report card on admin page with GitHub Issues links (bug + feature request)
+- Add floating 🐛 button on admin page linking to GitHub Issues
 - Show completedAt date+time alongside record count on admin sync status
 - Add `POST /api/admin/cron/run/{jobKey}` endpoint to manually trigger any cron job (ADMIN)
   Valid keys: `cache-warmup` (sync), `osm-reenrichment` (async), `es-reindex` (async)

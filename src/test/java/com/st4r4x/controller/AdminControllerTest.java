@@ -2,21 +2,29 @@ package com.st4r4x.controller;
 
 import com.st4r4x.entity.LetterGrade;
 import com.st4r4x.entity.Status;
+import com.st4r4x.entity.UserEntity;
 import com.st4r4x.repository.ReportRepository;
+import com.st4r4x.repository.UserRepository;
+import com.st4r4x.sync.CronScheduler;
+import com.st4r4x.sync.OsmEnrichmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,8 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class AdminControllerTest {
 
-    @Mock
-    private ReportRepository reportRepository;
+    @Mock private ReportRepository reportRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private OsmEnrichmentService osmEnrichmentService;
+    @Mock private CronScheduler cronScheduler;
 
     @InjectMocks
     private AdminController adminController;
@@ -38,6 +48,66 @@ class AdminControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(adminController).build();
+    }
+
+    @Test
+    void listUsers_returns200_withUserList() throws Exception {
+        UserEntity u1 = new UserEntity("alice", "alice@test.com", "hash", "ROLE_CUSTOMER");
+        UserEntity u2 = new UserEntity("bob", "bob@test.com", "hash", "ROLE_CONTROLLER");
+        when(userRepository.findAll()).thenReturn(Arrays.asList(u1, u2));
+
+        mockMvc.perform(get("/api/admin/users"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].username").value("alice"))
+            .andExpect(jsonPath("$[0].role").value("ROLE_CUSTOMER"))
+            .andExpect(jsonPath("$[1].username").value("bob"))
+            .andExpect(jsonPath("$[1].role").value("ROLE_CONTROLLER"));
+    }
+
+    @Test
+    void listUsers_doesNotReturnPasswordHash() throws Exception {
+        UserEntity u = new UserEntity("alice", "alice@test.com", "secret-hash", "ROLE_CUSTOMER");
+        when(userRepository.findAll()).thenReturn(Collections.singletonList(u));
+
+        mockMvc.perform(get("/api/admin/users"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].passwordHash").doesNotExist())
+            .andExpect(jsonPath("$[0].password").doesNotExist());
+    }
+
+    @Test
+    void setUserRole_validRole_returns200() throws Exception {
+        UserEntity u = new UserEntity("alice", "alice@test.com", "hash", "ROLE_CUSTOMER");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(u));
+        when(userRepository.save(any(UserEntity.class))).thenReturn(u);
+
+        mockMvc.perform(post("/api/admin/users/1/role")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"role\":\"ROLE_CONTROLLER\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("success"))
+            .andExpect(jsonPath("$.username").value("alice"))
+            .andExpect(jsonPath("$.role").value("ROLE_CONTROLLER"));
+    }
+
+    @Test
+    void setUserRole_invalidRole_returns400() throws Exception {
+        mockMvc.perform(post("/api/admin/users/1/role")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"role\":\"ROLE_SUPERUSER\"}"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value("error"));
+    }
+
+    @Test
+    void setUserRole_unknownUser_returns404() throws Exception {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/api/admin/users/99/role")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"role\":\"ROLE_CONTROLLER\"}"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value("error"));
     }
 
     /**

@@ -2,7 +2,9 @@ package com.st4r4x.controller;
 
 import com.st4r4x.entity.LetterGrade;
 import com.st4r4x.entity.Status;
+import com.st4r4x.entity.UserEntity;
 import com.st4r4x.repository.ReportRepository;
+import com.st4r4x.repository.UserRepository;
 import com.st4r4x.sync.CronScheduler;
 import com.st4r4x.sync.OsmEnrichmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +14,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for ADMIN-only operations.
@@ -33,10 +38,73 @@ public class AdminController {
     private ReportRepository reportRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private OsmEnrichmentService osmEnrichmentService;
 
     @Autowired
     private CronScheduler cronScheduler;
+
+    private static final List<String> ALLOWED_ROLES =
+            List.of("ROLE_CUSTOMER", "ROLE_CONTROLLER", "ROLE_ADMIN");
+
+    /**
+     * GET /api/admin/users — list all users (id, username, email, role).
+     * Password hashes are never returned. ADMIN role required.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/api/admin/users")
+    public ResponseEntity<List<Map<String, Object>>> listUsers() {
+        List<Map<String, Object>> users = userRepository.findAll().stream()
+                .map(u -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", u.getId());
+                    m.put("username", u.getUsername());
+                    m.put("email", u.getEmail());
+                    m.put("role", u.getRole());
+                    return m;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
+    }
+
+    /**
+     * POST /api/admin/users/{id}/role — update the role of a user.
+     * Body: { "role": "ROLE_CONTROLLER" }
+     * Allowed values: ROLE_CUSTOMER, ROLE_CONTROLLER, ROLE_ADMIN.
+     * ADMIN role required.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/api/admin/users/{id}/role")
+    public ResponseEntity<Map<String, Object>> setUserRole(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        String newRole = body.get("role");
+        if (newRole == null || !ALLOWED_ROLES.contains(newRole)) {
+            Map<String, Object> err = new LinkedHashMap<>();
+            err.put("status", "error");
+            err.put("message", "Invalid role. Allowed: " + ALLOWED_ROLES);
+            return ResponseEntity.badRequest().body(err);
+        }
+        return userRepository.findById(id)
+                .map(u -> {
+                    u.setRole(newRole);
+                    userRepository.save(u);
+                    Map<String, Object> resp = new LinkedHashMap<>();
+                    resp.put("status", "success");
+                    resp.put("id", u.getId());
+                    resp.put("username", u.getUsername());
+                    resp.put("role", u.getRole());
+                    return ResponseEntity.ok(resp);
+                })
+                .orElseGet(() -> {
+                    Map<String, Object> err = new LinkedHashMap<>();
+                    err.put("status", "error");
+                    err.put("message", "User not found: " + id);
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+                });
+    }
 
     /**
      * POST /api/admin/osm-enrich — triggers a full OSM re-enrichment of all restaurants.
