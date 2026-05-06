@@ -3,6 +3,7 @@ package com.st4r4x.controller;
 import com.st4r4x.entity.LetterGrade;
 import com.st4r4x.entity.Status;
 import com.st4r4x.repository.ReportRepository;
+import com.st4r4x.sync.CronScheduler;
 import com.st4r4x.sync.OsmEnrichmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,9 @@ public class AdminController {
     @Autowired
     private OsmEnrichmentService osmEnrichmentService;
 
+    @Autowired
+    private CronScheduler cronScheduler;
+
     /**
      * POST /api/admin/osm-enrich — triggers a full OSM re-enrichment of all restaurants.
      * Uses an absolute path to avoid the /api/reports prefix from @RequestMapping.
@@ -47,6 +51,20 @@ public class AdminController {
         body.put("status", "accepted");
         body.put("message", "OSM enrichment started in background");
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(body);
+    }
+
+    /**
+     * GET /api/admin/cron/status — returns the status of all scheduled cron jobs.
+     * Returns a map of job names to JobStatus objects, including last run time, duration, and error info.
+     * ADMIN role required.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/api/admin/cron/status")
+    public ResponseEntity<Map<String, Object>> getCronStatus() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", "success");
+        body.put("jobs", cronScheduler.getStatus());
+        return ResponseEntity.ok(body);
     }
 
     /**
