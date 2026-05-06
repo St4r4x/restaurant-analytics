@@ -31,6 +31,12 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build (skip tests)
         run: mvn clean package -DskipTests
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-jar
+          path: target/*.jar
+          retention-days: 1
 
   unit-test:
     name: Unit Tests
@@ -117,6 +123,11 @@ jobs:
           project-slug: nyc-restaurant-hygiene-z-qd-p
           env-slug: dev
           export-type: env
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: target/
       - name: Build application image
         run: docker compose build --build-arg GIT_SHA=${{ github.sha }} app
       - name: Start application stack
@@ -139,6 +150,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: target/
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Log in to GHCR

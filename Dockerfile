@@ -1,20 +1,5 @@
-FROM maven:3.9-eclipse-temurin-25 as builder
-
-WORKDIR /build
-
-ARG GIT_SHA=unknown
-
-# Copy pom.xml and download dependencies
-COPY pom.xml .
-RUN mvn dependency:go-offline
-
-# Copy source code
-COPY src ./src
-
-# Build application — inject git SHA so health endpoint reports correct version
-RUN mvn clean package -DskipTests -Dgit.commit.id.abbrev=${GIT_SHA}
-
-# Production image — JRE-only Alpine (smaller than JDK; non-root user for security)
+# JAR is pre-built by CI and passed via the build context (target/ directory).
+# This avoids Maven Central rate-limiting during Docker builds.
 FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
@@ -25,8 +10,9 @@ RUN apk add --no-cache curl
 # Non-root user — Alpine BusyBox syntax (NOT useradd which does not exist on Alpine)
 RUN addgroup -S appuser && adduser -S appuser -G appuser
 
-# Copy JAR from builder
-COPY --from=builder /build/target/*.jar app.jar
+ARG GIT_SHA=unknown
+
+COPY target/*.jar app.jar
 
 # MongoDB connection defaults (overridden by docker-compose environment section)
 ENV MONGODB_URI=mongodb://mongodb:27017

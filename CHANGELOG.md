@@ -20,6 +20,9 @@ All notable changes are documented here.
 - Remove deprecated ROADMAP.md
 - Improve global git rules: conventional commits prefix, unified CHANGELOG rule, semver rule
 
+### CI/CD
+- Fix Docker Build: upload JAR from build job as artifact, download in e2e+docker jobs; replace Maven builder stage with direct JAR copy to eliminate Maven Central 403 rate-limiting
+
 ## [2.1.1] — 2026-05-05
 
 ### Bug Fixes
