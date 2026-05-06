@@ -1,5 +1,7 @@
 package com.st4r4x.controller;
 
+import com.st4r4x.repository.AuditLogRepository;
+import com.st4r4x.service.AuditService;
 import com.st4r4x.sync.OsmEnrichmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,12 @@ class AdminOsmEnrichTest {
 
     @Mock
     private com.st4r4x.repository.ReportRepository reportRepository;
+
+    @Mock
+    private AuditLogRepository auditLogRepository;
+
+    @Mock
+    private AuditService auditService;
 
     @InjectMocks
     private AdminController adminController;

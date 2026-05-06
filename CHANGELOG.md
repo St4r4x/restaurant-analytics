@@ -2,7 +2,7 @@
 
 All notable changes are documented here.
 
-## [Unreleased] — 2026-05-06
+## [2.2.0] — 2026-05-06
 
 ### Features
 - Grade trend chart: per-point colour by grade (A=green, B=amber, C=orange, F=red), inverted y-axis, grade in tooltip

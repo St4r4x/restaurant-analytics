@@ -1,5 +1,6 @@
 package com.st4r4x.controller;
 
+import com.st4r4x.service.AuditService;
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.service.RestaurantService;
@@ -52,6 +53,7 @@ class ReportControllerTest {
     @Mock private ReportRepository reportRepository;
     @Mock private RestaurantService restaurantService;
     @Mock private UserRepository userRepository;
+    @Mock private AuditService auditService;
 
     @InjectMocks
     private ReportController reportController;

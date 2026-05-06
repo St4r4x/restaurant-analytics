@@ -1,5 +1,7 @@
 package com.st4r4x.controller;
 
+import com.st4r4x.repository.AuditLogRepository;
+import com.st4r4x.service.AuditService;
 import com.st4r4x.sync.CronScheduler;
 import com.st4r4x.sync.JobStatus;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,8 @@ import static org.mockito.Mockito.*;
 class AdminCronStatusTest {
 
     @Mock CronScheduler cronScheduler;
+    @Mock AuditLogRepository auditLogRepository;
+    @Mock AuditService auditService;
     @InjectMocks AdminController adminController;
 
     @Test
