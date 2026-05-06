@@ -1,0 +1,39 @@
+# Self-contained multi-stage build for Railway.
+# CI uses the root Dockerfile (pre-built JAR passed as artifact).
+# Railway has no artifact — it builds Maven from source here.
+FROM eclipse-temurin:25-jdk-alpine AS builder
+
+WORKDIR /build
+
+COPY pom.xml .
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -f pom.xml dependency:go-offline -B -q 2>/dev/null || true
+
+COPY src ./src
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -f pom.xml clean package -DskipTests -B -q
+
+# ── Runtime stage ────────────────────────────────────────────────────────────
+FROM eclipse-temurin:25-jre-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache curl
+
+RUN addgroup -S appuser && adduser -S appuser -G appuser
+
+ARG GIT_SHA=unknown
+
+COPY --from=builder /build/target/*.jar app.jar
+
+ENV MONGODB_URI=mongodb://mongodb:27017
+ENV MONGODB_DATABASE=newyork
+ENV MONGODB_COLLECTION=restaurants
+
+LABEL org.opencontainers.image.source=https://github.com/St4r4x/restaurant-analytics
+
+EXPOSE 8080
+
+USER appuser
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
