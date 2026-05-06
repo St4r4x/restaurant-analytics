@@ -19,6 +19,8 @@ All notable changes are documented here.
 
 ### Bug Fixes
 - Null-guard actorUsername in AuditService when auth.getName() returns null
+- Serialize AuditLogEntity action as .name() string in GET /api/admin/audit response
+- Add missing @CrossOrigin to AdminController
 
 ### Chores
 - Add .githooks/pre-commit enforcing CHANGELOG update on code commits

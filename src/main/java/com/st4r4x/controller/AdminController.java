@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  * No class-level @RequestMapping — each method declares its full path so that
  * /api/admin/* and /api/reports/* endpoints can coexist in the same controller.
  */
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 public class AdminController {
 
@@ -202,7 +204,7 @@ public class AdminController {
                     m.put("id", e.getId());
                     m.put("actorUsername", e.getActorUsername());
                     m.put("actorRole", e.getActorRole());
-                    m.put("action", e.getAction());
+                    m.put("action", e.getAction() != null ? e.getAction().name() : null);
                     m.put("targetType", e.getTargetType());
                     m.put("targetId", e.getTargetId());
                     m.put("detail", e.getDetail());
