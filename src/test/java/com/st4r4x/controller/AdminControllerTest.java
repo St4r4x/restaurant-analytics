@@ -1,10 +1,14 @@
 package com.st4r4x.controller;
 
+import com.st4r4x.entity.AuditAction;
+import com.st4r4x.entity.AuditLogEntity;
 import com.st4r4x.entity.LetterGrade;
 import com.st4r4x.entity.Status;
 import com.st4r4x.entity.UserEntity;
+import com.st4r4x.repository.AuditLogRepository;
 import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
+import com.st4r4x.service.AuditService;
 import com.st4r4x.sync.CronScheduler;
 import com.st4r4x.sync.OsmEnrichmentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +17,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +46,8 @@ class AdminControllerTest {
     @Mock private UserRepository userRepository;
     @Mock private OsmEnrichmentService osmEnrichmentService;
     @Mock private CronScheduler cronScheduler;
+    @Mock private AuditLogRepository auditLogRepository;
+    @Mock private AuditService auditService;
 
     @InjectMocks
     private AdminController adminController;
@@ -177,5 +186,38 @@ class AdminControllerTest {
             .andExpect(jsonPath("$.restaurantId").doesNotExist())
             .andExpect(jsonPath("$.notes").doesNotExist())
             .andExpect(jsonPath("$.userId").doesNotExist());
+    }
+
+    @Test
+    void getAuditLog_returns200_withPagedEntries() throws Exception {
+        AuditLogEntity entry = new AuditLogEntity();
+        entry.setActorUsername("admin");
+        entry.setActorRole("ROLE_ADMIN");
+        entry.setAction(AuditAction.USER_ROLE_CHANGED);
+        entry.setTargetType("User");
+        entry.setTargetId("5");
+        entry.setDetail("{\"oldRole\":\"ROLE_CUSTOMER\",\"newRole\":\"ROLE_CONTROLLER\"}");
+        entry.setCreatedAt(new java.util.Date());
+
+        when(auditLogRepository.findAllByOrderByCreatedAtDesc(any()))
+            .thenReturn(new PageImpl<>(List.of(entry), PageRequest.of(0, 20), 1));
+
+        mockMvc.perform(get("/api/admin/audit?page=0&size=20"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].actorUsername").value("admin"))
+            .andExpect(jsonPath("$.content[0].action").value("USER_ROLE_CHANGED"))
+            .andExpect(jsonPath("$.totalElements").value(1))
+            .andExpect(jsonPath("$.page").value(0));
+    }
+
+    @Test
+    void getAuditLog_emptyPage_returns200() throws Exception {
+        when(auditLogRepository.findAllByOrderByCreatedAtDesc(any()))
+            .thenReturn(new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0));
+
+        mockMvc.perform(get("/api/admin/audit"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.totalElements").value(0));
     }
 }

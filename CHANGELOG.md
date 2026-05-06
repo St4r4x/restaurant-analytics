@@ -5,6 +5,7 @@ All notable changes are documented here.
 ## [Unreleased] — 2026-05-06
 
 ### Features
+- Add `GET /api/admin/audit` endpoint (ADMIN only) with paginated audit entries; log actions in AdminController, RestaurantController, ReportController
 - Add AuditLogEntity, AuditService, AuditLogRepository for persisting admin actions to PostgreSQL audit_log table
 - Add User Management card on admin page: list all users, change role via dropdown
 - Add `GET /api/admin/users` and `POST /api/admin/users/{id}/role` endpoints (ADMIN)

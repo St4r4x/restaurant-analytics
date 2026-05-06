@@ -3,11 +3,13 @@ package com.st4r4x.controller;
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.dto.ReportRequest;
+import com.st4r4x.entity.AuditAction;
 import com.st4r4x.entity.InspectionReportEntity;
 import com.st4r4x.entity.Status;
 import com.st4r4x.entity.UserEntity;
 import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
+import com.st4r4x.service.AuditService;
 import com.st4r4x.service.RestaurantService;
 import com.st4r4x.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ public class ReportController {
     @Autowired private ReportRepository reportRepository;
     @Autowired private RestaurantService restaurantService;
     @Autowired private UserRepository userRepository;
+    @Autowired private AuditService auditService;
 
     // ── Auth helper ────────────────────────────────────────────────────────
     private UserEntity getCurrentUser() {
@@ -139,12 +142,17 @@ public class ReportController {
             }
 
             // Partial update — only apply non-null fields; restaurantId is ignored
+            Status oldStatus = report.getStatus();
             if (req.getGrade()          != null) { report.setGrade(req.getGrade()); }
             if (req.getStatus()         != null) { report.setStatus(req.getStatus()); }
             if (req.getViolationCodes() != null) { report.setViolationCodes(req.getViolationCodes()); }
             if (req.getNotes()          != null) { report.setNotes(req.getNotes()); }
             report.setUpdatedAt(new Date());
             reportRepository.save(report);
+            if (req.getStatus() != null && !req.getStatus().equals(oldStatus)) {
+                auditService.log(AuditAction.REPORT_STATUS_CHANGED, "Report", String.valueOf(id),
+                        Map.of("oldStatus", oldStatus.name(), "newStatus", req.getStatus().name()));
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");

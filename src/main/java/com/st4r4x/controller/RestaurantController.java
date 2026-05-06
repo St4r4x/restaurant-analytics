@@ -33,6 +33,8 @@ import com.st4r4x.aggregation.AggregationCount;
 import com.st4r4x.dto.HeatmapPoint;
 import com.st4r4x.dto.TopRestaurantEntry;
 import com.st4r4x.domain.Restaurant;
+import com.st4r4x.entity.AuditAction;
+import com.st4r4x.service.AuditService;
 import com.st4r4x.service.RestaurantService;
 import com.st4r4x.sync.ElasticsearchSyncService;
 import com.st4r4x.sync.ElasticsearchSyncService.EsRestaurantDoc;
@@ -67,6 +69,9 @@ public class RestaurantController {
 
     @Autowired
     private ElasticsearchClient esClient;
+
+    @Autowired
+    private AuditService auditService;
 
     /**
      * USE CASE 1: Restaurant count per borough
@@ -209,6 +214,7 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Object>> refresh() {
         try {
             SyncResult result = syncService.runSync();
+            auditService.log(AuditAction.SYNC_TRIGGERED, null, null, null);
             Map<String, Object> response = new HashMap<>();
             response.put("status", result.isSuccess() ? "success" : "error");
             response.put("rawRecords", result.getRawRecords());
@@ -394,6 +400,7 @@ public class RestaurantController {
             List<Restaurant> restaurants = restaurantService.getAllRestaurants(limit);
             cacheService.invalidateAll();
             cacheService.updateTopRestaurants(restaurants);
+            auditService.log(AuditAction.CACHE_REBUILT, null, null, null);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("restaurantsProcessed", restaurants.size());
