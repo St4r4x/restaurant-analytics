@@ -77,7 +77,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint((request, response, authException) -> {
                     // API calls get 401 JSON; browser navigation gets redirected to /login
                     String path = request.getRequestURI();
-                    if (path.startsWith("/api/")) {
+                    if (path.startsWith("/api/") || path.startsWith("/actuator/")) {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         response.setContentType("application/json");
                         response.getWriter().write("{\"status\":\"error\",\"message\":\"Unauthorized\"}");
