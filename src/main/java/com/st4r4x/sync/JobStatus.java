@@ -1,6 +1,7 @@
 package com.st4r4x.sync;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class JobStatus {
 
@@ -10,7 +11,7 @@ public class JobStatus {
     private final String errorMessage;
 
     private JobStatus(Instant lastRunAt, long durationMs, boolean success, String errorMessage) {
-        this.lastRunAt = lastRunAt;
+        this.lastRunAt = Objects.requireNonNull(lastRunAt, "lastRunAt");
         this.durationMs = durationMs;
         this.success = success;
         this.errorMessage = errorMessage;
@@ -28,4 +29,13 @@ public class JobStatus {
     public long getDurationMs()      { return durationMs; }
     public boolean isSuccess()       { return success; }
     public String getErrorMessage()  { return errorMessage; }
+
+    @Override
+    public String toString() {
+        return "JobStatus{" +
+                "success=" + success +
+                ", durationMs=" + durationMs +
+                ", lastRunAt=" + lastRunAt +
+                '}';
+    }
 }
