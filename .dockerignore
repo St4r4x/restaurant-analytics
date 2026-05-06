@@ -1,8 +1,14 @@
-# .dockerignore — keeps build context lean for two-stage Maven build
-# IMPORTANT: src/ and pom.xml are intentionally NOT excluded — builder stage needs them.
+# .dockerignore — JAR is pre-built by CI and passed via artifact; Dockerfile copies target/*.jar directly.
+# target/ is intentionally NOT excluded so the pre-built JAR is in the build context.
 
-# Build output — not needed (builder stage runs mvn clean package itself)
-target/
+# Build output subdirectories not needed in the image
+target/classes/
+target/generated-sources/
+target/maven-archiver/
+target/maven-status/
+target/site/
+target/surefire-reports/
+target/test-classes/
 
 # Git history — not needed in any stage
 .git/
