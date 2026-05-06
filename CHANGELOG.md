@@ -5,6 +5,7 @@ All notable changes are documented here.
 ## [Unreleased] — 2026-05-06
 
 ### Features
+- Grade trend chart: per-point colour by grade (A=green, B=amber, C=orange, F=red), inverted y-axis, grade in tooltip
 - Add paginated Audit Log card to admin page (DOM-safe rendering, Prev/Next pagination)
 - Add `GET /api/admin/audit` endpoint (ADMIN only) with paginated audit entries; log actions in AdminController, RestaurantController, ReportController
 - Add AuditLogEntity, AuditService, AuditLogRepository for persisting admin actions to PostgreSQL audit_log table

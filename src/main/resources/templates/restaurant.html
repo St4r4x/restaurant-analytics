@@ -328,46 +328,66 @@
       }
 
       function renderScoreChart(grades) {
-        const sorted = (grades || [])
-          .filter(g => g.date && g.score != null)
-          .sort((a, b) => a.date.localeCompare(b.date));
+        var sorted = (grades || [])
+          .filter(function(g) { return g.date && g.score != null; })
+          .sort(function(a, b) { return a.date.localeCompare(b.date); });
 
         if (sorted.length === 0) {
-          document.getElementById("score-chart").parentElement.innerHTML =
-            '<p style="color:#aaa;font-size:0.9em;padding:20px 0">No score data available</p>';
+          var container = document.getElementById('score-chart').parentElement;
+          container.textContent = 'No score data available';
+          container.style.cssText = 'color:#aaa;font-size:0.9em;padding:20px 0';
           return;
         }
 
-        const chart = new Chart(document.getElementById("score-chart"), {
-          type: "line",
+        var GRADE_COLORS = { A: '#2e7d32', B: '#f9a825', C: '#e65100', F: '#b71c1c' };
+        function gradeColor(g) { return GRADE_COLORS[g] || '#b71c1c'; }
+
+        var chart = new Chart(document.getElementById('score-chart'), {
+          type: 'line',
           data: {
-            labels: sorted.map(g => g.date.substring(0, 10)),
+            labels: sorted.map(function(g) { return g.date.substring(0, 10); }),
             datasets: [{
-              label: "Inspection score",
-              data: sorted.map(g => g.score),
-              borderColor: "#667eea",
-              backgroundColor: "rgba(102,126,234,0.1)",
+              label: 'Score',
+              data: sorted.map(function(g) { return g.score; }),
+              borderColor: '#888',
+              backgroundColor: 'rgba(136,136,136,0.08)',
               tension: 0.3,
               fill: true,
-              pointRadius: 4,
-              pointBackgroundColor: "#667eea"
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              pointBackgroundColor: sorted.map(function(g) { return gradeColor(g.grade); }),
+              pointBorderColor: sorted.map(function(g) { return gradeColor(g.grade); })
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    var g = sorted[ctx.dataIndex];
+                    return 'Score: ' + g.score + '  |  Grade: ' + (g.grade || '—');
+                  }
+                }
+              }
+            },
             scales: {
               y: {
-                beginAtZero: true,
-                title: { display: true, text: "Score (lower = better)" },
-                grid: { color: "#f0f0f0" }
+                reverse: true,
+                min: 0,
+                title: { display: true, text: 'Score (lower = better)', font: { size: 11 } },
+                grid: { color: '#f0f0f0' }
               },
-              x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }
+              x: {
+                grid: { display: false },
+                ticks: { maxTicksLimit: 8, font: { size: 10 } }
+              }
             }
           }
         });
-        setTimeout(() => chart.resize(), 50);
+        setTimeout(function() { chart.resize(); }, 50);
       }
 
       function renderInspections(grades) {
