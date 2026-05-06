@@ -8,7 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Map;
 
@@ -37,5 +39,13 @@ class AdminCronStatusTest {
         assertNotNull(body);
         assertEquals("success", body.get("status"));
         assertSame(registry, body.get("jobs"));
+    }
+
+    @Test
+    void getCronStatus_hasPreAuthorizeAdminRole() throws NoSuchMethodException {
+        Method method = AdminController.class.getMethod("getCronStatus");
+        PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
+        assertNotNull(annotation, "@PreAuthorize must be present on getCronStatus()");
+        assertEquals("hasRole('ADMIN')", annotation.value());
     }
 }

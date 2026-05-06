@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,7 @@ public class CronScheduler {
         try {
             osmEnrichmentService.enrichAllSync();
             recordJob("osm-reenrichment", start, true, null);
-            logger.info("OSM re-enrichment triggered");
+            logger.info("OSM re-enrichment complete");
         } catch (Exception e) {
             recordJob("osm-reenrichment", start, false, e.getMessage());
             logger.warn("OSM re-enrichment failed: {}", e.getMessage());
@@ -91,7 +92,7 @@ public class CronScheduler {
     }
 
     private void recordJob(String key, Instant start, boolean success, String error) {
-        long durationMs = Instant.now().toEpochMilli() - start.toEpochMilli();
+        long durationMs = Duration.between(start, Instant.now()).toMillis();
         registry.put(key, success
                 ? JobStatus.success(start, durationMs)
                 : JobStatus.failure(start, durationMs, error));
