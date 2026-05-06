@@ -107,6 +107,12 @@ function fetchWithAuth(url, options) {
     return fetch(url, options).then(handleFetchErrorResponse);
 }
 
+function fmtDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+}
+
 // Sync polling
 var syncPollInterval = null;
 
@@ -135,7 +141,7 @@ function startSyncPoll() {
 function showSyncResult(data) {
     var el = document.getElementById('sync-result');
     if (data.status === 'success') {
-        el.textContent = 'Done — ' + (data.upsertedRestaurants || 0) + ' records upserted';
+        el.textContent = 'Done — ' + (data.upsertedRestaurants || 0) + ' records upserted — ' + fmtDate(data.completedAt);
         el.style.color = '#2e7d32';
     } else if (data.status === 'error') {
         el.textContent = 'Error: ' + (data.error || 'Unknown error');
@@ -226,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('sync-btn').disabled = true;
                 startSyncPoll();
             } else if (data.status === 'success') {
-                textEl.textContent = 'Last sync: ' + (data.upsertedRestaurants || 0) + ' records';
+                textEl.textContent = 'Last sync: ' + (data.upsertedRestaurants || 0) + ' records — ' + fmtDate(data.completedAt);
             } else if (data.status === 'error') {
                 textEl.textContent = 'Last sync failed: ' + (data.error || 'Unknown');
             }

@@ -5,6 +5,7 @@ All notable changes are documented here.
 ## [Unreleased] — 2026-05-06
 
 ### Features
+- Show completedAt date+time alongside record count on admin sync status
 - Add `POST /api/admin/cron/run/{jobKey}` endpoint to manually trigger any cron job (ADMIN)
   Valid keys: `cache-warmup` (sync), `osm-reenrichment` (async), `es-reindex` (async)
   Writes to the job registry so `/api/admin/cron/status` reflects the run immediately
