@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,6 +52,32 @@ public class AdminController {
         body.put("status", "accepted");
         body.put("message", "OSM enrichment started in background");
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(body);
+    }
+
+    /**
+     * POST /api/admin/cron/run/{jobKey} — manually trigger a cron job by key.
+     * Valid keys: cache-warmup, osm-reenrichment, es-reindex.
+     * cache-warmup runs inline (200 OK when done); the other two run async (202 Accepted).
+     * ADMIN role required.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/api/admin/cron/run/{jobKey}")
+    public ResponseEntity<Map<String, Object>> runCronJob(@PathVariable String jobKey) {
+        boolean known = cronScheduler.runJob(jobKey);
+        if (!known) {
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("status", "error");
+            body.put("message", "Unknown job key: " + jobKey + ". Valid keys: cache-warmup, osm-reenrichment, es-reindex");
+            return ResponseEntity.badRequest().body(body);
+        }
+        boolean async = jobKey.equals("osm-reenrichment") || jobKey.equals("es-reindex");
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", async ? "accepted" : "success");
+        body.put("job", jobKey);
+        body.put("message", async ? "Job started in background" : "Job completed");
+        return async
+                ? ResponseEntity.status(HttpStatus.ACCEPTED).body(body)
+                : ResponseEntity.ok(body);
     }
 
     /**

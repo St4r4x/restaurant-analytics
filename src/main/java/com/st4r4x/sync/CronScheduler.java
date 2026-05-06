@@ -87,6 +87,28 @@ public class CronScheduler {
         }
     }
 
+    /**
+     * Manually trigger a job by key. Writes to the registry like the scheduled run.
+     * Heavy jobs (osm-reenrichment, es-reindex) run on a background thread; cache-warmup runs inline.
+     *
+     * @return true if the key was recognised, false if unknown
+     */
+    public boolean runJob(String key) {
+        switch (key) {
+            case "cache-warmup":
+                warmCache();
+                return true;
+            case "osm-reenrichment":
+                new Thread(this::reEnrichOsm, "manual-osm").start();
+                return true;
+            case "es-reindex":
+                new Thread(this::reindexEs, "manual-es").start();
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public Map<String, JobStatus> getStatus() {
         return Collections.unmodifiableMap(registry);
     }
