@@ -214,7 +214,8 @@ public class RestaurantController {
     public ResponseEntity<Map<String, Object>> refresh() {
         try {
             SyncResult result = syncService.runSync();
-            auditService.log(AuditAction.SYNC_TRIGGERED, null, null, null);
+            auditService.log(AuditAction.SYNC_TRIGGERED, null, null,
+                    result.isSuccess() ? null : Map.of("error", result.getErrorMessage()));
             Map<String, Object> response = new HashMap<>();
             response.put("status", result.isSuccess() ? "success" : "error");
             response.put("rawRecords", result.getRawRecords());
