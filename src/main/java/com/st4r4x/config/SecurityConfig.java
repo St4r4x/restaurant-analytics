@@ -49,6 +49,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/**").hasRole("ADMIN")
                 // Public: auth endpoints, read-only NYC data, Swagger
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/restaurants/**").permitAll()
