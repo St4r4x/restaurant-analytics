@@ -61,7 +61,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/api/admin/cron/status")
     public ResponseEntity<Map<String, Object>> getCronStatus() {
-        Map<String, Object> body = new HashMap<>();
+        Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", "success");
         body.put("jobs", cronScheduler.getStatus());
         return ResponseEntity.ok(body);

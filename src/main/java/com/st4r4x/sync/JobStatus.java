@@ -1,8 +1,10 @@
 package com.st4r4x.sync;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.Instant;
 import java.util.Objects;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class JobStatus {
 
     private final Instant lastRunAt;
