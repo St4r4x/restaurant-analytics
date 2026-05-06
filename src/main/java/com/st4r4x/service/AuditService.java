@@ -30,7 +30,7 @@ public class AuditService {
     public void log(AuditAction action, String targetType, String targetId, Map<String, Object> detail) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String actorUsername = (auth != null) ? auth.getName() : "anonymous";
+            String actorUsername = (auth != null && auth.getName() != null) ? auth.getName() : "anonymous";
             String actorRole = resolveRole(auth);
 
             AuditLogEntity entry = new AuditLogEntity();

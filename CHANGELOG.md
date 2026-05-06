@@ -16,6 +16,9 @@ All notable changes are documented here.
   Writes to the job registry so `/api/admin/cron/status` reflects the run immediately
 - Expose `/actuator/prometheus` (Micrometer + Prometheus) locked to ADMIN role; `/actuator/health` remains public for Railway health checks
 
+### Bug Fixes
+- Null-guard actorUsername in AuditService when auth.getName() returns null
+
 ### Chores
 - Add .githooks/pre-commit enforcing CHANGELOG update on code commits
 - Update CLAUDE.md: fix package name, expand architecture tree, endpoints, Git workflow

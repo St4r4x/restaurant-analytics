@@ -15,7 +15,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -37,8 +36,7 @@ class AuditServiceTest {
     private void setupSecurityContext(String username, String role) {
         Authentication auth = mock(Authentication.class);
         when(auth.getName()).thenReturn(username);
-        when(auth.getAuthorities()).thenReturn(
-            (Collection) List.of(new SimpleGrantedAuthority(role)));
+        when(auth.getAuthorities()).thenAnswer(inv -> List.of(new SimpleGrantedAuthority(role)));
         SecurityContext ctx = mock(SecurityContext.class);
         when(ctx.getAuthentication()).thenReturn(auth);
         SecurityContextHolder.setContext(ctx);
