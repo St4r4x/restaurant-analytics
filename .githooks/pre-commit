@@ -1,0 +1,26 @@
+#!/bin/bash
+# Pre-commit hook — enforces CHANGELOG update on code changes
+# Activate with: git config core.hooksPath .githooks
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Check if any source files are staged
+HAS_CODE=$(echo "$STAGED" | grep -E '\.(java|html|yml|yaml|xml|properties|js|css|ts)$' || true)
+
+if [[ -z "$HAS_CODE" ]]; then
+  exit 0
+fi
+
+# Check if CHANGELOG.md is also staged
+HAS_CHANGELOG=$(echo "$STAGED" | grep -F "CHANGELOG.md" || true)
+
+if [[ -z "$HAS_CHANGELOG" ]]; then
+  echo ""
+  echo "  Pre-commit: CHANGELOG.md not staged."
+  echo "  Source files changed — update CHANGELOG.md before committing."
+  echo "  To skip (housekeeping only): git commit --no-verify"
+  echo ""
+  exit 1
+fi
+
+exit 0

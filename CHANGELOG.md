@@ -1,225 +1,68 @@
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Bump app.semver to 2.1.1
-- Widen navbar-container to 1140px to prevent wrap when all nav items visible
-- Fix autocomplete dropdown clipped by hero overflow:hidden; fix ES index mapping boost removed in ES8
-- Move nearby+contact into left column, truncate violation descriptions, fix chart resize
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
-- Update for 24d3b78bef733a7da8fe536a786f2aa5e856dc2b [skip ci]
-- Update for 9bac142833f846f7099322fa24555d06c93f56f8 [skip ci]
-- Suppress sun.misc.Unsafe warning from Maven bundled Guava on Java 25
-- Update for 0ebab580e0cd5b14f84bf8f04d829f09212d12c5 [skip ci]
-- Update for 6ecb4afc2ad74e31cbfd9bf700829030a28ee44b [skip ci]
-- Update for 17be55324c73c3f141f64b625574d2527b4a77c7 [skip ci]
-- Update for 32eb7c0d291cb91e7f9e2df0907404579e88be91 [skip ci]
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
-
-### Features
-- Improve autocomplete with edge-ngram index and borough-aware query splitting
-- Add street to autocomplete search with edge-ngram; add reindex retry logic
-- Show formatted address with Maps link and formatted phone on detail page; trigger OSM enrichment on startup
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Bump app.semver to 2.1.1
-- Widen navbar-container to 1140px to prevent wrap when all nav items visible
-- Fix autocomplete dropdown clipped by hero overflow:hidden; fix ES index mapping boost removed in ES8
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
-- Update for 24d3b78bef733a7da8fe536a786f2aa5e856dc2b [skip ci]
-- Update for 9bac142833f846f7099322fa24555d06c93f56f8 [skip ci]
-- Suppress sun.misc.Unsafe warning from Maven bundled Guava on Java 25
-- Update for 0ebab580e0cd5b14f84bf8f04d829f09212d12c5 [skip ci]
-- Update for 6ecb4afc2ad74e31cbfd9bf700829030a28ee44b [skip ci]
-- Update for 17be55324c73c3f141f64b625574d2527b4a77c7 [skip ci]
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
-
-### Features
-- Improve autocomplete with edge-ngram index and borough-aware query splitting
-- Add street to autocomplete search with edge-ngram; add reindex retry logic
-- Show formatted address with Maps link and formatted phone on detail page; trigger OSM enrichment on startup
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Bump app.semver to 2.1.1
-- Widen navbar-container to 1140px to prevent wrap when all nav items visible
-- Fix autocomplete dropdown clipped by hero overflow:hidden; fix ES index mapping boost removed in ES8
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
-- Update for 24d3b78bef733a7da8fe536a786f2aa5e856dc2b [skip ci]
-- Update for 9bac142833f846f7099322fa24555d06c93f56f8 [skip ci]
-- Suppress sun.misc.Unsafe warning from Maven bundled Guava on Java 25
-- Update for 0ebab580e0cd5b14f84bf8f04d829f09212d12c5 [skip ci]
-- Update for 6ecb4afc2ad74e31cbfd9bf700829030a28ee44b [skip ci]
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
-
-### Features
-- Improve autocomplete with edge-ngram index and borough-aware query splitting
-- Add street to autocomplete search with edge-ngram; add reindex retry logic
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Bump app.semver to 2.1.1
-- Widen navbar-container to 1140px to prevent wrap when all nav items visible
-- Fix autocomplete dropdown clipped by hero overflow:hidden; fix ES index mapping boost removed in ES8
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
-- Update for 24d3b78bef733a7da8fe536a786f2aa5e856dc2b [skip ci]
-- Update for 9bac142833f846f7099322fa24555d06c93f56f8 [skip ci]
-- Suppress sun.misc.Unsafe warning from Maven bundled Guava on Java 25
-- Update for 0ebab580e0cd5b14f84bf8f04d829f09212d12c5 [skip ci]
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
-
-### Features
-- Improve autocomplete with edge-ngram index and borough-aware query splitting
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Bump app.semver to 2.1.1
-- Widen navbar-container to 1140px to prevent wrap when all nav items visible
-- Fix autocomplete dropdown clipped by hero overflow:hidden; fix ES index mapping boost removed in ES8
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
-- Update for 24d3b78bef733a7da8fe536a786f2aa5e856dc2b [skip ci]
-- Update for 9bac142833f846f7099322fa24555d06c93f56f8 [skip ci]
-- Suppress sun.misc.Unsafe warning from Maven bundled Guava on Java 25
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Bump app.semver to 2.1.1
-- Widen navbar-container to 1140px to prevent wrap when all nav items visible
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
-- Update for 24d3b78bef733a7da8fe536a786f2aa5e856dc2b [skip ci]
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
-
-## [Unreleased] — 2026-05-05
-
-### Bug Fixes
-- Bump app.semver to 2.1.1
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-- Update for bb941cb518f980e3a3a5a18c5435036e40245b5a [skip ci]
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
-
-## [Unreleased] — 2026-05-05
-
-### CI/CD
-- Redeploy v2.1.1 navbar fix to production
-
-### Chores
-- Update for 81b03bed8c27d66bd71e56e761e2af15c20e1eea [skip ci]
-
-### Documentation
-- Release v2.1.1 — navbar flex hotfix [skip ci]
 # Changelog
 
 All notable changes are documented here.
+
+## [Unreleased] — 2026-05-06
+
+### Chores
+- Add .githooks/pre-commit enforcing CHANGELOG update on code commits
+- Update CLAUDE.md: fix package name, expand architecture tree, endpoints, Git workflow
+- Remove deprecated ROADMAP.md
+- Improve global git rules: conventional commits prefix, unified CHANGELOG rule, semver rule
 
 ## [2.1.1] — 2026-05-05
 
 ### Bug Fixes
 - Restore flex layout on navbar-container so logo and nav links are in the same row on all pages
+- Widen navbar-container to 1140px to prevent wrap when all nav items visible
+- Fix autocomplete dropdown clipped by hero overflow:hidden; fix ES index mapping boost removed in ES8
+- Move nearby+contact into left column, truncate violation descriptions, fix chart resize
+- Bump app.semver to 2.1.1
+
+### Features
+- Add street to autocomplete search with edge-ngram; add reindex retry logic
+- Show formatted address with Maps link and formatted phone on restaurant detail page; trigger OSM enrichment on startup
+- Improve autocomplete with edge-ngram index and borough-aware query splitting
+
+### CI/CD
+- Parallelize unit+integration tests in CI; remove redundant changelog job
 
 ## [2.1.0] — 2026-05-05
 
 ### Features
 - Elasticsearch 8 as a 5th Docker service — full-text index of all restaurants, bulk-synced after each nightly data pull
 - `GET /api/restaurants/autocomplete?q=` — fuzzy multi-match on name, cuisine, street, borough; returns up to 8 suggestions
-- Autocomplete dropdown on landing page search bar — debounced 250 ms, keyboard navigation (↑↓ Enter Escape), name suggestions navigate to restaurant page
-- OpenStreetMap enrichment — `OsmEnrichmentService` enriches restaurant phone, website, and opening hours from Overpass API (async, 1 req/s rate-limited); shown on restaurant detail page
+- Autocomplete dropdown on landing page search bar — debounced 250 ms, keyboard navigation (↑↓ Enter Escape)
+- OpenStreetMap enrichment — `OsmEnrichmentService` enriches restaurant phone, website, and opening hours from Overpass API (async, 1 req/s)
 - `POST /api/admin/osm-enrich` — admin endpoint to trigger a full OSM re-enrichment pass
+- `GET /api/admin/cron/status` — cron job registry endpoint (ADMIN)
+- `CronScheduler` with cache warm-up (02:30), OSM re-enrichment (Sun 03:00), ES reindex (04:00)
 
 ### Bug Fixes
-- Navbar alignment inconsistency between pages — fragment now carries its own `.navbar-container` CSS so all pages share identical max-width and padding
+- Navbar alignment inconsistency between pages
 
 ## [2.0.0] — 2026-05-03
-
-### Bug Fixes
-- Use Bootstrap collapse data attributes for hamburger menu
-- Pull footer version from health endpoint instead of hardcoding
-- Add separator between nav links and auth area; version as semver+sha
-- Harden for pre-commercial readiness
-- Restore partial-match for short queries alongside $text index
-
-### Documentation
-- Add frontend redesign design spec and implementation plan
-- Add commercialisation guide
-- Add architecture, API, configuration, deployment, UI, and development docs
-
-### Performance
-- Add missing indexes, fix text search and Redis connection leak
-
-### Refactoring
-- Split DAO interfaces and enforce controller→service layering
 
 ### Frontend Redesign
 - Replace purple-gradient aesthetic with Clean Civic design system across all 11 templates and 2 fragments
 - Bootstrap 5.3.3 + Playfair Display/Inter typography
-- White navbar with 3px red bottom border, dark page headers, off-white page background
-- KPI cards with red top border and Playfair Display numbers
-- Grade badges (A/B/C) with semantic colors consistent across all pages
+- KPI cards with red top border; grade badges with semantic colors consistent across all pages
 - Show deployed git SHA as version badge on every page
 
+### Features
+- `AnalyticsDAO` split from `RestaurantDAO` — owns heatmap, borough-grade distribution, at-risk aggregations
+- Rename `domain.Grade` → `InspectionRecord`, `entity.Grade` → `LetterGrade`
+
+### Bug Fixes
+- Restore partial-match for short queries alongside $text index
+- Add missing indexes, fix text search and Redis connection leak
+
+### Documentation
+- Add architecture, API, configuration, deployment, UI, and development docs
+- Add commercialisation guide
+
 ### CI/CD
-- Add git-cliff changelog auto-update on main push
+- Add git-cliff changelog auto-update on main push (later removed in favour of manual updates)
 
 ## [Phase 21] — 2026-04-13 — Upgrade Java 11 → 25 and Spring Boot 2.6.15 → 4.0.5
 
@@ -228,33 +71,30 @@ All notable changes are documented here.
 - Removed JUnit 4; migrated 9 test files to JUnit 5
 - Migrated javax.* → jakarta.* in 6 main + 1 test source file
 - Migrated SecurityConfig to Spring Security 6 lambda DSL
-- Fixed JaCoCo exclusion patterns for correct package name
-- Exposed Jackson 2 ObjectMapper bean in RedisConfig
 
 ## [Phase 14] — 2026-04-12 — Testcontainers Integration Tests
 
 - Migrated RestaurantDAOIntegrationTest to Testcontainers (mongo:7.0)
 - Added UserRepositoryIT and BookmarkRepository tests against Testcontainers postgres:15-alpine
 - Added maven-failsafe-plugin for IT tests (*IT.java naming convention)
-- Fixed Surefire argLine to use @{argLine} late-binding for JaCoCo compatibility
 
 ## [Phase 10] — 2026-04-10 — Admin Tools
 
 - ROLE_ADMIN role with admin signup code
-- GET `/api/reports/stats` endpoint (ADMIN-only): aggregate report counts by status and grade
-- GET `/api/inspection/at-risk/export.csv` download endpoint
-- `admin.html`: Sync Controls, At-Risk CSV Download, Report Statistics
+- `GET /api/reports/stats` endpoint (ADMIN-only)
+- `GET /api/inspection/at-risk/export.csv` download endpoint
+- admin.html: Sync Controls, At-Risk CSV Download, Report Statistics
 
 ## [Phase 9] — 2026-04-08 — UX Polish
 
 - Shared `fragments/ux-utils.html` fragment: skeleton shimmer CSS + toast notifications
-- Pagination (20/page) on search results, at-risk list, uncontrolled list, bookmarks, and reports
+- Pagination (20/page) on search results, at-risk list, uncontrolled list, bookmarks, reports
 - Mobile-responsive navbar with hamburger menu at <=768px
 
 ## [Phase 8] — 2026-04-04 — Discovery Enhancement
 
 - Inspection map filter bar (grade, borough, cuisine) with live marker filtering
-- Uncontrolled restaurants page (/uncontrolled): grade C/Z or uninspected 12+ months
+- Uncontrolled restaurants page (/uncontrolled)
 - Nearby restaurants section on restaurant detail page (within 500m)
 - Landing page sort control (Best Score / Worst Score / A→Z)
 
