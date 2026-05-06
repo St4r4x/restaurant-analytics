@@ -25,6 +25,7 @@ All notable changes are documented here.
 - Add missing @CrossOrigin to AdminController and ReportController
 - Pass error detail to SYNC_TRIGGERED audit entry when sync fails
 - Fix audit pagination: disable Next button by default; fix falsy page=0 guard; hide table on empty page after navigation
+- Fix score chart: destroy previous Chart.js instance before re-render; guard pending grade codes (Z/P/N) as grey; safe resize in setTimeout
 
 ### Chores
 - Add .githooks/pre-commit enforcing CHANGELOG update on code commits

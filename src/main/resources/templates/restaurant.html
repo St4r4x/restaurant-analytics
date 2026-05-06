@@ -339,8 +339,12 @@
           return;
         }
 
-        var GRADE_COLORS = { A: '#2e7d32', B: '#f9a825', C: '#e65100', F: '#b71c1c' };
-        function gradeColor(g) { return GRADE_COLORS[g] || '#b71c1c'; }
+        var GRADE_COLORS = { A: '#2e7d32', B: '#f9a825', C: '#e65100', F: '#b71c1c',
+                             Z: '#9e9e9e', P: '#9e9e9e', N: '#9e9e9e' };
+        function gradeColor(g) { return GRADE_COLORS[g] || '#9e9e9e'; }
+
+        var existing = Chart.getChart('score-chart');
+        if (existing) existing.destroy();
 
         var chart = new Chart(document.getElementById('score-chart'), {
           type: 'line',
@@ -387,7 +391,7 @@
             }
           }
         });
-        setTimeout(function() { chart.resize(); }, 50);
+        setTimeout(function() { if (chart && chart.canvas) { chart.resize(); } }, 50);
       }
 
       function renderInspections(grades) {
