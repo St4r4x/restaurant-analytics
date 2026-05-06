@@ -70,7 +70,7 @@ jobs:
 
   integration-test:
     name: Integration Tests
-    needs: unit-test
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -99,13 +99,11 @@ jobs:
       - name: Run integration tests
         env:
           NYC_API_MAX_RECORDS: "200"
-        # test-compile phase: compiles sources + runs jacoco:prepare-agent (initialize)
-        # failsafe goals: run *IT.java tests only — Surefire and jacoco:check are not triggered
         run: mvn test-compile failsafe:integration-test failsafe:verify
 
   e2e:
     name: E2E Smoke Test
-    needs: integration-test
+    needs: [unit-test, integration-test]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -124,9 +122,7 @@ jobs:
       - name: Start application stack
         env:
           NYC_API_MAX_RECORDS: "200"
-          # docker-compose.yml app service reads SPRING_DATASOURCE_PASSWORD (not POSTGRES_PASSWORD)
           SPRING_DATASOURCE_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-        # Image is pre-built; 300s covers Spring Boot startup + 3×30s health check retries
         run: docker compose up -d --wait --wait-timeout 300
       - name: Dump app logs on failure
         if: failure()
@@ -168,30 +164,3 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: GIT_SHA=${{ github.sha }}
-
-  changelog:
-    name: Update Changelog
-    needs: docker
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Generate changelog with git-cliff
-        uses: orhun/git-cliff-action@v4
-        with:
-          config: cliff.toml
-          args: --unreleased --prepend CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Commit updated CHANGELOG.md
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet CHANGELOG.md || (
-            git add CHANGELOG.md &&
-            git commit -m "chore(changelog): update for ${{ github.sha }} [skip ci]" &&
-            git push
-          )
