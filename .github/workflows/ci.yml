@@ -124,7 +124,7 @@ jobs:
           env-slug: dev
           export-type: env
       - name: Download JAR artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: app-jar
           path: target/
@@ -151,7 +151,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Download JAR artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: app-jar
           path: target/

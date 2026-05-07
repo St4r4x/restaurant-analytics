@@ -6,6 +6,10 @@ All notable changes are documented here.
 
 ### Bug Fixes
 - Move floating 🐛 bug report button to ux-utils fragment so it appears on all pages for all users, not just admin
+- Fix version badge inconsistency across pages: cache version in sessionStorage so it renders identically on every page without re-fetching
+
+### CI
+- Upgrade `actions/download-artifact` from v4 to v5 to resolve Node.js 20 deprecation warning
 
 ## [2.2.0] — 2026-05-06
 

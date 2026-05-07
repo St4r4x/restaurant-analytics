@@ -104,23 +104,34 @@ body { font-family: 'Inter', sans-serif; }
     }
   })();
 
-  // Version badge — fetches version from health endpoint, renders bottom-left
-  fetch('/api/restaurants/health')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (!d.version) return;
-      var sha = d.version.includes('+') ? d.version.split('+')[1] : d.version;
+  // Version badge — bottom-left, cached in sessionStorage to stay consistent across pages
+  (function() {
+    function renderBadge(version) {
+      var sha = version.includes('+') ? version.split('+')[1] : version;
       var badge = document.createElement('a');
       badge.href = 'https://github.com/St4r4x/restaurant-analytics/commit/' + sha;
       badge.target = '_blank';
       badge.rel = 'noopener';
-      badge.textContent = 'v' + d.version;
+      badge.textContent = 'v' + version;
       badge.style.cssText = 'position:fixed;bottom:8px;left:12px;font-size:0.7em;color:rgba(0,0,0,0.3);text-decoration:none;font-family:monospace;z-index:9998';
       badge.addEventListener('mouseenter', function() { badge.style.color = 'rgba(0,0,0,0.6)'; });
       badge.addEventListener('mouseleave', function() { badge.style.color = 'rgba(0,0,0,0.3)'; });
       document.body.appendChild(badge);
-    })
-    .catch(function() {});
+    }
+    var cached = sessionStorage.getItem('app_version');
+    if (cached) {
+      renderBadge(cached);
+    } else {
+      fetch('/api/restaurants/health')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (!d.version) return;
+          sessionStorage.setItem('app_version', d.version);
+          renderBadge(d.version);
+        })
+        .catch(function() {});
+    }
+  })();
 
   window.showToast = function(msg, type, durationMs) {
     type = type || 'info';
