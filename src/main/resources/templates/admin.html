@@ -36,8 +36,6 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 .role-controller { background: #1565c022; color: #1565c0; }
 .role-customer { background: #2e7d3222; color: #2e7d32; }
 .role-select { font-size: 0.82em; padding: 3px 6px; border: 1px solid #e8e0d8; border-radius: 0; font-family: 'Inter', sans-serif; background: white; }
-.bug-btn { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%; background: #1a1a1a; color: white; border: none; font-size: 1.1em; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; text-decoration: none; }
-.bug-btn:hover { background: #333; }
 .audit-table { width: 100%; border-collapse: collapse; font-size: 0.82em; margin-top: 8px; }
 .audit-table th { text-align: left; padding: 7px 10px; border-bottom: 2px solid #e8e0d8; font-weight: 700; color: #555; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.05em; }
 .audit-table td { padding: 7px 10px; border-bottom: 1px solid #f0ebe3; vertical-align: top; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -146,10 +144,6 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
         </div>
     </div>
 </div>
-
-<!-- Floating bug report button -->
-<a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D+"
-   target="_blank" rel="noopener" class="bug-btn" title="Report a bug">🐛</a>
 
 <script>
 // Admin auth guard

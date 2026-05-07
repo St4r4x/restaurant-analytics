@@ -2,6 +2,11 @@
 
 All notable changes are documented here.
 
+## [Unreleased]
+
+### Bug Fixes
+- Move floating 🐛 bug report button to ux-utils fragment so it appears on all pages for all users, not just admin
+
 ## [2.2.0] — 2026-05-06
 
 ### Features
