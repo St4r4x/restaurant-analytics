@@ -7,6 +7,9 @@ All notable changes are documented here.
 ### Bug Fixes
 - Move floating 🐛 bug report button to ux-utils fragment so it appears on all pages for all users, not just admin
 - Fix version badge inconsistency across pages: cache version in sessionStorage so it renders identically on every page without re-fetching
+- Fix analytics footer showing hardcoded v0.2.0 — now reads from sessionStorage like all other pages
+- Add missing footer to inspection-map page
+- Fix footer appearing in middle of bookmarks page when few bookmarks — add sticky footer layout (flex column + flex:1 on content)
 
 ### CI
 - Upgrade `actions/download-artifact` v4→v8 and `actions/checkout` v5→v6 to resolve Node.js 20 deprecation warnings

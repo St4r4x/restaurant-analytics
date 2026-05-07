@@ -43,6 +43,7 @@
         #toolbar select { font-size: 0.78em; padding: 4px 8px; }
         #toolbar label { font-size: 0.75em; margin-right: 6px; }
       }
+      .civic-footer { background: #1a1a1a; color: rgba(255,255,255,0.45); padding: 24px 0; font-size: 0.78em; }
     </style>
   </head>
   <body>
@@ -211,5 +212,15 @@
       });
       // ── End grade-colored clustered markers ──────────────────────────
     </script>
+  <footer class="civic-footer">
+    <div class="container d-flex justify-content-between">
+      <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
+      <div id="footer-version" style="font-family:monospace;font-size:0.85em;color:rgba(255,255,255,0.2)"></div>
+    </div>
+  </footer>
+  <script>
+    var fv = sessionStorage.getItem('app_version');
+    if (fv) { document.getElementById('footer-version').textContent = 'v' + fv; }
+  </script>
   </body>
 </html>

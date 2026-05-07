@@ -141,7 +141,7 @@
   <footer class="civic-footer">
     <div class="container d-flex justify-content-between">
       <div>NYC Restaurant Inspector &#xB7; Data from NYC Open Data</div>
-      <div style="font-family:monospace;font-size:0.85em;color:rgba(255,255,255,0.2)">v0.2.0</div>
+      <div id="footer-version" style="font-family:monospace;font-size:0.85em;color:rgba(255,255,255,0.2)"></div>
     </div>
   </footer>
 <script>
@@ -199,6 +199,10 @@ function goAtRiskPage(delta) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    // Footer version
+    var fv = sessionStorage.getItem('app_version');
+    if (fv) { document.getElementById('footer-version').textContent = 'v' + fv; }
 
     // 1. KPI tiles
     fetch('/api/analytics/kpis')
