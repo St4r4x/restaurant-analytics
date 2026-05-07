@@ -38,7 +38,6 @@ public class SyncService {
     private final NycOpenDataClient apiClient;
     private final RestaurantWriteDAO restaurantWriteDAO;
     private final RestaurantCacheService cacheService;
-    private final OsmEnrichmentService osmEnrichmentService;
     private final ElasticsearchSyncService esSyncService;
 
     private volatile SyncResult lastResult;
@@ -47,12 +46,11 @@ public class SyncService {
 
     @Autowired
     public SyncService(NycOpenDataClient apiClient, RestaurantWriteDAO restaurantWriteDAO,
-                       RestaurantCacheService cacheService, OsmEnrichmentService osmEnrichmentService,
+                       RestaurantCacheService cacheService,
                        ElasticsearchSyncService esSyncService) {
         this.apiClient = apiClient;
         this.restaurantWriteDAO = restaurantWriteDAO;
         this.cacheService = cacheService;
-        this.osmEnrichmentService = osmEnrichmentService;
         this.esSyncService = esSyncService;
     }
 
@@ -143,7 +141,6 @@ public class SyncService {
         }
 
         if (result.isSuccess()) {
-            osmEnrichmentService.enrichNew();
             esSyncService.triggerReindex();
         }
 

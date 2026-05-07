@@ -1,7 +1,6 @@
 package com.st4r4x.domain;
 
 import java.util.List;
-import java.time.Instant;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
@@ -30,18 +29,6 @@ public class Restaurant {
 
     @BsonProperty("grades")
     private List<InspectionRecord> grades;
-
-    @BsonProperty("osm_phone")
-    private String osmPhone;
-
-    @BsonProperty("osm_website")
-    private String osmWebsite;
-
-    @BsonProperty("osm_opening_hours")
-    private String osmOpeningHours;
-
-    @BsonProperty("osm_enriched_at")
-    private Instant osmEnrichedAt;
 
     public Restaurant() {}
 
@@ -99,18 +86,6 @@ public class Restaurant {
 
     public List<InspectionRecord> getGrades() { return grades; }
     public void setGrades(List<InspectionRecord> grades) { this.grades = grades; }
-
-    public String getOsmPhone() { return osmPhone; }
-    public void setOsmPhone(String osmPhone) { this.osmPhone = osmPhone; }
-
-    public String getOsmWebsite() { return osmWebsite; }
-    public void setOsmWebsite(String osmWebsite) { this.osmWebsite = osmWebsite; }
-
-    public String getOsmOpeningHours() { return osmOpeningHours; }
-    public void setOsmOpeningHours(String osmOpeningHours) { this.osmOpeningHours = osmOpeningHours; }
-
-    public Instant getOsmEnrichedAt() { return osmEnrichedAt; }
-    public void setOsmEnrichedAt(Instant osmEnrichedAt) { this.osmEnrichedAt = osmEnrichedAt; }
 
     @Override
     public String toString() {

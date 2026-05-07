@@ -10,7 +10,6 @@ import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
 import com.st4r4x.service.AuditService;
 import com.st4r4x.sync.CronScheduler;
-import com.st4r4x.sync.OsmEnrichmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -51,9 +50,6 @@ public class AdminController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private OsmEnrichmentService osmEnrichmentService;
 
     @Autowired
     private CronScheduler cronScheduler;
@@ -128,26 +124,9 @@ public class AdminController {
     }
 
     /**
-     * POST /api/admin/osm-enrich — triggers a full OSM re-enrichment of all restaurants.
-     * Uses an absolute path to avoid the /api/reports prefix from @RequestMapping.
-     * The enrichAll() method is @Async and returns immediately; enrichment runs in background.
-     * ADMIN role required.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/api/admin/osm-enrich")
-    public ResponseEntity<Map<String, Object>> triggerOsmEnrich() {
-        osmEnrichmentService.enrichAll();
-        auditService.log(AuditAction.OSM_ENRICH_TRIGGERED, null, null, null);
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", "accepted");
-        body.put("message", "OSM enrichment started in background");
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(body);
-    }
-
-    /**
      * POST /api/admin/cron/run/{jobKey} — manually trigger a cron job by key.
-     * Valid keys: cache-warmup, osm-reenrichment, es-reindex.
-     * cache-warmup runs inline (200 OK when done); the other two run async (202 Accepted).
+     * Valid keys: cache-warmup, es-reindex.
+     * cache-warmup runs inline (200 OK when done); es-reindex runs async (202 Accepted).
      * ADMIN role required.
      */
     @PreAuthorize("hasRole('ADMIN')")
@@ -157,11 +136,11 @@ public class AdminController {
         if (!known) {
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("status", "error");
-            body.put("message", "Unknown job key: " + jobKey + ". Valid keys: cache-warmup, osm-reenrichment, es-reindex");
+            body.put("message", "Unknown job key: " + jobKey + ". Valid keys: cache-warmup, es-reindex");
             return ResponseEntity.badRequest().body(body);
         }
         auditService.log(AuditAction.CRON_JOB_TRIGGERED, "CronJob", jobKey, null);
-        boolean async = jobKey.equals("osm-reenrichment") || jobKey.equals("es-reindex");
+        boolean async = jobKey.equals("es-reindex");
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", async ? "accepted" : "success");
         body.put("job", jobKey);

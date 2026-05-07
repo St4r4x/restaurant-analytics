@@ -25,7 +25,6 @@ public class CronScheduler {
 
     private final RestaurantCacheService cacheService;
     private final RestaurantDAO restaurantDAO;
-    private final OsmEnrichmentService osmEnrichmentService;
     private final ElasticsearchSyncService esSyncService;
 
     private final ConcurrentHashMap<String, JobStatus> registry = new ConcurrentHashMap<>();
@@ -33,11 +32,9 @@ public class CronScheduler {
     @Autowired
     public CronScheduler(RestaurantCacheService cacheService,
                          RestaurantDAO restaurantDAO,
-                         OsmEnrichmentService osmEnrichmentService,
                          ElasticsearchSyncService esSyncService) {
         this.cacheService = cacheService;
         this.restaurantDAO = restaurantDAO;
-        this.osmEnrichmentService = osmEnrichmentService;
         this.esSyncService = esSyncService;
     }
 
@@ -59,20 +56,6 @@ public class CronScheduler {
         }
     }
 
-    /** Full OSM re-enrichment for all restaurants — Sundays at 03:00. */
-    @Scheduled(cron = "0 0 3 * * 0")
-    public void reEnrichOsm() {
-        Instant start = Instant.now();
-        try {
-            osmEnrichmentService.enrichAllSync();
-            recordJob("osm-reenrichment", start, true, null);
-            logger.info("OSM re-enrichment complete");
-        } catch (Exception e) {
-            recordJob("osm-reenrichment", start, false, e.getMessage());
-            logger.warn("OSM re-enrichment failed: {}", e.getMessage());
-        }
-    }
-
     /** ES reindex — daily at 04:00, after the 02:00 data sync. */
     @Scheduled(cron = "0 0 4 * * *")
     public void reindexEs() {
@@ -89,7 +72,7 @@ public class CronScheduler {
 
     /**
      * Manually trigger a job by key. Writes to the registry like the scheduled run.
-     * Heavy jobs (osm-reenrichment, es-reindex) run on a background thread; cache-warmup runs inline.
+     * Heavy jobs (es-reindex) run on a background thread; cache-warmup runs inline.
      *
      * @return true if the key was recognised, false if unknown
      */
@@ -97,9 +80,6 @@ public class CronScheduler {
         switch (key) {
             case "cache-warmup":
                 warmCache();
-                return true;
-            case "osm-reenrichment":
-                new Thread(this::reEnrichOsm, "manual-osm").start();
                 return true;
             case "es-reindex":
                 new Thread(this::reindexEs, "manual-es").start();

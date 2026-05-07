@@ -19,7 +19,6 @@ class CronSchedulerTest {
 
     @Mock RestaurantCacheService cacheService;
     @Mock RestaurantDAO restaurantDAO;
-    @Mock OsmEnrichmentService osmEnrichmentService;
     @Mock ElasticsearchSyncService esSyncService;
 
     @InjectMocks CronScheduler cronScheduler;
@@ -45,14 +44,6 @@ class CronSchedulerTest {
         JobStatus status = cronScheduler.getStatus().get("cache-warmup");
         assertFalse(status.isSuccess());
         assertEquals("redis down", status.getErrorMessage());
-    }
-
-    @Test
-    void reEnrichOsm_calls_enrichAllSync() {
-        cronScheduler.reEnrichOsm();
-
-        verify(osmEnrichmentService).enrichAllSync();
-        assertTrue(cronScheduler.getStatus().get("osm-reenrichment").isSuccess());
     }
 
     @Test

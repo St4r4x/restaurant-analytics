@@ -4,6 +4,9 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+### Removed
+- Remove OSM enrichment (`OsmEnrichmentService`) — Overpass API is blocked on Railway; phone data comes from NYC Open Data directly
+
 ### Bug Fixes
 - Move floating 🐛 bug report button to ux-utils fragment so it appears on all pages for all users, not just admin
 - Fix version badge inconsistency across pages: cache version in sessionStorage so it renders identically on every page without re-fetching

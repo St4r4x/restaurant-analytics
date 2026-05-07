@@ -10,7 +10,6 @@ import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
 import com.st4r4x.service.AuditService;
 import com.st4r4x.sync.CronScheduler;
-import com.st4r4x.sync.OsmEnrichmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +43,6 @@ class AdminControllerTest {
 
     @Mock private ReportRepository reportRepository;
     @Mock private UserRepository userRepository;
-    @Mock private OsmEnrichmentService osmEnrichmentService;
     @Mock private CronScheduler cronScheduler;
     @Mock private AuditLogRepository auditLogRepository;
     @Mock private AuditService auditService;

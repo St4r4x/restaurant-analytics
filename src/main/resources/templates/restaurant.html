@@ -475,8 +475,8 @@
                   }
               }
 
-              // Phone — prefer OSM phone (formatted), fall back to NYC data phone
-              var rawPhone = r.osmPhone || r.phone;
+              // Phone — from NYC Open Data
+              var rawPhone = r.phone;
               if (rawPhone) {
                   var digits = rawPhone.replace(/[^0-9]/g, '');
                   var formatted = digits.length === 10
@@ -489,29 +489,6 @@
                   document.getElementById('contact-phone').appendChild(makeRow('Phone', phoneEl));
               }
 
-              // Website — OSM only
-              if (r.osmWebsite) {
-                  try {
-                      var parsed = new URL(r.osmWebsite);
-                      if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
-                          var siteEl = document.createElement('a');
-                          siteEl.href = parsed.href;
-                          siteEl.textContent = parsed.href.replace(/^https?:\/\//, '').replace(/\/$/, '');
-                          siteEl.target = '_blank';
-                          siteEl.rel = 'noopener noreferrer';
-                          siteEl.style.cssText = 'color:#c0392b;text-decoration:none;font-weight:600;font-size:0.9em';
-                          document.getElementById('contact-website').appendChild(makeRow('Website', siteEl));
-                      }
-                  } catch (_) {}
-              }
-
-              // Opening hours — OSM only
-              if (r.osmOpeningHours) {
-                  var hoursEl = document.createElement('span');
-                  hoursEl.style.fontSize = '0.9em';
-                  hoursEl.textContent = r.osmOpeningHours;
-                  document.getElementById('contact-hours').appendChild(makeRow('Hours', hoursEl));
-              }
           })(r);
           var currentId = window.location.pathname.split('/').pop();
           loadNearby(r.latitude, r.longitude, currentId);
