@@ -14,6 +14,9 @@ All notable changes are documented here.
 ### CI
 - Upgrade `actions/download-artifact` v4→v8 and `actions/checkout` v5→v6 to resolve Node.js 20 deprecation warnings
 
+### Infrastructure
+- Rename `Dockerfile` → `Dockerfile.ci` so Railway Railpack auto-detects Maven instead of forcing DOCKERFILE builder mode
+
 ## [2.2.0] — 2026-05-06
 
 ### Features
