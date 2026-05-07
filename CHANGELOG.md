@@ -9,7 +9,7 @@ All notable changes are documented here.
 - Fix version badge inconsistency across pages: cache version in sessionStorage so it renders identically on every page without re-fetching
 
 ### CI
-- Upgrade `actions/download-artifact` from v4 to v5 to resolve Node.js 20 deprecation warning
+- Upgrade `actions/download-artifact` v4→v8 and `actions/checkout` v5→v6 to resolve Node.js 20 deprecation warnings
 
 ## [2.2.0] — 2026-05-06
 
