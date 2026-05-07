@@ -1,3 +1,6 @@
 [build]
 builder = "RAILPACK"
 buildCommand = "mvn clean package -DskipTests -B -q"
+
+[deploy]
+startCommand = "java -Dserver.port=$PORT -jar target/*.jar"
