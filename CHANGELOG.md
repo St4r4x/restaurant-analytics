@@ -4,8 +4,11 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.2.1] — 2026-05-07
+
 ### Removed
 - Remove OSM enrichment (`OsmEnrichmentService`) — Overpass API is blocked on Railway; phone data comes from NYC Open Data directly
+- Remove Bug Report card from admin page — redundant with the floating 🐛 button already injected by ux-utils on every page
 
 ### Bug Fixes
 - Move floating 🐛 bug report button to ux-utils fragment so it appears on all pages for all users, not just admin
@@ -13,6 +16,9 @@ All notable changes are documented here.
 - Fix analytics footer showing hardcoded v0.2.0 — now reads from sessionStorage like all other pages
 - Add missing footer to inspection-map page
 - Fix footer appearing in middle of bookmarks page when few bookmarks — add sticky footer layout (flex column + flex:1 on content)
+- Fix admin page-header eyebrow misaligned with navbar — override container max-width to 1140px in page-header and footer
+- Add missing footer to admin page
+- Fix my-bookmarks page-header eyebrow misaligned with navbar — page-header container widened to 1140px; content cards keep narrower content-container
 
 ### CI
 - Upgrade `actions/download-artifact` v4→v8 and `actions/checkout` v5→v6 to resolve Node.js 20 deprecation warnings

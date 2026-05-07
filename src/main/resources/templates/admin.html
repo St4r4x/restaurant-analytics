@@ -48,7 +48,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 <body>
 <div th:replace="fragments/navbar :: navbar"></div>
 <div class="page-header">
-  <div class="container" style="padding-top:0;padding-bottom:0">
+  <div class="container" style="padding-top:0;padding-bottom:0;max-width:1140px">
     <div class="eyebrow">System</div>
     <h1>Admin Panel</h1>
   </div>
@@ -107,19 +107,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
         </div>
     </div>
 
-    <!-- Card 5: Bug Report -->
-    <div class="card">
-        <h2>Bug Report</h2>
-        <p class="desc-text">Found a bug or have a feature request? Open an issue directly on GitHub.</p>
-        <div class="btn-row">
-            <a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D+"
-               target="_blank" rel="noopener" class="btn btn-primary">Report a Bug</a>
-            <a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=enhancement&template=feature_request.md&title=%5BFEATURE%5D+"
-               target="_blank" rel="noopener" class="btn btn-secondary">Request a Feature</a>
-        </div>
-    </div>
-
-    <!-- Card 6: Audit Log -->
+    <!-- Card 5: Audit Log -->
     <div class="card">
         <h2>Audit Log</h2>
         <p class="desc-text">Recent admin and controller actions. Most recent first.</p>
@@ -144,6 +132,13 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
         </div>
     </div>
 </div>
+
+<footer style="background:#1a1a1a;color:rgba(255,255,255,0.45);padding:24px 0;font-size:0.78em;margin-top:32px">
+  <div class="container" style="max-width:1140px;display:flex;justify-content:space-between;align-items:center">
+    <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
+    <div id="footer-version" style="font-family:monospace;font-size:0.85em;color:rgba(255,255,255,0.2)"></div>
+  </div>
+</footer>
 
 <script>
 // Admin auth guard
@@ -437,6 +432,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadUsers();
     loadAudit(0);
+
+    var fv = sessionStorage.getItem('app_version');
+    if (fv) { document.getElementById('footer-version').textContent = 'v' + fv; }
 
     fetchWithAuth('/api/reports/stats')
         .then(function(r) { return r.json(); })
