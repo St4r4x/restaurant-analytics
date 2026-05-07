@@ -16,6 +16,7 @@ All notable changes are documented here.
 
 ### Infrastructure
 - Rename `Dockerfile` → `Dockerfile.ci` so Railway Railpack auto-detects Maven instead of forcing DOCKERFILE builder mode
+- Add `railway.toml` with explicit `buildCommand` to prevent Railpack from adding `-Pproduction` flag (no such Maven profile exists)
 
 ## [2.2.0] — 2026-05-06
 

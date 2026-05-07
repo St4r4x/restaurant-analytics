@@ -1,0 +1,3 @@
+[build]
+builder = "RAILPACK"
+buildCommand = "mvn clean package -DskipTests -B -q"
