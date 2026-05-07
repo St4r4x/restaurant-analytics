@@ -6,11 +6,11 @@ FROM eclipse-temurin:25-jdk-alpine AS builder
 WORKDIR /build
 
 COPY pom.xml .
-RUN --mount=type=cache,target=/root/.m2 \
+RUN --mount=type=cache,id=maven,target=/root/.m2 \
     mvn -f pom.xml dependency:go-offline -B -q 2>/dev/null || true
 
 COPY src ./src
-RUN --mount=type=cache,target=/root/.m2 \
+RUN --mount=type=cache,id=maven,target=/root/.m2 \
     mvn -f pom.xml clean package -DskipTests -B -q
 
 # ── Runtime stage ────────────────────────────────────────────────────────────
