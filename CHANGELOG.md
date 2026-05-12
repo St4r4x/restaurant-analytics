@@ -4,6 +4,11 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.2.3] — 2026-05-12
+
+### Bug Fixes
+- Fix `TypeError: Cannot read properties of null (reading 'appendChild')` on pages after first visit — version badge script in `<head>` called `document.body.appendChild` synchronously when `app_version` was cached in sessionStorage, before `<body>` existed; now deferred to `DOMContentLoaded`
+
 ## [2.2.2] — 2026-05-12
 
 ### Performance

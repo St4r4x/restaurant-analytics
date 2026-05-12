@@ -120,7 +120,7 @@ body { font-family: 'Inter', sans-serif; }
     }
     var cached = sessionStorage.getItem('app_version');
     if (cached) {
-      renderBadge(cached);
+      document.addEventListener('DOMContentLoaded', function() { renderBadge(cached); });
     } else {
       fetch('/api/restaurants/health')
         .then(function(r) { return r.json(); })
