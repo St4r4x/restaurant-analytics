@@ -123,20 +123,6 @@
         color: #a02d24;
       }
 
-      .civic-footer {
-        background: #1a1a1a;
-        color: rgba(255, 255, 255, 0.45);
-        padding: 24px 0;
-        font-size: 0.78em;
-        border-top: 1px solid #2a2a2a;
-      }
-
-      .civic-footer .container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
       .empty-state {
         color: #999;
         font-size: 0.9em;
@@ -178,11 +164,7 @@
       </div>
     </div>
 
-    <footer class="civic-footer">
-      <div class="container">
-        <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
-      </div>
-    </footer>
+    <div th:replace="fragments/footer :: footer"></div>
 
     <script>
       // ── Pagination state ─────────────────────────────────────────────

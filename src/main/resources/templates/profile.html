@@ -16,7 +16,6 @@
     .mini-card { background: white; border: 1px solid #e8e0d8; border-top: 3px solid #e8e0d8; padding: 16px; transition: border-top-color 0.15s; }
     .mini-card:hover { border-top-color: #c0392b; }
     .error-msg { color: #c0392b; font-size: 0.85em; margin-top: 8px; }
-    .civic-footer { background: #1a1a1a; color: rgba(255,255,255,0.45); padding: 24px 0; font-size: 0.78em; }
     .skel { background: #e8e0d8; animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
   </style>
@@ -49,11 +48,7 @@
       </div>
     </div>
   </div>
-  <footer class="civic-footer">
-    <div class="container d-flex justify-content-between align-items-center">
-      <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
-    </div>
-  </footer>
+  <div th:replace="fragments/footer :: footer"></div>
 
   <script>
     var token = localStorage.getItem('accessToken');

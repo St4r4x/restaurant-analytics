@@ -32,7 +32,6 @@
       .insp-table tr:hover td { background: #faf7f4; }
       .btn-bookmark-civic { font-size: 0.82em; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid #c0392b; color: #c0392b; background: white; padding: 7px 18px; border-radius: 0; cursor: pointer; transition: background 0.15s, color 0.15s; }
       .btn-bookmark-civic:hover, .btn-bookmark-civic.bookmarked { background: #c0392b; color: white; }
-      .civic-footer { background: #1a1a1a; color: rgba(255,255,255,0.45); padding: 24px 0; font-size: 0.78em; }
 
       /* Preserved — used by JS-injected content */
       .header-info { flex: 1; min-width: 200px; }
@@ -128,11 +127,7 @@
       </div>
     </div>
 
-    <footer class="civic-footer">
-      <div class="container d-flex justify-content-between align-items-center">
-        <div>NYC Restaurant Inspector &middot; Data from NYC Open Data</div>
-      </div>
-    </footer>
+    <div th:replace="fragments/footer :: footer"></div>
 
     <script>
       const restaurantId = window.location.pathname.split("/").filter(Boolean).pop();

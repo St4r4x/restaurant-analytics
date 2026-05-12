@@ -23,7 +23,6 @@
     .mini-card:hover { border-top-color: #c0392b; }
     .mini-card a { color: #c0392b; text-decoration: none; }
     .mini-card a:hover { text-decoration: underline; }
-    .civic-footer { background: #1a1a1a; color: rgba(255,255,255,0.45); padding: 24px 0; font-size: 0.78em; }
   </style>
 </head>
 <body>
@@ -65,11 +64,7 @@
     </div>
   </div>
 
-  <footer class="civic-footer">
-    <div class="container d-flex justify-content-between align-items-center">
-      <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
-    </div>
-  </footer>
+  <div th:replace="fragments/footer :: footer"></div>
 
   <script>
     var token = localStorage.getItem('accessToken');

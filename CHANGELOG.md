@@ -4,6 +4,13 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.2.4] — 2026-05-12
+
+### Improvements
+- Standardize footer across all pages via a shared `fragments/footer.html` — identical height, padding, border-top, and layout on every page
+- Add "Report an issue" link to footer (opens GitHub issue template) visible to all users
+- Move version badge from ux-utils floating overlay into footer right-side — less intrusive, consistent position
+
 ## [2.2.3] — 2026-05-12
 
 ### Bug Fixes

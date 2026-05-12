@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="civic-footer">
+  <div class="footer-container">
+    <div>NYC Restaurant Inspector &middot; Data from NYC Open Data</div>
+    <div class="footer-right">
+      <a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=bug&amp;template=bug_report.md&amp;title=%5BBUG%5D+"
+         target="_blank" rel="noopener" class="footer-link">Report an issue</a>
+      <span id="footer-version" class="footer-version"></span>
+    </div>
+  </div>
+<style>
+.civic-footer { background: #1a1a1a; color: rgba(255,255,255,0.45); padding: 24px 0; font-size: 0.78em; border-top: 1px solid #2a2a2a; }
+.footer-container { max-width: 1140px; margin: 0 auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
+.footer-right { display: flex; align-items: center; gap: 20px; }
+.footer-link { color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.15s; }
+.footer-link:hover { color: rgba(255,255,255,0.7); }
+.footer-version { font-family: monospace; font-size: 0.85em; color: rgba(255,255,255,0.2); }
+</style>
+<script>
+(function() {
+  var v = sessionStorage.getItem('app_version');
+  if (v) {
+    document.getElementById('footer-version').textContent = 'v' + v;
+  } else {
+    fetch('/api/restaurants/health')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (!d.version) return;
+        sessionStorage.setItem('app_version', d.version);
+        document.getElementById('footer-version').textContent = 'v' + d.version;
+      })
+      .catch(function() {});
+  }
+})();
+</script>
+</footer>
+</body>
+</html>

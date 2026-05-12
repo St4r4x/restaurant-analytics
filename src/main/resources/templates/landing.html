@@ -33,7 +33,6 @@
     .rest-meta { font-size: 0.78em; color: #888; }
     .rest-score { font-size: 0.78em; color: #555; margin-top: 8px; }
     .rest-link { font-size: 0.78em; color: #c0392b; text-decoration: none; font-weight: 600; margin-top: 10px; display: block; }
-    .civic-footer { background: #1a1a1a; color: rgba(255,255,255,0.45); padding: 24px 0; font-size: 0.78em; }
     #results-section { display: none; }
     .autocomplete-dropdown {
       position: absolute;
@@ -121,12 +120,7 @@
     </div>
   </section>
 
-  <footer class="civic-footer">
-    <div class="container d-flex justify-content-between align-items-center">
-      <div>NYC Restaurant Inspector · Data from NYC Open Data</div>
-      <div id="footer-version" style="font-family:monospace;font-size:0.85em;color:rgba(255,255,255,0.2)"></div>
-    </div>
-  </footer>
+  <div th:replace="fragments/footer :: footer"></div>
 
   <script>
     function esc(s) {
@@ -199,13 +193,6 @@
           grid.innerHTML = '<div class="col-12" style="color:#c0392b;font-size:0.9em;padding:16px 0;text-align:center">Search failed. Please try again.</div>';
         });
     }
-
-    fetch('/api/restaurants/health')
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (d.version) document.getElementById('footer-version').textContent = 'v' + d.version;
-      })
-      .catch(function() {});
 
     document.getElementById('search-btn').addEventListener('click', doSearch);
     document.getElementById('search-input').addEventListener('keydown', function(e) {
