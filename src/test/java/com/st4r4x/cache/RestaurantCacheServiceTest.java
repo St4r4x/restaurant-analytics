@@ -91,23 +91,23 @@ class RestaurantCacheServiceTest {
         assertEquals(expected, result);
     }
 
-    // ── updateTopRestaurants ─────────────────────────────────────────────────
+    // ── addTopRestaurantsBatch ───────────────────────────────────────────────
 
     @Test
-    void updateTopRestaurants_skipsRestaurantsWithNoScore() {
+    void addTopRestaurantsBatch_skipsRestaurantsWithNoScore() {
         Restaurant r = new Restaurant();
         r.setRestaurantId("123");
         r.setName("No Score Place");
         r.setGrades(Collections.singletonList(new InspectionRecord())); // grade with null score
 
-        cacheService.updateTopRestaurants(Collections.singletonList(r));
+        cacheService.addTopRestaurantsBatch(Collections.singletonList(r));
 
         // bulk add(key, Set) must never be called when no restaurant has a score
         verify(zSetOps, never()).add(anyString(), anySet());
     }
 
     @Test
-    void updateTopRestaurants_addsRestaurantWithScore() {
+    void addTopRestaurantsBatch_addsRestaurantWithScore() {
         InspectionRecord grade = new InspectionRecord();
         grade.setScore(10);
 
@@ -120,7 +120,7 @@ class RestaurantCacheServiceTest {
 
         when(redis.opsForZSet()).thenReturn(zSetOps);
 
-        cacheService.updateTopRestaurants(Collections.singletonList(r));
+        cacheService.addTopRestaurantsBatch(Collections.singletonList(r));
 
         // single bulk ZADD call with a non-empty set of tuples
         verify(zSetOps).add(eq(RestaurantCacheService.KEY_TOP), argThat(tuples -> !tuples.isEmpty()));

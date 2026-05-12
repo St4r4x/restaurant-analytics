@@ -27,4 +27,4 @@ EXPOSE 8080
 # Run as non-root user (must appear after COPY to avoid permission issues on copied files)
 USER appuser
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

@@ -70,6 +70,7 @@ public class SyncService {
         SyncResult result;
         try {
             cacheService.invalidateAll();
+            cacheService.resetTopRestaurants();
 
             final List<NycApiRestaurantDto>[] carry = new List[]{new ArrayList<>()};
             final int[] rawCount = {0};
@@ -97,7 +98,7 @@ public class SyncService {
                     List<Restaurant> batch = mapToRestaurants(complete);
                     if (!batch.isEmpty()) {
                         restaurantWriteDAO.upsertRestaurants(batch);
-                        cacheService.updateTopRestaurants(batch);
+                        cacheService.addTopRestaurantsBatch(batch);
                         upsertCount[0] += batch.size();
                     }
                 }
@@ -107,10 +108,11 @@ public class SyncService {
                 List<Restaurant> last = mapToRestaurants(carry[0]);
                 if (!last.isEmpty()) {
                     restaurantWriteDAO.upsertRestaurants(last);
-                    cacheService.updateTopRestaurants(last);
+                    cacheService.addTopRestaurantsBatch(last);
                     upsertCount[0] += last.size();
                 }
             }
+            cacheService.finalizeTopRestaurants();
 
             result = SyncResult.builder()
                     .startedAt(start)

@@ -4,6 +4,12 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.2.2] — 2026-05-12
+
+### Performance
+- Cap JVM heap at 75% of container RAM via `UseContainerSupport` + `MaxRAMPercentage=75.0` in Dockerfile entrypoint — prevents unbounded heap growth on Railway
+- Fix Redis sorted set rebuilt N times during sync (once per 1000-row batch) — now reset once before sync and accumulated with per-batch ZADD, eliminating repeated serialization spikes
+
 ## [2.2.1] — 2026-05-07
 
 ### Removed

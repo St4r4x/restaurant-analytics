@@ -122,10 +122,12 @@ public class RestaurantCacheService {
      * Score = latest inspection score (lower = healthier). Restaurants with no score are skipped.
      * Uses a single bulk ZADD to avoid N+1 Redis calls.
      */
-    public void updateTopRestaurants(List<Restaurant> restaurants) {
+    /**
+     * Appends a batch of restaurants to the sorted set without resetting it.
+     * Call {@link #finalizeTopRestaurants()} once all batches are added.
+     */
+    public void addTopRestaurantsBatch(List<Restaurant> restaurants) {
         try {
-            redis.delete(KEY_TOP);
-
             Set<ZSetOperations.TypedTuple<String>> tuples = new HashSet<>();
             for (Restaurant r : restaurants) {
                 if (r.getGrades() == null) continue;
@@ -138,13 +140,33 @@ public class RestaurantCacheService {
                         r.getRestaurantId(), r.getName(), r.getBorough(), r.getCuisine(), score);
                 tuples.add(new DefaultTypedTuple<>(objectMapper.writeValueAsString(entry), score.doubleValue()));
             }
-
             if (!tuples.isEmpty()) {
                 redis.opsForZSet().add(KEY_TOP, tuples);
             }
-            logger.info("Top restaurants sorted set rebuilt: {} entries", tuples.size());
         } catch (Exception e) {
-            logger.warn("Failed to update top restaurants sorted set: {}", e.getMessage());
+            logger.warn("Failed to add top-restaurants batch: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Resets the sorted set before a new sync, then logs completion.
+     * Pair with {@link #addTopRestaurantsBatch(List)} during sync.
+     */
+    public void resetTopRestaurants() {
+        try {
+            redis.delete(KEY_TOP);
+            logger.debug("Top restaurants sorted set cleared");
+        } catch (Exception e) {
+            logger.warn("Failed to reset top-restaurants sorted set: {}", e.getMessage());
+        }
+    }
+
+    public void finalizeTopRestaurants() {
+        try {
+            Long size = redis.opsForZSet().size(KEY_TOP);
+            logger.info("Top restaurants sorted set rebuilt: {} entries", size != null ? size : 0);
+        } catch (Exception e) {
+            logger.warn("Failed to finalize top-restaurants sorted set: {}", e.getMessage());
         }
     }
 

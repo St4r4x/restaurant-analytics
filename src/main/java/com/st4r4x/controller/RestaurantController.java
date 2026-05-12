@@ -400,7 +400,9 @@ public class RestaurantController {
         try {
             List<Restaurant> restaurants = restaurantService.getAllRestaurants(limit);
             cacheService.invalidateAll();
-            cacheService.updateTopRestaurants(restaurants);
+            cacheService.resetTopRestaurants();
+            cacheService.addTopRestaurantsBatch(restaurants);
+            cacheService.finalizeTopRestaurants();
             auditService.log(AuditAction.CACHE_REBUILT, null, null, null);
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
