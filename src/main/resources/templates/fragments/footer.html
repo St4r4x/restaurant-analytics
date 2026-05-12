@@ -7,7 +7,7 @@
     <div class="footer-right">
       <a href="https://github.com/St4r4x/restaurant-analytics/issues/new?labels=bug&amp;template=bug_report.md&amp;title=%5BBUG%5D+"
          target="_blank" rel="noopener" class="footer-link">Report an issue</a>
-      <span id="footer-version" class="footer-version"></span>
+      <a id="footer-version" class="footer-version" target="_blank" rel="noopener" style="text-decoration:none"></a>
     </div>
   </div>
 <style>
@@ -17,19 +17,29 @@
 .footer-link { color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.15s; }
 .footer-link:hover { color: rgba(255,255,255,0.7); }
 .footer-version { font-family: monospace; font-size: 0.85em; color: rgba(255,255,255,0.2); }
+.footer-version:hover { color: rgba(255,255,255,0.5); }
 </style>
 <script>
 (function() {
+  function applyVersion(raw) {
+    var el = document.getElementById('footer-version');
+    if (!el || !raw) return;
+    var parts = raw.split('+');
+    var semver = parts[0];
+    var sha = parts[1] || null;
+    el.textContent = 'v' + semver;
+    if (sha) el.href = 'https://github.com/St4r4x/restaurant-analytics/commit/' + sha;
+  }
   var v = sessionStorage.getItem('app_version');
   if (v) {
-    document.getElementById('footer-version').textContent = 'v' + v;
+    applyVersion(v);
   } else {
     fetch('/api/restaurants/health')
       .then(function(r) { return r.json(); })
       .then(function(d) {
         if (!d.version) return;
         sessionStorage.setItem('app_version', d.version);
-        document.getElementById('footer-version').textContent = 'v' + d.version;
+        applyVersion(d.version);
       })
       .catch(function() {});
   }
