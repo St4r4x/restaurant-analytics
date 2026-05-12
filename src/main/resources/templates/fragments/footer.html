@@ -30,19 +30,17 @@
     el.textContent = 'v' + semver;
     if (sha) el.href = 'https://github.com/St4r4x/restaurant-analytics/commit/' + sha;
   }
-  var v = sessionStorage.getItem('app_version');
-  if (v) {
-    applyVersion(v);
-  } else {
-    fetch('/api/restaurants/health')
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (!d.version) return;
-        sessionStorage.setItem('app_version', d.version);
-        applyVersion(d.version);
-      })
-      .catch(function() {});
-  }
+  // Show cached value immediately, then always fetch to pick up new deploys
+  var cached = sessionStorage.getItem('app_version');
+  if (cached) applyVersion(cached);
+  fetch('/api/restaurants/health')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.version) return;
+      sessionStorage.setItem('app_version', d.version);
+      applyVersion(d.version);
+    })
+    .catch(function() {});
 })();
 </script>
 </footer>
