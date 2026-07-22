@@ -4,6 +4,11 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+### Tests
+- Add `AnalyticsDAOIT` (Testcontainers) covering all 9 `AnalyticsDAO` aggregation queries — heatmap points, borough-grade distribution, at-risk count, cuisine rankings, at-risk/uncontrolled entries, name/address search
+- Add `JwtAuthenticationFilterTest` covering token extraction, validation, and role-to-authority mapping
+- Add `AuthControllerTest` covering register/login/refresh HTTP status codes and error branches
+
 ## [2.2.4] — 2026-05-12
 
 ### Improvements
