@@ -25,6 +25,16 @@ since a split into two PRs would add process overhead without a matching
 gain (the git-workflow fix has no code of its own; it's demonstrated by how
 this PR is shipped).
 
+A third, smaller item is folded into the same PR: a CI secret-scanning job.
+Reviewing two sibling personal projects (`diggo`, `the-good-spot`) for
+git-workflow and CI conventions surfaced one concrete gap — `the-good-spot`
+runs a `gitleaks` job on every PR/push (`.github/workflows/ci.yml`, job
+`secrets`), with a `.gitleaks.toml` allowlist for legitimate
+client-exposable keys. `restaurant-analytics` has no equivalent job, and
+this PR is literally about a secret that leaked into git history — adding
+the scan here directly prevents recurrence rather than deferring it to an
+unscheduled follow-up.
+
 ## Part 1 — JWT secret
 
 ### Current state (verified by reading the code)
@@ -156,6 +166,53 @@ No new test needed for the `jwt.secret` removal (config deletion, not logic)
 green before this change; same command re-run after implementation must show
 identical results).
 
+## Part 3 — CI secret scanning (gitleaks)
+
+Add a `secrets` job to `.github/workflows/ci.yml`, mirroring `the-good-spot`'s
+setup:
+
+```yaml
+secrets:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - uses: gitleaks/gitleaks-action@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+`fetch-depth: 0` is required so gitleaks can scan full git history, not just
+the PR diff — the leaked `jwt.secret` value is still present in prior commits
+even after this PR removes the live line, and a shallow scan would miss it.
+
+### Expected false positives
+
+`JwtUtilTest.java` and `AppConfigTest.java` already inject fixture strings
+like `"test-only-jwt-secret-64chars-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"`
+into a reflection-patched `AppConfig` field — these look like secrets by
+keyword (`jwt.secret`) even though they carry no real entropy and are
+scoped to test-only code. Add a `.gitleaks.toml` at repo root, following
+`the-good-spot`'s pattern, allowlisting the `test-only-jwt-secret-` prefix
+specifically (not a broad `*secret*` exemption, to avoid masking a real
+future leak):
+
+```toml
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test-only JWT fixture secrets — no real entropy, scoped to src/test/java"
+regexes = [
+  '''test-only-jwt-secret-[A-Za-z0-9]+''',
+]
+```
+
+If gitleaks flags anything else once the job first runs in CI, extend this
+allowlist entry-by-entry rather than disabling the job — same posture as
+`the-good-spot`'s existing allowlist for Supabase publishable keys.
+
 ## Documentation updates (same PR, per project convention)
 
 - `CHANGELOG.md` — new entry under a fresh version section (not `[Unreleased]`,
@@ -164,9 +221,11 @@ identical results).
   `DELETE /api/users/me` **is** a new capability → **minor** bump).
 - `docs/api.md` — add `DELETE /api/users/me` to the endpoint table.
 - `certification/bloc4a-1-analyse-risques.md` — flip R1 and R2 from "Non
-  traité" to "Traité", referencing this PR/commit as evidence.
+  traité" to "Traité", referencing this PR/commit as evidence; add the
+  gitleaks CI job as a new indicator of continuous monitoring (section 6).
 - `certification/bloc3-2-dossier-technique.md` — update section 4.1 (mesures
-  déjà en place) to include the new endpoint and the secret removal.
+  déjà en place) to include the new endpoint, the secret removal, and the
+  CI secret-scanning job.
 
 ## Out of scope
 
