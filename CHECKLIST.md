@@ -23,27 +23,22 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 
 | Bloc | Intitulé | Livrables requis | Statut global |
 |---|---|---|---|
-| **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ⚠️ 1/3 fait |
+| **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ⚠️ 2/3 fait |
 | **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ❌ 0/4 fait |
-| **3** | Concevoir et développer une application informatique | Dossier de conception · Application développée + dossier technique | ⚠️ appli faite, dossiers à produire |
-| **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ❌ 0/2 fait |
+| **3** | Concevoir et développer une application informatique | Dossier de conception · Application développée + dossier technique | ✅ 2/2 fait |
+| **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ⚠️ 1/2 fait |
 | **—** | Épreuve orale finale | Diaporama + présentation 30 min devant jury | ❌ à préparer une fois les 4 blocs validés |
 
 ---
 
 ## BLOC 1 — Analyser et définir une stratégie de systèmes d'information
 
-### 1.1 Dossier de veille ❌
-**Critères d'évaluation**
-- [ ] Méthode de collecte de flux d'information utilisée et **décrite** (pull ou push)
-- [ ] Données analysées avec exclusion justifiée des sources non fiables/non pertinentes
-- [ ] Vocabulaire adapté au public visé (compréhensible hors expert)
-- [ ] Recommandations argumentées intégrées
-
-**À faire**
-- [ ] Choisir 3-4 thématiques (sécurité API, cloud-native, réglementation IA/RGPD, agentic AI)
-- [ ] Documenter la méthode de collecte
-- [ ] Rédiger le dossier avec fiabilité des sources justifiée + recommandations
+### 1.1 Dossier de veille ✅
+**Fait** — `certification/bloc1-1-dossier-veille.md`
+- [x] Méthode de collecte de flux d'information utilisée et **décrite** (pull ou push)
+- [x] Données analysées avec exclusion justifiée des sources non fiables/non pertinentes
+- [x] Vocabulaire adapté au public visé (compréhensible hors expert)
+- [x] Recommandations argumentées intégrées
 
 ### 1.2 Cahier des charges fonctionnel ✅
 - [x] Fait — doc Drive *"Cahier des charges fonctionnel"* (projet Aflokkat, groupe de 3)
@@ -125,61 +120,35 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 
 ## BLOC 3 — Concevoir et développer une application informatique
 
-### 3.1 Dossier de conception d'une application informatique ⚠️
-**Base existante** : `docs/architecture.md` (structure des packages, pas de diagrammes UML)
+### 3.1 Dossier de conception d'une application informatique ✅
+**Fait** — `certification/bloc3-1-dossier-conception.md` (diagrammes Mermaid : cas d'utilisation, classes, activité — syntaxe validée avec `mmdc`)
+- [x] Décomposition de l'application présentée
+- [x] Modélisation UML : cas d'utilisation, activités, classes
+- [x] Fonctionnement de l'application décrit
+- [x] Données utilisées et structuration des informations échangées décrites
 
-**Critères d'évaluation**
-- [ ] Décomposition de l'application présentée
-- [ ] Modélisation UML : cas d'utilisation, activités, classes
-- [ ] Fonctionnement de l'application décrit
-- [ ] Données utilisées et structuration des informations échangées décrites
-
-**À faire**
-- [ ] Diagramme de cas d'utilisation (rôles CUSTOMER / CONTROLLER / ADMIN)
-- [ ] Diagramme de classes (domain: Restaurant/Address/InspectionRecord, entity: User/Bookmark/Report)
-- [ ] Diagramme d'activité pour un flux clé (ex : sync NYC Open Data → Mongo → cache → API)
-- [ ] Compiler en un dossier avec `docs/architecture.md` comme socle texte
-
-### 3.2 Application développée + dossier technique ⚠️
+### 3.2 Application développée + dossier technique ✅
 **Application livrée** : ✅ (`restaurant-analytics`, démo live, code sur GitHub)
-
-**Critères d'évaluation du dossier technique**
-- [ ] Revue de code formalisée (recommandations écrites, pas juste du code commenté)
-- [ ] Stratégie de tests documentée : niveaux, objectifs, responsabilités, critères d'entrée/sortie, risques, environnement de tests
-- [ ] Taux de couverture des tests vs objectifs fixés
-- [ ] Procédures d'installation avec scripts + plans de tests associés (déploiement continu)
-- [ ] Plan de sécurité
-- [ ] Plan de maintenance (+ support utilisateurs)
-
-**À faire**
-- [ ] Rédiger une revue de code formelle
-- [ ] Rédiger une stratégie de tests formelle à partir des tests JUnit/Mockito existants
-- [ ] Compléter `docs/deployment.md` en procédure complète (scripts + plans de tests)
-- [ ] Rédiger un plan de sécurité dédié (renvoi croisé avec le Bloc 4A, sans dupliquer)
-- [ ] Rédiger un plan de maintenance (cron jobs existants, supervision, support)
+**Dossier technique** : ✅ — `certification/bloc3-2-dossier-technique.md`
+- [x] Revue de code formalisée (recommandations écrites, pas juste du code commenté)
+- [x] Stratégie de tests documentée : niveaux, objectifs, responsabilités, critères d'entrée/sortie, risques, environnement de tests
+- [x] Taux de couverture des tests vs objectifs fixés
+- [x] Procédures d'installation avec scripts + plans de tests associés (déploiement continu)
+- [x] Plan de sécurité
+- [x] Plan de maintenance (+ support utilisateurs)
 
 ---
 
 ## BLOC 4A — Manager la cybersécurité des systèmes, applications et bases de données
 
-### 4A.1 Dossier d'analyse des risques des systèmes d'information ❌
-**Base existante** : `docs/commercialisation.md` (liste déjà des failles connues)
-
-**Critères d'évaluation**
-- [ ] Analyse des risques du SI maîtrisée (méthode + connaissances, contexte et parties prenantes pris en compte)
-- [ ] Cartographie des risques (confidentialité / intégrité / disponibilité)
-- [ ] Process d'audit organisationnel et technique pertinent et complet (tout le cycle de vie)
-- [ ] Plan de sécurisation avec mesures claires et ressources nécessaires
-- [ ] Protections développées adaptées aux risques identifiés
-- [ ] Indicateurs de suivi présentés, exploitables pour la prise de décision
-
-**À faire**
-- [ ] Lister les vulnérabilités connues (credentials en dur du `DataSeeder`, secrets non rotés, rate limiting incomplet, stack traces potentiellement exposées, stockage photo non sécurisé, HTTPS non forcé hors Railway)
-- [ ] Cartographie des risques (grille probabilité × impact × actif touché)
-- [ ] Documenter un process d'audit (organisationnel : gouvernance, accès ; technique : code, infra, données)
-- [ ] Rédiger le plan de sécurisation (actions priorisées)
-- [ ] Implémenter au moins une partie des protections dans le code (preuve concrète)
-- [ ] Définir des indicateurs de suivi
+### 4A.1 Dossier d'analyse des risques des systèmes d'information ✅
+**Fait** — `certification/bloc4a-1-analyse-risques.md` (10 risques cartographiés, R1/R2/R4/R5/R6/R8 traités, R3 partiel, R7/R9/R10 restants avec plan de sécurisation)
+- [x] Analyse des risques du SI maîtrisée (méthode + connaissances, contexte et parties prenantes pris en compte)
+- [x] Cartographie des risques (confidentialité / intégrité / disponibilité)
+- [x] Process d'audit organisationnel et technique pertinent et complet (tout le cycle de vie)
+- [x] Plan de sécurisation avec mesures claires et ressources nécessaires
+- [x] Protections développées adaptées aux risques identifiés
+- [x] Indicateurs de suivi présentés, exploitables pour la prise de décision
 
 ### 4A.2 Simulation de hacking et tests d'intrusion ❌
 **À faire**
@@ -201,12 +170,13 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 
 ## Ordre de traitement suggéré
 
-1. **Bloc 4A** (cybersécurité) — le plus gros morceau, réutilise directement `docs/commercialisation.md`
-2. **Bloc 3.2** (dossier technique) — converge en partie avec le Bloc 4A (plan de sécurité)
-3. **Bloc 3.1** (UML) — rapide, clarifie le 3.2
-4. **Bloc 2.1 + 2.2** (cahier des charges technique + note de cadrage) — s'appuient sur 3.1/3.2
-5. **Bloc 2.3** (planification + bilan) — s'appuie sur 2.1/2.2
-6. **Bloc 1.3** (analyse stratégique) — retravail léger d'un existant
-7. **Bloc 1.1** (veille) — indépendant, à caser n'importe quand
-8. **Bloc 2.4** (plan de changement) — à clarifier avec Aflokkat avant de rédiger quoi que ce soit
-9. **Épreuve orale finale** — seulement une fois les 4 blocs validés
+1. ~~**Bloc 4A.1** (analyse des risques)~~ ✅ fait
+2. ~~**Bloc 3.2** (dossier technique)~~ ✅ fait
+3. ~~**Bloc 3.1** (UML)~~ ✅ fait
+4. ~~**Bloc 1.1** (veille)~~ ✅ fait
+5. **Bloc 2.1 + 2.2** (cahier des charges technique + note de cadrage) — s'appuient sur 3.1/3.2, prochaine étape logique
+6. **Bloc 2.3** (planification + bilan) — s'appuie sur 2.1/2.2
+7. **Bloc 1.3** (analyse stratégique) — retravail léger d'un existant
+8. **Bloc 4A.2** (pentest) — question envoyée à Aflokkat sur le format attendu, en attente de réponse
+9. **Bloc 2.4** (plan de changement) — question envoyée à Aflokkat sur la modalité groupe/solo, en attente de réponse
+10. **Épreuve orale finale** — seulement une fois les 4 blocs validés
