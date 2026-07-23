@@ -30,7 +30,7 @@
 
 This task exists because the design spec flagged genuine uncertainty: the existing CI (`.github/workflows/ci.yml`) authenticates to Infisical with `env-slug: dev` for test-time secrets, but nobody has confirmed whether an Infisical `prod` environment exists with the real Supabase URL, or whether that URL only lives in Railway's environment variables today.
 
-- [ ] **Step 1: Check whether an Infisical `prod` environment exists for this project**
+- [x] **Step 1: Check whether an Infisical `prod` environment exists for this project**
 
 You (the human operator) have access to the Infisical dashboard/CLI login that this session does not. Run:
 
@@ -45,7 +45,7 @@ infisical secrets --projectId <project-id-for-nyc-restaurant-hygiene-z-qd-p> --e
 
 **If no `prod` environment exists, or it doesn't contain the Postgres URL:** proceed to Step 2 to create a plain GitHub secret instead.
 
-- [ ] **Step 2 (fallback only — skip if Step 1 found the URL in Infisical): create `SUPABASE_DATABASE_URL` as a GitHub Actions secret**
+- [x] ~~Step 2 (fallback only — skip if Step 1 found the URL in Infisical): create `SUPABASE_DATABASE_URL` as a GitHub Actions secret~~ — **skipped**: Step 1 found the URL in Infisical `prod` (Path A), so this fallback didn't apply.
 
 Get the real Supabase connection string from the Supabase dashboard (Project Settings → Database → Connection string → URI format, using the **connection pooler** URI if available since `pg_dump` is a short-lived connection). Then:
 
@@ -62,7 +62,7 @@ gh secret list --repo St4r4x/restaurant-analytics
 
 Expected: `SUPABASE_DATABASE_URL` appears in the list.
 
-- [ ] **Step 3: Create the GPG passphrase secret (required regardless of Step 1's outcome)**
+- [x] **Step 3: Create the GPG passphrase secret (required regardless of Step 1's outcome)**
 
 ```bash
 openssl rand -base64 32 | gh secret set BACKUP_GPG_PASSPHRASE --repo St4r4x/restaurant-analytics
@@ -78,7 +78,7 @@ Expected: `BACKUP_GPG_PASSPHRASE` appears in the list.
 
 **Save the passphrase value somewhere durable outside GitHub** (a password manager) before closing this step — GitHub secrets are write-only; there is no way to retrieve the value later, and losing it means every future backup becomes undecryptable.
 
-- [ ] **Step 4: Record the decision for Task 2**
+- [x] **Step 4: Record the decision for Task 2**
 
 Write down (in your own notes, not a repo file) which path Step 1 resolved to:
 - Path A: Infisical `prod` environment has the URL under key `<KEY_NAME>`.
@@ -97,7 +97,7 @@ Task 2's workflow file differs slightly depending on which path applies — the 
 - Consumes: the secret(s) provisioned in Task 1 (`BACKUP_GPG_PASSPHRASE` always; `SUPABASE_DATABASE_URL` env var, sourced either from the GitHub secret directly or from Infisical's export, depending on Task 1's Path A/B outcome).
 - Produces: a GitHub Actions artifact named `postgres-backup-${{ github.run_id }}`, containing one file `backup.sql.gpg` — consumed manually during a restore (Task 4 documents how), not by any other workflow or task.
 
-- [ ] **Step 1: Write the workflow file**
+- [x] **Step 1: Write the workflow file**
 
 If Task 1 resolved to **Path B** (plain GitHub secret `SUPABASE_DATABASE_URL`), create `.github/workflows/backup-postgres.yml` with this content:
 
@@ -189,7 +189,7 @@ jobs:
 
 (Replace `$<KEY_NAME>` with the actual shell variable reference to the Infisical-exported secret — Infisical's `export-type: env` step makes the secret available as a real environment variable with that exact name, so if the key in Infisical is literally `SUPABASE_DATABASE_URL`, the line reads `pg_dump --format=plain "$SUPABASE_DATABASE_URL" > backup.sql`, identical to Path B's dump step.)
 
-- [ ] **Step 2: Validate YAML syntax**
+- [x] **Step 2: Validate YAML syntax**
 
 ```bash
 python3 -c "import yaml; yaml.safe_load(open('.github/workflows/backup-postgres.yml'))" && echo OK
@@ -197,7 +197,7 @@ python3 -c "import yaml; yaml.safe_load(open('.github/workflows/backup-postgres.
 
 Expected: `OK`
 
-- [ ] **Step 3: Trigger a manual run to verify it works end-to-end**
+- [x] **Step 3: Trigger a manual run to verify it works end-to-end**
 
 ```bash
 git add .github/workflows/backup-postgres.yml
@@ -222,7 +222,7 @@ gh run list --repo St4r4x/restaurant-analytics --workflow=backup-postgres.yml --
 
 Expected: a run with status `completed` and conclusion `success`. If it fails, run `gh run view --repo St4r4x/restaurant-analytics --log-failed` (using the run ID from the list) to see the exact error — most likely causes are a wrong connection string format (Supabase requires the pooler port for short-lived connections in many configurations) or a missing secret name typo.
 
-- [ ] **Step 4: Download and verify the artifact decrypts and restores cleanly**
+- [x] **Step 4: Download and verify the artifact decrypts and restores cleanly**
 
 ```bash
 gh run download --repo St4r4x/restaurant-analytics -D /tmp/backup-verify $(gh run list --repo St4r4x/restaurant-analytics --workflow=backup-postgres.yml --limit 1 --json databaseId --jq '.[0].databaseId')
@@ -259,7 +259,7 @@ rm -rf /tmp/backup-verify
 - Consumes: Task 2's workflow name (`backup-postgres.yml`) and artifact naming pattern (`postgres-backup-${{ github.run_id }}`) — referenced by name in the restore instructions.
 - Produces: nothing consumed by later tasks — this is documentation.
 
-- [ ] **Step 1: Write `docs/backup-restore.md`**
+- [x] **Step 1: Write `docs/backup-restore.md`**
 
 ```markdown
 # Backup and Disaster Recovery
@@ -318,7 +318,7 @@ The `newyork.restaurants` collection contains only data mirrored from the NYC Op
 If the Redis cache or Elasticsearch index also need rebuilding after a Mongo resync, use the existing admin endpoints: `POST /api/admin/rebuild-cache` and the nightly Elasticsearch reindex (or trigger it manually via `POST /api/admin/cron/run/es-reindex`, per `docs/api.md`).
 ```
 
-- [ ] **Step 2: Add a "Disaster Recovery" section to `docs/deployment.md`**
+- [x] **Step 2: Add a "Disaster Recovery" section to `docs/deployment.md`**
 
 Read the current end of `docs/deployment.md` first (it ends with a "Production Notes" section), then append this new section after it:
 
@@ -331,7 +331,7 @@ Read the current end of `docs/deployment.md` first (it ends with a "Production N
 See [backup-restore.md](backup-restore.md) for the full backup and restore procedure. Summary: PostgreSQL (Supabase) is backed up daily via `.github/workflows/backup-postgres.yml` (GPG-encrypted, 30-day retention); MongoDB (Atlas) has no backup because it's fully re-derivable from NYC Open Data.
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/backup-restore.md docs/deployment.md
@@ -354,7 +354,7 @@ new Disaster Recovery section."
 - Consumes: Task 2's workflow existing and verified working, Task 3's documentation existing — this task only updates a status cell, it doesn't add new capability.
 - Produces: nothing consumed by later tasks.
 
-- [ ] **Step 1: Update R8's status**
+- [x] **Step 1: Update R8's status**
 
 Read the current file first to find R8's exact row in the risk table (section "2. Cartographie des risques"), then change its "Statut" column from "Non traité" to:
 
@@ -364,7 +364,7 @@ Read the current file first to find R8's exact row in the risk table (section "2
 
 (Use today's actual merge date if this is being executed after the PR merges, matching the pattern already used for R1/R2 in this same file.)
 
-- [ ] **Step 2: Add an indicator for backup job health**
+- [x] **Step 2: Add an indicator for backup job health**
 
 In the same file's section 6 ("Indicateurs de suivi"), add a row:
 
@@ -372,7 +372,7 @@ In the same file's section 6 ("Indicateurs de suivi"), add a row:
 | Job CI `backup-postgres` en échec | GitHub Actions | Quotidien (03:17 UTC) | Tout échec = vérifier la connectivité Supabase et relancer manuellement (`gh workflow run backup-postgres.yml`) |
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add certification/bloc4a-1-analyse-risques.md
