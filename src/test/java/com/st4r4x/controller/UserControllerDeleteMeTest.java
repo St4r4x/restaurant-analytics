@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -79,7 +80,9 @@ public class UserControllerDeleteMeTest {
 
         userController.deleteAccount();
 
-        verify(auditService).log(eq(AuditAction.USER_DELETED), eq("User"), eq("testuser"), isNull());
+        InOrder inOrder = inOrder(auditService, userRepository);
+        inOrder.verify(auditService).log(eq(AuditAction.USER_DELETED), eq("User"), eq("testuser"), isNull());
+        inOrder.verify(userRepository).delete(user);
     }
 
     @Test

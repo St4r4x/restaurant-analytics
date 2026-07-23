@@ -101,8 +101,14 @@ existing inspection reports).
 ### Cascade order (full deletion, confirmed choice)
 
 1. **Log the deletion event first** — `AuditService.log(USER_DELETED, ...)`
-   before any data is removed, so the audit trail captures the action while
-   `actorUsername` is still meaningful.
+   before any data is removed. Because `AuditLogEntity` uses
+   `GenerationType.IDENTITY` (a synchronous insert), this row already exists
+   by the time step 5 runs its `findByActorUsername` lookup, so the
+   USER_DELETED entry itself gets swept into the later anonymization pass
+   along with every prior entry for this user — the end state is that no
+   audit row anywhere retains the real username after account deletion,
+   which satisfies GDPR erasure more completely than a scheme that preserved
+   one identifying row.
 2. **Delete photo files on disk** — for every `InspectionReportEntity` owned
    by the user, delete `{uploadsDir}/{reportId}/` recursively (mirrors the
    write path in `ReportController.uploadPhoto()`,
