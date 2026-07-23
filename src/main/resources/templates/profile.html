@@ -46,6 +46,18 @@
           <div style="background: #e8e0d8; border-radius: 2px; height: 80px;"></div>
         </div>
       </div>
+      <div id="danger-zone" class="content-card" style="border-color: #c0392b;">
+        <div class="section-label">Danger Zone</div>
+        <div class="section-title">Delete Account</div>
+        <p style="color: #666; font-size: 0.9em; margin-bottom: 16px;">
+          Permanently deletes your account, bookmarks, and hygiene reports (including uploaded photos). This cannot be undone.
+        </p>
+        <button id="delete-account-btn" onclick="deleteAccount()"
+          style="background: #c0392b; color: white; border: none; padding: 10px 20px; font-size: 0.85em; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer;">
+          Delete My Account
+        </button>
+        <div id="delete-account-error" class="error-msg" style="display: none;"></div>
+      </div>
     </div>
   </div>
   <div th:replace="fragments/footer :: footer"></div>
@@ -132,6 +144,33 @@
         document.getElementById('bookmarks-grid').innerHTML =
           '<p style="color:#b71c1c;font-size:0.85em">Could not load bookmarks.</p>';
       });
+
+    function deleteAccount() {
+      var errorEl = document.getElementById('delete-account-error');
+      errorEl.style.display = 'none';
+      if (!window.confirm('Delete your account permanently? This removes your bookmarks and hygiene reports (including photos) and cannot be undone.')) {
+        return;
+      }
+      var btn = document.getElementById('delete-account-btn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+      fetchWithAuth('/api/users/me', { method: 'DELETE' })
+        .then(r => r.json().then(res => ({ ok: r.ok, res: res })))
+        .then(function(result) {
+          if (!result.ok || result.res.status !== 'success') {
+            throw new Error((result.res && result.res.message) || 'Account deletion failed');
+          }
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/login';
+        })
+        .catch(function(err) {
+          errorEl.textContent = err.message || 'Could not delete your account. Please try again.';
+          errorEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Delete My Account';
+        });
+    }
   </script>
 </body>
 </html>
