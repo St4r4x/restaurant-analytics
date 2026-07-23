@@ -28,11 +28,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Restaurant;
+import com.st4r4x.entity.AuditAction;
+import com.st4r4x.entity.AuditLogEntity;
 import com.st4r4x.entity.BookmarkEntity;
+import com.st4r4x.entity.InspectionReportEntity;
 import com.st4r4x.entity.UserEntity;
+import com.st4r4x.repository.AuditLogRepository;
 import com.st4r4x.repository.BookmarkRepository;
 import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
+import com.st4r4x.service.AuditService;
 import com.st4r4x.util.ResponseUtil;
 
 @RestController
@@ -52,6 +57,12 @@ public class UserController {
 
     @Autowired
     private RestaurantDAO restaurantDAO;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+
+    @Autowired
+    private AuditService auditService;
 
     private UserEntity getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -142,6 +153,41 @@ public class UserController {
             response.put("status", "success");
             response.put("message", "Bookmark added");
             response.put("restaurantId", restaurantId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseUtil.errorResponse(e);
+        }
+    }
+
+    @DeleteMapping("/me")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> deleteAccount() {
+        try {
+            UserEntity user = getCurrentUser();
+            String username = user.getUsername();
+
+            auditService.log(AuditAction.USER_DELETED, "User", username, null);
+
+            List<InspectionReportEntity> reports = reportRepository.findByUserId(user.getId());
+            for (InspectionReportEntity report : reports) {
+                deletePhotoDirectory(report.getId());
+            }
+            reportRepository.deleteAll(reports);
+
+            List<BookmarkEntity> bookmarks = bookmarkRepository.findByUserId(user.getId());
+            bookmarkRepository.deleteAll(bookmarks);
+
+            List<AuditLogEntity> priorEntries = auditLogRepository.findByActorUsername(username);
+            for (AuditLogEntity entry : priorEntries) {
+                entry.setActorUsername("[deleted-user]");
+            }
+            auditLogRepository.saveAll(priorEntries);
+
+            userRepository.delete(user);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Account deleted");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseUtil.errorResponse(e);
