@@ -42,8 +42,8 @@
 
 | # | Risque | Actif touché | Critère DICP | P | I | Score | Statut au 2026-07-22 |
 |---|---|---|---|---|---|---|---|
-| R1 | Secret JWT versionné en clair dans `application.properties` | Sessions utilisateurs (tous rôles) | Confidentialité, Intégrité | 3 | 4 | **12** | Non traité |
-| R2 | Absence de politique de rétention / suppression des données personnelles (pas de `DELETE /api/users/me`) | Comptes utilisateurs | Confidentialité (RGPD) | 3 | 3 | **9** | Non traité |
+| R1 | Secret JWT versionné en clair dans `application.properties` | Sessions utilisateurs (tous rôles) | Confidentialité, Intégrité | 3 | 4 | **12** | **Traité** — PR feature/security-hardening (2026-07-22) |
+| R2 | Absence de politique de rétention / suppression des données personnelles (pas de `DELETE /api/users/me`) | Comptes utilisateurs | Confidentialité (RGPD) | 3 | 3 | **9** | **Traité** — PR feature/security-hardening (2026-07-22) |
 | R3 | Photos de rapports d'inspection stockées sur disque local, non chiffrées, sans contrôle d'accès dédié | Rapports d'inspection | Confidentialité | 2 | 3 | 6 | Partiellement traité (accès via API authentifiée, mais pas de séparation de stockage) |
 | R4 | Scraping / déni de service applicatif sur les endpoints publics de recherche et de carte | Disponibilité du service | Disponibilité | 3 | 2 | 6 | **Traité** — `RateLimitFilter` couvre `/api/restaurants/search` et `/api/restaurants/map-points` |
 | R5 | Comptes de test avec identifiants connus (`DataSeeder`) actifs en production | Comptes / accès admin | Confidentialité, Intégrité | 1 | 4 | 4 | **Traité** — `@Profile("dev")`, ne s'exécute pas en production |
@@ -123,6 +123,7 @@ Ces protections sont déjà en place dans le code au moment de la rédaction de 
 | Résultat du dernier sync NYC Open Data (`GET /api/restaurants/sync-status`) | Endpoint applicatif | Quotidien (cron 02:30) | Échec de sync depuis > 48h |
 | Nombre d'actions admin journalisées (`AuditService`) | PostgreSQL `audit_log` | Mensuel | Volume anormal sur un compte admin (indice de compromission) |
 | Âge du secret JWT en production | Procédure manuelle (à formaliser) | Annuel | > 12 mois sans rotation |
+| Job CI `secrets` (gitleaks) en échec | GitHub Actions | À chaque push/PR | Tout échec = secret détecté, bloquer le merge |
 
 Ces indicateurs sont exploitables pour la prise de décision : ils permettent d'objectiver si le plan de sécurisation (section 4) produit un effet mesurable (ex. baisse du nombre de 429 après ajustement des seuils, absence de CVE critique ouverte plus de 7 jours).
 

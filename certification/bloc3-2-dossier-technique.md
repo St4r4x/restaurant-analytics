@@ -152,6 +152,9 @@ Ce plan de sécurité porte la mise en œuvre technique. L'analyse de risque str
 - **Isolation des comptes de démonstration** : `DataSeeder` gated par `@Profile("dev")`.
 - **Traçabilité** : `AuditService` journalise les actions administrateur (changement de rôle, déclenchement de sync, etc.) en PostgreSQL, consultable via `GET /api/admin/audit`.
 - **Veille sur les dépendances** : GitHub Dependabot actif sur le dépôt.
+- **Suppression de compte RGPD** : `DELETE /api/users/me` — cascade complète (photos, rapports, bookmarks) + anonymisation de l'audit log.
+- **Secret JWT retiré du dépôt** : `application.properties` ne contient plus de valeur de secours ; `JWT_SECRET` est obligatoire via variable d'environnement, avec échec au démarrage sinon (`AppConfig.getJwtSecret()`).
+- **Scan de secrets en CI** : job `secrets` (gitleaks) sur chaque push/PR, avec allowlist documentée (`.gitleaks.toml`).
 
 ### 4.2 Mesures à mettre en œuvre (renvoi au plan de sécurisation du Bloc 4A.1)
 

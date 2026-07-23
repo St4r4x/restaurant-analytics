@@ -90,6 +90,7 @@ All analytics endpoints are **public**.
 | GET | `/api/users/me/bookmarks` | Required | List bookmarked restaurant IDs |
 | POST | `/api/users/me/bookmarks/{restaurantId}` | Required | Add bookmark |
 | DELETE | `/api/users/me/bookmarks/{restaurantId}` | Required | Remove bookmark |
+| DELETE | `/api/users/me` | Required | Delete own account — cascades through photos, reports, and bookmarks, anonymizes matching audit log entries, then deletes the user |
 
 ---
 

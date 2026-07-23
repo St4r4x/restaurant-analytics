@@ -9,6 +9,15 @@ All notable changes are documented here.
 - Add `JwtAuthenticationFilterTest` covering token extraction, validation, and role-to-authority mapping
 - Add `AuthControllerTest` covering register/login/refresh HTTP status codes and error branches
 
+## [2.3.0] — 2026-07-22
+
+### Added
+- `DELETE /api/users/me` — RGPD-compliant account deletion; cascades through photo files, inspection reports, and bookmarks, anonymizes matching audit log entries, then removes the user row
+- CI: `secrets` job (gitleaks) scans every push/PR for committed secrets, with a `.gitleaks.toml` allowlist for test-only JWT fixtures
+
+### Security
+- Remove `jwt.secret` fallback value from `application.properties` — it was committed in clear text in git history and silently defeated the existing fail-fast check in `AppConfig.getJwtSecret()`. `JWT_SECRET` must now come from the environment (already wired in `docker-compose.yml`, Railway, and CI)
+
 ## [2.2.4] — 2026-05-12
 
 ### Improvements
