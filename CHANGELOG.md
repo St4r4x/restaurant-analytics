@@ -4,6 +4,14 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+### Added
+- Daily encrypted PostgreSQL backup workflow (`.github/workflows/backup-postgres.yml`) — GPG AES256, 30-day artifact retention, runs at 03:17 UTC via Supabase's Supavisor pooler (the direct host is IPv6-only and unreachable from GitHub-hosted runners). Closes risk R8.
+- `docs/backup-restore.md` and a "Disaster Recovery" section in `docs/deployment.md` — Postgres restore procedure and MongoDB resync procedure (no dump needed, fully re-derivable from NYC Open Data)
+- "Delete My Account" button on the profile page (`profile.html`), wired to the existing `DELETE /api/users/me` RGPD endpoint — the endpoint shipped in v2.3.0 but was never exposed in the UI
+
+### Fixed
+- `DELETE /api/users/me` was failing with a 500 for every user — the `audit_log` table's `audit_log_action_check` CHECK constraint predated the `USER_DELETED` enum value added in v2.3.0 and rejected the audit log insert, poisoning the transaction. Migrated the constraint to include `USER_DELETED`.
+
 ### Tests
 - Add `AnalyticsDAOIT` (Testcontainers) covering all 9 `AnalyticsDAO` aggregation queries — heatmap points, borough-grade distribution, at-risk count, cuisine rankings, at-risk/uncontrolled entries, name/address search
 - Add `JwtAuthenticationFilterTest` covering token extraction, validation, and role-to-authority mapping

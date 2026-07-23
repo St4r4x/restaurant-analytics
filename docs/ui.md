@@ -7,7 +7,7 @@
 | `/` | None (anonymous) | Landing: hero, stat strip, search bar, sample restaurants |
 | `/` | JWT present | Customer dashboard: bookmarks strip + KPI tiles |
 | `/login` | None | Login / Register tabs |
-| `/profile` | Required | Role badge, bookmark count, report count (controllers only) |
+| `/profile` | Required | Role badge, bookmark count, report count (controllers only), account deletion (RGPD) |
 | `/analytics` | None | City-wide analytics: KPI tiles, borough chart, cuisine rankings, at-risk table |
 | `/dashboard` | CONTROLLER | Inspector dashboard: reports list, status tabs, New Report modal |
 | `/restaurant/{camis}` | None | Restaurant detail: grade badge, score chart, inspection history timeline |
