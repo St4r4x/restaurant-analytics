@@ -20,6 +20,9 @@ target/
 .env.*
 !.env.example
 
+# Claude Code local-only files (credentials, personal settings)
+.claude/*.local.json
+
 # Logs
 *.log
 
