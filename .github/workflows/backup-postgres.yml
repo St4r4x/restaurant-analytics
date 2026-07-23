@@ -11,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PGHOST: db.dcdssfzpxuejwznuossj.supabase.co
+      # Supavisor pooler (session mode) — the direct "db.<ref>.supabase.co" host
+      # is IPv6-only and unreachable from GitHub-hosted runners (no IPv6 egress).
+      PGHOST: aws-0-eu-west-1.pooler.supabase.com
       PGPORT: "5432"
       PGDATABASE: postgres
     steps:
@@ -30,7 +32,8 @@ jobs:
 
       - name: Dump database
         env:
-          PGUSER: ${{ env.SPRING_DATASOURCE_USERNAME }}
+          # Pooler requires the project-scoped username, not the bare role name.
+          PGUSER: postgres.dcdssfzpxuejwznuossj
           PGPASSWORD: ${{ env.SPRING_DATASOURCE_PASSWORD }}
         run: pg_dump --format=plain > backup.sql
 
