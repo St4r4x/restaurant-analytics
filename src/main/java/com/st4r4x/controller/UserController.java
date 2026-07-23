@@ -1,11 +1,19 @@
 package com.st4r4x.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.st4r4x.config.AppConfig;
 import com.st4r4x.dao.RestaurantDAO;
 import com.st4r4x.domain.Restaurant;
 import com.st4r4x.entity.BookmarkEntity;
@@ -29,6 +38,8 @@ import com.st4r4x.util.ResponseUtil;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -46,6 +57,28 @@ public class UserController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    /**
+     * Deletes {uploadsDir}/{reportId}/ recursively. Best-effort: a missing or
+     * already-deleted directory must not block account deletion.
+     */
+    private void deletePhotoDirectory(Long reportId) {
+        Path dir = Paths.get(AppConfig.getUploadsDir(), String.valueOf(reportId));
+        if (!Files.exists(dir)) {
+            return;
+        }
+        try (Stream<Path> paths = Files.walk(dir)) {
+            paths.sorted(Comparator.reverseOrder()).forEach(path -> {
+                try {
+                    Files.delete(path);
+                } catch (IOException e) {
+                    logger.warn("Failed to delete {} during account deletion: {}", path, e.getMessage());
+                }
+            });
+        } catch (IOException e) {
+            logger.warn("Failed to walk photo directory {} during account deletion: {}", dir, e.getMessage());
+        }
     }
 
     @GetMapping("/me")
