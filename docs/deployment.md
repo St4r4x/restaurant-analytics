@@ -64,3 +64,9 @@ java -Dmongodb.uri=mongodb://localhost:27017 -jar target/quickstart-app-1.0-SNAP
 - Manual sync trigger: `POST /api/restaurants/refresh` (ADMIN role required).
 - `DataSeeder` creates three seeded accounts on every startup (see [development.md](development.md)). Gate it behind `@Profile("dev")` before going to a shared production environment.
 - The `ARCHITECTURE.md` at the project root is superseded by [docs/architecture.md](architecture.md).
+
+---
+
+## Disaster Recovery
+
+See [backup-restore.md](backup-restore.md) for the full backup and restore procedure. Summary: PostgreSQL (Supabase) is backed up daily via `.github/workflows/backup-postgres.yml` (GPG-encrypted, 30-day retention, credentials via Infisical `prod` + Supavisor pooler connection); MongoDB (Atlas) has no backup because it's fully re-derivable from NYC Open Data.
