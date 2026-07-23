@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test-only JWT fixture secrets — no real entropy, scoped to src/test/java"
+regexes = [
+  '''test-only-jwt-secret-[A-Za-z0-9]+''',
+]
