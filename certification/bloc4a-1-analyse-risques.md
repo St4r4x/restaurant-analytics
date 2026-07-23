@@ -49,7 +49,7 @@
 | R5 | Comptes de test avec identifiants connus (`DataSeeder`) actifs en production | Comptes / accès admin | Confidentialité, Intégrité | 1 | 4 | 4 | **Traité** — `@Profile("dev")`, ne s'exécute pas en production |
 | R6 | Exposition de stack traces / détails d'erreur interne dans les réponses API | Confidentialité (fuite d'architecture) | Confidentialité | 1 | 2 | 2 | **Traité** — `ResponseUtil.errorResponse()` masque systématiquement le détail des exceptions non métier |
 | R7 | Panne du service NYC Open Data (fournisseur externe, SLA informel) | Disponibilité des données | Disponibilité | 2 | 2 | 4 | Non traité (pas de fallback documenté) |
-| R8 | Absence de sauvegarde documentée pour MongoDB / PostgreSQL en cas de corruption | Intégrité, Disponibilité | Intégrité, Disponibilité | 2 | 3 | 6 | Non traité |
+| R8 | Absence de sauvegarde documentée pour MongoDB / PostgreSQL en cas de corruption | Intégrité, Disponibilité | Intégrité, Disponibilité | 2 | 3 | 6 | **Traité** — PR #8 (2026-07-23) |
 | R9 | Rate limiting en mémoire (`ConcurrentHashMap` non borné) — fuite mémoire possible sous charge soutenue | Disponibilité (app elle-même) | Disponibilité | 1 | 2 | 2 | Connu, documenté en commentaire dans le code (`RateLimitFilter`), non corrigé |
 | R10 | Absence de rotation planifiée des secrets (JWT, éventuels tokens NYC API) | Confidentialité | Confidentialité | 2 | 3 | 6 | Non traité |
 
@@ -124,6 +124,7 @@ Ces protections sont déjà en place dans le code au moment de la rédaction de 
 | Nombre d'actions admin journalisées (`AuditService`) | PostgreSQL `audit_log` | Mensuel | Volume anormal sur un compte admin (indice de compromission) |
 | Âge du secret JWT en production | Procédure manuelle (à formaliser) | Annuel | > 12 mois sans rotation |
 | Job CI `secrets` (gitleaks) en échec | GitHub Actions | À chaque push/PR | Tout échec = secret détecté, bloquer le merge |
+| Job CI `backup-postgres` en échec | GitHub Actions | Quotidien (03:17 UTC) | Tout échec = vérifier la connectivité Supabase (pooler Supavisor) et relancer manuellement (`gh workflow run backup-postgres.yml`) |
 
 Ces indicateurs sont exploitables pour la prise de décision : ils permettent d'objectiver si le plan de sécurisation (section 4) produit un effet mesurable (ex. baisse du nombre de 429 après ajustement des seuils, absence de CVE critique ouverte plus de 7 jours).
 
