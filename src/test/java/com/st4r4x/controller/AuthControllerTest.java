@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import com.st4r4x.config.AppConfig;
 import com.st4r4x.dto.AuthRequest;
 import com.st4r4x.dto.JwtResponse;
 import com.st4r4x.dto.RefreshRequest;
@@ -139,6 +140,17 @@ class AuthControllerTest {
         assertTrue(refreshCookie.isHttpOnly());
         assertEquals("/", accessCookie.getPath());
         assertEquals("/api/auth/", refreshCookie.getPath());
+
+        // Additional assertions for secure, SameSite, and maxAge to catch CSRF defense regressions
+        assertTrue(accessCookie.getSecure(), "access_token cookie must be secure");
+        assertTrue(refreshCookie.getSecure(), "refresh_token cookie must be secure");
+        assertEquals("Strict", accessCookie.getAttribute("SameSite"), "access_token cookie SameSite must be Strict");
+        assertEquals("Strict", refreshCookie.getAttribute("SameSite"), "refresh_token cookie SameSite must be Strict");
+
+        int expectedAccessMaxAge = (int) (AppConfig.getJwtAccessTokenExpirationMs() / 1000);
+        int expectedRefreshMaxAge = (int) (AppConfig.getJwtRefreshTokenExpirationMs() / 1000);
+        assertEquals(expectedAccessMaxAge, accessCookie.getMaxAge(), "access_token cookie maxAge must match JWT expiration");
+        assertEquals(expectedRefreshMaxAge, refreshCookie.getMaxAge(), "refresh_token cookie maxAge must match JWT expiration");
     }
 
     @Test
