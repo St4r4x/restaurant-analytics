@@ -145,4 +145,12 @@ public class ValidationUtilTest {
         assertThrows(IllegalArgumentException.class, () ->
             ValidationUtil.requireValidPassword("Abcdefgh1"));
     }
+
+    @Test
+    void testRequireValidPassword_ValidWithNewline() {
+        // Regression test: password contains uppercase + digit + 10+ chars,
+        // but a newline character used to break the regex-based check
+        // (Java's `.` doesn't cross line terminators without DOTALL).
+        ValidationUtil.requireValidPassword("Password1\n");
+    }
 }

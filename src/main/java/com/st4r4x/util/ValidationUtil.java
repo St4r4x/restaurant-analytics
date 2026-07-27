@@ -1,14 +1,9 @@
 package com.st4r4x.util;
 
-import java.util.regex.Pattern;
-
 /**
  * Utilitaires de validation
  */
 public class ValidationUtil {
-
-    private static final Pattern PASSWORD_UPPERCASE = Pattern.compile(".*[A-Z].*");
-    private static final Pattern PASSWORD_DIGIT = Pattern.compile(".*[0-9].*");
 
     private ValidationUtil() {
         // Classe utilitaire
@@ -33,10 +28,10 @@ public class ValidationUtil {
         if (password.length() < 10) {
             throw new IllegalArgumentException("password doit contenir au moins 10 caractères");
         }
-        if (!PASSWORD_UPPERCASE.matcher(password).matches()) {
+        if (password.chars().noneMatch(Character::isUpperCase)) {
             throw new IllegalArgumentException("password doit contenir au moins une majuscule");
         }
-        if (!PASSWORD_DIGIT.matcher(password).matches()) {
+        if (password.chars().noneMatch(Character::isDigit)) {
             throw new IllegalArgumentException("password doit contenir au moins un chiffre");
         }
     }
