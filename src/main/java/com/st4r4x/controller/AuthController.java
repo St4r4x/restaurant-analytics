@@ -1,5 +1,6 @@
 package com.st4r4x.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.Cookie;
@@ -78,7 +79,10 @@ public class AuthController {
             .findFirst()
             .map(a -> a.getAuthority())
             .orElse(null);
-        return ResponseEntity.ok(Map.of("username", username, "role", role));
+        Map<String, Object> data = new HashMap<>();
+        data.put("username", username);
+        data.put("role", role);
+        return ResponseEntity.ok(data);
     }
 
     @PostMapping("/logout")

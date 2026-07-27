@@ -252,6 +252,24 @@ class AuthControllerTest {
     }
 
     @Test
+    void me_returnsNullRole_whenNoAuthoritiesPresent() {
+        var auth = new UsernamePasswordAuthenticationToken(
+            "bob", null, List.of());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        try {
+            ResponseEntity<?> response = authController.me();
+
+            assertEquals(200, response.getStatusCode().value());
+            Map<?, ?> body = (Map<?, ?>) response.getBody();
+            assertEquals("bob", body.get("username"));
+            assertNull(body.get("role"));
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
     void logout_clearsCookies() {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
