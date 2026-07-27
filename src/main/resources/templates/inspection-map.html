@@ -199,15 +199,14 @@
         document.getElementById('cuisine-filter').addEventListener('change', applyFilters);
 
         // Show dashboard link for controllers
-        try {
-          const t = localStorage.getItem('accessToken');
-          if (t) {
-            const payload = JSON.parse(atob(t.split('.')[1]));
-            if (payload.role === 'ROLE_CONTROLLER') {
+        fetchWithAuth('/api/auth/me')
+          .then((response) => (response.ok ? response.json() : null))
+          .then((data) => {
+            if (data && data.role === 'ROLE_CONTROLLER') {
               document.getElementById('dashboardLink').style.display = '';
             }
-          }
-        } catch(e) {}
+          })
+          .catch(() => {});
       });
       // ── End grade-colored clustered markers ──────────────────────────
     </script>

@@ -155,8 +155,6 @@
           if (!result.ok || result.res.status !== 'success') {
             throw new Error((result.res && result.res.message) || 'Account deletion failed');
           }
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
           window.location.href = '/login';
         })
         .catch(function(err) {
