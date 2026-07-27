@@ -3,6 +3,8 @@ package com.st4r4x.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -108,6 +110,68 @@ class AuthControllerTest {
         when(authService.refresh("expired-token")).thenThrow(new IllegalArgumentException("Invalid refresh token"));
 
         ResponseEntity<?> response = authController.refresh(req);
+
+        assertEquals(400, response.getStatusCode().value());
+    }
+
+    // ── check-username ───────────────────────────────────────────────────────
+
+    @Test
+    void checkUsername_returns200_withAvailableTrue() {
+        when(authService.isUsernameAvailable("newuser")).thenReturn(true);
+
+        ResponseEntity<?> response = authController.checkUsername("newuser");
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(Map.of("available", true), response.getBody());
+    }
+
+    @Test
+    void checkUsername_returns200_withAvailableFalse() {
+        when(authService.isUsernameAvailable("alice")).thenReturn(false);
+
+        ResponseEntity<?> response = authController.checkUsername("alice");
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(Map.of("available", false), response.getBody());
+    }
+
+    @Test
+    void checkUsername_returns400_onBlankUsername() {
+        when(authService.isUsernameAvailable("")).thenThrow(new IllegalArgumentException("username ne peut pas être null ou vide"));
+
+        ResponseEntity<?> response = authController.checkUsername("");
+
+        assertEquals(400, response.getStatusCode().value());
+    }
+
+    // ── check-email ───────────────────────────────────────────────────────────
+
+    @Test
+    void checkEmail_returns200_withAvailableTrue() {
+        when(authService.isEmailAvailable("new@example.com")).thenReturn(true);
+
+        ResponseEntity<?> response = authController.checkEmail("new@example.com");
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(Map.of("available", true), response.getBody());
+    }
+
+    @Test
+    void checkEmail_returns200_withAvailableFalse() {
+        when(authService.isEmailAvailable("alice@example.com")).thenReturn(false);
+
+        ResponseEntity<?> response = authController.checkEmail("alice@example.com");
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(Map.of("available", false), response.getBody());
+    }
+
+    @Test
+    void checkEmail_returns400_onBlankEmail() {
+        when(authService.isEmailAvailable("")).thenThrow(new IllegalArgumentException("email ne peut pas être null ou vide"));
+
+        ResponseEntity<?> response = authController.checkEmail("");
 
         assertEquals(400, response.getStatusCode().value());
     }
