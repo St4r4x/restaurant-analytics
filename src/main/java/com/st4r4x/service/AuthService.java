@@ -91,6 +91,16 @@ public class AuthService {
         return new JwtResponse(accessToken, refreshToken);
     }
 
+    public boolean isUsernameAvailable(String username) {
+        ValidationUtil.requireNonEmpty(username, "username");
+        return userRepository.findByUsername(username).isEmpty();
+    }
+
+    public boolean isEmailAvailable(String email) {
+        ValidationUtil.requireNonEmpty(email, "email");
+        return userRepository.findByEmail(email).isEmpty();
+    }
+
     public JwtResponse login(AuthRequest request) {
         ValidationUtil.requireNonEmpty(request.getUsername(), "username");
         ValidationUtil.requireNonEmpty(request.getPassword(), "password");

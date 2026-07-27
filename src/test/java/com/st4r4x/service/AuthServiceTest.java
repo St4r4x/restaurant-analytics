@@ -324,4 +324,44 @@ class AuthServiceTest {
         verify(userRepository).save(captor.capture());
         assertEquals("ROLE_ADMIN", captor.getValue().getRole());
     }
+
+    // ── availability checks ──────────────────────────────────────────────────
+
+    @Test
+    void isUsernameAvailable_returnsTrue_whenNotTaken() {
+        when(userRepository.findByUsername("newuser")).thenReturn(Optional.empty());
+
+        assertTrue(authService.isUsernameAvailable("newuser"));
+    }
+
+    @Test
+    void isUsernameAvailable_returnsFalse_whenTaken() {
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(new UserEntity()));
+
+        assertFalse(authService.isUsernameAvailable("alice"));
+    }
+
+    @Test
+    void isUsernameAvailable_throws_whenBlank() {
+        assertThrows(IllegalArgumentException.class, () -> authService.isUsernameAvailable(""));
+    }
+
+    @Test
+    void isEmailAvailable_returnsTrue_whenNotTaken() {
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+
+        assertTrue(authService.isEmailAvailable("new@example.com"));
+    }
+
+    @Test
+    void isEmailAvailable_returnsFalse_whenTaken() {
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(new UserEntity()));
+
+        assertFalse(authService.isEmailAvailable("alice@example.com"));
+    }
+
+    @Test
+    void isEmailAvailable_throws_whenBlank() {
+        assertThrows(IllegalArgumentException.class, () -> authService.isEmailAvailable(null));
+    }
 }
