@@ -93,12 +93,13 @@
     <script>
       // Redirect if already logged in
       (function() {
-        const t = localStorage.getItem("accessToken");
-        if (!t) return;
-        try {
-          const role = JSON.parse(atob(t.split(".")[1])).role;
-          window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : role === "ROLE_ADMIN" ? "/admin" : "/";
-        } catch { window.location.href = "/"; }
+        fetch("/api/auth/me", { credentials: "same-origin" })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (!data) return;
+            window.location.href = data.role === "ROLE_CONTROLLER" ? "/dashboard" : data.role === "ROLE_ADMIN" ? "/admin" : "/";
+          })
+          .catch(() => {});
       })();
 
       function switchTab(tab) {
@@ -134,18 +135,19 @@
 
         fetch("/api/auth/login", {
           method: "POST",
+          credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password }),
         })
           .then((res) => res.json().then((data) => ({ status: res.status, body: data })))
           .then((result) => {
-            if (result.status === 200 && result.body.accessToken) {
-              localStorage.setItem("accessToken", result.body.accessToken);
-              localStorage.setItem("refreshToken", result.body.refreshToken);
-              try {
-                const role = JSON.parse(atob(result.body.accessToken.split(".")[1])).role;
-                window.location.href = role === "ROLE_CONTROLLER" ? "/dashboard" : role === "ROLE_ADMIN" ? "/admin" : "/";
-              } catch { window.location.href = "/"; }
+            if (result.status === 200) {
+              fetch("/api/auth/me", { credentials: "same-origin" })
+                .then((res) => res.json())
+                .then((data) => {
+                  window.location.href = data.role === "ROLE_CONTROLLER" ? "/dashboard" : data.role === "ROLE_ADMIN" ? "/admin" : "/";
+                })
+                .catch(() => { window.location.href = "/"; });
             } else {
               errorEl.style.display = "block";
               errorEl.textContent = result.body.message || "Invalid username or password.";
@@ -253,14 +255,13 @@
 
         fetch("/api/auth/register", {
           method: "POST",
+          credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         })
           .then((res) => res.json().then((data) => ({ status: res.status, body: data })))
           .then((result) => {
-            if (result.status === 200 && result.body.accessToken) {
-              localStorage.setItem("accessToken", result.body.accessToken);
-              localStorage.setItem("refreshToken", result.body.refreshToken);
+            if (result.status === 200) {
               window.location.href = "/";
             } else {
               errorEl.style.display = "block";
