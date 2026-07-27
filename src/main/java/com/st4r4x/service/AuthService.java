@@ -52,7 +52,7 @@ public class AuthService {
     public JwtResponse register(RegisterRequest request) {
         ValidationUtil.requireNonEmpty(request.getUsername(), "username");
         ValidationUtil.requireNonEmpty(request.getEmail(), "email");
-        ValidationUtil.requireNonEmpty(request.getPassword(), "password");
+        ValidationUtil.requireValidPassword(request.getPassword());
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");

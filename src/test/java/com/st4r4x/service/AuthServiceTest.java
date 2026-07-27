@@ -45,7 +45,7 @@ class AuthServiceTest {
     void register_returnsTokens_onSuccess() {
         when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("password123")).thenReturn("hashed");
+        when(passwordEncoder.encode("Password123")).thenReturn("hashed");
         UserEntity saved = new UserEntity("alice", "alice@example.com", "hashed", "ROLE_CUSTOMER");
         when(userRepository.save(any(UserEntity.class))).thenReturn(saved);
         when(jwtUtil.generateAccessToken("alice", "ROLE_CUSTOMER")).thenReturn("access-token");
@@ -54,7 +54,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
-        req.setPassword("password123");
+        req.setPassword("Password123");
 
         JwtResponse response = authService.register(req);
         assertEquals("access-token", response.getAccessToken());
@@ -68,7 +68,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
-        req.setPassword("password123");
+        req.setPassword("Password123");
 
         assertThrows(IllegalArgumentException.class, () -> authService.register(req));
     }
@@ -81,7 +81,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
-        req.setPassword("password123");
+        req.setPassword("Password123");
 
         assertThrows(IllegalArgumentException.class, () -> authService.register(req));
     }
@@ -91,9 +91,22 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("");
         req.setEmail("alice@example.com");
-        req.setPassword("password123");
+        req.setPassword("Password123");
 
         assertThrows(IllegalArgumentException.class, () -> authService.register(req));
+    }
+
+    @Test
+    void register_throws_whenPasswordTooWeak() {
+        RegisterRequest req = new RegisterRequest();
+        req.setUsername("alice");
+        req.setEmail("alice@example.com");
+        req.setPassword("weak"); // 4 chars, no uppercase, no digit
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> authService.register(req));
+        assertTrue(ex.getMessage().contains("10 caractères"));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     // ── login ─────────────────────────────────────────────────────────────────
@@ -185,7 +198,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
-        req.setPassword("pass");
+        req.setPassword("Password123");
         // signupCode NOT set (null) → ROLE_CUSTOMER
 
         authService.register(req);
@@ -210,7 +223,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("ctrl");
         req.setEmail("ctrl@test.com");
-        req.setPassword("pass");
+        req.setPassword("Password123");
         req.setSignupCode("secret123");
 
         serviceWithCode.register(req);
@@ -228,7 +241,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
-        req.setPassword("pass");
+        req.setPassword("Password123");
         req.setSignupCode("wrongcode");
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -242,7 +255,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
-        req.setPassword("pass");
+        req.setPassword("Password123");
         req.setSignupCode("anything");
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -263,7 +276,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("adm");
         req.setEmail("adm@test.com");
-        req.setPassword("pass");
+        req.setPassword("Password123");
         req.setSignupCode("admincode");
 
         adminService.register(req);
@@ -279,7 +292,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("adm");
         req.setEmail("adm@test.com");
-        req.setPassword("pass");
+        req.setPassword("Password123");
         req.setSignupCode("admincode");
 
         // authService has (null, null) — both codes disabled
@@ -302,7 +315,7 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("adm");
         req.setEmail("adm@test.com");
-        req.setPassword("pass");
+        req.setPassword("Password123");
         req.setSignupCode("admincode");
 
         bothCodes.register(req);

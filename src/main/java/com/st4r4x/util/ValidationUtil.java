@@ -4,17 +4,35 @@ package com.st4r4x.util;
  * Utilitaires de validation
  */
 public class ValidationUtil {
-    
+
     private ValidationUtil() {
         // Classe utilitaire
     }
-    
+
     /**
      * Valide qu'une string n'est pas null ou vide
      */
     public static void requireNonEmpty(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException(fieldName + " ne peut pas être null ou vide");
+        }
+    }
+
+    /**
+     * Valide qu'un mot de passe respecte la politique de complexité :
+     * au moins 10 caractères, une majuscule, un chiffre.
+     * Ne s'applique qu'à l'inscription — jamais à la connexion.
+     */
+    public static void requireValidPassword(String password) {
+        requireNonEmpty(password, "password");
+        if (password.length() < 10) {
+            throw new IllegalArgumentException("password doit contenir au moins 10 caractères");
+        }
+        if (password.chars().noneMatch(Character::isUpperCase)) {
+            throw new IllegalArgumentException("password doit contenir au moins une majuscule");
+        }
+        if (password.chars().noneMatch(Character::isDigit)) {
+            throw new IllegalArgumentException("password doit contenir au moins un chiffre");
         }
     }
     
