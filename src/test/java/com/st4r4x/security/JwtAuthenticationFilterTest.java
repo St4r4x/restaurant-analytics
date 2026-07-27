@@ -15,6 +15,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import jakarta.servlet.http.Cookie;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 
@@ -49,7 +50,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void noAuthorizationHeader_doesNotAuthenticate() throws Exception {
+    void noAccessTokenCookie_doesNotAuthenticate() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -60,9 +61,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void headerWithoutBearerPrefix_doesNotAuthenticate() throws Exception {
+    void cookiesPresentButNoAccessTokenCookie_doesNotAuthenticate() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Basic dXNlcjpwYXNz");
+        request.setCookies(new Cookie("some_other_cookie", "value"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilterInternal(request, response, new MockFilterChain());
@@ -72,11 +73,11 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void validBearerToken_setsAuthenticationWithUsernameAndRole() throws Exception {
+    void validAccessTokenCookie_setsAuthenticationWithUsernameAndRole() throws Exception {
         when(jwtService.getClaimsIfValid("valid-token")).thenReturn(claimsFor("alice", "ROLE_ADMIN"));
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer valid-token");
+        request.setCookies(new Cookie("access_token", "valid-token"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilterInternal(request, response, new MockFilterChain());
@@ -93,7 +94,7 @@ class JwtAuthenticationFilterTest {
         when(jwtService.getClaimsIfValid("valid-token")).thenReturn(claimsFor("bob", null));
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer valid-token");
+        request.setCookies(new Cookie("access_token", "valid-token"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilterInternal(request, response, new MockFilterChain());
@@ -105,11 +106,11 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void invalidOrExpiredToken_doesNotAuthenticate() throws Exception {
+    void invalidOrExpiredTokenCookie_doesNotAuthenticate() throws Exception {
         when(jwtService.getClaimsIfValid("bad-token")).thenReturn(null);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer bad-token");
+        request.setCookies(new Cookie("access_token", "bad-token"));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilterInternal(request, response, new MockFilterChain());
@@ -122,7 +123,7 @@ class JwtAuthenticationFilterTest {
         when(jwtService.getClaimsIfValid("bad-token")).thenReturn(null);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization", "Bearer bad-token");
+        request.setCookies(new Cookie("access_token", "bad-token"));
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
