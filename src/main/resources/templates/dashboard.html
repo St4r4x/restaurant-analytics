@@ -106,7 +106,7 @@ input[type=text]:focus, select:focus, textarea:focus { border-color: #c0392b; }
 <script>
 // ── Auth guard — server-side role check via GET /api/auth/me ──────────────
 (function() {
-    fetch('/api/auth/me', { credentials: 'same-origin' })
+    fetchWithAuth('/api/auth/me')
         .then(function(response) {
             if (!response.ok) { window.location.href = '/login'; return null; }
             return response.json();

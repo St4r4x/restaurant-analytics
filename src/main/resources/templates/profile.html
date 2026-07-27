@@ -63,7 +63,7 @@
   <div th:replace="fragments/footer :: footer"></div>
 
   <script>
-    fetch('/api/auth/me', { credentials: 'same-origin' })
+    fetchWithAuth('/api/auth/me')
       .then(function(response) { if (!response.ok) window.location.href = '/login'; });
 
     function gradeBadgeHtml(grade) {

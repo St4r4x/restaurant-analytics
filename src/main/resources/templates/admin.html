@@ -138,7 +138,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 <script>
 // Admin auth guard — server-side role check via GET /api/auth/me
 (function() {
-    fetch('/api/auth/me', { credentials: 'same-origin' })
+    fetchWithAuth('/api/auth/me')
         .then(function(response) {
             if (!response.ok) { window.location.href = '/login'; return null; }
             return response.json();
