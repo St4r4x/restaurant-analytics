@@ -443,16 +443,15 @@ function prependCard(r) {
 // ── Photo upload ───────────────────────────────────────────────────────────
 // CRITICAL: Do NOT use fetchWithAuth() here.
 // fetchWithAuth injects Content-Type: application/json which breaks multipart boundary.
-// Use raw fetch() with only the Authorization header.
+// The auth cookie rides along automatically on this same-origin request — no manual header needed.
 function uploadPhoto(reportId, fileInput) {
     const file = fileInput.files[0];
     if (!file) return;
     const formData = new FormData();
     formData.append('file', file);  // param name must match @RequestParam("file")
-    const token = localStorage.getItem('accessToken');
     fetch('/api/reports/' + reportId + '/photo', {
         method: 'POST',
-        headers: { Authorization: 'Bearer ' + token },
+        credentials: 'same-origin',
         body: formData
     })
     .then(r => r.json())
