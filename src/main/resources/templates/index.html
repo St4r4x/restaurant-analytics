@@ -67,14 +67,6 @@
   <div th:replace="fragments/footer :: footer"></div>
 
   <script>
-    var token = localStorage.getItem('accessToken');
-    if (!token) { window.location.href = '/login'; }
-
-    function fetchWithAuth(url, options) {
-      options = options || {};
-      return fetch(url, Object.assign({}, options, { headers: Object.assign({}, options.headers || {}, { 'Authorization': 'Bearer ' + token }) }));
-    }
-
     function gradeBadgeHtml(grade) {
       const g = grade || '—';
       let bg = '#ffebee', color = '#b71c1c';

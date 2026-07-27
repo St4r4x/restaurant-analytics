@@ -136,34 +136,17 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 <div th:replace="fragments/footer :: footer"></div>
 
 <script>
-// Admin auth guard
+// Admin auth guard — server-side role check via GET /api/auth/me
 (function() {
-    var token = localStorage.getItem('accessToken');
-    if (!token) { window.location.href = '/login'; return; }
-    try {
-        var payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'ROLE_ADMIN') { window.location.href = '/'; }
-    } catch (e) { window.location.href = '/login'; }
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+        .then(function(response) {
+            if (!response.ok) { window.location.href = '/login'; return null; }
+            return response.json();
+        })
+        .then(function(data) {
+            if (data && data.role !== 'ROLE_ADMIN') { window.location.href = '/'; }
+        });
 })();
-
-function getAuthHeaders() {
-    var token = localStorage.getItem('accessToken');
-    return { 'Content-Type': 'application/json', 'Authorization': token ? 'Bearer ' + token : '' };
-}
-function handleFetchErrorResponse(response) {
-    if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        throw new Error('Unauthorized');
-    }
-    return response;
-}
-function fetchWithAuth(url, options) {
-    options = options || {};
-    options.headers = Object.assign({}, getAuthHeaders(), options.headers || {});
-    return fetch(url, options).then(handleFetchErrorResponse);
-}
 function fmtDate(iso) {
     if (!iso) return '';
     var d = new Date(iso);

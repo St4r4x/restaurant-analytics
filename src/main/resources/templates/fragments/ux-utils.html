@@ -58,51 +58,24 @@ body { font-family: 'Inter', sans-serif; }
     }
     return c;
   }
-  // Proactive JWT refresh — runs on every page load and schedules ahead-of-time renewal
-  (function scheduleTokenRefresh() {
-    var accessToken = localStorage.getItem('accessToken');
-    var refreshToken = localStorage.getItem('refreshToken');
-    if (!accessToken || !refreshToken) return;
-
-    var expMs;
-    try {
-      expMs = JSON.parse(atob(accessToken.split('.')[1])).exp * 1000;
-    } catch(e) { return; }
-
-    var msUntilExpiry = expMs - Date.now();
-    var refreshAt = msUntilExpiry - 60000; // refresh 1 min before expiry
-
-    function doRefresh() {
-      var rt = localStorage.getItem('refreshToken');
-      if (!rt) return;
-      fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: rt })
-      })
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(data) {
-        if (data && data.accessToken) {
-          localStorage.setItem('accessToken', data.accessToken);
-          localStorage.setItem('refreshToken', data.refreshToken);
-          scheduleTokenRefresh();
-        } else {
-          // refresh token itself expired — force re-login
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          if (window.location.pathname !== '/login') window.location.href = '/login';
-        }
-      })
-      .catch(function() {});
-    }
-
-    if (refreshAt <= 0) {
-      // Already within the last minute or expired — refresh immediately
-      doRefresh();
-    } else {
-      setTimeout(doRefresh, refreshAt);
-    }
-  })();
+  // Reactive refresh-on-401 — the cookie-based replacement for the old
+  // proactive exp-based scheduler (which required reading the JWT client-side,
+  // impossible now that both tokens are httpOnly).
+  window.fetchWithAuth = function(url, options) {
+    options = options || {};
+    options.credentials = 'same-origin';
+    return fetch(url, options).then(function(response) {
+      if (response.status !== 401) return response;
+      return fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' })
+        .then(function(refreshResponse) {
+          if (!refreshResponse.ok) {
+            if (window.location.pathname !== '/login') window.location.href = '/login';
+            return response;
+          }
+          return fetch(url, options);
+        });
+    });
+  };
 
   window.showToast = function(msg, type, durationMs) {
     type = type || 'info';

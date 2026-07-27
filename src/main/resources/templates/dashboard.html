@@ -104,37 +104,19 @@ input[type=text]:focus, select:focus, textarea:focus { border-color: #c0392b; }
 </div>
 
 <script>
-// ── Auth guard (client-side — JWT is in localStorage, not HTTP headers) ────
+// ── Auth guard — server-side role check via GET /api/auth/me ──────────────
 (function() {
-    const token = localStorage.getItem('accessToken');
-    if (!token) { window.location.href = '/login'; return; }
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'ROLE_CONTROLLER') {
-            window.location.href = '/';
-        }
-    } catch { window.location.href = '/login'; }
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+        .then(function(response) {
+            if (!response.ok) { window.location.href = '/login'; return null; }
+            return response.json();
+        })
+        .then(function(data) {
+            if (data && data.role !== 'ROLE_CONTROLLER') {
+                window.location.href = '/';
+            }
+        });
 })();
-
-// ── Auth utilities ─────────────────────────────────────────────────────────
-function getAuthHeaders() {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return { "Content-Type": "application/json" };
-    return { "Content-Type": "application/json", Authorization: "Bearer " + token };
-}
-function handleFetchErrorResponse(response) {
-    if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/login";
-        throw new Error("Unauthorized");
-    }
-    return response;
-}
-function fetchWithAuth(url, options = {}) {
-    options.headers = { ...getAuthHeaders(), ...(options.headers || {}) };
-    return fetch(url, options).then(handleFetchErrorResponse);
-}
 
 // ── Grade/color utilities (top-level — NOT inside IIFE) ───────────────────
 function gradeBadgeHtml(grade) {
