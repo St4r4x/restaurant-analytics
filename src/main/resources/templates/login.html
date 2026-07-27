@@ -57,10 +57,12 @@
           <div class="field">
             <label for="regUsername">Username</label>
             <input id="regUsername" type="text" placeholder="choose a username" autocomplete="username" />
+            <div id="usernameAvailability" class="hint"></div>
           </div>
           <div class="field">
             <label for="regEmail">Email</label>
             <input id="regEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+            <div id="emailAvailability" class="hint"></div>
           </div>
           <div class="field">
             <label for="regPassword">Password</label>
@@ -167,6 +169,39 @@
           el.textContent = (pass ? "✓ " : "✗ ") + el.textContent.replace(/^[✓✗—] /, "");
         });
       });
+
+      function checkAvailability(inputId, resultId, endpoint, param) {
+        const input = document.getElementById(inputId);
+        const resultEl = document.getElementById(resultId);
+        input.addEventListener("blur", () => {
+          const value = input.value.trim();
+          if (!value) {
+            resultEl.textContent = "";
+            return;
+          }
+          resultEl.style.color = "#aaa";
+          resultEl.textContent = "Checking…";
+          fetch(`${endpoint}?${param}=${encodeURIComponent(value)}`)
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.available === true) {
+                resultEl.style.color = "#2e7d32";
+                resultEl.textContent = "✓ " + (param === "username" ? "Username" : "Email") + " available";
+              } else if (data.available === false) {
+                resultEl.style.color = "#c62828";
+                resultEl.textContent = "✗ " + (param === "username" ? "Username already taken" : "Email already registered");
+              } else {
+                resultEl.textContent = "";
+              }
+            })
+            .catch(() => {
+              resultEl.textContent = "";
+            });
+        });
+      }
+
+      checkAvailability("regUsername", "usernameAvailability", "/api/auth/check-username", "username");
+      checkAvailability("regEmail", "emailAvailability", "/api/auth/check-email", "email");
 
       document.getElementById("registerBtn").addEventListener("click", () => {
         const username = document.getElementById("regUsername").value.trim();
