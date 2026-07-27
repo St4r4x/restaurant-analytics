@@ -74,6 +74,11 @@
             </ul>
           </div>
           <div class="field">
+            <label for="regPasswordConfirm">Confirm Password</label>
+            <input id="regPasswordConfirm" type="password" placeholder="••••••••" autocomplete="new-password" />
+            <div id="passwordMismatch" class="hint" style="color:#c62828;display:none;">Les mots de passe ne correspondent pas</div>
+          </div>
+          <div class="field">
             <label for="regSignupCode">Inspector Code <span style="color:#aaa;font-weight:400">(optional)</span></label>
             <input id="regSignupCode" type="text" placeholder="leave empty for customer account" />
             <div class="hint">Leave blank for customer account. Enter inspector code for controller role.</div>
@@ -170,6 +175,20 @@
         });
       });
 
+      function checkPasswordsMatch() {
+        const password = document.getElementById("regPassword").value;
+        const confirm = document.getElementById("regPasswordConfirm").value;
+        const mismatchEl = document.getElementById("passwordMismatch");
+        if (confirm.length === 0) {
+          mismatchEl.style.display = "none";
+          return;
+        }
+        mismatchEl.style.display = password !== confirm ? "block" : "none";
+      }
+
+      document.getElementById("regPassword").addEventListener("input", checkPasswordsMatch);
+      document.getElementById("regPasswordConfirm").addEventListener("input", checkPasswordsMatch);
+
       function checkAvailability(inputId, resultId, endpoint, param) {
         const input = document.getElementById(inputId);
         const resultEl = document.getElementById(resultId);
@@ -207,11 +226,17 @@
         const username = document.getElementById("regUsername").value.trim();
         const email = document.getElementById("regEmail").value.trim();
         const password = document.getElementById("regPassword").value;
+        const passwordConfirm = document.getElementById("regPasswordConfirm").value;
         const signupCode = document.getElementById("regSignupCode").value.trim();
         const errorEl = document.getElementById("registerError");
         const successEl = document.getElementById("registerSuccess");
         errorEl.style.display = "none";
         successEl.style.display = "none";
+
+        if (password !== passwordConfirm) {
+          document.getElementById("passwordMismatch").style.display = "block";
+          return;
+        }
 
         if (!username || !email || !password) {
           errorEl.style.display = "block";
