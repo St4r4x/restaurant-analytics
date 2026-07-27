@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,6 +69,22 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(errorResponse(e));
         }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+            .findFirst()
+            .map(a -> a.getAuthority())
+            .orElse(null);
+        return ResponseEntity.ok(Map.of("username", username, "role", role));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        clearAuthCookies(response);
+        return ResponseEntity.ok(Map.of("status", "success"));
     }
 
     private String extractCookie(HttpServletRequest request, String name) {

@@ -3,6 +3,7 @@ package com.st4r4x.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.Cookie;
@@ -15,6 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.dto.AuthRequest;
@@ -226,6 +230,51 @@ class AuthControllerTest {
         assertEquals(200, result.getStatusCode().value());
         assertFalse(result.getBody().toString().contains("access-tok"));
         assertFalse(result.getBody().toString().contains("refresh-tok"));
+    }
+
+    // ── me / logout ──────────────────────────────────────────────────────────
+
+    @Test
+    void me_returnsUsernameAndRole_whenAuthenticated() {
+        var auth = new UsernamePasswordAuthenticationToken(
+            "alice", null,
+            List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        try {
+            ResponseEntity<?> response = authController.me();
+
+            assertEquals(200, response.getStatusCode().value());
+            assertEquals(Map.of("username", "alice", "role", "ROLE_CUSTOMER"), response.getBody());
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    void logout_clearsCookies() {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        ResponseEntity<?> result = authController.logout(response);
+
+        assertEquals(200, result.getStatusCode().value());
+
+        Cookie accessCookie = response.getCookie("access_token");
+        Cookie refreshCookie = response.getCookie("refresh_token");
+        assertNotNull(accessCookie, "access_token cookie must be cleared");
+        assertNotNull(refreshCookie, "refresh_token cookie must be cleared");
+
+        assertEquals(0, accessCookie.getMaxAge());
+        assertEquals(0, refreshCookie.getMaxAge());
+
+        // A cookie clear must match the original cookie's httpOnly/secure/path attributes,
+        // otherwise browsers won't actually delete it.
+        assertTrue(accessCookie.isHttpOnly());
+        assertTrue(refreshCookie.isHttpOnly());
+        assertTrue(accessCookie.getSecure(), "access_token cookie must remain secure when cleared");
+        assertTrue(refreshCookie.getSecure(), "refresh_token cookie must remain secure when cleared");
+        assertEquals("/", accessCookie.getPath());
+        assertEquals("/api/auth/", refreshCookie.getPath());
     }
 
     // ── check-username ───────────────────────────────────────────────────────
