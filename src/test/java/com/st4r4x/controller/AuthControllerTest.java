@@ -5,12 +5,15 @@ import static org.mockito.Mockito.*;
 
 import java.util.Map;
 
+import jakarta.servlet.http.Cookie;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.st4r4x.dto.AuthRequest;
 import com.st4r4x.dto.JwtResponse;
@@ -73,7 +76,7 @@ class AuthControllerTest {
         req.setPassword("password");
         when(authService.login(req)).thenReturn(new JwtResponse("access", "refresh"));
 
-        ResponseEntity<?> response = authController.login(req);
+        ResponseEntity<?> response = authController.login(req, new MockHttpServletResponse());
 
         assertEquals(200, response.getStatusCode().value());
     }
@@ -85,7 +88,7 @@ class AuthControllerTest {
         req.setPassword("wrong");
         when(authService.login(req)).thenThrow(new IllegalArgumentException("Invalid credentials"));
 
-        ResponseEntity<?> response = authController.login(req);
+        ResponseEntity<?> response = authController.login(req, new MockHttpServletResponse());
 
         assertEquals(400, response.getStatusCode().value());
     }
@@ -112,6 +115,45 @@ class AuthControllerTest {
         ResponseEntity<?> response = authController.refresh(req);
 
         assertEquals(400, response.getStatusCode().value());
+    }
+
+    // ── cookie helpers ────────────────────────────────────────────────────────
+
+    @Test
+    void login_setsAccessAndRefreshCookies_onSuccess() {
+        AuthRequest req = new AuthRequest();
+        req.setUsername("bob");
+        req.setPassword("password");
+        when(authService.login(req)).thenReturn(new JwtResponse("access-tok", "refresh-tok"));
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        authController.login(req, response);
+
+        Cookie accessCookie = response.getCookie("access_token");
+        Cookie refreshCookie = response.getCookie("refresh_token");
+        assertNotNull(accessCookie, "access_token cookie must be set");
+        assertNotNull(refreshCookie, "refresh_token cookie must be set");
+        assertEquals("access-tok", accessCookie.getValue());
+        assertEquals("refresh-tok", refreshCookie.getValue());
+        assertTrue(accessCookie.isHttpOnly());
+        assertTrue(refreshCookie.isHttpOnly());
+        assertEquals("/", accessCookie.getPath());
+        assertEquals("/api/auth/", refreshCookie.getPath());
+    }
+
+    @Test
+    void login_responseBody_doesNotContainTokens() {
+        AuthRequest req = new AuthRequest();
+        req.setUsername("bob");
+        req.setPassword("password");
+        when(authService.login(req)).thenReturn(new JwtResponse("access-tok", "refresh-tok"));
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        ResponseEntity<?> result = authController.login(req, response);
+
+        assertEquals(200, result.getStatusCode().value());
+        assertFalse(result.getBody().toString().contains("access-tok"));
+        assertFalse(result.getBody().toString().contains("refresh-tok"));
     }
 
     // ── check-username ───────────────────────────────────────────────────────

@@ -76,6 +76,10 @@ public class AppConfig {
         return "true".equalsIgnoreCase(getProperty("redis.ssl", "false"));
     }
 
+    public static boolean isCookieSecure() {
+        return "true".equalsIgnoreCase(getProperty("app.cookie.secure", "true"));
+    }
+
     public static long getRedisCacheTtlSeconds() {
         return getLongProperty("redis.cache.ttl-seconds", 3600L);
     }
