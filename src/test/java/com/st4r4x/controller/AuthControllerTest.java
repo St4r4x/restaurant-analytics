@@ -38,13 +38,38 @@ class AuthControllerTest {
         RegisterRequest req = new RegisterRequest();
         req.setUsername("alice");
         req.setEmail("alice@example.com");
-        req.setPassword("password123");
-        when(authService.register(req)).thenReturn(new JwtResponse("access", "refresh"));
+        req.setPassword("Password123");
+        when(authService.register(req)).thenReturn(new JwtResponse("access-tok", "refresh-tok"));
 
-        ResponseEntity<?> response = authController.register(req);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        ResponseEntity<?> result = authController.register(req, response);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertInstanceOf(JwtResponse.class, response.getBody());
+        assertEquals(200, result.getStatusCode().value());
+
+        Cookie accessCookie = response.getCookie("access_token");
+        Cookie refreshCookie = response.getCookie("refresh_token");
+        assertNotNull(accessCookie, "access_token cookie must be set");
+        assertNotNull(refreshCookie, "refresh_token cookie must be set");
+        assertEquals("access-tok", accessCookie.getValue());
+        assertEquals("refresh-tok", refreshCookie.getValue());
+        assertTrue(accessCookie.isHttpOnly());
+        assertTrue(refreshCookie.isHttpOnly());
+        assertEquals("/", accessCookie.getPath());
+        assertEquals("/api/auth/", refreshCookie.getPath());
+
+        // Additional assertions for secure, SameSite, and maxAge to catch CSRF defense regressions
+        assertTrue(accessCookie.getSecure(), "access_token cookie must be secure");
+        assertTrue(refreshCookie.getSecure(), "refresh_token cookie must be secure");
+        assertEquals("Strict", accessCookie.getAttribute("SameSite"), "access_token cookie SameSite must be Strict");
+        assertEquals("Strict", refreshCookie.getAttribute("SameSite"), "refresh_token cookie SameSite must be Strict");
+
+        int expectedAccessMaxAge = (int) (AppConfig.getJwtAccessTokenExpirationMs() / 1000);
+        int expectedRefreshMaxAge = (int) (AppConfig.getJwtRefreshTokenExpirationMs() / 1000);
+        assertEquals(expectedAccessMaxAge, accessCookie.getMaxAge(), "access_token cookie maxAge must match JWT expiration");
+        assertEquals(expectedRefreshMaxAge, refreshCookie.getMaxAge(), "refresh_token cookie maxAge must match JWT expiration");
+
+        assertFalse(result.getBody().toString().contains("access-tok"));
+        assertFalse(result.getBody().toString().contains("refresh-tok"));
     }
 
     @Test
@@ -53,7 +78,7 @@ class AuthControllerTest {
         req.setUsername("alice");
         when(authService.register(req)).thenThrow(new IllegalArgumentException("Username already exists"));
 
-        ResponseEntity<?> response = authController.register(req);
+        ResponseEntity<?> response = authController.register(req, new MockHttpServletResponse());
 
         assertEquals(400, response.getStatusCode().value());
     }
@@ -63,7 +88,7 @@ class AuthControllerTest {
         RegisterRequest req = new RegisterRequest();
         when(authService.register(req)).thenThrow(new RuntimeException("DB unavailable"));
 
-        ResponseEntity<?> response = authController.register(req);
+        ResponseEntity<?> response = authController.register(req, new MockHttpServletResponse());
 
         assertEquals(500, response.getStatusCode().value());
     }

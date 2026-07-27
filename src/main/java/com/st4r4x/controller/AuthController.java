@@ -31,10 +31,11 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request, HttpServletResponse response) {
         try {
-            JwtResponse response = authService.register(request);
-            return ResponseEntity.ok(response);
+            JwtResponse tokens = authService.register(request);
+            setAuthCookies(response, tokens.getAccessToken(), tokens.getRefreshToken());
+            return ResponseEntity.ok(Map.of("status", "success"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(errorResponse(e));
         } catch (Exception e) {
