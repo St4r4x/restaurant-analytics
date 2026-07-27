@@ -65,6 +65,11 @@
           <div class="field">
             <label for="regPassword">Password</label>
             <input id="regPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
+            <ul id="pwChecklist" style="list-style:none;padding:0;margin:6px 0 0;font-size:0.75rem;">
+              <li id="pwCheckLength" style="color:#aaa;">— At least 10 characters</li>
+              <li id="pwCheckUpper" style="color:#aaa;">— At least 1 uppercase letter</li>
+              <li id="pwCheckDigit" style="color:#aaa;">— At least 1 digit</li>
+            </ul>
           </div>
           <div class="field">
             <label for="regSignupCode">Inspector Code <span style="color:#aaa;font-weight:400">(optional)</span></label>
@@ -147,6 +152,20 @@
             btn.disabled = false;
             btn.textContent = "Sign In";
           });
+      });
+
+      document.getElementById("regPassword").addEventListener("input", (e) => {
+        const value = e.target.value;
+        const checks = [
+          { id: "pwCheckLength", pass: value.length >= 10 },
+          { id: "pwCheckUpper", pass: /[A-Z]/.test(value) },
+          { id: "pwCheckDigit", pass: /[0-9]/.test(value) },
+        ];
+        checks.forEach(({ id, pass }) => {
+          const el = document.getElementById(id);
+          el.style.color = pass ? "#2e7d32" : "#c62828";
+          el.textContent = (pass ? "✓ " : "✗ ") + el.textContent.replace(/^[✓✗—] /, "");
+        });
       });
 
       document.getElementById("registerBtn").addEventListener("click", () => {
