@@ -13,12 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.dto.AuthRequest;
 import com.st4r4x.dto.JwtResponse;
-import com.st4r4x.dto.RefreshRequest;
 import com.st4r4x.dto.RegisterRequest;
 import com.st4r4x.service.AuthService;
 
@@ -123,22 +123,57 @@ class AuthControllerTest {
 
     @Test
     void refresh_returns200_onValidToken() {
-        RefreshRequest req = new RefreshRequest();
-        req.setRefreshToken("valid-refresh");
         when(authService.refresh("valid-refresh")).thenReturn(new JwtResponse("new-access", "new-refresh"));
 
-        ResponseEntity<?> response = authController.refresh(req);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new Cookie("refresh_token", "valid-refresh"));
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
-        assertEquals(200, response.getStatusCode().value());
+        ResponseEntity<?> result = authController.refresh(request, response);
+
+        assertEquals(200, result.getStatusCode().value());
+
+        Cookie accessCookie = response.getCookie("access_token");
+        Cookie refreshCookie = response.getCookie("refresh_token");
+        assertNotNull(accessCookie, "access_token cookie must be set");
+        assertNotNull(refreshCookie, "refresh_token cookie must be set");
+        assertEquals("new-access", accessCookie.getValue());
+        assertEquals("new-refresh", refreshCookie.getValue());
+        assertTrue(accessCookie.isHttpOnly());
+        assertTrue(refreshCookie.isHttpOnly());
+        assertEquals("/", accessCookie.getPath());
+        assertEquals("/api/auth/", refreshCookie.getPath());
+
+        // Additional assertions for secure, SameSite, and maxAge to catch CSRF defense regressions
+        assertTrue(accessCookie.getSecure(), "access_token cookie must be secure");
+        assertTrue(refreshCookie.getSecure(), "refresh_token cookie must be secure");
+        assertEquals("Strict", accessCookie.getAttribute("SameSite"), "access_token cookie SameSite must be Strict");
+        assertEquals("Strict", refreshCookie.getAttribute("SameSite"), "refresh_token cookie SameSite must be Strict");
+
+        int expectedAccessMaxAge = (int) (AppConfig.getJwtAccessTokenExpirationMs() / 1000);
+        int expectedRefreshMaxAge = (int) (AppConfig.getJwtRefreshTokenExpirationMs() / 1000);
+        assertEquals(expectedAccessMaxAge, accessCookie.getMaxAge(), "access_token cookie maxAge must match JWT expiration");
+        assertEquals(expectedRefreshMaxAge, refreshCookie.getMaxAge(), "refresh_token cookie maxAge must match JWT expiration");
     }
 
     @Test
     void refresh_returns400_onExpiredOrInvalidToken() {
-        RefreshRequest req = new RefreshRequest();
-        req.setRefreshToken("expired-token");
         when(authService.refresh("expired-token")).thenThrow(new IllegalArgumentException("Invalid refresh token"));
 
-        ResponseEntity<?> response = authController.refresh(req);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new Cookie("refresh_token", "expired-token"));
+
+        ResponseEntity<?> response = authController.refresh(request, new MockHttpServletResponse());
+
+        assertEquals(400, response.getStatusCode().value());
+    }
+
+    @Test
+    void refresh_returns400_whenNoRefreshTokenCookie() {
+        MockHttpServletRequest request = new MockHttpServletRequest(); // no cookies set
+        when(authService.refresh(null)).thenThrow(new IllegalArgumentException("refreshToken ne peut pas être null ou vide"));
+
+        ResponseEntity<?> response = authController.refresh(request, new MockHttpServletResponse());
 
         assertEquals(400, response.getStatusCode().value());
     }

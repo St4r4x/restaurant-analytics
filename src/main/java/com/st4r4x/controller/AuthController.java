@@ -3,6 +3,7 @@ package com.st4r4x.controller;
 import java.util.Map;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.dto.AuthRequest;
 import com.st4r4x.dto.JwtResponse;
-import com.st4r4x.dto.RefreshRequest;
 import com.st4r4x.dto.RegisterRequest;
 import com.st4r4x.service.AuthService;
 
@@ -57,15 +57,25 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody RefreshRequest request) {
+    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
         try {
-            JwtResponse response = authService.refresh(request.getRefreshToken());
-            return ResponseEntity.ok(response);
+            String refreshToken = extractCookie(request, "refresh_token");
+            JwtResponse tokens = authService.refresh(refreshToken);
+            setAuthCookies(response, tokens.getAccessToken(), tokens.getRefreshToken());
+            return ResponseEntity.ok(Map.of("status", "success"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(errorResponse(e));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(errorResponse(e));
         }
+    }
+
+    private String extractCookie(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if (name.equals(cookie.getName())) return cookie.getValue();
+        }
+        return null;
     }
 
     @GetMapping("/check-username")
