@@ -1,6 +1,7 @@
 package com.st4r4x.util;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -91,5 +92,57 @@ public class ValidationUtilTest {
     void testValidateFieldName_EmptyFieldName() {
         assertThrows(IllegalArgumentException.class, () ->
             ValidationUtil.validateFieldName(""));
+    }
+
+    @Test
+    void testRequireValidPassword_ValidPassword() {
+        // Should not throw: 10+ chars, has uppercase, has digit
+        ValidationUtil.requireValidPassword("Password12");
+    }
+
+    @Test
+    void testRequireValidPassword_NullPassword() {
+        assertThrows(IllegalArgumentException.class, () ->
+            ValidationUtil.requireValidPassword(null));
+    }
+
+    @Test
+    void testRequireValidPassword_EmptyPassword() {
+        assertThrows(IllegalArgumentException.class, () ->
+            ValidationUtil.requireValidPassword(""));
+    }
+
+    @Test
+    void testRequireValidPassword_TooShort() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+            ValidationUtil.requireValidPassword("Short1"));
+        assertTrue(ex.getMessage().contains("10 caractères"));
+    }
+
+    @Test
+    void testRequireValidPassword_NoUppercase() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+            ValidationUtil.requireValidPassword("lowercase123"));
+        assertTrue(ex.getMessage().contains("majuscule"));
+    }
+
+    @Test
+    void testRequireValidPassword_NoDigit() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+            ValidationUtil.requireValidPassword("NoDigitsHere"));
+        assertTrue(ex.getMessage().contains("chiffre"));
+    }
+
+    @Test
+    void testRequireValidPassword_ExactlyTenChars() {
+        // Boundary: exactly 10 chars, has uppercase and digit — should pass
+        ValidationUtil.requireValidPassword("Abcdefghi1");
+    }
+
+    @Test
+    void testRequireValidPassword_NineChars() {
+        // Boundary: 9 chars — should fail on length
+        assertThrows(IllegalArgumentException.class, () ->
+            ValidationUtil.requireValidPassword("Abcdefgh1"));
     }
 }
