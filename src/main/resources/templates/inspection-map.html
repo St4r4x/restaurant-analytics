@@ -198,8 +198,10 @@
         document.getElementById('borough-filter').addEventListener('change', applyFilters);
         document.getElementById('cuisine-filter').addEventListener('change', applyFilters);
 
-        // Show dashboard link for controllers
-        fetchWithAuth('/api/auth/me')
+        // Show dashboard link for controllers — checked via a plain (non-fetchWithAuth)
+        // /api/auth/me probe so anonymous visitors are NOT redirected to /login by
+        // fetchWithAuth's 401-refresh-fail handling; this page must stay loadable anonymously.
+        fetch('/api/auth/me', { credentials: 'same-origin' })
           .then((response) => (response.ok ? response.json() : null))
           .then((data) => {
             if (data && data.role === 'ROLE_CONTROLLER') {
