@@ -4,19 +4,32 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.4.0] — 2026-07-28
+
 ### Added
 - Forgot-password flow: `POST /api/auth/forgot-password` (request a reset email, anti-enumeration — always 200) and `POST /api/auth/reset-password` (single-use, 1-hour-expiry token) via `PasswordResetService`, plus a new `/reset-password` page and a "Forgot password?" link on `/login`
 - Daily encrypted PostgreSQL backup workflow (`.github/workflows/backup-postgres.yml`) — GPG AES256, 30-day artifact retention, runs at 03:17 UTC via Supabase's Supavisor pooler (the direct host is IPv6-only and unreachable from GitHub-hosted runners). Closes risk R8.
 - `docs/backup-restore.md` and a "Disaster Recovery" section in `docs/deployment.md` — Postgres restore procedure and MongoDB resync procedure (no dump needed, fully re-derivable from NYC Open Data)
 - "Delete My Account" button on the profile page (`profile.html`), wired to the existing `DELETE /api/users/me` RGPD endpoint — the endpoint shipped in v2.3.0 but was never exposed in the UI
 
+### Security
+- JWT storage migrated from `localStorage` to httpOnly cookies (access + refresh) — closes the XSS-exfiltration risk on token storage
+
 ### Fixed
 - `DELETE /api/users/me` was failing with a 500 for every user — the `audit_log` table's `audit_log_action_check` CHECK constraint predated the `USER_DELETED` enum value added in v2.3.0 and rejected the audit log insert, poisoning the transaction. Migrated the constraint to include `USER_DELETED`.
+- `resetPassword()`'s two writes (password update + mark-token-used) lacked a transaction boundary — a partial DB failure could leave a spent reset token still valid and replayable within its 1-hour window
+- A missing/null `token` on `POST /api/auth/reset-password` threw an unhandled NPE surfaced as a raw 500, whose body could leak an internal variable name via Java's helpful-NPE messages — now rejected the same way an unknown token is
+
+### Ops
+- Elasticsearch service on Railway stopped (not deleted) — its ~1 GB continuous memory footprint was costing ~$10/month for a feature (search autocomplete) with low actual traffic; `/api/restaurants/autocomplete` degrades to a handled error, `/api/restaurants/search` (MongoDB-backed) is unaffected
+- `restaurant-app`'s Railway memory limit lowered to 3 GB (from 8 GB) as a safety net against future runaway usage — observed peak is 1.69 GB
 
 ### Tests
 - Add `AnalyticsDAOIT` (Testcontainers) covering all 9 `AnalyticsDAO` aggregation queries — heatmap points, borough-grade distribution, at-risk count, cuisine rankings, at-risk/uncontrolled entries, name/address search
 - Add `JwtAuthenticationFilterTest` covering token extraction, validation, and role-to-authority mapping
 - Add `AuthControllerTest` covering register/login/refresh HTTP status codes and error branches
+- Add `PasswordResetTokenRepositoryIT`, `ResendEmailServiceTest`, `PasswordResetServiceTest` covering the full forgot-password token lifecycle
+- Fix a latent `MongoClientFactory` singleton-reuse race between IT test classes in the same Failsafe fork (`UserRepositoryIT`, `PasswordResetTokenRepositoryIT` now reset it in `@BeforeAll`/`@AfterAll`, matching the existing `RestaurantDAOIT`/`AnalyticsDAOIT` pattern)
 
 ## [2.3.0] — 2026-07-22
 
