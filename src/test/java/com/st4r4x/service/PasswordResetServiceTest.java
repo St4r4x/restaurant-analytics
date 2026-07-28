@@ -117,6 +117,13 @@ class PasswordResetServiceTest {
     }
 
     @Test
+    void resetPassword_throws_whenTokenIsNull() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> service.resetPassword(null, "NewPassword123"));
+        assertTrue(ex.getMessage().contains("Invalid or expired"));
+    }
+
+    @Test
     void resetPassword_throws_whenTokenExpired() {
         UserEntity user = new UserEntity("alice", "alice@example.com", "oldHash", "ROLE_CUSTOMER");
         PasswordResetTokenEntity expiredToken = new PasswordResetTokenEntity(

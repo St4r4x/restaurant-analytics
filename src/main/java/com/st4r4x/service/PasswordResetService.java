@@ -65,6 +65,14 @@ public class PasswordResetService {
 
     @Transactional
     public void resetPassword(String rawToken, String newPassword) {
+        try {
+            ValidationUtil.requireNonEmpty(rawToken, "token");
+        } catch (IllegalArgumentException e) {
+            // Same message as an unknown-token lookup below — a missing token
+            // must be indistinguishable from an invalid one to the caller.
+            throw new IllegalArgumentException("Invalid or expired reset link");
+        }
+
         String tokenHash = hashToken(rawToken);
         PasswordResetTokenEntity tokenEntity = tokenRepository.findByTokenHash(tokenHash)
             .orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset link"));
