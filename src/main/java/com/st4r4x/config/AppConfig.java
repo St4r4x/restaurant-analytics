@@ -99,6 +99,17 @@ public class AppConfig {
         return secret;
     }
 
+    public static String getResendApiKey() {
+        String key = getProperty("resend.api.key", null);
+        if (key == null || key.isBlank()) {
+            throw new IllegalStateException(
+                "RESEND_API_KEY environment variable is not set. " +
+                "Set it in your .env file or environment to enable password-reset emails."
+            );
+        }
+        return key;
+    }
+
     public static long getJwtAccessTokenExpirationMs() {
         return getLongProperty("jwt.access.expiration.ms", 900000L);
     }

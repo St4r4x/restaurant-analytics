@@ -120,6 +120,13 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Resend Email Service -->
+    <dependency>
+      <groupId>com.resend</groupId>
+      <artifactId>resend-java</artifactId>
+      <version>4.4.0</version>
+    </dependency>
+
     <!-- Logging -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
