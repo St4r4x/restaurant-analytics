@@ -7,6 +7,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,17 +22,25 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.dto.AuthRequest;
+import com.st4r4x.dto.ForgotPasswordRequest;
 import com.st4r4x.dto.JwtResponse;
 import com.st4r4x.dto.RegisterRequest;
+import com.st4r4x.dto.ResetPasswordRequest;
 import com.st4r4x.service.AuthService;
+import com.st4r4x.service.PasswordResetService;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AuthController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request, HttpServletResponse response) {
@@ -116,6 +126,32 @@ public class AuthController {
         try {
             boolean available = authService.isEmailAvailable(email);
             return ResponseEntity.ok(Map.of("available", available));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(errorResponse(e));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(errorResponse(e));
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletRequest httpRequest) {
+        try {
+            String appBaseUrl = httpRequest.getScheme() + "://" + httpRequest.getServerName()
+                + (httpRequest.getServerPort() == 80 || httpRequest.getServerPort() == 443 ? "" : ":" + httpRequest.getServerPort());
+            passwordResetService.requestReset(request.getEmail(), appBaseUrl);
+        } catch (Exception e) {
+            // Deliberately swallowed — the response must be identical whether the email exists,
+            // the send succeeded, or anything else failed server-side. Anti-enumeration by design.
+            logger.warn("forgot-password request processing failed (response is unaffected): {}", e.getMessage());
+        }
+        return ResponseEntity.ok(Map.of("status", "success"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+            return ResponseEntity.ok(Map.of("status", "success"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(errorResponse(e));
         } catch (Exception e) {
