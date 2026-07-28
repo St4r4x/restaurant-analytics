@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.st4r4x.entity.PasswordResetTokenEntity;
 import com.st4r4x.entity.UserEntity;
@@ -62,6 +63,7 @@ public class PasswordResetService {
         emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
     }
 
+    @Transactional
     public void resetPassword(String rawToken, String newPassword) {
         String tokenHash = hashToken(rawToken);
         PasswordResetTokenEntity tokenEntity = tokenRepository.findByTokenHash(tokenHash)
