@@ -23,6 +23,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import com.st4r4x.config.MongoClientFactory;
 import com.st4r4x.entity.PasswordResetTokenEntity;
 import com.st4r4x.entity.UserEntity;
 
@@ -51,6 +52,11 @@ public class PasswordResetTokenRepositoryIT {
     static {
         pgContainer.start();
         mongoContainer.start();
+        // MongoClientFactory is a JVM-wide static singleton (see RestaurantDAOIT/
+        // AnalyticsDAOIT) — a client left over from an earlier IT class in this same
+        // fork would otherwise be reused here, still pointing at that class's
+        // (possibly already-stopped) container instead of ours.
+        MongoClientFactory.closeInstance();
         System.setProperty("mongodb.uri", mongoContainer.getConnectionString());
         // ResendEmailService's bean creation calls AppConfig.getResendApiKey() eagerly at
         // context startup (per Task 3) — without this, the full @SpringBootTest context
@@ -60,6 +66,9 @@ public class PasswordResetTokenRepositoryIT {
 
     @AfterAll
     public static void tearDownContainers() {
+        // Reset the singleton so it doesn't outlive this class's container and get
+        // reused (pointing at a now-dead connection) by whichever IT class runs next.
+        MongoClientFactory.closeInstance();
         System.clearProperty("mongodb.uri");
         System.clearProperty("resend.api.key");
         if (pgContainer != null && pgContainer.isRunning()) pgContainer.stop();

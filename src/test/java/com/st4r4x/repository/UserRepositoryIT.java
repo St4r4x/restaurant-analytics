@@ -23,6 +23,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import com.st4r4x.config.MongoClientFactory;
 import com.st4r4x.entity.BookmarkEntity;
 import com.st4r4x.entity.UserEntity;
 
@@ -59,6 +60,12 @@ public class UserRepositoryIT {
         pgContainer.start();
         mongoContainer.start();
 
+        // MongoClientFactory is a JVM-wide static singleton (see RestaurantDAOIT/
+        // AnalyticsDAOIT) — a client left over from an earlier IT class in this same
+        // fork would otherwise be reused here, still pointing at that class's
+        // (possibly already-stopped) container instead of ours.
+        MongoClientFactory.closeInstance();
+
         // Inject TC MongoDB URI as JVM system property (dotted key) so that
         // AppConfig.getProperty("mongodb.uri") tier-0 picks it up BEFORE
         // MongoClientFactory.getInstance() is called during Spring context startup.
@@ -70,6 +77,9 @@ public class UserRepositoryIT {
 
     @AfterAll
     public static void tearDownContainers() {
+        // Reset the singleton so it doesn't outlive this class's container and get
+        // reused (pointing at a now-dead connection) by whichever IT class runs next.
+        MongoClientFactory.closeInstance();
         System.clearProperty("mongodb.uri");
         if (pgContainer != null && pgContainer.isRunning()) pgContainer.stop();
         if (mongoContainer != null && mongoContainer.isRunning()) mongoContainer.stop();
