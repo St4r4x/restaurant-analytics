@@ -49,9 +49,20 @@
           <div class="field">
             <label for="loginPassword">Password</label>
             <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <div class="hint"><a href="#" id="forgotPasswordLink" style="color:#c0392b;">Forgot password?</a></div>
           </div>
           <button class="submit-btn" id="loginBtn">Sign In</button>
           <div class="error-msg" id="loginError"></div>
+          <div class="success-msg" id="loginSuccess"></div>
+
+          <div id="forgotPasswordSection" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid #e8e0d8;">
+            <div class="field">
+              <label for="forgotEmail">Email</label>
+              <input id="forgotEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+            </div>
+            <button class="submit-btn" id="forgotPasswordBtn" type="button">Send Reset Link</button>
+            <div class="success-msg" id="forgotPasswordSuccess"></div>
+          </div>
         </div>
         <div class="form-section" id="sectionRegister">
           <div class="field">
@@ -101,6 +112,13 @@
           })
           .catch(() => {});
       })();
+
+      // Show a success banner if redirected here after a successful password reset
+      if (new URLSearchParams(window.location.search).get("reset") === "success") {
+        const successEl = document.getElementById("loginSuccess");
+        successEl.style.display = "block";
+        successEl.textContent = "Password reset — please sign in with your new password.";
+      }
 
       function switchTab(tab) {
         document.getElementById("tabLogin").classList.toggle("active", tab === "login");
@@ -160,6 +178,45 @@
             errorEl.textContent = "Network error, please try again.";
             btn.disabled = false;
             btn.textContent = "Sign In";
+          });
+      });
+
+      document.getElementById("forgotPasswordLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        const section = document.getElementById("forgotPasswordSection");
+        section.style.display = section.style.display === "none" ? "block" : "none";
+      });
+
+      document.getElementById("forgotPasswordBtn").addEventListener("click", () => {
+        const email = document.getElementById("forgotEmail").value.trim();
+        const successEl = document.getElementById("forgotPasswordSuccess");
+        successEl.style.display = "none";
+
+        if (!email) return;
+
+        const btn = document.getElementById("forgotPasswordBtn");
+        btn.disabled = true;
+        btn.textContent = "Sending…";
+
+        fetch("/api/auth/forgot-password", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        })
+          .then(() => {
+            // Always show the same message, whether or not the email exists —
+            // anti-enumeration, mirrored from the server's always-200 behavior.
+            successEl.style.display = "block";
+            successEl.textContent = "If an account exists with that email, a reset link has been sent.";
+            btn.disabled = false;
+            btn.textContent = "Send Reset Link";
+          })
+          .catch(() => {
+            successEl.style.display = "block";
+            successEl.textContent = "If an account exists with that email, a reset link has been sent.";
+            btn.disabled = false;
+            btn.textContent = "Send Reset Link";
           });
       });
 
