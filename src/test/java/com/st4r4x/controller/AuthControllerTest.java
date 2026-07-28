@@ -22,9 +22,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.st4r4x.config.AppConfig;
 import com.st4r4x.dto.AuthRequest;
+import com.st4r4x.dto.ForgotPasswordRequest;
 import com.st4r4x.dto.JwtResponse;
 import com.st4r4x.dto.RegisterRequest;
+import com.st4r4x.dto.ResetPasswordRequest;
 import com.st4r4x.service.AuthService;
+import com.st4r4x.service.PasswordResetService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
@@ -34,6 +37,9 @@ class AuthControllerTest {
 
     @Mock
     private AuthService authService;
+
+    @Mock
+    private PasswordResetService passwordResetService;
 
     // ── register ──────────────────────────────────────────────────────────────
 
@@ -353,6 +359,59 @@ class AuthControllerTest {
         when(authService.isEmailAvailable("")).thenThrow(new IllegalArgumentException("email ne peut pas être null ou vide"));
 
         ResponseEntity<?> response = authController.checkEmail("");
+
+        assertEquals(400, response.getStatusCode().value());
+    }
+
+    // ── forgot-password / reset-password ────────────────────────────────────
+
+    @Test
+    void forgotPassword_returns200_always() {
+        ForgotPasswordRequest req = new ForgotPasswordRequest();
+        req.setEmail("alice@example.com");
+
+        ResponseEntity<?> response = authController.forgotPassword(req, new MockHttpServletRequest());
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(Map.of("status", "success"), response.getBody());
+        verify(passwordResetService).requestReset(eq("alice@example.com"), any());
+    }
+
+    @Test
+    void forgotPassword_returns200_evenWhenServiceThrowsUnexpectedError() {
+        ForgotPasswordRequest req = new ForgotPasswordRequest();
+        req.setEmail("alice@example.com");
+        doThrow(new RuntimeException("email provider down")).when(passwordResetService)
+            .requestReset(any(), any());
+
+        ResponseEntity<?> response = authController.forgotPassword(req, new MockHttpServletRequest());
+
+        assertEquals(200, response.getStatusCode().value(),
+            "Must still return the generic success response even if the email service fails — "
+            + "a caller must never learn anything from the response about what happened server-side");
+    }
+
+    @Test
+    void resetPassword_returns200_onValidToken() {
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setToken("valid-token");
+        req.setNewPassword("NewPassword123");
+
+        ResponseEntity<?> response = authController.resetPassword(req);
+
+        assertEquals(200, response.getStatusCode().value());
+        verify(passwordResetService).resetPassword("valid-token", "NewPassword123");
+    }
+
+    @Test
+    void resetPassword_returns400_onInvalidToken() {
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setToken("bad-token");
+        req.setNewPassword("NewPassword123");
+        doThrow(new IllegalArgumentException("Invalid or expired reset link")).when(passwordResetService)
+            .resetPassword("bad-token", "NewPassword123");
+
+        ResponseEntity<?> response = authController.resetPassword(req);
 
         assertEquals(400, response.getStatusCode().value());
     }

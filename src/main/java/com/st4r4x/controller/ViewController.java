@@ -27,6 +27,11 @@ public class ViewController {
         return "login";
     }
 
+    @GetMapping("/reset-password")
+    public String resetPassword() {
+        return "reset-password";
+    }
+
     @GetMapping("/restaurant/{id}")
     public String restaurantDetail() {
         return "restaurant";

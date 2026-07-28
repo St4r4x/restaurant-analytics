@@ -64,6 +64,12 @@ Docker Compose injects tier-2 environment variables on the `app` container — t
 | `CONTROLLER_SIGNUP_CODE` | *(env var)* | Required to register as CONTROLLER; unset = 400 |
 | `ADMIN_SIGNUP_CODE` | *(env var)* | Required to register as ADMIN; unset = signup disabled |
 
+### Password Reset (Resend)
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `resend.api.key` | *(must set)* | Resend API key used by `EmailService` to send password-reset emails — fails fast via `AppConfig.getResendApiKey()` if unset |
+
 ---
 
 ## Environment Variables (Docker Compose)
@@ -80,3 +86,4 @@ The `app` service in `docker-compose.yml` maps these env vars:
 | `JWT_SECRET` | `jwt.secret` |
 | `CONTROLLER_SIGNUP_CODE` | controller registration gate |
 | `ADMIN_SIGNUP_CODE` | admin registration gate |
+| `RESEND_API_KEY` | `resend.api.key` |

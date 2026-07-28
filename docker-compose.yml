@@ -15,6 +15,7 @@ services:
       ELASTICSEARCH_URI: http://elasticsearch:9200
       APP_UPLOADS_DIR: /app/uploads
       APP_COOKIE_SECURE: "false"
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
       # Secrets injected from .env (never hardcoded — D-05)
       JWT_SECRET: ${JWT_SECRET}
       CONTROLLER_SIGNUP_CODE: ${CONTROLLER_SIGNUP_CODE:-}

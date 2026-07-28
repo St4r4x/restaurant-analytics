@@ -115,6 +115,8 @@ docker compose down
 | `POST /api/auth/register` | Register user |
 | `POST /api/auth/login` | Login → JWT |
 | `POST /api/auth/refresh` | Refresh token |
+| `POST /api/auth/forgot-password` | Request password reset email |
+| `POST /api/auth/reset-password` | Reset password with emailed token |
 | `GET /api/restaurants/by-borough` | Count per borough |
 | `GET /api/restaurants/by-cuisine` | Count per cuisine |
 | `GET /api/restaurants/top` | Top restaurants (Redis sorted set) |

@@ -5,6 +5,7 @@ All notable changes are documented here.
 ## [Unreleased]
 
 ### Added
+- Forgot-password flow: `POST /api/auth/forgot-password` (request a reset email, anti-enumeration — always 200) and `POST /api/auth/reset-password` (single-use, 1-hour-expiry token) via `PasswordResetService`, plus a new `/reset-password` page and a "Forgot password?" link on `/login`
 - Daily encrypted PostgreSQL backup workflow (`.github/workflows/backup-postgres.yml`) — GPG AES256, 30-day artifact retention, runs at 03:17 UTC via Supabase's Supavisor pooler (the direct host is IPv6-only and unreachable from GitHub-hosted runners). Closes risk R8.
 - `docs/backup-restore.md` and a "Disaster Recovery" section in `docs/deployment.md` — Postgres restore procedure and MongoDB resync procedure (no dump needed, fully re-derivable from NYC Open Data)
 - "Delete My Account" button on the profile page (`profile.html`), wired to the existing `DELETE /api/users/me` RGPD endpoint — the endpoint shipped in v2.3.0 but was never exposed in the UI

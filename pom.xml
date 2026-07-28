@@ -17,8 +17,12 @@
     <maven.compiler.source>25</maven.compiler.source>
     <maven.compiler.target>25</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Override Byte Buddy from Spring Boot BOM — 1.16.x adds Java 25 support -->
-    <byte-buddy.version>1.16.0</byte-buddy.version>
+    <!-- Override Byte Buddy from Spring Boot BOM for Java 25 support.
+         1.16.0's inline mock maker can't instrument final classes on Java 25
+         (missing net.bytebuddy.jar.asmjdkbridge.JdkClassReader method) — hit
+         when mocking the Resend SDK's final Emails class in ResendEmailServiceTest.
+         1.17.5 fixes this. -->
+    <byte-buddy.version>1.17.5</byte-buddy.version>
     <!-- Default empty argLine — overridden by JaCoCo when present.
          Required so @{argLine} in Surefire/Failsafe resolves to empty string instead
          of crashing the forked JVM with an unresolved property literal. -->
@@ -118,6 +122,13 @@
       <artifactId>jjwt-jackson</artifactId>
       <version>0.11.5</version>
       <scope>runtime</scope>
+    </dependency>
+
+    <!-- Resend Email Service -->
+    <dependency>
+      <groupId>com.resend</groupId>
+      <artifactId>resend-java</artifactId>
+      <version>4.4.0</version>
     </dependency>
 
     <!-- Logging -->
