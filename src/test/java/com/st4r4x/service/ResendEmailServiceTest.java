@@ -46,11 +46,14 @@ class ResendEmailServiceTest {
     @Test
     void sendPasswordResetEmail_wrapsResendExceptionAsRuntimeException() throws ResendException {
         when(resend.emails()).thenReturn(emails);
-        when(emails.send(any(CreateEmailOptions.class))).thenThrow(new ResendException("API error", null));
+        ResendException original = new ResendException("API error", null);
+        when(emails.send(any(CreateEmailOptions.class))).thenThrow(original);
 
         ResendEmailService service = new ResendEmailService(resend);
 
-        assertThrows(RuntimeException.class, () ->
+        RuntimeException thrown = assertThrows(RuntimeException.class, () ->
             service.sendPasswordResetEmail("alice@example.com", "https://example.com/reset-password?token=abc123"));
+        assertEquals("Failed to send password reset email", thrown.getMessage());
+        assertSame(original, thrown.getCause());
     }
 }
