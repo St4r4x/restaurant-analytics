@@ -7,6 +7,7 @@
 | `/` | None (anonymous) | Landing: hero, stat strip, search bar, sample restaurants |
 | `/` | JWT present | Customer dashboard: bookmarks strip + KPI tiles |
 | `/login` | None | Login / Register tabs |
+| `/reset-password` | None | Set new password via emailed reset token |
 | `/profile` | Required | Role badge, bookmark count, report count (controllers only), account deletion (RGPD) |
 | `/analytics` | None | City-wide analytics: KPI tiles, borough chart, cuisine rankings, at-risk table |
 | `/dashboard` | CONTROLLER | Inspector dashboard: reports list, status tabs, New Report modal |
@@ -57,6 +58,7 @@ Templates live in `src/main/resources/templates/`.
 |------|------|
 | `index.html` | Landing / customer dashboard |
 | `login.html` | Login / register |
+| `reset-password.html` | Password reset form |
 | `profile.html` | User profile |
 | `analytics.html` | Analytics dashboard |
 | `dashboard.html` | Inspector dashboard |

@@ -15,6 +15,8 @@ Authenticated endpoints require `Authorization: Bearer <accessToken>`.
 | POST | `/api/auth/register` | None | Register — body: `RegisterRequest { username, email, password, signupCode? }` |
 | POST | `/api/auth/login` | None | Login — body: `AuthRequest { username, password }` → `JwtResponse { accessToken, refreshToken }` |
 | POST | `/api/auth/refresh` | None | Refresh — body: `RefreshRequest { refreshToken }` → new `JwtResponse` |
+| POST | `/api/auth/forgot-password` | None | Request reset — body: `{ email }`; always returns 200 regardless of whether the email exists (anti-enumeration) |
+| POST | `/api/auth/reset-password` | None | Reset — body: `ResetPasswordRequest { token, newPassword }`; token is single-use and expires after 1 hour |
 
 `signupCode` is required for `ROLE_CONTROLLER` (env `CONTROLLER_SIGNUP_CODE`) and `ROLE_ADMIN` (env `ADMIN_SIGNUP_CODE`).
 
