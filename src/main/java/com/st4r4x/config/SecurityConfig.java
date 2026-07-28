@@ -52,6 +52,8 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/**").hasRole("ADMIN")
                 // Public: auth endpoints, read-only NYC data, Swagger
+                // MUST precede the /api/auth/** wildcard below (first match wins)
+                .requestMatchers("/api/auth/me").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/restaurants/**").permitAll()
                 .requestMatchers("/api/inspection/**").permitAll()

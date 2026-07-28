@@ -133,30 +133,6 @@
       const restaurantId = window.location.pathname.split("/").filter(Boolean).pop();
       let currentRestaurantId = null;
 
-      function getAuthHeaders() {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return { "Content-Type": "application/json" };
-        return {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        };
-      }
-
-      function handleFetchErrorResponse(response) {
-        if (response.status === 401 || response.status === 403) {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          window.location.href = "/login";
-          throw new Error("Unauthorized");
-        }
-        return response;
-      }
-
-      function fetchWithAuth(url, options = {}) {
-        options.headers = { ...getAuthHeaders(), ...(options.headers || {}) };
-        return fetch(url, options).then(handleFetchErrorResponse);
-      }
-
       function updateBookmarkBtn(saved) {
         const btn = document.getElementById('bookmark-btn');
         if (!btn) return;
@@ -174,28 +150,27 @@
       }
 
       function handleBookmarkClick() {
-        if (!localStorage.getItem('accessToken')) {
-          window.location.href = '/login';
-          return;
-        }
-        const btn = document.getElementById('bookmark-btn');
-        const saved = btn.textContent.includes('Saved');
-        // Optimistic toggle
-        updateBookmarkBtn(!saved);
-        const method = saved ? 'DELETE' : 'POST';
-        fetchWithAuth('/api/users/me/bookmarks/' + currentRestaurantId, { method })
-          .then(r => {
-            if (!r || !r.ok) {
-              updateBookmarkBtn(saved); // revert on error
+        fetchWithAuth('/api/auth/me').then(function(response) {
+          if (!response.ok) { window.location.href = '/login'; return; }
+          const btn = document.getElementById('bookmark-btn');
+          const saved = btn.textContent.includes('Saved');
+          // Optimistic toggle
+          updateBookmarkBtn(!saved);
+          const method = saved ? 'DELETE' : 'POST';
+          fetchWithAuth('/api/users/me/bookmarks/' + currentRestaurantId, { method })
+            .then(r => {
+              if (!r || !r.ok) {
+                updateBookmarkBtn(saved); // revert on error
+                showToast('Could not update bookmark', 'error');
+              } else {
+                showToast(saved ? 'Bookmark removed' : 'Bookmarked!', 'success');
+              }
+            })
+            .catch(() => {
+              updateBookmarkBtn(saved);
               showToast('Could not update bookmark', 'error');
-            } else {
-              showToast(saved ? 'Bookmark removed' : 'Bookmarked!', 'success');
-            }
-          })
-          .catch(() => {
-            updateBookmarkBtn(saved);
-            showToast('Could not update bookmark', 'error');
-          });
+            });
+        });
       }
 
       function gradeClass(g) {
@@ -488,19 +463,25 @@
           var currentId = window.location.pathname.split('/').pop();
           loadNearby(r.latitude, r.longitude, currentId);
 
-          // Bookmark toggle state (only if logged in)
-          if (localStorage.getItem('accessToken')) {
-            fetchWithAuth('/api/users/me/bookmarks')
-              .then(bResp => bResp ? bResp.json() : null)
-              .then(bData => {
-                if (bData && bData.status === 'success') {
-                  const rid = r.restaurantId;
-                  const isSaved = (bData.data || []).some(b => b.restaurantId === rid);
-                  updateBookmarkBtn(isSaved);
-                }
-              })
-              .catch(() => {});
-          }
+          // Bookmark toggle state (only if logged in) — checked via a plain (non-fetchWithAuth)
+          // /api/auth/me probe so anonymous visitors are NOT redirected to /login by
+          // fetchWithAuth's 401-refresh-fail handling; this page must stay loadable anonymously.
+          fetch('/api/auth/me', { credentials: 'same-origin' })
+            .then(function(meResp) { return meResp.ok; })
+            .then(function(loggedIn) {
+              if (!loggedIn) return;
+              fetchWithAuth('/api/users/me/bookmarks')
+                .then(bResp => bResp ? bResp.json() : null)
+                .then(bData => {
+                  if (bData && bData.status === 'success') {
+                    const rid = r.restaurantId;
+                    const isSaved = (bData.data || []).some(b => b.restaurantId === rid);
+                    updateBookmarkBtn(isSaved);
+                  }
+                })
+                .catch(() => {});
+            })
+            .catch(() => {});
         })
         .catch(e => {
           showToast('Could not load restaurant details', 'error');

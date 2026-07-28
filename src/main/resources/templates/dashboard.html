@@ -104,37 +104,19 @@ input[type=text]:focus, select:focus, textarea:focus { border-color: #c0392b; }
 </div>
 
 <script>
-// ── Auth guard (client-side — JWT is in localStorage, not HTTP headers) ────
+// ── Auth guard — server-side role check via GET /api/auth/me ──────────────
 (function() {
-    const token = localStorage.getItem('accessToken');
-    if (!token) { window.location.href = '/login'; return; }
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role !== 'ROLE_CONTROLLER') {
-            window.location.href = '/';
-        }
-    } catch { window.location.href = '/login'; }
+    fetchWithAuth('/api/auth/me')
+        .then(function(response) {
+            if (!response.ok) { window.location.href = '/login'; return null; }
+            return response.json();
+        })
+        .then(function(data) {
+            if (data && data.role !== 'ROLE_CONTROLLER') {
+                window.location.href = '/';
+            }
+        });
 })();
-
-// ── Auth utilities ─────────────────────────────────────────────────────────
-function getAuthHeaders() {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return { "Content-Type": "application/json" };
-    return { "Content-Type": "application/json", Authorization: "Bearer " + token };
-}
-function handleFetchErrorResponse(response) {
-    if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/login";
-        throw new Error("Unauthorized");
-    }
-    return response;
-}
-function fetchWithAuth(url, options = {}) {
-    options.headers = { ...getAuthHeaders(), ...(options.headers || {}) };
-    return fetch(url, options).then(handleFetchErrorResponse);
-}
 
 // ── Grade/color utilities (top-level — NOT inside IIFE) ───────────────────
 function gradeBadgeHtml(grade) {
@@ -157,12 +139,6 @@ const STATUS_LABELS = { 'OPEN': 'Open', 'IN_PROGRESS': 'In Progress', 'RESOLVED'
 function formatDate(iso) {
     if (!iso) return '';
     return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function logout() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    window.location.href = '/login';
 }
 
 // ── Tab state ──────────────────────────────────────────────────────────────
@@ -461,16 +437,15 @@ function prependCard(r) {
 // ── Photo upload ───────────────────────────────────────────────────────────
 // CRITICAL: Do NOT use fetchWithAuth() here.
 // fetchWithAuth injects Content-Type: application/json which breaks multipart boundary.
-// Use raw fetch() with only the Authorization header.
+// The auth cookie rides along automatically on this same-origin request — no manual header needed.
 function uploadPhoto(reportId, fileInput) {
     const file = fileInput.files[0];
     if (!file) return;
     const formData = new FormData();
     formData.append('file', file);  // param name must match @RequestParam("file")
-    const token = localStorage.getItem('accessToken');
     fetch('/api/reports/' + reportId + '/photo', {
         method: 'POST',
-        headers: { Authorization: 'Bearer ' + token },
+        credentials: 'same-origin',
         body: formData
     })
     .then(r => r.json())

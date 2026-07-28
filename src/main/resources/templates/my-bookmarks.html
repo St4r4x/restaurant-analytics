@@ -172,32 +172,6 @@
       var currentPage = 0;
       var PAGE_SIZE = 20;
 
-      // ── Auth ─────────────────────────────────────────────────────────
-      function getAuthHeaders() {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return { "Content-Type": "application/json" };
-        return {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        };
-      }
-
-      function handleFetchErrorResponse(response) {
-        if (response.status === 401 || response.status === 403) {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          window.location.href = "/login";
-          throw new Error("Non autorisé");
-        }
-        return response;
-      }
-
-      function fetchWithAuth(url, options) {
-        options = options || {};
-        options.headers = Object.assign({}, getAuthHeaders(), options.headers || {});
-        return fetch(url, options).then(handleFetchErrorResponse);
-      }
-
       // ── Bookmarks ────────────────────────────────────────────────────
       function gradeBadgeHtml(grade) {
         const g = grade || '—';
@@ -283,24 +257,26 @@
       }
 
       function loadBookmarks() {
-        if (!localStorage.getItem('accessToken')) { window.location.href = '/login'; return; }
-        document.getElementById('bookmarks-list').innerHTML = Array(3).fill(
-          '<div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>'
-        ).join('');
-        fetchWithAuth('/api/users/me/bookmarks')
-          .then(function(r) { return r ? r.json() : null; })
-          .then(function(data) {
-            if (data && data.status === 'success') {
-              renderBookmarks(data.data || []);
-            } else {
+        fetchWithAuth('/api/auth/me').then(function(response) {
+          if (!response.ok) { window.location.href = '/login'; return; }
+          document.getElementById('bookmarks-list').innerHTML = Array(3).fill(
+            '<div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>'
+          ).join('');
+          fetchWithAuth('/api/users/me/bookmarks')
+            .then(function(r) { return r ? r.json() : null; })
+            .then(function(data) {
+              if (data && data.status === 'success') {
+                renderBookmarks(data.data || []);
+              } else {
+                showToast('Failed to load bookmarks.', 'error');
+                document.getElementById('bookmarks-list').innerHTML = '';
+              }
+            })
+            .catch(function() {
               showToast('Failed to load bookmarks.', 'error');
               document.getElementById('bookmarks-list').innerHTML = '';
-            }
-          })
-          .catch(function() {
-            showToast('Failed to load bookmarks.', 'error');
-            document.getElementById('bookmarks-list').innerHTML = '';
-          });
+            });
+        });
       }
 
       document.addEventListener('DOMContentLoaded', loadBookmarks);
