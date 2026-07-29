@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version part to bump
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Compute next version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          current=$(grep -oP 'app\.semver=\K.*' src/main/resources/application.properties)
+          IFS='.' read -r major minor patch <<< "$current"
+          case "$BUMP" in
+            major) major=$((major+1)); minor=0; patch=0 ;;
+            minor) minor=$((minor+1)); patch=0 ;;
+            patch) patch=$((patch+1)) ;;
+          esac
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "next=$major.$minor.$patch" >> "$GITHUB_OUTPUT"
+
+      - name: Fail if CHANGELOG has nothing to release
+        run: |
+          awk '/^## \[Unreleased\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md | grep -q '[^[:space:]]' || {
+            echo "::error::CHANGELOG.md's [Unreleased] section is empty — nothing to release."
+            exit 1
+          }
+
+      - name: Bump app.semver and cut CHANGELOG section
+        run: |
+          sed -i "s/app.semver=.*/app.semver=${{ steps.version.outputs.next }}/" src/main/resources/application.properties
+          today=$(date -u +%Y-%m-%d)
+          sed -i "0,/^## \[Unreleased\]/{s//## [Unreleased]\n\n## [${{ steps.version.outputs.next }}] — $today/}" CHANGELOG.md
+
+      - name: Open release PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch="chore/release-${{ steps.version.outputs.next }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add src/main/resources/application.properties CHANGELOG.md
+          git commit -m "chore(release): cut v${{ steps.version.outputs.next }}"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "chore(release): cut v${{ steps.version.outputs.next }}" \
+            --body "Bumps \`app.semver\` ${{ steps.version.outputs.current }} → ${{ steps.version.outputs.next }} and cuts the CHANGELOG's \`[Unreleased]\` section.
+
+          After merge: \`git tag -a v${{ steps.version.outputs.next }} -m \"...\" && git push origin v${{ steps.version.outputs.next }}\` on the merged commit."
