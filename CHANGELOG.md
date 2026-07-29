@@ -4,6 +4,8 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.4.1] — 2026-07-29
+
 ### Fixed
 - `/inspection-map` was silently redirecting every anonymous visitor to `/login` ~1-2s after load — the JWT httpOnly cookie migration's `fetchWithAuth()` always redirects on a 401 that survives a refresh attempt, but this page only used it for an optional "show Dashboard link for controllers" probe. Switched to a plain `fetch()`, the same fix already applied to `restaurant.html` for the identical footgun.
 
