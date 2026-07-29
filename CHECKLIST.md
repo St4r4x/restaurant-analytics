@@ -8,7 +8,7 @@
 > Ce document est un plan de travail personnel, pas un livrable officiel.
 > Statut : ✅ Fait · ⚠️ Ébauche existante à retravailler · ❌ À produire
 
-> **Note sur la modalité groupe/solo (29/07/2026)** : le référentiel officiel indique "Évaluation réalisée en groupe de 3 personnes maximum" pour l'ensemble du Bloc 2 (2.1 à 2.4). Les Blocs 1.3, 2.1, 2.2 et 2.3 ont néanmoins été traités en solo, sur la base de `restaurant-analytics` — choix assumé par le candidat plutôt qu'un retour au projet de groupe (document Drive associé inaccessible). Le référentiel encadre le format d'évaluation, pas une obligation de constituer un groupe pour un candidat qui n'en a pas. Le Bloc 2.4 (plan de changement) et le Bloc 4A.2 (pentest) restent en question ouverte auprès d'Aflokkat sur ce même point.
+> **Note sur la modalité groupe/solo (29/07/2026)** : le référentiel officiel indique "Évaluation réalisée en groupe de 3 personnes maximum" pour l'ensemble du Bloc 2 (2.1 à 2.4). Les Blocs 1.3 et l'ensemble du Bloc 2 (2.1 à 2.4) ont néanmoins été traités en solo, sur la base de `restaurant-analytics` — choix assumé par le candidat plutôt qu'un retour au projet de groupe (document Drive associé inaccessible). Le référentiel encadre le format d'évaluation, pas une obligation de constituer un groupe pour un candidat qui n'en a pas. Le Bloc 4A.2 (pentest, groupe de 3 également selon le référentiel) reste en question ouverte auprès d'Aflokkat sur ce même point — seul bloc encore non traité.
 
 ---
 
@@ -26,7 +26,7 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 | Bloc | Intitulé | Livrables requis | Statut global |
 |---|---|---|---|
 | **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ✅ 3/3 fait |
-| **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ⚠️ 3/4 fait |
+| **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ✅ 4/4 fait |
 | **3** | Concevoir et développer une application informatique | Dossier de conception · Application développée + dossier technique | ✅ 2/2 fait |
 | **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ⚠️ 1/2 fait |
 | **—** | Épreuve orale finale | Diaporama + présentation 30 min devant jury | ❌ à préparer une fois les 4 blocs validés |
@@ -101,14 +101,18 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 - [ ] Indiquer la méthode (spec → plan → exécution par feature, visible dans `docs/superpowers/`)
 - [ ] Rédiger le bilan complet une fois la planification posée
 
-### 2.4 Plan de changement ❌
-**Critères d'évaluation** : parties prenantes (acteurs, rôles, organigramme), types de messages selon parties prenantes, plan de communication, plannings, indicateurs d'avancement, plan de formation
+### 2.4 Plan de changement ✅
+**Fait** — `certification/bloc2-4-plan-de-changement.md`
 
-⚠️ **Point d'attention** : `restaurant-analytics` semble être un travail solo — ce bloc suppose un contexte d'équipe.
+> Traité en solo sur `restaurant-analytics` (choix assumé, cf. note groupe/solo en tête de ce document) — question envoyée à Aflokkat toujours en attente, à ajuster si la réponse impose le projet de groupe.
 
-**À faire**
-- [ ] Vérifier auprès d'Aflokkat si ce bloc peut s'appuyer sur le projet de groupe (cahier des charges fonctionnel, équipe de 3) plutôt que sur `restaurant-analytics`
-- [ ] Rédiger le plan de changement sur la base retenue
+**Critères d'évaluation**
+- [x] Parties prenantes (acteurs, rôles, organigramme, équipe projet) — distinction explicite équipe (candidat seul) vs parties prenantes externes
+- [x] Types de messages selon parties prenantes
+- [x] Plan de communication
+- [x] Plannings (référence au Gantt du Bloc 2.3)
+- [x] Indicateurs d'avancement
+- [x] Plan de formation (montée en compétences + valorisation des connaissances)
 
 ---
 
@@ -171,6 +175,6 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 5. ~~**Bloc 2.1 + 2.2** (cahier des charges technique + note de cadrage)~~ ✅ fait
 6. ~~**Bloc 2.3** (planification + bilan)~~ ✅ fait
 7. ~~**Bloc 1.3** (analyse stratégique)~~ ✅ fait — document Drive de base inaccessible, reconstruit depuis `restaurant-analytics`
-8. **Bloc 4A.2** (pentest) — question envoyée à Aflokkat sur le format attendu, en attente de réponse
-9. **Bloc 2.4** (plan de changement) — question envoyée à Aflokkat sur la modalité groupe/solo, en attente de réponse
+8. ~~**Bloc 2.4** (plan de changement)~~ ✅ fait — traité en solo, même choix que 1.3/2.1-2.3
+9. **Bloc 4A.2** (pentest) — dernier bloc restant ; question envoyée à Aflokkat sur le format attendu, en attente de réponse
 10. **Épreuve orale finale** — seulement une fois les 4 blocs validés
