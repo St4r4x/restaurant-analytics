@@ -35,6 +35,7 @@ import com.st4r4x.entity.InspectionReportEntity;
 import com.st4r4x.entity.UserEntity;
 import com.st4r4x.repository.AuditLogRepository;
 import com.st4r4x.repository.BookmarkRepository;
+import com.st4r4x.repository.PasswordResetTokenRepository;
 import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
 import com.st4r4x.service.AuditService;
@@ -54,6 +55,9 @@ public class UserController {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     private RestaurantDAO restaurantDAO;
@@ -182,6 +186,8 @@ public class UserController {
                 entry.setActorUsername("[deleted-user]");
             }
             auditLogRepository.saveAll(priorEntries);
+
+            passwordResetTokenRepository.deleteByUserId(user.getId());
 
             userRepository.delete(user);
 
