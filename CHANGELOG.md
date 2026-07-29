@@ -4,6 +4,12 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- `/inspection-map` was silently redirecting every anonymous visitor to `/login` ~1-2s after load — the JWT httpOnly cookie migration's `fetchWithAuth()` always redirects on a 401 that survives a refresh attempt, but this page only used it for an optional "show Dashboard link for controllers" probe. Switched to a plain `fetch()`, the same fix already applied to `restaurant.html` for the identical footgun.
+
+### CI/CD
+- Add a manually-triggered `release.yml` workflow to bump `app.semver` and cut `CHANGELOG.md`'s `[Unreleased]` section into a dated version block, then open a PR — automates the mechanical file edits of a release cut, not the changelog content itself (a prior full-automation attempt via git-cliff was tried and reverted, see `72c7faa`/`b234fbd`)
+
 ## [2.4.0] — 2026-07-28
 
 ### Added
