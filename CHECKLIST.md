@@ -8,6 +8,8 @@
 > Ce document est un plan de travail personnel, pas un livrable officiel.
 > Statut : ✅ Fait · ⚠️ Ébauche existante à retravailler · ❌ À produire
 
+> **Note sur la modalité groupe/solo (29/07/2026)** : le référentiel officiel indique "Évaluation réalisée en groupe de 3 personnes maximum" pour l'ensemble du Bloc 2 (2.1 à 2.4). Les Blocs 1.3, 2.1, 2.2 et 2.3 ont néanmoins été traités en solo, sur la base de `restaurant-analytics` — choix assumé par le candidat plutôt qu'un retour au projet de groupe (document Drive associé inaccessible). Le référentiel encadre le format d'évaluation, pas une obligation de constituer un groupe pour un candidat qui n'en a pas. Le Bloc 2.4 (plan de changement) et le Bloc 4A.2 (pentest) restent en question ouverte auprès d'Aflokkat sur ce même point.
+
 ---
 
 ## Structure officielle de la certification
