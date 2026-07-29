@@ -23,7 +23,7 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 
 | Bloc | Intitulé | Livrables requis | Statut global |
 |---|---|---|---|
-| **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ⚠️ 2/3 fait |
+| **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ✅ 3/3 fait |
 | **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ⚠️ 3/4 fait |
 | **3** | Concevoir et développer une application informatique | Dossier de conception · Application développée + dossier technique | ✅ 2/2 fait |
 | **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ⚠️ 1/2 fait |
@@ -44,19 +44,16 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 - [x] Fait — doc Drive *"Cahier des charges fonctionnel"* (projet Aflokkat, groupe de 3)
 - [ ] Relecture rapide de la cartographie du SI + inventaire des fonctions avant dépôt final
 
-### 1.3 Dossier d'analyse stratégique ⚠️
-**Base existante** : *"Etude de cas Aflokkat"* (Drive)
+### 1.3 Dossier d'analyse stratégique ✅
+**Fait** — `certification/bloc1-3-analyse-strategique.md`
+
+> Note : le document Drive *"Etude de cas Aflokkat"* prévu comme base est devenu inaccessible au moment de la rédaction (29/07/2026) — reconstruit intégralement à partir du SI `restaurant-analytics`, sur le même principe que les Blocs 2.1-2.3/3/4A, plutôt que retravaillé depuis l'existant.
 
 **Critères d'évaluation**
-- [ ] Diagnostic du SI existant structuré
-- [ ] Risques et impacts (probabilité + montant) évalués
-- [ ] Cohérence avec obligations réglementaires et orientations stratégiques démontrée
-- [ ] Priorités et évolutions préconisées listées explicitement
-
-**À faire**
-- [ ] Restructurer en 5 sections : enjeux/orientations, SI actuel, process améliorables, priorités, évolutions préconisées
-- [ ] Ajouter une évaluation chiffrée des risques (probabilité × impact)
-- [ ] Vérifier la cohérence RGPD
+- [x] Diagnostic du SI existant structuré
+- [x] Risques et impacts (probabilité + montant) évalués (5 risques stratégiques S1-S5, distincts des risques sécurité R1-R10 du Bloc 4A.1)
+- [x] Cohérence avec obligations réglementaires et orientations stratégiques démontrée (RGPD)
+- [x] Priorités et évolutions préconisées listées explicitement
 
 ---
 
@@ -171,7 +168,7 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 4. ~~**Bloc 1.1** (veille)~~ ✅ fait
 5. ~~**Bloc 2.1 + 2.2** (cahier des charges technique + note de cadrage)~~ ✅ fait
 6. ~~**Bloc 2.3** (planification + bilan)~~ ✅ fait
-7. **Bloc 1.3** (analyse stratégique) — retravail léger d'un existant, prochaine étape logique
+7. ~~**Bloc 1.3** (analyse stratégique)~~ ✅ fait — document Drive de base inaccessible, reconstruit depuis `restaurant-analytics`
 8. **Bloc 4A.2** (pentest) — question envoyée à Aflokkat sur le format attendu, en attente de réponse
 9. **Bloc 2.4** (plan de changement) — question envoyée à Aflokkat sur la modalité groupe/solo, en attente de réponse
 10. **Épreuve orale finale** — seulement une fois les 4 blocs validés
