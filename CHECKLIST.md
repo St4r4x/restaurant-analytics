@@ -24,7 +24,7 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 | Bloc | Intitulé | Livrables requis | Statut global |
 |---|---|---|---|
 | **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ⚠️ 2/3 fait |
-| **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ⚠️ 2/4 fait |
+| **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ⚠️ 3/4 fait |
 | **3** | Concevoir et développer une application informatique | Dossier de conception · Application développée + dossier technique | ✅ 2/2 fait |
 | **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ⚠️ 1/2 fait |
 | **—** | Épreuve orale finale | Diaporama + présentation 30 min devant jury | ❌ à préparer une fois les 4 blocs validés |
@@ -83,19 +83,19 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 - [x] Risques projet + solutions de contournement
 - [x] Ressources et délais (reconstitués depuis `CHANGELOG.md`)
 
-### 2.3 Dossier de planification d'un projet informatique ⚠️ (inclut le bilan)
-**Base existante** : `CHANGELOG.md`, `docs/superpowers/specs` et `plans`
+### 2.3 Dossier de planification d'un projet informatique ✅ (inclut le bilan)
+**Fait** — `certification/bloc2-3-dossier-planification-bilan.md`
 
 **Critères d'évaluation — Planification**
-- [ ] Phases du projet définies avec précision et pertinentes
-- [ ] Planning, budget, déroulement analysés avec mesures correctives si besoin
+- [x] Phases du projet définies avec précision et pertinentes (7 phases, Gantt Mermaid validé avec `mmdc`)
+- [x] Planning, budget, déroulement analysés avec mesures correctives si besoin (3 écarts réels documentés : allers-retours de package, migration GSD→Superpowers, abandon de git-cliff)
 
 **Critères d'évaluation — Bilan** (fait partie du même dossier)
-- [ ] Objectifs fixés vs résultats atteints
-- [ ] Bilan technique (pertinence des choix vs cahier des charges)
-- [ ] Bilan méthodologique (répartition des rôles, méthode adoptée)
-- [ ] Ressources planifiées vs utilisées
-- [ ] Date de fin prévue vs réelle + synthèse
+- [x] Objectifs fixés vs résultats atteints
+- [x] Bilan technique (pertinence des choix vs cahier des charges)
+- [x] Bilan méthodologique (répartition des rôles, méthode adoptée)
+- [x] Ressources planifiées vs utilisées
+- [x] Date de fin prévue vs réelle + synthèse
 
 **À faire**
 - [ ] Reconstituer les phases a posteriori depuis le CHANGELOG (v2.0 → v2.2.x) en planning/Gantt simplifié
@@ -170,8 +170,8 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 3. ~~**Bloc 3.1** (UML)~~ ✅ fait
 4. ~~**Bloc 1.1** (veille)~~ ✅ fait
 5. ~~**Bloc 2.1 + 2.2** (cahier des charges technique + note de cadrage)~~ ✅ fait
-6. **Bloc 2.3** (planification + bilan) — s'appuie sur 2.1/2.2, prochaine étape logique
-7. **Bloc 1.3** (analyse stratégique) — retravail léger d'un existant
+6. ~~**Bloc 2.3** (planification + bilan)~~ ✅ fait
+7. **Bloc 1.3** (analyse stratégique) — retravail léger d'un existant, prochaine étape logique
 8. **Bloc 4A.2** (pentest) — question envoyée à Aflokkat sur le format attendu, en attente de réponse
 9. **Bloc 2.4** (plan de changement) — question envoyée à Aflokkat sur la modalité groupe/solo, en attente de réponse
 10. **Épreuve orale finale** — seulement une fois les 4 blocs validés
