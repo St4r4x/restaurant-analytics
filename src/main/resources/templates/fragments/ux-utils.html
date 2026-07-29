@@ -77,6 +77,15 @@ body { font-family: 'Inter', sans-serif; }
     });
   };
 
+  // Escapes untrusted text before it's interpolated into an innerHTML template —
+  // found missing on report notes/violation codes during the 2026-07-29 pentest
+  // (Bloc 4A.2), which allowed a controller to break out of the edit-panel markup.
+  window.escapeHtml = function(str) {
+    var div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  };
+
   window.showToast = function(msg, type, durationMs) {
     type = type || 'info';
     durationMs = durationMs || 3000;

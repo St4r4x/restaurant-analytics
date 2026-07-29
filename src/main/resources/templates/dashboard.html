@@ -229,7 +229,7 @@ function renderCardHtml(r) {
     <div id="card-${r.id}" class="report-card" style="border-left:4px solid ${borderColor(r.grade)}">
         ${gradeBadgeHtml(r.grade)}
         <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:0.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.restaurantName || r.restaurantId}</div>
+            <div style="font-weight:600;font-size:0.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(r.restaurantName || r.restaurantId)}</div>
             <div style="font-size:0.78em;color:#888">${r.borough || ''} · ${formatDate(r.createdAt)}</div>
             <div style="font-size:0.78em;color:#888">Status: ${STATUS_LABELS[r.status] || r.status}</div>
         </div>
@@ -261,11 +261,11 @@ function renderEditPanelHtml(r) {
         </div>
         <div style="margin-bottom:12px">
             <label>Violation Codes</label>
-            <input type="text" id="edit-violations-${r.id}" value="${r.violationCodes || ''}">
+            <input type="text" id="edit-violations-${r.id}" value="${escapeHtml(r.violationCodes || '')}">
         </div>
         <div style="margin-bottom:16px">
             <label>Notes</label>
-            <textarea id="edit-notes-${r.id}" rows="2">${r.notes || ''}</textarea>
+            <textarea id="edit-notes-${r.id}" rows="2">${escapeHtml(r.notes || '')}</textarea>
         </div>
         <div style="display:flex;gap:8px">
             <button class="btn btn-primary btn-sm" onclick="saveEdit(${r.id})">Save</button>
