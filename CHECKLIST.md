@@ -24,7 +24,7 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 | Bloc | Intitulé | Livrables requis | Statut global |
 |---|---|---|---|
 | **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ⚠️ 2/3 fait |
-| **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ❌ 0/4 fait |
+| **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ⚠️ 2/4 fait |
 | **3** | Concevoir et développer une application informatique | Dossier de conception · Application développée + dossier technique | ✅ 2/2 fait |
 | **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ⚠️ 1/2 fait |
 | **—** | Épreuve orale finale | Diaporama + présentation 30 min devant jury | ❌ à préparer une fois les 4 blocs validés |
@@ -62,31 +62,26 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 
 ## BLOC 2 — Piloter et manager les projets informatiques
 
-### 2.1 Cahier des charges techniques ⚠️
-**Base existante** : `docs/architecture.md`, `docs/api.md`
+### 2.1 Cahier des charges techniques ✅
+**Fait** — `certification/bloc2-1-cahier-des-charges-techniques.md` (+ `certification/screenshots/`)
 
 **Critères d'évaluation**
-- [ ] Spécifications fonctionnelles détaillées
-- [ ] Contenu des écrans documenté
-- [ ] Contenu des bases de données documenté (Mongo + PostgreSQL)
-- [ ] Environnement informatique choisi et **justifié**
-- [ ] Interactions entre composants décrites
-- [ ] Plan de développement logiciel présent
+- [x] Spécifications fonctionnelles détaillées
+- [x] Contenu des écrans documenté
+- [x] Contenu des bases de données documenté (Mongo + PostgreSQL)
+- [x] Environnement informatique choisi et **justifié**
+- [x] Interactions entre composants décrites (diagramme Mermaid validé avec `mmdc`)
+- [x] Plan de développement logiciel présent
 
-**À faire**
-- [ ] Compiler en un seul document + justifier chaque choix techno
-- [ ] Documenter le contenu des écrans (captures + description, base : `docs/ui.md`)
-- [ ] Schéma des interactions entre composants
+### 2.2 Note de cadrage ✅
+**Fait** — `certification/bloc2-2-note-de-cadrage.md`
 
-### 2.2 Note de cadrage ❌
-**Critères d'évaluation** : contexte, méthode de conduite, contraintes, risques + solutions de contournement, ressources, délais
-
-**À faire**
-- [ ] Contexte du projet `restaurant-analytics`
-- [ ] Méthode de conduite (agile/lean — cohérent avec workflow Superpowers déjà utilisé)
-- [ ] Contraintes (solo dev, données NYC Open Data, hébergement Railway gratuit)
-- [ ] Risques projet + solutions de contournement
-- [ ] Ressources et délais (a posteriori via CHANGELOG)
+**Critères d'évaluation**
+- [x] Contexte du projet `restaurant-analytics`
+- [x] Méthode de conduite (workflow Superpowers : brainstorm → spec → plan → implémentation → revue CI → documentation)
+- [x] Contraintes (solo dev, coût d'hébergement, alternance, double casquette académique/certification)
+- [x] Risques projet + solutions de contournement
+- [x] Ressources et délais (reconstitués depuis `CHANGELOG.md`)
 
 ### 2.3 Dossier de planification d'un projet informatique ⚠️ (inclut le bilan)
 **Base existante** : `CHANGELOG.md`, `docs/superpowers/specs` et `plans`
@@ -174,8 +169,8 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 2. ~~**Bloc 3.2** (dossier technique)~~ ✅ fait
 3. ~~**Bloc 3.1** (UML)~~ ✅ fait
 4. ~~**Bloc 1.1** (veille)~~ ✅ fait
-5. **Bloc 2.1 + 2.2** (cahier des charges technique + note de cadrage) — s'appuient sur 3.1/3.2, prochaine étape logique
-6. **Bloc 2.3** (planification + bilan) — s'appuie sur 2.1/2.2
+5. ~~**Bloc 2.1 + 2.2** (cahier des charges technique + note de cadrage)~~ ✅ fait
+6. **Bloc 2.3** (planification + bilan) — s'appuie sur 2.1/2.2, prochaine étape logique
 7. **Bloc 1.3** (analyse stratégique) — retravail léger d'un existant
 8. **Bloc 4A.2** (pentest) — question envoyée à Aflokkat sur le format attendu, en attente de réponse
 9. **Bloc 2.4** (plan de changement) — question envoyée à Aflokkat sur la modalité groupe/solo, en attente de réponse
