@@ -45,4 +45,5 @@ restaurants.json
 *.png
 *.jpg
 *.jpeg
+!certification/screenshots/*.png
 .worktrees/

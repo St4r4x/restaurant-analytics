@@ -63,7 +63,7 @@ Templates live in `src/main/resources/templates/`.
 | `analytics.html` | Analytics dashboard |
 | `dashboard.html` | Inspector dashboard |
 | `restaurant.html` | Restaurant detail |
-| `map.html` | Inspection map |
+| `inspection-map.html` | Inspection map |
 | `bookmarks.html` | My bookmarks |
 | `admin.html` | Admin panel |
 | `fragments/navbar.html` | Sticky navbar fragment |
