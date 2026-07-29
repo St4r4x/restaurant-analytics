@@ -4,6 +4,12 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- `DELETE /api/users/me` threw an unhandled 500 for any user who had ever requested a password reset — the account-deletion cascade covered reports, bookmarks, and audit log anonymization, but never `password_reset_tokens`, causing a foreign-key violation. Found via manual pentest against production (Bloc 4A.2 certification work). Undermined the RGPD right-to-erasure guarantee for that user segment.
+
+### Security
+- Deleted 3 `DataSeeder` test accounts (`customer_test`, `controller_test`, `admin_test` — publicly documented credentials) that had been live in the production database since before `@Profile("dev")` was added to the seeder (2026-05-03) — the gate only prevented re-seeding, it never cleaned up rows already created during the unguarded window. Found via manual pentest against production (Bloc 4A.2 certification work).
+
 ## [2.4.1] — 2026-07-29
 
 ### Fixed
