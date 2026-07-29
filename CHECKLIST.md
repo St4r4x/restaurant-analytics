@@ -8,7 +8,7 @@
 > Ce document est un plan de travail personnel, pas un livrable officiel.
 > Statut : ✅ Fait · ⚠️ Ébauche existante à retravailler · ❌ À produire
 
-> **Note sur la modalité groupe/solo (29/07/2026)** : le référentiel officiel indique "Évaluation réalisée en groupe de 3 personnes maximum" pour l'ensemble du Bloc 2 (2.1 à 2.4). Les Blocs 1.3 et l'ensemble du Bloc 2 (2.1 à 2.4) ont néanmoins été traités en solo, sur la base de `restaurant-analytics` — choix assumé par le candidat plutôt qu'un retour au projet de groupe (document Drive associé inaccessible). Le référentiel encadre le format d'évaluation, pas une obligation de constituer un groupe pour un candidat qui n'en a pas. Le Bloc 4A.2 (pentest, groupe de 3 également selon le référentiel) reste en question ouverte auprès d'Aflokkat sur ce même point — seul bloc encore non traité.
+> **Note sur la modalité groupe/solo (29/07/2026)** : le référentiel officiel indique "Évaluation réalisée en groupe de 3 personnes maximum" pour l'ensemble du Bloc 2 et pour le Bloc 4A.2. Les Blocs 1.3, l'ensemble du Bloc 2 (2.1 à 2.4) et le Bloc 4A.2 ont néanmoins été traités en solo, sur la base de `restaurant-analytics` — choix assumé par le candidat plutôt qu'un retour au projet de groupe (document Drive associé inaccessible). Le référentiel encadre le format d'évaluation, pas une obligation de constituer un groupe pour un candidat qui n'en a pas. **Les 4 blocs sont désormais complets.**
 
 ---
 
@@ -28,7 +28,7 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 | **1** | Analyser et définir une stratégie de SI | Dossier de veille · Cahier des charges fonctionnel · Dossier d'analyse stratégique | ✅ 3/3 fait |
 | **2** | Piloter et manager les projets informatiques | Cahier des charges techniques · Note de cadrage · Dossier de planification (+ bilan) · Plan de changement | ✅ 4/4 fait |
 | **3** | Concevoir et développer une application informatique | Dossier de conception · Application développée + dossier technique | ✅ 2/2 fait |
-| **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ⚠️ 1/2 fait |
+| **4A** | Manager la cybersécurité (option choisie) | Dossier d'analyse des risques SI · Simulation de hacking/pentest | ✅ 2/2 fait |
 | **—** | Épreuve orale finale | Diaporama + présentation 30 min devant jury | ❌ à préparer une fois les 4 blocs validés |
 
 ---
@@ -148,10 +148,18 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 - [x] Protections développées adaptées aux risques identifiés
 - [x] Indicateurs de suivi présentés, exploitables pour la prise de décision
 
-### 4A.2 Simulation de hacking et tests d'intrusion ❌
-**À faire**
-- [ ] Se renseigner auprès d'Aflokkat sur le format exact attendu (outil imposé ? environnement dédié ? encadrement ?)
-- [ ] Planifier/réaliser le pentest et documenter les preuves numériques (accès, élévation de privilèges…)
+### 4A.2 Simulation de hacking et tests d'intrusion ✅
+**Fait** — `certification/bloc4a-2-pentest.md` — traité en solo sur `restaurant-app-production-3b11.up.railway.app` (choix assumé, même note groupe/solo)
+
+3 vulnérabilités réelles trouvées, corrigées, déployées et revérifiées en production dans la foulée :
+1. **Critique** — 3 comptes `DataSeeder` à identifiants publics actifs en prod depuis ~4 mois (dont un compte admin) → supprimés
+2. **Élevé** — `DELETE /api/users/me` cassé pour tout utilisateur ayant demandé un reset de mot de passe (atteinte RGPD réelle) → corrigé + testé
+3. **Moyen** — XSS stocké (auto-XSS) dans le panneau d'édition des rapports → corrigé (+ un second passage après que la revue de sécurité automatisée ait trouvé un échappement incomplet dans mon premier correctif)
+
+- [x] Les tests d'intrusion sont pertinents (accès, élévation de privilèges testée et bloquée sur 4 endpoints)
+- [x] Les preuves numériques sont identifiées (transcripts HTTP, logs Railway, PR mergées)
+- [x] L'ensemble du cycle de vie est adressé (constat → correction → déploiement → revérification en prod)
+- [x] Des indicateurs d'activité sont présentés (section 4 du dossier)
 
 ---
 
@@ -176,5 +184,5 @@ La certification est découpée en **4 blocs de compétences** (3 communs + 1 op
 6. ~~**Bloc 2.3** (planification + bilan)~~ ✅ fait
 7. ~~**Bloc 1.3** (analyse stratégique)~~ ✅ fait — document Drive de base inaccessible, reconstruit depuis `restaurant-analytics`
 8. ~~**Bloc 2.4** (plan de changement)~~ ✅ fait — traité en solo, même choix que 1.3/2.1-2.3
-9. **Bloc 4A.2** (pentest) — dernier bloc restant ; question envoyée à Aflokkat sur le format attendu, en attente de réponse
-10. **Épreuve orale finale** — seulement une fois les 4 blocs validés
+9. ~~**Bloc 4A.2** (pentest)~~ ✅ fait — traité en solo contre la prod, 3 vulnérabilités réelles trouvées et corrigées
+10. **Épreuve orale finale** — les 4 blocs sont validés côté production ; reste à préparer le diaporama et la présentation de 30 min
