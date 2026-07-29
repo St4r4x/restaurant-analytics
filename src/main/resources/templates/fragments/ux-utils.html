@@ -77,6 +77,20 @@ body { font-family: 'Inter', sans-serif; }
     });
   };
 
+  // Escapes untrusted text before it's interpolated into an innerHTML template —
+  // found missing on report notes/violation codes during the 2026-07-29 pentest
+  // (Bloc 4A.2), which allowed a controller to break out of the edit-panel markup.
+  // Escapes quotes too (not just <>&) since callers also interpolate into
+  // quoted attribute values (e.g. value="${escapeHtml(x)}"), not just text nodes.
+  window.escapeHtml = function(str) {
+    return (str == null ? '' : String(str))
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   window.showToast = function(msg, type, durationMs) {
     type = type || 'info';
     durationMs = durationMs || 3000;

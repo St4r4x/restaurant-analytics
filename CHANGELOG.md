@@ -9,6 +9,7 @@ All notable changes are documented here.
 
 ### Security
 - Deleted 3 `DataSeeder` test accounts (`customer_test`, `controller_test`, `admin_test` — publicly documented credentials) that had been live in the production database since before `@Profile("dev")` was added to the seeder (2026-05-03) — the gate only prevented re-seeding, it never cleaned up rows already created during the unguarded window. Found via manual pentest against production (Bloc 4A.2 certification work).
+- `dashboard.html`'s report edit panel interpolated `r.notes`, `r.violationCodes`, and `r.restaurantName` raw into an `innerHTML` template — a controller could break out of the markup via report notes and run arbitrary JS. Currently self-XSS only (`GET /api/reports` is scoped to the requesting user's own reports). Added a shared `escapeHtml()` helper in `ux-utils.html`. Found via the same pentest.
 
 ## [2.4.1] — 2026-07-29
 
