@@ -26,6 +26,7 @@ import com.st4r4x.entity.InspectionReportEntity;
 import com.st4r4x.entity.UserEntity;
 import com.st4r4x.repository.AuditLogRepository;
 import com.st4r4x.repository.BookmarkRepository;
+import com.st4r4x.repository.PasswordResetTokenRepository;
 import com.st4r4x.repository.ReportRepository;
 import com.st4r4x.repository.UserRepository;
 import com.st4r4x.service.AuditService;
@@ -41,6 +42,7 @@ public class UserControllerDeleteMeTest {
     @Mock private ReportRepository reportRepository;
     @Mock private AuditLogRepository auditLogRepository;
     @Mock private AuditService auditService;
+    @Mock private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @BeforeEach
     public void setUpSecurityContext() {
@@ -104,6 +106,26 @@ public class UserControllerDeleteMeTest {
 
         verify(bookmarkRepository).deleteAll(bookmarks);
         verify(reportRepository).deleteAll(reports);
+    }
+
+    @Test
+    public void deleteAccount_deletesPasswordResetTokensBeforeDeletingUser() {
+        // Regression test: a user who requested a password reset had a row in
+        // password_reset_tokens FK-referencing users.id, which caused DELETE
+        // /api/users/me to fail with a 500 (DataIntegrityViolationException)
+        // before this cascade was added — found via manual pentest 2026-07-29.
+        UserEntity user = new UserEntity("testuser", "test@example.com", "hash", "ROLE_CUSTOMER");
+        user.setId(1L);
+        when(userRepository.findByUsername("testuser")).thenReturn(java.util.Optional.of(user));
+        when(bookmarkRepository.findByUserId(1L)).thenReturn(Collections.emptyList());
+        when(reportRepository.findByUserId(1L)).thenReturn(Collections.emptyList());
+        when(auditLogRepository.findByActorUsername("testuser")).thenReturn(Collections.emptyList());
+
+        userController.deleteAccount();
+
+        InOrder inOrder = inOrder(passwordResetTokenRepository, userRepository);
+        inOrder.verify(passwordResetTokenRepository).deleteByUserId(1L);
+        inOrder.verify(userRepository).delete(user);
     }
 
     @Test
