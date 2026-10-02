@@ -4,6 +4,8 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.4.2] — 2026-10-02
+
 ### Fixed
 - On pages shorter than the viewport, the footer floated mid-screen with page background showing below it. It is now a sticky footer, set once in the shared `fragments/footer.html` (`body { min-height: 100vh }` + `position: sticky; top: 100vh`), which fixes all 8 pages that include it without changing their body layout; long pages are unaffected.
 - Page headers were not aligned the same way across pages: `my-bookmarks`, `admin`, `dashboard`, `uncontrolled` and `profile` each redefined `.container` (or set an inline `max-width`) with their own width, so the header title jumped horizontally from page to page and, on bookmarks and admin, did not line up with the content below it. Removed the per-page overrides — every page header and its content now share Bootstrap's `.container`, like the home dashboard. Side effect: admin, controller dashboard and profile content now use the full container width instead of a narrow centred column.
