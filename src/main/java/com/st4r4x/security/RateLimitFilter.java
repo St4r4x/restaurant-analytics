@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Per-IP rate limiting using Bucket4j token-bucket algorithm.
  *
  * Two tiers:
- *   - /api/auth/**          : strict (default 10 req/min) — brute-force protection
+ *   - /api/auth/** except /me and /refresh : strict (default 10 req/min) — brute-force protection
  *   - /api/restaurants/search, /api/restaurants/map-points : relaxed (default 100 req/min) — scraping protection
  *
  * Registered as a @Component — Spring Boot auto-registers it in the servlet filter chain.
@@ -62,6 +62,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
+        // Session endpoints are not brute-force targets (they need a valid signed token) but run on every
+        // page load (/me) and on each access-token expiry (/refresh): throttling them logged users out.
+        if (uri.equals("/api/auth/me") || uri.equals("/api/auth/refresh")) {
+            return true;
+        }
         return !uri.startsWith("/api/auth/")
             && !uri.equals("/api/restaurants/search")
             && !uri.equals("/api/restaurants/map-points");

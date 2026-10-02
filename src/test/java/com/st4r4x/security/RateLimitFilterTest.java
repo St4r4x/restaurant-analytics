@@ -86,4 +86,20 @@ class RateLimitFilterTest {
         filter.doFilterInternal(searchReq, response, new MockFilterChain());
         assertEquals(200, response.getStatus(), "Search bucket should be independent from auth bucket");
     }
+
+    @Test
+    void sessionEndpoints_areNotRateLimited() throws Exception {
+        // /me is probed twice on every page load and /refresh runs whenever the access token expires:
+        // counting them against the brute-force bucket logged users out after a few page changes
+        String[][] calls = {{"GET", "/api/auth/me"}, {"POST", "/api/auth/refresh"}};
+        for (String[] call : calls) {
+            for (int i = 0; i < 10; i++) {
+                MockHttpServletRequest request = new MockHttpServletRequest(call[0], call[1]);
+                request.setRemoteAddr("10.0.0.4");
+                MockHttpServletResponse response = new MockHttpServletResponse();
+                filter.doFilter(request, response, new MockFilterChain());
+                assertEquals(200, response.getStatus(), call[1] + " request " + (i + 1) + " should not be rate-limited");
+            }
+        }
+    }
 }
