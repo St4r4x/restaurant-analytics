@@ -107,7 +107,8 @@ input[type=text]:focus, select:focus, textarea:focus { border-color: #c0392b; }
 (function() {
     fetchWithAuth('/api/auth/me')
         .then(function(response) {
-            if (!response.ok) { window.location.href = '/login'; return null; }
+            // fetchWithAuth sends a logged-out user to /login itself; any other failure is transient
+            if (!response.ok) { showToast('Could not check your session, please retry', 'error'); return null; }
             return response.json();
         })
         .then(function(data) {

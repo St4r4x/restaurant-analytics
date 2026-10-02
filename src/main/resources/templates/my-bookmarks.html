@@ -247,7 +247,8 @@
 
       function loadBookmarks() {
         fetchWithAuth('/api/auth/me').then(function(response) {
-          if (!response.ok) { window.location.href = '/login'; return; }
+          // fetchWithAuth sends a logged-out user to /login itself; any other failure is transient
+          if (!response.ok) { showToast('Could not check your session, please retry', 'error'); return; }
           document.getElementById('bookmarks-list').innerHTML = Array(3).fill(
             '<div class="skel" style="height:52px;border-radius:6px;margin-bottom:6px"></div>'
           ).join('');

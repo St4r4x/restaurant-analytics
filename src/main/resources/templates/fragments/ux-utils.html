@@ -68,11 +68,13 @@ body { font-family: 'Inter', sans-serif; }
       if (response.status !== 401) return response;
       return fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' })
         .then(function(refreshResponse) {
-          if (!refreshResponse.ok) {
-            if (window.location.pathname !== '/login') window.location.href = '/login';
-            return response;
-          }
-          return fetch(url, options);
+          if (refreshResponse.ok) return fetch(url, options);
+          // Only a rejected refresh token (400/401/403) means the session is gone; a 429 or 5xx is
+          // transient and must not log the user out — the caller gets the original 401 and decides.
+          var sessionGone = [400, 401, 403].indexOf(refreshResponse.status) !== -1;
+          if (!sessionGone) return response;
+          if (window.location.pathname !== '/login') window.location.href = '/login';
+          return new Promise(function() {}); // page is navigating away: stop the caller's chain
         });
     });
   };
