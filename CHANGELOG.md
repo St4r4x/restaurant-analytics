@@ -5,6 +5,7 @@ All notable changes are documented here.
 ## [Unreleased]
 
 ### Fixed
+- `.env.example` was missing `RESEND_API_KEY` — `AppConfig` refuses to start without it, so a fresh install that followed the template failed at startup. Added it, with a note that any non-empty value lets the app start locally (password-reset emails only go out with a real key).
 - `DELETE /api/users/me` threw an unhandled 500 for any user who had ever requested a password reset — the account-deletion cascade covered reports, bookmarks, and audit log anonymization, but never `password_reset_tokens`, causing a foreign-key violation. Found via manual pentest against production (Bloc 4A.2 certification work). Undermined the RGPD right-to-erasure guarantee for that user segment.
 
 ### Security
