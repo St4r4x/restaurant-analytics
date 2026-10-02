@@ -8,7 +8,6 @@
     <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh; }
-.container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
 .page-header { background: #1a1a1a; color: white; padding: 32px 0; }
 .page-header .eyebrow { font-size: 0.7em; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #c0392b; margin-bottom: 8px; }
 .page-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 900; margin: 0; }
@@ -33,18 +32,18 @@ input[type=text]:focus, select:focus, textarea:focus { border-color: #c0392b; }
 .autocomplete-item { padding: 9px 12px; cursor: pointer; font-size: 0.88em; }
 .autocomplete-item:hover { background: #faf7f4; }
 .error-msg { color: #c0392b; font-size: 0.82em; margin-top: 4px; }
-@media (max-width: 768px) { .container { padding: 12px 8px !important; } .report-card { flex-wrap: wrap; } .edit-panel { padding: 12px; } }
+@media (max-width: 768px) { .report-card { flex-wrap: wrap; } .edit-panel { padding: 12px; } }
     </style>
 </head>
 <body>
   <div th:replace="fragments/navbar :: navbar"></div>
 <div class="page-header">
-  <div class="container" style="padding-top:0;padding-bottom:0">
+  <div class="container">
     <div class="eyebrow">Controller</div>
     <h1>Inspector Dashboard</h1>
   </div>
 </div>
-<div class="container" style="padding-top:32px">
+<div class="container" style="padding-top:32px;padding-bottom:24px">
 
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
