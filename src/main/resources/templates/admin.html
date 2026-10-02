@@ -8,7 +8,6 @@
     <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh; }
-.container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
 .page-header { background: #1a1a1a; color: white; padding: 32px 0; }
 .page-header .eyebrow { font-size: 0.7em; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #c0392b; margin-bottom: 8px; }
 .page-header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 900; margin: 0; }
@@ -27,6 +26,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 .desc-text { font-size: 0.88em; color: #555; margin-bottom: 14px; }
 .badge-row { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; align-items: center; }
 .badge-label { font-size: 0.82em; font-weight: 600; color: #555; min-width: 80px; }
+.table-scroll { overflow-x: auto; } /* wide tables scroll inside their card on phones instead of widening the page */
 .user-table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin-top: 8px; }
 .user-table th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #e8e0d8; font-weight: 700; color: #555; font-size: 0.82em; text-transform: uppercase; letter-spacing: 0.05em; }
 .user-table td { padding: 8px 10px; border-bottom: 1px solid #f0ebe3; vertical-align: middle; }
@@ -42,18 +42,18 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
 .audit-table tr:last-child td { border-bottom: none; }
 .audit-action { font-weight: 600; font-size: 0.82em; color: #1a1a1a; }
 .audit-pagination { display: flex; gap: 8px; margin-top: 12px; align-items: center; font-size: 0.82em; color: #555; }
-@media (max-width: 768px) { .container { padding: 12px 8px !important; } .btn-row { flex-direction: column; align-items: flex-start; } .user-table { font-size: 0.82em; } }
+@media (max-width: 768px) { .btn-row { flex-direction: column; align-items: flex-start; } .user-table { font-size: 0.82em; } }
     </style>
 </head>
 <body>
 <div th:replace="fragments/navbar :: navbar"></div>
 <div class="page-header">
-  <div class="container" style="padding-top:0;padding-bottom:0;max-width:1140px">
+  <div class="container">
     <div class="eyebrow">System</div>
     <h1>Admin Panel</h1>
   </div>
 </div>
-<div class="container" style="padding-top:32px">
+<div class="container" style="padding-top:32px;padding-bottom:24px">
 
     <!-- Card 1: Sync Controls -->
     <div class="card">
@@ -71,6 +71,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
         <h2>User Management</h2>
         <p class="desc-text">View all users and change their role. Changes take effect on next login.</p>
         <div id="users-loading" class="status-text">Loading users…</div>
+        <div class="table-scroll">
         <table class="user-table" id="users-table" style="display:none">
             <thead>
                 <tr>
@@ -83,6 +84,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
             </thead>
             <tbody id="users-tbody"></tbody>
         </table>
+        </div>
     </div>
 
     <!-- Card 3: At-Risk CSV Download -->
@@ -112,6 +114,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
         <h2>Audit Log</h2>
         <p class="desc-text">Recent admin and controller actions. Most recent first.</p>
         <div id="audit-loading" class="status-text">Loading audit log…</div>
+        <div class="table-scroll">
         <table class="audit-table" id="audit-table" style="display:none">
             <thead>
                 <tr>
@@ -124,6 +127,7 @@ body { font-family: 'Inter', sans-serif; background: #f8f5f0; min-height: 100vh;
             </thead>
             <tbody id="audit-tbody"></tbody>
         </table>
+        </div>
         <div id="audit-empty" class="status-text" style="display:none">No audit entries yet.</div>
         <div class="audit-pagination" id="audit-pagination" style="display:none">
             <button id="audit-prev" class="btn btn-secondary" onclick="loadAudit(auditPage-1)" disabled>&#8592; Prev</button>
