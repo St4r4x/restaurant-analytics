@@ -4,6 +4,15 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.4.3] — 2026-10-02
+
+### Fixed
+- Production deploys of 2.4.2 crashed at startup with `FATAL: (EMAXCONNSESSION) max clients reached in session mode - max clients are limited to pool_size: 15`. Supabase's session-mode pooler accepts 15 client connections, but every app instance opened HikariCP's default 10: during a Railway deploy the old and new instances overlap (20 connections), so the new one could not open a single connection and Hibernate failed to build its session factory. Capped the pool at 5 per instance (`spring.datasource.hikari.maximum-pool-size=5`), which keeps two overlapping instances at 10. A local dev server pointed at the production database also counts against the same limit.
+
+### Ops
+- Railway's Railpack now runs Java apps on JDK 21 unless `RAILPACK_JDK_VERSION` is set — `.tool-versions` alone no longer covers the runtime, and the Java 25 build crashed with `UnsupportedClassVersionError`. Set `RAILPACK_JDK_VERSION=25` on the `restaurant-app` service.
+- Elasticsearch service restarted on Railway; the index is rebuilt automatically on app startup.
+
 ## [2.4.2] — 2026-10-02
 
 ### Fixed
