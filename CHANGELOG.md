@@ -5,6 +5,10 @@ All notable changes are documented here.
 ## [Unreleased]
 
 ### Fixed
+- On pages shorter than the viewport, the footer floated mid-screen with page background showing below it. It is now a sticky footer, set once in the shared `fragments/footer.html` (`body { min-height: 100vh }` + `position: sticky; top: 100vh`), which fixes all 8 pages that include it without changing their body layout; long pages are unaffected.
+- Page headers were not aligned the same way across pages: `my-bookmarks`, `admin`, `dashboard`, `uncontrolled` and `profile` each redefined `.container` (or set an inline `max-width`) with their own width, so the header title jumped horizontally from page to page and, on bookmarks and admin, did not line up with the content below it. Removed the per-page overrides — every page header and its content now share Bootstrap's `.container`, like the home dashboard. Side effect: admin, controller dashboard and profile content now use the full container width instead of a narrow centred column.
+- The admin user and audit tables overflowed the viewport on phones (the audit table is 788px wide on a 375px screen), widening the whole page. They now scroll horizontally inside their card (`.table-scroll`).
+- `.env.example` was missing `RESEND_API_KEY` — `AppConfig` refuses to start without it, so a fresh install that followed the template failed at startup. Added it, with a note that any non-empty value lets the app start locally (password-reset emails only go out with a real key).
 - `DELETE /api/users/me` threw an unhandled 500 for any user who had ever requested a password reset — the account-deletion cascade covered reports, bookmarks, and audit log anonymization, but never `password_reset_tokens`, causing a foreign-key violation. Found via manual pentest against production (Bloc 4A.2 certification work). Undermined the RGPD right-to-erasure guarantee for that user segment.
 
 ### Security
