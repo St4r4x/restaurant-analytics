@@ -151,7 +151,8 @@
 
       function handleBookmarkClick() {
         fetchWithAuth('/api/auth/me').then(function(response) {
-          if (!response.ok) { window.location.href = '/login'; return; }
+          // fetchWithAuth sends a logged-out visitor to /login itself; any other failure is transient
+          if (!response.ok) { showToast('Could not check your session, please retry', 'error'); return; }
           const btn = document.getElementById('bookmark-btn');
           const saved = btn.textContent.includes('Saved');
           // Optimistic toggle

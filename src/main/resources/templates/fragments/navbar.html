@@ -42,7 +42,15 @@
   }
   (function() {
     var el = document.getElementById('nav-auth');
-    fetch('/api/auth/me', { credentials: 'same-origin' })
+    function probe() { return fetch('/api/auth/me', { credentials: 'same-origin' }); }
+    // An expired access token (15 min) must not make the navbar show "Sign In": renew it silently.
+    // Unlike fetchWithAuth, never redirect — public pages stay browsable for anonymous visitors.
+    probe()
+      .then(function(response) {
+        if (response.status !== 401) return response;
+        return fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' })
+          .then(function(refresh) { return refresh.ok ? probe() : response; });
+      })
       .then(function(response) { return response.ok ? response.json() : null; })
       .then(function(data) {
         if (!data) {

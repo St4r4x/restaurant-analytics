@@ -64,7 +64,8 @@
 
   <script>
     fetchWithAuth('/api/auth/me')
-      .then(function(response) { if (!response.ok) window.location.href = '/login'; });
+      // fetchWithAuth sends a logged-out user to /login itself; any other failure is transient
+      .then(function(response) { if (!response.ok) showToast('Could not check your session, please retry', 'error'); });
 
     function gradeBadgeHtml(grade) {
       const g = grade || '—';
