@@ -4,7 +4,7 @@
 **Bloc** : 1 — Analyser et définir une stratégie de systèmes d'information
 **Livrable** : Dossier de veille (évaluation individuelle)
 **Candidat** : Arnaud Thery
-**Support technique** : `restaurant-analytics` (API REST + dashboard Spring Boot / MongoDB / Redis / Elasticsearch, déployé sur Railway)
+**Support technique** : `restaurant-analytics` (API REST + dashboard Spring Boot / MongoDB / PostgreSQL / Redis, déployé sur Railway ; Elasticsearch utilisé de mai à juillet 2026 puis arrêté en production)
 **Période de veille couverte** : février 2026 – juillet 2026
 
 ---
@@ -90,12 +90,16 @@ Quatre thématiques ont été retenues parce qu'elles influent directement sur l
 
 ## 4. Recommandations
 
-| # | Recommandation | Thématique source | Priorité |
-|---|---|---|---|
-| 1 | Étendre le rate limiting existant (`RateLimitFilter`) aux endpoints `/api/restaurants/search` et `/api/analytics/heatmap` | Sécurité API | Haute |
-| 2 | Documenter une politique de rétention des données personnelles et ajouter un endpoint `DELETE /api/users/me` | RGPD | Haute |
-| 3 | Poursuivre la migration vers une configuration cloud-native pilotée par la plateforme (buildpacks) plutôt que des Dockerfiles maintenus à la main, pour toute nouvelle brique d'infrastructure | Cloud-native | Moyenne |
-| 4 | Maintenir une revue humaine systématique sur tout code produit par un agent IA avant merge — déjà en place via le workflow Superpowers, à formaliser dans le dossier technique (Bloc 3.2) | IA agentique | Moyenne |
+Chaque recommandation est argumentée par le gain attendu et le risque évité (section 3) ; la dernière colonne indique ce qu'elle est devenue, pour montrer que la veille débouche sur des décisions.
+
+| # | Recommandation | Thématique source | Priorité | Suivi au 2026-10-01 |
+|---|---|---|---|---|
+| 1 | Étendre le rate limiting existant (`RateLimitFilter`) aux endpoints `/api/restaurants/search` et `/api/analytics/heatmap` | Sécurité API | Haute | Fait pour `/api/restaurants/search` et `/api/restaurants/map-points` (100 requêtes/min) ; `/api/analytics/heatmap` n'est pas encore limité |
+| 2 | Documenter une politique de rétention des données personnelles et ajouter un endpoint `DELETE /api/users/me` | RGPD | Haute | Endpoint fait (v2.3.0) ; politique de confidentialité et de rétention encore à publier |
+| 3 | Poursuivre la migration vers une configuration cloud-native pilotée par la plateforme (buildpacks) plutôt que des Dockerfiles maintenus à la main, pour toute nouvelle brique d'infrastructure | Cloud-native | Moyenne | Appliqué (Railpack, `Dockerfile.ci` réservé à la CI) |
+| 4 | Maintenir une revue humaine systématique sur tout code produit par un agent IA avant merge — déjà en place via le workflow Superpowers, à formaliser dans le dossier technique (Bloc 3.2) | IA agentique | Moyenne | En place : chaque modification passe par une pull request relue et la CI obligatoire |
+
+**Impact sur le métier d'expert SI** : les quatre thématiques convergent vers un même déplacement du métier. L'expert écrit moins de code lui-même et passe plus de temps à cadrer, vérifier et sécuriser : définir les règles que les outils (plateformes de déploiement, agents IA) appliquent, et prouver leur conformité (sécurité des API, RGPD, AI Act).
 
 ---
 
