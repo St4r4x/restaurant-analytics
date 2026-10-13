@@ -10,16 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
+    /** Search page, for every visitor: the navbar's "Search" link points here. */
     @GetMapping("/")
-    public String index(Authentication auth) {
-        if (auth == null) {
-            return "landing";
-        }
-        if (auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CONTROLLER"))) {
-            return "redirect:/dashboard";
-        }
-        return "index";
+    public String index() {
+        return "landing";
     }
 
     @GetMapping("/login")
@@ -47,9 +41,18 @@ public class ViewController {
         return "my-bookmarks";
     }
 
+    /**
+     * Role-dependent dashboard: inspector dashboard for controllers, bookmarks and nearby
+     * restaurants (index.html) for the other signed-in users. An expired access token reaches
+     * here as anonymous, so dashboard.html refreshes the session and resolves the role itself.
+     */
     @GetMapping("/dashboard")
-    public String dashboard() {
-        return "dashboard";
+    public String dashboard(Authentication auth) {
+        if (auth == null || auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CONTROLLER"))) {
+            return "dashboard";
+        }
+        return "index";
     }
 
     /**

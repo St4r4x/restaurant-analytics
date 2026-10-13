@@ -112,8 +112,10 @@ input[type=text]:focus, select:focus, textarea:focus { border-color: #c0392b; }
             return response.json();
         })
         .then(function(data) {
+            // the server served this page without knowing the role (expired access token):
+            // now that the session is refreshed, /dashboard returns the right dashboard
             if (data && data.role !== 'ROLE_CONTROLLER') {
-                window.location.href = '/';
+                window.location.href = '/dashboard';
             }
         });
 })();
