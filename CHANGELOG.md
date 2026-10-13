@@ -4,6 +4,11 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+## [2.4.4] — 2026-10-13
+
+### Fixed
+- The navbar's "Search" link opened the bookmarks dashboard once signed in. It points to `/`, which served the search page only to anonymous visitors: customers and admins got `index.html` (their dashboard: bookmarks and nearby restaurants) and controllers were redirected to the inspector dashboard. `/` now always serves the search page, `/dashboard` serves the dashboard matching the role (inspector dashboard for controllers, `index.html` for the others), and the "Dashboard" navbar entry shows for every signed-in user, not only controllers. Sign-in and sign-up now land on `/dashboard`, and the map's back link reads "← Search" instead of "← Dashboard".
+
 ## [2.4.3] — 2026-10-02
 
 ### Fixed

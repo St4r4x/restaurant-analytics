@@ -18,24 +18,37 @@ public class ViewControllerDashboardTest {
     @InjectMocks
     private ViewController viewController;
 
-    @Test
-    public void index_redirectsToDashboard_forController() {
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-            "ctrl_user", null,
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_CONTROLLER")));
-        assertEquals("redirect:/dashboard", viewController.index(auth));
+    private static Authentication withRole(String role) {
+        return new UsernamePasswordAuthenticationToken(
+            "user", null, Collections.singletonList(new SimpleGrantedAuthority(role)));
     }
 
+    // "/" is the Search page for everyone: it used to send signed-in users to their dashboard,
+    // so the navbar's Search link opened the bookmarks dashboard instead of the search
     @Test
     public void index_returnsLanding_forAnonymous() {
-        assertEquals("landing", viewController.index(null));
+        assertEquals("landing", viewController.index());
     }
 
     @Test
-    public void index_returnsIndex_forCustomer() {
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-            "customer_user", null,
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
-        assertEquals("index", viewController.index(auth));
+    public void dashboard_returnsInspectorDashboard_forController() {
+        assertEquals("dashboard", viewController.dashboard(withRole("ROLE_CONTROLLER")));
+    }
+
+    @Test
+    public void dashboard_returnsCustomerDashboard_forCustomer() {
+        assertEquals("index", viewController.dashboard(withRole("ROLE_CUSTOMER")));
+    }
+
+    @Test
+    public void dashboard_returnsCustomerDashboard_forAdmin() {
+        assertEquals("index", viewController.dashboard(withRole("ROLE_ADMIN")));
+    }
+
+    @Test
+    public void dashboard_letsThePageCheckTheRole_whenAccessTokenIsMissing() {
+        // an expired access token reaches the server as anonymous: dashboard.html refreshes the
+        // session and resolves the role client-side
+        assertEquals("dashboard", viewController.dashboard(null));
     }
 }

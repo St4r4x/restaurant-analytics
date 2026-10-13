@@ -108,7 +108,7 @@
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => {
             if (!data) return;
-            window.location.href = data.role === "ROLE_CONTROLLER" ? "/dashboard" : data.role === "ROLE_ADMIN" ? "/admin" : "/";
+            window.location.href = data.role === "ROLE_CONTROLLER" ? "/dashboard" : data.role === "ROLE_ADMIN" ? "/admin" : "/dashboard";
           })
           .catch(() => {});
       })();
@@ -163,7 +163,7 @@
               fetch("/api/auth/me", { credentials: "same-origin" })
                 .then((res) => res.json())
                 .then((data) => {
-                  window.location.href = data.role === "ROLE_CONTROLLER" ? "/dashboard" : data.role === "ROLE_ADMIN" ? "/admin" : "/";
+                  window.location.href = data.role === "ROLE_CONTROLLER" ? "/dashboard" : data.role === "ROLE_ADMIN" ? "/admin" : "/dashboard";
                 })
                 .catch(() => { window.location.href = "/"; });
             } else {
@@ -319,7 +319,7 @@
           .then((res) => res.json().then((data) => ({ status: res.status, body: data })))
           .then((result) => {
             if (result.status === 200) {
-              window.location.href = "/";
+              window.location.href = "/dashboard";
             } else {
               errorEl.style.display = "block";
               errorEl.textContent = result.body.message || "Could not create account.";
