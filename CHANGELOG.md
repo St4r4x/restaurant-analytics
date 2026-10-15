@@ -8,7 +8,7 @@ All notable changes are documented here.
 - Certification dossiers brought up to date with the actual exam scope (Bloc 3 only, option B), plus a shared glossary (`certification/glossaire.md`). The Bloc 3 dossier technique is now standalone and covers the 2.4.2 → 2.4.4 fixes and the 2026-10-02 production incidents.
 - `certification/tools/` builds the dossier technique as PDF and DOCX with the charte of the submitted Google Doc (`build_dossier.py`; outputs go to the ignored `certification/export/`).
 - `docs/architecture.md` explains why the app is a modular monolith rather than microservices.
-- README listed only two roles and an OpenStreetMap enrichment removed on 2026-05-07; `CLAUDE.md` still described that enrichment, its admin endpoint and its cron job, and an ungated `DataSeeder`. Both are fixed. `CHECKLIST.md` now opens with the scope given by the school on 2026-10-01.
+- README listed only two roles and an OpenStreetMap enrichment removed on 2026-05-07; `CLAUDE.md` still described that enrichment, its admin endpoint and its cron job, and an ungated `DataSeeder`, and credited Elasticsearch with `/search`, which actually runs on MongoDB's text index (Elasticsearch only serves `/autocomplete`). Both are fixed. `CHECKLIST.md` now opens with the scope given by the school on 2026-10-01.
 
 ### Chore
 - Removed `cliff.toml`, left over from the git-cliff changelog automation that was reverted.

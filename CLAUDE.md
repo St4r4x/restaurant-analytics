@@ -13,7 +13,7 @@ Academic project (Aflokkat / big data module).
 - **Primary DB**: MongoDB (driver: `mongodb-driver-sync`, raw aggregation pipelines — no Spring Data MongoDB)
 - **RDBMS**: PostgreSQL 15 — users, bookmarks, inspection reports (Spring JPA / Hibernate)
 - **Cache**: Redis 7 (TTL-based, via `RestaurantCacheService`)
-- **Search**: Elasticsearch (via `ElasticsearchSyncService`)
+- **Search**: MongoDB text index for `/search`; Elasticsearch (via `ElasticsearchSyncService`) for `/autocomplete` only
 - **Security**: JWT (access 15 min / refresh 7 days), Spring Security
 - **Build**: Maven (`mvn`)
 - **Config**: `src/main/resources/application.properties` (main config, no dotenv in production)
@@ -55,7 +55,7 @@ NYC Open Data API → `NycOpenDataClient` → `SyncService` → MongoDB (`newyor
 MongoDB → `RestaurantDAO` / `AnalyticsDAO` → `RestaurantService` → REST controllers → JSON responses
 Hot data → `RestaurantCacheService` (Redis, TTL 3600s)
 Users / bookmarks / reports → PostgreSQL via Spring JPA
-Elasticsearch → `ElasticsearchSyncService` (full-text search, rebuilt daily by `CronScheduler`)
+Elasticsearch → `ElasticsearchSyncService` (autocomplete only, rebuilt daily by `CronScheduler`)
 
 ## Configuration (`application.properties`)
 
@@ -120,7 +120,7 @@ docker compose down
 | `GET /api/restaurants/by-cuisine` | Count per cuisine |
 | `GET /api/restaurants/top` | Top restaurants (Redis sorted set) |
 | `GET /api/restaurants/sample` | Random sample |
-| `GET /api/restaurants/search` | Full-text search (Elasticsearch) |
+| `GET /api/restaurants/search` | Name/address search (MongoDB text index; escaped prefix regex under 3 chars) |
 | `GET /api/restaurants/autocomplete` | Autocomplete (Elasticsearch edge-ngram) |
 | `GET /api/restaurants/nearby` | Nearby restaurants by coords |
 | `GET /api/restaurants/stats` | Global stats |
