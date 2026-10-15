@@ -5,7 +5,7 @@
 **Live demo:** https://restaurant-app-production-3b11.up.railway.app/
 
 Spring Boot REST API and web dashboard for exploring NYC restaurant hygiene data.
-Data is synced from the NYC Open Data API into MongoDB. Two user roles: **CUSTOMER** (discovery) and **CONTROLLER** (inspection report filing).
+Data is synced from the NYC Open Data API into MongoDB. Anonymous visitors can search and browse; signed-in users get one of three roles: **CUSTOMER** (bookmarks), **CONTROLLER** (inspection report filing) and **ADMIN** (sync, cache, roles, audit log).
 
 Academic project — Aflokkat / big data module.
 
@@ -21,7 +21,6 @@ Academic project — Aflokkat / big data module.
 | RDBMS | PostgreSQL 15 (users, bookmarks, reports) |
 | Cache | Redis 7 (TTL 3600 s) |
 | Search | Elasticsearch 8 (autocomplete, fuzzy multi-match) |
-| Enrichment | OpenStreetMap Overpass API (phone, website, hours) |
 | Security | JWT (access 15 min / refresh 7 days) |
 | Build | Maven |
 | Deployment | Docker Compose (5 services) |

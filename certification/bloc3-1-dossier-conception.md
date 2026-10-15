@@ -191,6 +191,7 @@ classDiagram
 - `Address` et `InspectionRecord` n'ont pas d'identité propre (pas de `_id`) : ce sont des objets valeur, existentiellement dépendants de `Restaurant` (composition UML, losange plein). Un document `Restaurant` complet est toujours upserté en un seul appel MongoDB — cohérent avec le modèle document.
 - `BookmarkEntity` et `InspectionReportEntity` portent une vraie relation JPA `@ManyToOne` vers `UserEntity` (association, cardinalité 1–N) : ce sont des données transactionnelles PostgreSQL, la cohérence référentielle native de la base est exploitée.
 - `AuditLogEntity.actorUsername` est **volontairement** une chaîne dénormalisée et non une `@ManyToOne` vers `UserEntity`. Preuve dans le code : `UserController.deleteAccount()` réécrit `actorUsername` en `"[deleted-user]"` sur toutes les entrées d'audit existantes au lieu de les supprimer en cascade — l'historique d'audit doit survivre à la suppression du compte qui l'a produit (traçabilité RGPD, cf. Bloc 4A.1).
+- `AuditAction.OSM_ENRICH_TRIGGERED` est une valeur héritée de l'enrichissement OpenStreetMap, retiré le 2026-05-07 (API Overpass bloquée depuis l'hébergeur) ; elle est conservée pour la lisibilité d'éventuelles entrées d'audit historiques.
 - `restaurantId` (dans `BookmarkEntity` et `InspectionReportEntity`) est une simple chaîne, pas une clé étrangère SQL : la cible vit dans une base différente (MongoDB), donc aucune contrainte d'intégrité référentielle n'est possible nativement. Ce choix est un compromis assumé (voir section 6, risque associé).
 
 ---
@@ -225,7 +226,7 @@ flowchart TD
 - Le *carry buffer* évite qu'un restaurant dont les lignes d'inspection sont réparties sur deux pages consécutives de l'API ne soit persisté de façon incomplète.
 - Le retry avec backoff exponentiel (3 tentatives, 2s/4s/8s) absorbe les indisponibilités transitoires du fournisseur externe (NYC Open Data, SLA informel — risque R7 du Bloc 4A.1) sans faire échouer tout le cycle de synchronisation pour une erreur réseau ponctuelle.
 - `running=false` est garanti par un bloc `finally` (Java), donc exécuté même en cas d'échec — évite qu'un sync bloqué en erreur n'empêche indéfiniment tout sync ultérieur.
-- La réindexation Elasticsearch n'est déclenchée **qu'en cas de succès** du sync Mongo, pour ne jamais indexer une donnée partielle.
+- La réindexation Elasticsearch n'est déclenchée **qu'en cas de succès** du sync Mongo, pour ne jamais indexer une donnée partielle. Elle est asynchrone et tolère l'absence d'Elasticsearch (tentatives journalisées en avertissement) : depuis l'arrêt d'Elasticsearch en production (juillet 2026), cette étape est sans effet sur le service.
 
 Deux tâches planifiées complémentaires, hors de ce flux, s'exécutent après le sync nocturne (`CronScheduler`) : réchauffement du cache Redis à 02:30, réindexation Elasticsearch indépendante à 04:00 — toutes deux également déclenchables manuellement via `POST /api/admin/cron/run/{jobKey}` et supervisées via `GET /api/admin/cron/status`.
 
@@ -238,7 +239,7 @@ L'application suit un modèle **lecture-majoritaire, écriture-planifiée** : le
 **Cycle de vie d'une requête de lecture typique** (ex. `GET /api/restaurants/by-borough`) :
 1. `RestaurantController` reçoit la requête (aucune authentification requise, endpoint public).
 2. `RestaurantService` interroge `RestaurantCacheService.getOrLoad(key, loader)` : cache hit → retour immédiat depuis Redis ; cache miss → exécution du `loader` (agrégation MongoDB via `RestaurantDAO`/`AnalyticsDAO`), résultat mis en cache avec TTL avant d'être retourné.
-3. `ResponseUtil.successResponse()` formate la réponse JSON.
+3. Le contrôleur construit l'enveloppe JSON standard `{"status": "success", "data": …, "count": …}` (les erreurs passent par `ResponseUtil.errorResponse()`, voir section 6).
 
 **Cycle de vie d'une requête d'écriture typique** (ex. `POST /api/reports`, voir section 4 du Bloc 3.2 pour le détail du flux de rapport) :
 1. `JwtAuthenticationFilter` valide le token, peuple le `SecurityContext` avec le rôle porté par le JWT.
@@ -258,7 +259,85 @@ L'application suit un modèle **lecture-majoritaire, écriture-planifiée** : le
 | Upload photo | `multipart/form-data` → fichier sur disque (`app.uploads.dir`) + chemin en base | Client HTTP → filesystem + PostgreSQL |
 | Cache | Objet Java sérialisé (Redis) | MongoDB → Redis (TTL 3600s) → Client HTTP |
 
+**Structure des messages échangés avec le client** — toutes les réponses de l'API partagent la même enveloppe (exemple `GET /api/restaurants/by-borough`, valeurs illustratives) :
+
+```json
+{ "status": "success", "data": [ { "id": "Manhattan", "count": 10234 } ], "count": 5 }
+```
+
+```json
+{ "status": "error", "message": "Report not found" }
+```
+
+Une erreur interne inattendue renvoie toujours le message générique `"An internal error occurred"`, sans détail technique (risque R6, Bloc 4A.1). Exemple de requête d'écriture (`POST /api/reports`, DTO `ReportRequest`) :
+
+```json
+{ "restaurantId": "30075445", "grade": "B", "status": "OPEN", "violationCodes": "10F,04L", "notes": "Surface de préparation à nettoyer" }
+```
+
+`restaurantId` et `grade` sont obligatoires à la création ; `status` vaut `OPEN` par défaut ; en modification (`PATCH`), tout champ absent reste inchangé.
+
 **Risque identifié et assumé** : l'absence de contrainte d'intégrité référentielle entre `restaurantId` (PostgreSQL, chaîne libre) et les documents MongoDB signifie qu'un favori ou un rapport peut référencer un `restaurantId` qui n'existe plus (ex. si un restaurant était retiré du jeu de données NYC Open Data — cas non observé en pratique, l'API ne supprime pas d'entrées historiques). Ce compromis est le prix du choix polyglotte (deux bases sans ORM unifié) et n'a pas justifié la complexité d'une synchronisation de cohérence applicative pour un projet de cette échelle.
+
+---
+
+## 7. Règles de gestion et exigences
+
+Règles extraites du code source (la référence fait foi en cas d'écart) :
+
+| # | Règle | Implémentation |
+|---|---|---|
+| RG1 | Un utilisateur a un rôle unique parmi `CUSTOMER`, `CONTROLLER`, `ADMIN` ; aucun rôle n'hérite d'un autre | `UserEntity.role`, `SecurityConfig` |
+| RG2 | L'inscription comme contrôleur ou administrateur exige un code d'inscription fourni par variable d'environnement ; sans code configuré, ces inscriptions sont désactivées | `AuthService` (`CONTROLLER_SIGNUP_CODE`, `ADMIN_SIGNUP_CODE`) |
+| RG3 | Un mot de passe compte au moins 10 caractères, dont une majuscule et un chiffre | `ValidationUtil.requireValidPassword()` |
+| RG4 | Le jeton d'accès expire après 15 minutes, le jeton de rafraîchissement après 7 jours | `JwtUtil`, configuration `jwt.*` |
+| RG5 | Un lien de réinitialisation de mot de passe est valable 1 heure et utilisable une seule fois | `PasswordResetService` (`TOKEN_VALIDITY_MS`) |
+| RG6 | Un restaurant ne peut être mis en favori qu'une fois par utilisateur | Contrainte `UNIQUE(user_id, restaurant_id)` |
+| RG7 | Seul un contrôleur peut créer un rapport ; `restaurantId` et `grade` sont obligatoires ; le statut vaut `OPEN` par défaut | `ReportController`, `ReportRequest` |
+| RG8 | Un contrôleur ne voit et ne modifie que ses propres rapports, et ne peut joindre une photo qu'à ses propres rapports | `ReportController` (filtre `findByUserId`, contrôle de propriété) |
+| RG9 | Les statuts d'un rapport (`OPEN`, `IN_PROGRESS`, `RESOLVED`) peuvent être fixés dans n'importe quel ordre | `ReportController` (`PATCH`) |
+| RG10 | Un restaurant est « à risque » si sa dernière note est C ou Z | `AnalyticsDAOImpl.countAtRiskRestaurants()` |
+| RG11 | Un restaurant est « non contrôlé » si sa dernière note est C ou Z, ou si sa dernière inspection date de plus de 12 mois | `AnalyticsDAOImpl.findUncontrolled()` |
+| RG12 | Les restaurants « à proximité » sont recherchés dans un rayon de 500 m par défaut | `RestaurantController` (`radius`) |
+| RG13 | Les endpoints d'authentification acceptent 10 requêtes par minute et par IP ; la recherche et la carte, 100 | `RateLimitFilter`, `application.properties` |
+| RG14 | La suppression d'un compte supprime ses rapports (et photos), favoris et jetons de réinitialisation, et anonymise ses entrées d'audit | `UserController.deleteAccount()` |
+| RG15 | Les données restaurants sont resynchronisées chaque jour à 02:00 ; les inspections sont dédupliquées par date | `SyncService` |
+
+---
+
+## 8. Maquettes et navigation
+
+Aucune maquette filaire n'a été produite avant le développement : l'interface a été construite par itérations directement dans les gabarits Thymeleaf. Les captures de l'application en production tiennent donc lieu de maquettes haute fidélité ; elles sont présentées écran par écran, avec leur contenu, dans le cahier des charges techniques (Bloc 2.1, §2) :
+
+| Écran | Gabarit | Profils | Capture |
+|---|---|---|---|
+| Accueil | `landing.html` | Tous | `screenshots/01-landing.png` |
+| Connexion / inscription | `login.html` | Visiteur | `screenshots/02-login.png` |
+| Statistiques | `analytics.html` | Tous | `screenshots/03-analytics.png` |
+| Carte des inspections | `inspection-map.html` | Tous | `screenshots/04-inspection-map.png` |
+| Fiche restaurant | `restaurant.html` | Tous | `screenshots/05-restaurant-detail.png` |
+| Tableau de bord contrôleur | `dashboard.html` | Contrôleur | `screenshots/06-controller-dashboard.png` |
+
+Enchaînement des écrans :
+
+```mermaid
+flowchart LR
+    L[Accueil] --> R[Fiche restaurant]
+    L --> M[Carte des inspections]
+    L --> A[Statistiques]
+    L --> U[Restaurants non contrôlés]
+    L --> Log[Connexion / inscription]
+    M --> R
+    A --> R
+    Log --> D[Tableau de bord<br/>selon le rôle]
+    Log --> PW[Réinitialisation<br/>du mot de passe]
+    D --> B[Mes favoris]
+    D --> P[Profil<br/>suppression de compte]
+    D --> Adm[Administration]
+    B --> R
+```
+
+Le tableau de bord affiché dépend du rôle : favoris et restaurants à proximité pour un client, rapports pour un contrôleur ; la page d'administration n'est accessible qu'au rôle `ADMIN`.
 
 ---
 
