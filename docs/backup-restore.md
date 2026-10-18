@@ -2,6 +2,8 @@
 
 ## PostgreSQL (Supabase) — daily encrypted backups
 
+> **Disabled since 2026-10-18.** The application is no longer hosted (see the README), so the `Backup PostgreSQL` workflow was turned off (`gh workflow disable backup-postgres.yml`); re-enable it with `gh workflow enable backup-postgres.yml` if the application is brought back. Backups already taken stay downloadable for 30 days from their run; the GPG passphrase that decrypts them lives only in the `BACKUP_GPG_PASSPHRASE` repository secret, so keep a copy elsewhere before deleting it. The rest of this section describes how the backup worked while it was active.
+
 `.github/workflows/backup-postgres.yml` runs daily at 03:17 UTC (and on manual dispatch), dumps the Supabase Postgres database, encrypts it with GPG, and uploads it as a GitHub Actions artifact, retained for 30 days.
 
 **Why PostgreSQL and not MongoDB:** PostgreSQL holds user accounts, bookmarks, and inspection reports (with photos) — none of this is reconstructible if lost. MongoDB holds only the NYC restaurant dataset, which is fully re-derivable from the NYC Open Data API (see the MongoDB section below).
