@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/St4r4x/restaurant-analytics/actions/workflows/ci.yml/badge.svg)
 
-**Live demo:** https://restaurant-app-production-3b11.up.railway.app/
+**Live demo:** offline since October 2026, hosting was stopped to cut costs. Run it locally with `docker compose up -d` (see Quick Start); `railway.toml` is kept so the Railway deployment can be restored.
 
 Spring Boot REST API and web dashboard for exploring NYC restaurant hygiene data.
 Data is synced from the NYC Open Data API into MongoDB. Anonymous visitors can search and browse; signed-in users get one of three roles: **CUSTOMER** (bookmarks), **CONTROLLER** (inspection report filing) and **ADMIN** (sync, cache, roles, audit log).

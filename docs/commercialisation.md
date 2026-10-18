@@ -87,7 +87,7 @@ Requires multi-tenancy (per-organisation data isolation), custom branding, and a
 
 ## Infrastructure for Scale
 
-The current Railway deployment is sufficient for hundreds of daily users. For higher load:
+The Railway deployment (stopped in October 2026 to cut costs) was sufficient for hundreds of daily users. For higher load:
 
 | Bottleneck | Current | Upgrade path |
 |-----------|---------|-------------|
