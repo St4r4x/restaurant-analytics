@@ -15,6 +15,14 @@
 | Testing | JUnit 5 + Mockito | — |
 | Deployment | Docker / Docker Compose | — |
 
+## Why a modular monolith, not microservices
+
+The application is **one Spring Boot service** (one build, one deployment) backed by four specialised services that each run in their own container: MongoDB, PostgreSQL, Redis and Elasticsearch. It is deliberately not split into microservices:
+
+- **Team and traffic**: one developer and modest traffic. Microservices pay off when several teams ship independently or when one part needs to scale on its own; here they would multiply deployments, network failure points and hosting costs for no gain.
+- **Consistency**: account deletion removes reports, bookmarks and reset tokens and anonymises the audit log in one PostgreSQL transaction. Across services this would need distributed coordination.
+- **Room to grow**: the code is split into layers (`controller` → `service` → `dao`/`repository`) and functional packages, so a part can be extracted later without a rewrite. The nightly sync (`sync/`) is the first candidate: it already runs on its own schedule and only shares MongoDB and Redis with the rest.
+
 ---
 
 ## Package Structure

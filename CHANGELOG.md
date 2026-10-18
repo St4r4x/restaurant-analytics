@@ -4,6 +4,19 @@ All notable changes are documented here.
 
 ## [Unreleased]
 
+### Docs
+- Certification dossiers brought up to date with the actual exam scope (Bloc 3 only, option B), plus a shared glossary (`certification/glossaire.md`). The Bloc 3 dossier technique is now standalone and covers the 2.4.2 → 2.4.4 fixes and the 2026-10-02 production incidents.
+- `certification/tools/` builds the dossier technique as PDF and DOCX with the charte of the submitted Google Doc (`build_dossier.py`; outputs go to the ignored `certification/export/`).
+- `docs/architecture.md` explains why the app is a modular monolith rather than microservices.
+- README listed only two roles and an OpenStreetMap enrichment removed on 2026-05-07; `CLAUDE.md` still described that enrichment, its admin endpoint and its cron job, and an ungated `DataSeeder`, and credited Elasticsearch with `/search`, which actually runs on MongoDB's text index (Elasticsearch only serves `/autocomplete`). Both are fixed. `CHECKLIST.md` now opens with the scope given by the school on 2026-10-01.
+
+### Ops
+- The application is no longer hosted: the Railway deployment was stopped in October 2026 to cut costs. README and `docs/commercialisation.md` say so; `railway.toml` stays so it can be redeployed.
+
+### Chore
+- Removed `cliff.toml`, left over from the git-cliff changelog automation that was reverted.
+- `.gitignore`: Python virtualenv and caches, generated dossier exports, the local `.claude/launch.json` (it points at real database hosts), the design-hook state and the certification reference PDFs.
+
 ## [2.4.4] — 2026-10-13
 
 ### Fixed

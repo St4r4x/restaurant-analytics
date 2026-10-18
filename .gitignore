@@ -47,3 +47,16 @@ restaurants.json
 *.jpeg
 !certification/screenshots/*.png
 .worktrees/
+
+# Python tooling for the certification dossier (certification/tools/)
+.venv/
+__pycache__/
+# Generated dossier exports (PDF/DOCX), rebuilt by certification/tools/build_dossier.py
+certification/export/
+# Local Claude Code launch config — points at real database credentials/hosts
+.claude/launch.json
+# Local design-hook state
+.impeccable/
+# Certification reference PDFs (kept locally, not versioned)
+/Referentiel*.pdf
+/R*glement*.pdf

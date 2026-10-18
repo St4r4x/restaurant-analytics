@@ -49,6 +49,44 @@ L'application permet d'explorer les inspections d'hygiène des restaurants new-y
 
 Référentiel complet des endpoints : [`docs/api.md`](../docs/api.md).
 
+### 1.5 Modélisation du processus métier principal
+
+Le processus qui porte la valeur métier propre à l'application (au-delà de la consultation des données publiques) est le **cycle de vie d'un rapport d'hygiène**. Modélisation par couloirs d'acteurs, dans l'esprit BPMN :
+
+```mermaid
+flowchart LR
+    subgraph Contrôleur
+        S([Visite terrain]) --> R[Rechercher le restaurant]
+        R --> C[Créer le rapport<br/>grade + restaurant obligatoires]
+        C --> P{Photo ?}
+        P -->|Oui| U[Joindre la photo]
+        P -->|Non| O
+        U --> O[Rapport OPEN]
+        O --> E[Mettre à jour<br/>grade, notes, statut]
+        E --> F([Rapport RESOLVED])
+    end
+    subgraph Application
+        C -.-> V1[Contrôle du rôle CONTROLLER<br/>et des champs obligatoires]
+        U -.-> V2[Contrôle : le rapport<br/>appartient au contrôleur]
+    end
+    subgraph Administrateur
+        F -.-> ST[Statistiques par statut<br/>et par grade]
+    end
+```
+
+Statuts possibles : `OPEN` (par défaut à la création) → `IN_PROGRESS` → `RESOLVED`. L'application ne contraint pas l'ordre des transitions : le contrôleur peut fixer n'importe quel statut à l'édition (règle de gestion détaillée au Bloc 3.1, §7).
+
+### 1.6 Priorisation des fonctionnalités (MoSCoW)
+
+Priorisation reconstituée selon la valeur pour l'utilisateur et la dépendance technique (une fonction dont d'autres dépendent passe avant) :
+
+| Priorité | Fonctionnalités | Justification |
+|---|---|---|
+| **Must** (indispensable) | Synchronisation NYC Open Data, recherche, fiche restaurant, carte, authentification et rôles, rapports contrôleur, suppression de compte | Sans données ni contrôle d'accès, aucune autre fonction n'existe ; la suppression de compte est une obligation légale (RGPD) |
+| **Should** (important) | Statistiques et KPI, favoris, mot de passe oublié, administration (sync manuel, cache, journal d'audit) | Forte valeur d'usage, mais le service reste utilisable sans |
+| **Could** (confort) | Autocomplétion Elasticsearch, export CSV, classement des restaurants, restaurants à proximité | Amélioration de l'expérience ; l'autocomplétion a d'ailleurs été coupée en production sans perte fonctionnelle majeure |
+| **Won't** (hors périmètre actuel) | Application mobile, notifications, vue administrateur de tous les rapports, autres villes que New York | Pas de besoin exprimé ; la vue « tous les rapports » demanderait d'abord de traiter le risque XSS identifié au pentest (Bloc 4A.2, §2.3) |
+
 ---
 
 ## 2. Contenu des écrans
@@ -145,8 +183,19 @@ Clés `restaurants:*` (agrégations mises en cache, TTL 1h) et un sorted-set `re
 | **PostgreSQL + JPA** | MongoDB pour tout | Données utilisateur intrinsèquement relationnelles (contraintes d'unicité, clés étrangères, transactions ACID sur la suppression de compte RGPD) |
 | **Redis** | Cache applicatif in-memory (Caffeine) | Partagé entre instances si l'application est scalée horizontalement ; sorted-set natif pour le leaderboard sans requête MongoDB répétée |
 | **JWT (access 15 min / refresh 7 j) en cookies httpOnly** | Session serveur classique | Stateless (pas de session partagée à synchroniser entre instances) ; migration ultérieure de `localStorage` vers cookies httpOnly pour fermer le risque d'exfiltration XSS des tokens |
+| **MongoDB Atlas + Supabase (PostgreSQL, région UE)** | Bases auto-hébergées sur le même serveur que l'application | Bases managées (sauvegardes, mises à jour, supervision assurées par le fournisseur) ; données personnelles hébergées dans l'Union européenne |
 | **Docker Compose (dev) / Railway (prod)** | Kubernetes | Complexité de Kubernetes non justifiée pour un service unique à trafic modéré ; Railway fournit le déploiement continu et la détection automatique du build Maven sans configuration d'orchestrateur |
 | **Elasticsearch (optionnel, coupé en production)** | Recherche full-text MongoDB (`$text`) | Autocomplete avec edge-ngram plus pertinent qu'un index texte MongoDB, mais fonctionnalité non critique — le service a été arrêté en production pour réduire le coût mémoire (~1 Go) au profit de la recherche MongoDB de base, qui reste pleinement fonctionnelle |
+
+### 4.1 Contraintes et vulnérabilités de l'existant prises en compte
+
+| Constat sur l'existant | Effet sur les choix techniques |
+|---|---|
+| L'API NYC Open Data n'est pas contractualisée et livre une ligne par violation | Synchronisation avec reprise sur erreur (backoff exponentiel), regroupement par restaurant à l'ingestion, plafond configurable |
+| Jetons JWT lisibles par JavaScript dans la première version (`localStorage`) | Migration vers des cookies `HttpOnly` / `Secure` / `SameSite=Strict` |
+| Endpoints publics de recherche exposés au scraping | Limitation de débit par IP (Bucket4j) |
+| Coût mémoire d'Elasticsearch disproportionné au trafic réel | Elasticsearch rendu optionnel, recherche MongoDB en repli |
+| Risques de sécurité cartographiés (R1 à R10) | Traités selon le plan de sécurisation du Bloc 4A.1 |
 
 ---
 

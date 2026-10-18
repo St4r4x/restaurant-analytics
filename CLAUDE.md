@@ -13,7 +13,7 @@ Academic project (Aflokkat / big data module).
 - **Primary DB**: MongoDB (driver: `mongodb-driver-sync`, raw aggregation pipelines — no Spring Data MongoDB)
 - **RDBMS**: PostgreSQL 15 — users, bookmarks, inspection reports (Spring JPA / Hibernate)
 - **Cache**: Redis 7 (TTL-based, via `RestaurantCacheService`)
-- **Search**: Elasticsearch (via `ElasticsearchSyncService`)
+- **Search**: MongoDB text index for `/search`; Elasticsearch (via `ElasticsearchSyncService`) for `/autocomplete` only
 - **Security**: JWT (access 15 min / refresh 7 days), Spring Security
 - **Build**: Maven (`mvn`)
 - **Config**: `src/main/resources/application.properties` (main config, no dotenv in production)
@@ -32,7 +32,7 @@ com.st4r4x/
 ├── dao/              # RestaurantDAO + Impl, AnalyticsDAO + Impl (MongoDB), RestaurantWriteDAO
 ├── repository/       # UserRepository, BookmarkRepository, ReportRepository (Spring JPA / PostgreSQL)
 ├── cache/            # RestaurantCacheService (Redis)
-├── sync/             # NycOpenDataClient, SyncService, OsmEnrichmentService, ElasticsearchSyncService,
+├── sync/             # NycOpenDataClient, SyncService, ElasticsearchSyncService,
 │                     # CronScheduler, JobStatus, NycApiRestaurantDto, SyncResult
 ├── domain/           # Restaurant, Address, InspectionRecord (MongoDB POJOs)
 ├── entity/           # UserEntity, BookmarkEntity, InspectionReportEntity, LetterGrade, Status (JPA)
@@ -55,8 +55,7 @@ NYC Open Data API → `NycOpenDataClient` → `SyncService` → MongoDB (`newyor
 MongoDB → `RestaurantDAO` / `AnalyticsDAO` → `RestaurantService` → REST controllers → JSON responses
 Hot data → `RestaurantCacheService` (Redis, TTL 3600s)
 Users / bookmarks / reports → PostgreSQL via Spring JPA
-OSM data → `OsmEnrichmentService` (phone, website, opening hours — runs on startup + weekly cron)
-Elasticsearch → `ElasticsearchSyncService` (full-text search, rebuilt daily by `CronScheduler`)
+Elasticsearch → `ElasticsearchSyncService` (autocomplete only, rebuilt daily by `CronScheduler`)
 
 ## Configuration (`application.properties`)
 
@@ -83,7 +82,7 @@ jwt.access.expiration.ms=900000
 jwt.refresh.expiration.ms=604800000
 
 spring.task.scheduling.pool.size=4
-app.semver=2.1.1
+app.semver=2.4.4
 ```
 
 Docker Compose sets `MONGODB_URI`, `MONGODB_DATABASE`, `MONGODB_COLLECTION`, `REDIS_HOST`, `REDIS_PORT` as env vars on the app container.
@@ -121,7 +120,7 @@ docker compose down
 | `GET /api/restaurants/by-cuisine` | Count per cuisine |
 | `GET /api/restaurants/top` | Top restaurants (Redis sorted set) |
 | `GET /api/restaurants/sample` | Random sample |
-| `GET /api/restaurants/search` | Full-text search (Elasticsearch) |
+| `GET /api/restaurants/search` | Name/address search (MongoDB text index; escaped prefix regex under 3 chars) |
 | `GET /api/restaurants/autocomplete` | Autocomplete (Elasticsearch edge-ngram) |
 | `GET /api/restaurants/nearby` | Nearby restaurants by coords |
 | `GET /api/restaurants/stats` | Global stats |
@@ -141,7 +140,6 @@ docker compose down
 | `POST /api/reports` | Submit hygiene report |
 | `GET /api/reports/stats` | Report statistics |
 | `GET /api/admin/cron/status` | Cron job registry (ADMIN) |
-| `POST /api/admin/osm-enrich` | Trigger OSM re-enrichment (ADMIN) |
 | `POST /api/admin/rebuild-cache` | Rebuild Redis cache (ADMIN) |
 | `GET /swagger-ui.html` | Swagger UI |
 
@@ -169,5 +167,5 @@ After each significant feature, keep these files up to date:
 - Integration tests require live MongoDB on `localhost:27017` with `newyork` DB populated
 - `nyc.api.max_records=0` means unlimited — set a small value (e.g. 5000) for local testing to avoid long sync
 - Swagger available at `http://localhost:8080/swagger-ui.html`
-- `DataSeeder` seeds known credentials unconditionally — gate behind `@Profile("dev")` before going to production
-- `CronScheduler` owns all `@Scheduled` jobs: cache warm-up (02:30), OSM re-enrichment (Sun 03:00), ES reindex (04:00)
+- `DataSeeder` seeds known test credentials — it is gated behind `@Profile("dev")`, never enable that profile in production
+- `CronScheduler` owns all `@Scheduled` jobs: cache warm-up (02:30), ES reindex (04:00). OpenStreetMap enrichment was removed on 2026-05-07 (Overpass API unreachable from the host)

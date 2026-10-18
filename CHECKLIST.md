@@ -2,7 +2,9 @@
 
 > Certificateur : **3W Academy** · Formation dispensée via **Aflokkat**
 > Référence : Référentiel d'évaluation + Règlement d'examen (dernière MAJ février 2022)
-> Option choisie : **Bloc 4A — Manager la cybersécurité des systèmes, applications et bases de données**
+> **Mise à jour du 01/10/2026 (consignes de l'école)** : l'épreuve finale porte sur le **Bloc 3 seul** (l'application et son dossier technique, `certification/bloc3-2-dossier-technique.md`) : 15 min de présentation puis 15 min d'entretien technique. L'option suivie est l'**option B (big data)**, validée en contrôle continu, et non l'option 4A : les dossiers `bloc4a-*` restent utiles comme plan de sécurité et tests de sécurité de l'application. Le reste de ce document est l'historique du plan de travail initial.
+>
+> Option initialement envisagée : Bloc 4A — Manager la cybersécurité des systèmes, applications et bases de données
 > Support technique principal : [`restaurant-analytics`](https://github.com/St4r4x/restaurant-analytics)
 >
 > Ce document est un plan de travail personnel, pas un livrable officiel.
