@@ -12,6 +12,7 @@ All notable changes are documented here.
 
 ### Ops
 - The application is no longer hosted: the Railway deployment was stopped in October 2026 to cut costs. README and `docs/commercialisation.md` say so; `railway.toml` stays so it can be redeployed.
+- The daily PostgreSQL backup workflow (`backup-postgres.yml`) is disabled since the application is no longer hosted; `docs/backup-restore.md` says so and explains how to re-enable it.
 
 ### Chore
 - Removed `cliff.toml`, left over from the git-cliff changelog automation that was reverted.
